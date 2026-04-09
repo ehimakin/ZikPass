@@ -10,6 +10,7 @@ import { getEnrollment, listEnrollments, upsertEnrollment } from "@/lib/server/s
 export async function startEnrollment(input: {
   proof: CreditAdulthoodProof;
   holderPublicKey: JsonWebKey;
+  bankName: string;
 }): Promise<EnrollmentRecord> {
   const evaluation = evaluateProof(input.proof);
   const now = new Date();
@@ -22,7 +23,7 @@ export async function startEnrollment(input: {
     proof: input.proof,
     proof_evaluation: evaluation,
     holder_public_key: input.holderPublicKey,
-    possession: createPossessionChallenge(),
+    bank_verification: createPossessionChallenge(input.bankName, now.toISOString()),
     cooling_off: {
       started_at: now.toISOString(),
       ends_at: coolingEnds.toISOString(),
@@ -30,9 +31,11 @@ export async function startEnrollment(input: {
       manually_advanced: false
     },
     notifications: [
-      buildNotification("Zik Pass would notify the account holder about this enrollment attempt.")
+      buildNotification(
+        "We sent a refundable GBP 0.01 verification reference to the selected bank account."
+      )
     ],
-    status: evaluation.approved ? "awaiting_possession" : "proof_rejected"
+    status: evaluation.approved ? "bank_verification_pending" : "proof_rejected"
   };
 
   return upsertEnrollment(enrollment);
@@ -48,22 +51,22 @@ export async function verifyPossessionCode(
     throw new Error("Cannot verify possession on a rejected proof.");
   }
 
-  record.possession.attempts += 1;
+  record.bank_verification.attempts += 1;
 
-  if (record.possession.code !== code) {
+  if (record.bank_verification.code !== code) {
     record.updated_at = new Date().toISOString();
     await upsertEnrollment(record);
     throw new Error("Incorrect refund confirmation code.");
   }
 
-  record.possession.status = "verified";
-  record.possession.verified_at = new Date().toISOString();
+  record.bank_verification.transaction_status = "confirmed";
+  record.bank_verification.confirmed_at = new Date().toISOString();
   record.issued_credential ??= await issueCredential(record);
   record.status = coolingOffSatisfied(record) ? "issued" : "issued_cooling_off";
   record.updated_at = new Date().toISOString();
   record.notifications.unshift(
     buildNotification(
-      "Possession check passed. The credential has been delivered and is now in cooling-off."
+      "Bank verification confirmed. Your Zik Pass has been issued and is now activating."
     )
   );
 
@@ -77,7 +80,7 @@ export async function advanceCoolingOff(enrollmentId: string): Promise<Enrollmen
   record.cooling_off.ends_at = new Date().toISOString();
   record.cooling_off.satisfied_at = new Date().toISOString();
 
-  if (record.possession.status === "verified" && record.proof_evaluation.approved) {
+  if (record.bank_verification.transaction_status === "confirmed" && record.proof_evaluation.approved) {
     if (record.issued_credential) {
       record.issued_credential = await issueCredential(record);
     }
@@ -104,7 +107,7 @@ export async function issueEnrollmentCredential(enrollmentId: string): Promise<E
     throw new Error("Proof evaluation failed.");
   }
 
-  if (record.possession.status !== "verified") {
+  if (record.bank_verification.transaction_status !== "confirmed") {
     throw new Error("Possession verification is still pending.");
   }
 
@@ -126,7 +129,7 @@ export async function getEnrollmentOrThrow(enrollmentId: string): Promise<Enroll
   if (
     record.status === "issued_cooling_off" &&
     coolingOffSatisfied(record) &&
-    record.possession.status === "verified"
+    record.bank_verification.transaction_status === "confirmed"
   ) {
     record.status = "issued";
     record.cooling_off.satisfied_at ??= new Date().toISOString();

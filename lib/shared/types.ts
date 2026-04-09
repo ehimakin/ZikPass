@@ -33,13 +33,22 @@ export interface CoolingOffState {
   satisfied_at?: string;
 }
 
-export interface PossessionState {
+export interface BankVerificationState {
+  bank_name: string;
+  amount_gbp: number;
   code: string;
   reference: string;
-  status: "pending" | "verified";
+  transaction_status: "pending" | "sent" | "confirmed";
   attempts: number;
-  verified_at?: string;
+  sent_at: string;
+  confirmed_at?: string;
 }
+
+export type EnrollmentStatus =
+  | "proof_rejected"
+  | "bank_verification_pending"
+  | "issued_cooling_off"
+  | "issued";
 
 export interface AgeCredential {
   credential_id: string;
@@ -87,14 +96,10 @@ export interface EnrollmentRecord {
   proof: CreditAdulthoodProof;
   proof_evaluation: ProofEvaluation;
   holder_public_key: JsonWebKey;
-  possession: PossessionState;
+  bank_verification: BankVerificationState;
   cooling_off: CoolingOffState;
   notifications: NotificationRecord[];
-  status:
-    | "proof_rejected"
-    | "awaiting_possession"
-    | "issued_cooling_off"
-    | "issued";
+  status: EnrollmentStatus;
   issued_credential?: SignedCredential;
 }
 

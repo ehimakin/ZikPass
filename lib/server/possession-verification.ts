@@ -1,13 +1,16 @@
-import type { PossessionState } from "@/lib/shared/types";
+import type { BankVerificationState } from "@/lib/shared/types";
 import { randomNumericCode } from "@/lib/shared/utils";
 
-export function createPossessionChallenge(): PossessionState {
+export function createPossessionChallenge(bankName: string, sentAt: string): BankVerificationState {
   const code = randomNumericCode(6);
 
   return {
+    bank_name: bankName,
+    amount_gbp: 0.01,
     code,
     reference: `BANK-REF-${code}`,
-    status: "pending",
-    attempts: 0
+    transaction_status: "sent",
+    attempts: 0,
+    sent_at: sentAt
   };
 }

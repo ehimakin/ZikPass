@@ -1,9 +1,20 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import type { EnrollmentRecord } from "@/lib/shared/types";
+import type { EnrollmentRecord, EnrollmentStatus } from "@/lib/shared/types";
 
 interface StoreData {
   enrollments: EnrollmentRecord[];
+}
+
+interface LegacyEnrollmentRecord extends Omit<EnrollmentRecord, "bank_verification" | "status"> {
+  possession?: {
+    code: string;
+    reference: string;
+    status: "pending" | "verified";
+    attempts: number;
+    verified_at?: string;
+  };
+  status: EnrollmentStatus | "awaiting_possession";
 }
 
 const dataDir = path.join(process.cwd(), "data");
@@ -22,7 +33,11 @@ async function ensureStateFile() {
 async function readStore(): Promise<StoreData> {
   await ensureStateFile();
   const content = await fs.readFile(statePath, "utf8");
-  return JSON.parse(content) as StoreData;
+  const parsed = JSON.parse(content) as { enrollments?: LegacyEnrollmentRecord[] };
+
+  return {
+    enrollments: (parsed.enrollments ?? []).map(normalizeEnrollment)
+  };
 }
 
 async function writeStore(store: StoreData): Promise<void> {
@@ -52,4 +67,28 @@ export async function upsertEnrollment(record: EnrollmentRecord): Promise<Enroll
 
   await writeStore(store);
   return record;
+}
+
+function normalizeEnrollment(record: LegacyEnrollmentRecord): EnrollmentRecord {
+  if ("bank_verification" in record && record.bank_verification) {
+    return record as EnrollmentRecord;
+  }
+
+  const legacyPossession = record.possession;
+
+  return {
+    ...record,
+    bank_verification: {
+      bank_name: "Linked bank account",
+      amount_gbp: 0.01,
+      code: legacyPossession?.code ?? "000000",
+      reference: legacyPossession?.reference ?? "BANK-REF-000000",
+      transaction_status: legacyPossession?.status === "verified" ? "confirmed" : "sent",
+      attempts: legacyPossession?.attempts ?? 0,
+      sent_at: record.created_at,
+      confirmed_at: legacyPossession?.verified_at
+    },
+    status:
+      record.status === "awaiting_possession" ? "bank_verification_pending" : (record.status as EnrollmentStatus)
+  };
 }
