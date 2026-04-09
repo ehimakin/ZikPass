@@ -81,7 +81,7 @@ export function IssuerDashboard() {
 
       <SurfaceCard
         title="Enrollment queue"
-        subtitle="This dashboard shows proof evaluation, possession verification, cooling-off, notification logging, and issuance state."
+        subtitle="This dashboard shows proof evaluation, bank verification, cooling-off, notification logging, and issuance state."
       >
         {error ? <p className="mb-4 text-sm text-red-700">{error}</p> : null}
         {sessions.length === 0 ? (
@@ -110,11 +110,23 @@ export function IssuerDashboard() {
                       <StatusPill tone={session.proof_evaluation.approved ? "good" : "warn"}>
                         {session.proof_evaluation.approved ? "Proof approved" : "Proof rejected"}
                       </StatusPill>
-                      <StatusPill tone={session.possession.status === "verified" ? "good" : "neutral"}>
-                        {session.possession.status}
+                      <StatusPill
+                        tone={
+                          session.bank_verification.transaction_status === "confirmed"
+                            ? "good"
+                            : "neutral"
+                        }
+                      >
+                        {session.bank_verification.transaction_status}
                       </StatusPill>
                       <StatusPill
-                        tone={session.status === "issued" ? "good" : session.status === "issued_cooling_off" ? "warn" : "neutral"}
+                        tone={
+                          session.status === "issued"
+                            ? "good"
+                            : session.status === "issued_cooling_off"
+                              ? "warn"
+                              : "neutral"
+                        }
                       >
                         {session.status}
                       </StatusPill>
@@ -127,16 +139,24 @@ export function IssuerDashboard() {
                       <pre className="mt-2 text-xs">{JSON.stringify(session.proof, null, 2)}</pre>
                     </div>
                     <div className="rounded-2xl bg-white/80 p-4 text-sm text-ink/75">
-                      <p className="font-medium">Possession</p>
+                      <p className="font-medium">Bank verification</p>
+                      <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-ink/50">
+                        Bank
+                      </p>
+                      <p className="mt-1">{session.bank_verification.bank_name}</p>
+                      <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-ink/50">
+                        Amount
+                      </p>
+                      <p className="mt-1">GBP {session.bank_verification.amount_gbp.toFixed(2)}</p>
                       <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-ink/50">
                         Reference
                       </p>
-                      <p className="mt-1">{session.possession.reference}</p>
+                      <p className="mt-1">{session.bank_verification.reference}</p>
                       <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-ink/50">
                         Code
                       </p>
-                      <p className="mt-1">{session.possession.code}</p>
-                      <p className="mt-2">Attempts: {session.possession.attempts}</p>
+                      <p className="mt-1">{session.bank_verification.code}</p>
+                      <p className="mt-2">Attempts: {session.bank_verification.attempts}</p>
                     </div>
                     <div className="rounded-2xl bg-white/80 p-4 text-sm text-ink/75">
                       <p className="font-medium">Cooling-off</p>
@@ -160,7 +180,7 @@ export function IssuerDashboard() {
                       className="rounded-full bg-ink px-4 py-2 text-sm text-mist disabled:opacity-50"
                       disabled={
                         isPending ||
-                        session.possession.status !== "verified" ||
+                        session.bank_verification.transaction_status !== "confirmed" ||
                         Boolean(session.issued_credential)
                       }
                       onClick={() => mutate("/api/enrollment/issue", session.id)}

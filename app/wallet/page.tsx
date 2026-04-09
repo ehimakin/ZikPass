@@ -6,11 +6,10 @@ export default function WalletPage() {
     <AppShell currentPath="/wallet">
       <main className="grid gap-6">
         <div>
-          <h1 className="font-heading text-4xl font-semibold tracking-tight">Wallet enrollment</h1>
+          <h1 className="font-heading text-4xl font-semibold tracking-tight">Get your Zik Pass</h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-ink/70">
-            This sprint-two flow is designed for ease of use: one question per screen, automatic
-            wallet binding, immediate pass delivery after confirmation, and a visible cooling-off
-            period before the credential becomes usable at a vendor.
+            Complete a first-time check, confirm a refundable bank verification, and receive a
+            private Over-18 pass stored on this device.
           </p>
         </div>
         <WalletSurface />

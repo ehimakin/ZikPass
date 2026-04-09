@@ -8,15 +8,21 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as {
       identityMatch: IdentityMatchInput;
       holderPublicKey: JsonWebKey;
+      bankName: string;
     };
 
     if (!body.holderPublicKey) {
       throw new Error("Holder public key is required before issuance.");
     }
 
+    if (!body.bankName?.trim()) {
+      throw new Error("A bank must be selected for the refundable verification step.");
+    }
+
     const enrollment = await startEnrollment({
       proof: buildMockCreditProof(body.identityMatch),
-      holderPublicKey: body.holderPublicKey
+      holderPublicKey: body.holderPublicKey,
+      bankName: body.bankName.trim()
     });
     return NextResponse.json(enrollment);
   } catch (error) {
