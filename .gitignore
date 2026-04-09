@@ -4,6 +4,7 @@ coverage
 data/*.json
 !data/state.json
 !data/issuer-keypair.example.json
+data/runtime-state.json
 .DS_Store
 *.log
 .env

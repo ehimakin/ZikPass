@@ -18,21 +18,22 @@ interface LegacyEnrollmentRecord extends Omit<EnrollmentRecord, "bank_verificati
 }
 
 const dataDir = path.join(process.cwd(), "data");
-const statePath = path.join(dataDir, "state.json");
+const seedStatePath = path.join(dataDir, "state.json");
+const runtimeStatePath = path.join(dataDir, "runtime-state.json");
 
 async function ensureStateFile() {
   await fs.mkdir(dataDir, { recursive: true });
 
   try {
-    await fs.access(statePath);
+    await fs.access(runtimeStatePath);
   } catch {
-    await fs.writeFile(statePath, JSON.stringify({ enrollments: [] }, null, 2), "utf8");
+    await fs.writeFile(runtimeStatePath, JSON.stringify({ enrollments: [] }, null, 2), "utf8");
   }
 }
 
 async function readStore(): Promise<StoreData> {
   await ensureStateFile();
-  const content = await fs.readFile(statePath, "utf8");
+  const content = await readStateContent();
   const parsed = JSON.parse(content) as { enrollments?: LegacyEnrollmentRecord[] };
 
   return {
@@ -42,7 +43,7 @@ async function readStore(): Promise<StoreData> {
 
 async function writeStore(store: StoreData): Promise<void> {
   await ensureStateFile();
-  await fs.writeFile(statePath, JSON.stringify(store, null, 2), "utf8");
+  await fs.writeFile(runtimeStatePath, JSON.stringify(store, null, 2), "utf8");
 }
 
 export async function listEnrollments(): Promise<EnrollmentRecord[]> {
@@ -91,4 +92,12 @@ function normalizeEnrollment(record: LegacyEnrollmentRecord): EnrollmentRecord {
     status:
       record.status === "awaiting_possession" ? "bank_verification_pending" : (record.status as EnrollmentStatus)
   };
+}
+
+async function readStateContent(): Promise<string> {
+  try {
+    return await fs.readFile(runtimeStatePath, "utf8");
+  } catch {
+    return fs.readFile(seedStatePath, "utf8");
+  }
 }
