@@ -8,11 +8,14 @@
 
 body {
   margin: 0;
-  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(215, 241, 113, 0.3), transparent 24%),
+    linear-gradient(180deg, #fbfff1 0%, #f4f7ee 46%, #eef2e6 100%);
 }
 
 .font-heading {
-  font-family: "Avenir Next Condensed", "Gill Sans", "Trebuchet MS", sans-serif;
+  font-family: "Avenir Next Condensed", "Arial Narrow", "Trebuchet MS", sans-serif;
 }
 
 .font-mono {
@@ -45,4 +48,19 @@ pre {
 
 .animate-hero-fade {
   animation: heroFadeIn 700ms ease-out;
+}
+
+@keyframes floatSlow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 6s ease-in-out infinite;
 }

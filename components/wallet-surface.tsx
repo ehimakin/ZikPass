@@ -6,6 +6,7 @@ import type { InputHTMLAttributes, ReactNode } from "react";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { SurfaceCard } from "@/components/surface-card";
 import { StatusPill } from "@/components/status-pill";
+import { ZikLogoLockup, ZikLogoMark } from "@/components/zik-logo";
 import {
   clearWallet,
   ensureHolderKeyPair,
@@ -122,6 +123,7 @@ export function WalletSurface() {
   const [step, setStep] = useState<FlowStep>("full-name");
   const [journeyState, setJourneyState] = useState<JourneyState>("idle");
   const [isFlowOpen, setIsFlowOpen] = useState(false);
+  const [isLearnMoreOpen, setIsLearnMoreOpen] = useState(false);
   const [answers, setAnswers] = useState<Answers>(initialAnswers);
   const [possessionCode, setPossessionCode] = useState("");
   const [message, setMessage] = useState<string | null>(null);
@@ -340,6 +342,24 @@ export function WalletSurface() {
     }
   }
 
+  function startFromHero() {
+    if (credential || enrollment) {
+      openFlow();
+      return;
+    }
+
+    if (!answers.firstName.trim() || !answers.lastName.trim() || !isValidDate(answers.dateOfBirth)) {
+      setError("Enter your first name, last name, and date of birth to begin.");
+      return;
+    }
+
+    setError(null);
+    setMessage(null);
+    setJourneyState("collecting_details");
+    setStep("current-address");
+    setIsFlowOpen(true);
+  }
+
   function closeFlow() {
     setIsFlowOpen(false);
   }
@@ -468,13 +488,6 @@ export function WalletSurface() {
   }
 
   const totalQuestions = answers.movedInLastThreeYears ? 7 : 6;
-  const primaryActionLabel = credential
-    ? active
-      ? "View Zik Pass"
-      : "Check activation"
-    : enrollment
-      ? "Continue setup"
-      : "Get Zik Pass";
   const statusHeadline = credential
     ? active
       ? "Your Zik Pass is active on this device."
@@ -492,67 +505,113 @@ export function WalletSurface() {
 
   return (
     <div className="grid gap-6">
-      <section className="relative overflow-hidden rounded-[36px] bg-[linear-gradient(135deg,_#0b1322_0%,_#17314a_44%,_#2b6a61_100%)] px-6 py-8 text-mist shadow-panel sm:px-10 sm:py-10">
-        <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_center,_rgba(215,241,113,0.2),_transparent_58%)]" />
-        <div className="relative grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="space-y-5">
-            <StatusPill tone="good">No photo ID required</StatusPill>
-            <div className="space-y-3">
-              <h2 className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
-                Get your Zik Pass on this device.
+      <section className="relative overflow-hidden rounded-[40px] border border-white/80 bg-[linear-gradient(135deg,_rgba(255,255,255,0.96),_rgba(247,251,236,0.98)_48%,_rgba(240,247,221,0.96)_100%)] px-6 py-8 shadow-panel sm:px-10 sm:py-10">
+        <div className="absolute -left-20 top-8 h-56 w-56 rounded-full bg-lime/30 blur-3xl" />
+        <div className="absolute -right-16 bottom-0 h-72 w-72 rounded-full bg-teal/20 blur-3xl" />
+        <div className="relative grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+          <div className="space-y-6">
+            <ZikLogoLockup />
+            <div className="flex flex-wrap gap-2">
+              <StatusPill tone="good">Light-touch onboarding</StatusPill>
+              <StatusPill tone="neutral">Refundable GBP 0.01 check</StatusPill>
+            </div>
+            <div className="space-y-4">
+              <h2 className="max-w-3xl font-heading text-5xl font-semibold leading-[0.92] tracking-tight text-ink sm:text-6xl">
+                Start your Zik Pass in minutes, right from the first screen.
               </h2>
-              <p className="max-w-2xl text-sm leading-7 text-mist/82 sm:text-base">
-                Zik Pass helps you prove you are over 18 using a soft financial check, a
-                refundable GBP 0.01 bank verification, and a secure pass stored locally on this
-                device.
+              <p className="max-w-2xl text-base leading-8 text-ink/68">
+                Zik Pass uses a soft financial check, a refundable bank authorisation, and
+                activation protection so you can prove you are over 18 without uploading photo ID.
               </p>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <button
-                className="rounded-full bg-lime px-5 py-3 text-sm font-semibold text-ink"
-                onClick={openFlow}
-              >
-                {primaryActionLabel}
-              </button>
-              {credential || enrollment ? (
-                <button
-                  className="rounded-full bg-white/10 px-5 py-3 text-sm font-medium text-mist hover:bg-white/15"
-                  onClick={resetFlow}
-                >
-                  Delete Zik Pass
-                </button>
-              ) : null}
-              {credential ? (
-                <Link
-                  className="rounded-full bg-white/10 px-5 py-3 text-sm font-medium text-mist hover:bg-white/15"
-                  href="/verifier"
-                >
-                  Try example betting site
-                </Link>
-              ) : null}
-            </div>
-            <div className="flex flex-wrap gap-2 text-xs text-mist/76">
-              <TrustChip label="Soft check only" />
+            <div className="flex flex-wrap gap-2 text-xs text-ink/70">
+              <TrustChip label="No photo ID required" />
               <TrustChip label="No biometric upload" />
-              <TrustChip label="Stored securely on this device" />
+              <TrustChip label="Stored on this device" />
             </div>
           </div>
 
-          <div className="rounded-[30px] bg-white/10 p-5 backdrop-blur">
-            <p className="font-mono text-xs uppercase tracking-[0.24em] text-lime">What to expect</p>
-            <div className="mt-4 grid gap-3">
-              <ExpectationRow
-                label="1. Match your details"
-                body="Answer a few familiar questions so we can find the right financial record."
-              />
-              <ExpectationRow
-                label="2. Confirm a GBP 0.01 authorisation"
-                body="Use a temporary refundable bank reference to prove you control a real account."
-              />
-              <ExpectationRow
-                label="3. Let Zik prepare your pass"
-                body="We run a soft check, bind the pass to this device, and activate it after a short delay."
-              />
+          <div className="relative">
+            <div className="absolute inset-0 translate-x-5 translate-y-5 rounded-[34px] bg-lime/35" />
+            <div className="relative overflow-hidden rounded-[34px] border border-ink/8 bg-white p-6 shadow-[0_30px_80px_rgba(14,23,38,0.18)]">
+              <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top_right,_rgba(215,241,113,0.3),_transparent_45%)]" />
+              <div className="relative space-y-6">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink/45">
+                      Get your Zik Pass
+                    </p>
+                    <p className="mt-2 font-heading text-3xl font-semibold tracking-tight text-ink">
+                      Start with your details
+                    </p>
+                  </div>
+                  <div className="animate-float-slow rounded-[24px] border border-ink/8 bg-[#f6faea] p-3">
+                    <ZikLogoMark className="h-10 w-10 text-ink" />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <FieldInput
+                    placeholder="First name"
+                    value={answers.firstName}
+                    onChange={(value) =>
+                      setAnswers((current) => ({
+                        ...current,
+                        firstName: value
+                      }))
+                    }
+                  />
+                  <FieldInput
+                    placeholder="Last name"
+                    value={answers.lastName}
+                    onChange={(value) =>
+                      setAnswers((current) => ({
+                        ...current,
+                        lastName: value
+                      }))
+                    }
+                  />
+                </div>
+
+                <FieldInput
+                  type="date"
+                  value={answers.dateOfBirth}
+                  onChange={(value) =>
+                    setAnswers((current) => ({
+                      ...current,
+                      dateOfBirth: value
+                    }))
+                  }
+                />
+
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    className="rounded-full bg-ink px-6 py-3 text-sm font-semibold text-mist"
+                    onClick={startFromHero}
+                  >
+                    Get Zik Pass
+                  </button>
+                  <button
+                    className="rounded-full border border-ink/10 bg-[#f7faee] px-6 py-3 text-sm font-medium text-ink hover:bg-[#edf3df]"
+                    onClick={() => setIsLearnMoreOpen(true)}
+                  >
+                    Learn more
+                  </button>
+                </div>
+
+                <div className="grid gap-3">
+                  <HeroSignalCard
+                    title="What happens next"
+                    body="We use the details above to start a secure record match, then ask for your address and bank selection in the overlay flow."
+                  />
+                </div>
+
+                <div className="grid gap-4 rounded-[26px] bg-[#f7faee] p-5 sm:grid-cols-3">
+                  <HeroMetric label="Soft check" value="No score impact" dark />
+                  <HeroMetric label="Privacy" value="Over-18 only" dark />
+                  <HeroMetric label="Stored" value="On device" dark />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -566,9 +625,13 @@ export function WalletSurface() {
       )}
 
       <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-        <SurfaceCard title="Your status" subtitle="A calmer view of where your pass stands right now.">
+        <SurfaceCard
+          title="Your status"
+          subtitle="A cleaner product view of where this device stands in the onboarding journey."
+          className="border-ink/5 bg-white/88"
+        >
           <div className="space-y-4">
-            <div className="rounded-[24px] bg-ink/5 p-5">
+            <div className="rounded-[28px] border border-ink/8 bg-[linear-gradient(135deg,_#ffffff_0%,_#f5f9e7_100%)] p-6">
               <div className="flex flex-wrap items-center gap-3">
                 <StatusPill tone={credential ? (active ? "good" : "neutral") : "neutral"}>
                   {credential ? (active ? "Active" : "Activating") : "Not started"}
@@ -611,7 +674,11 @@ export function WalletSurface() {
           </div>
         </SurfaceCard>
 
-        <SurfaceCard title="Why people choose Zik Pass" subtitle="Built to feel familiar, private, and easy to trust.">
+        <SurfaceCard
+          title="Why people choose Zik Pass"
+          subtitle="Designed to feel more like a premium financial product than a compliance prompt."
+          className="border-ink/5 bg-white/88"
+        >
           <div className="grid gap-4">
             <TrustPanel
               title="Familiar first-time check"
@@ -653,15 +720,18 @@ export function WalletSurface() {
       ) : null}
 
       {isFlowOpen ? (
-        <div className="fixed inset-0 z-50 bg-ink/55 backdrop-blur-sm" onClick={closeFlow}>
+        <div
+          className="fixed inset-0 z-50 bg-[radial-gradient(circle_at_top,_rgba(215,241,113,0.18),rgba(14,23,38,0.64)_58%)] backdrop-blur-md"
+          onClick={closeFlow}
+        >
           <div className="flex h-full w-full items-stretch justify-center p-3 sm:p-6">
             <div
-              className="relative flex h-full w-full max-w-6xl flex-col overflow-hidden rounded-[36px] bg-white/92 p-3 shadow-panel sm:p-6"
+              className="relative flex h-full w-full max-w-7xl flex-col overflow-hidden rounded-[40px] border border-white/65 bg-[linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(244,247,238,0.97))] p-3 shadow-[0_36px_120px_rgba(14,23,38,0.28)] sm:p-6"
               onClick={(event) => event.stopPropagation()}
             >
               <button
                 aria-label="Close Zik Pass form"
-                className="absolute right-4 top-4 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full bg-ink text-xl text-mist hover:bg-ink/90"
+                className="absolute right-4 top-4 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full border border-ink/10 bg-white text-xl text-ink hover:bg-[#f4f7ee]"
                 onClick={closeFlow}
               >
                 ×
@@ -1006,6 +1076,65 @@ export function WalletSurface() {
           </div>
         </div>
       ) : null}
+
+      {isLearnMoreOpen ? (
+        <div
+          className="fixed inset-0 z-50 bg-[radial-gradient(circle_at_top,_rgba(215,241,113,0.16),rgba(14,23,38,0.62)_56%)] backdrop-blur-sm"
+          onClick={() => setIsLearnMoreOpen(false)}
+        >
+          <div className="flex min-h-screen items-center justify-center p-4 sm:p-6">
+            <div
+              className="w-full max-w-4xl rounded-[36px] border border-white/70 bg-[linear-gradient(135deg,_rgba(255,255,255,0.98),_rgba(245,249,231,0.98))] p-6 shadow-[0_36px_120px_rgba(14,23,38,0.24)] sm:p-8"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink/46">
+                    Learn more
+                  </p>
+                  <h3 className="mt-3 font-heading text-4xl font-semibold tracking-tight text-ink">
+                    What Zik App and Zik Pass actually do
+                  </h3>
+                </div>
+                <button
+                  aria-label="Close learn more"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-ink/10 bg-white text-xl text-ink hover:bg-[#f4f7ee]"
+                  onClick={() => setIsLearnMoreOpen(false)}
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="mt-8 grid gap-4 md:grid-cols-2">
+                <InfoBlock
+                  title="What is Zik App?"
+                  body="Zik App is the onboarding experience that helps a new user get set up. It collects a few matching details, guides the refundable bank step, and stores the pass on this device."
+                />
+                <InfoBlock
+                  title="What is Zik Pass?"
+                  body="Zik Pass is the secure Over-18 credential created at the end of that process. Sites can verify it locally without learning your identity."
+                />
+                <InfoBlock
+                  title="Why the bank step exists"
+                  body="The refundable GBP 0.01 reference helps confirm control of a real adult-linked financial account. It is temporary and used only as a verification signal."
+                />
+                <InfoBlock
+                  title="Why there is a short wait"
+                  body="The activation window gives you time to spot anything unexpected before the pass can be used. It is a safety feature, not a delay for delay’s sake."
+                />
+              </div>
+
+              <div className="mt-6 rounded-[28px] bg-[#0f1721] p-6 text-mist">
+                <div className="grid gap-4 md:grid-cols-3">
+                  <HeroMetric label="No ID upload" value="No passport or selfie" />
+                  <HeroMetric label="Soft check" value="Does not affect score" />
+                  <HeroMetric label="What sites see" value="Over-18 confirmation" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -1041,7 +1170,7 @@ function JourneyTracker({ state }: { state: JourneyState }) {
   const activeIndex = steps.findIndex((step) => step.states.includes(state));
 
   return (
-    <div className="rounded-[26px] bg-ink/5 px-4 py-4">
+    <div className="rounded-[28px] border border-ink/8 bg-white/82 px-4 py-4">
       <div className="grid gap-3 sm:grid-cols-4">
         {steps.map((step, index) => {
           const complete = activeIndex > index || state === "pass_issued";
@@ -1054,8 +1183,8 @@ function JourneyTracker({ state }: { state: JourneyState }) {
                 complete
                   ? "bg-ink text-mist"
                   : active
-                    ? "bg-[linear-gradient(135deg,_rgba(215,241,113,0.32),_rgba(105,225,200,0.22))] text-ink"
-                    : "bg-white text-ink/60"
+                    ? "bg-[linear-gradient(135deg,_rgba(215,241,113,0.38),_rgba(255,255,255,0.98))] text-ink ring-1 ring-lime/40"
+                    : "bg-[#f7faee] text-ink/60"
               }`}
             >
               <p className="font-mono text-[11px] uppercase tracking-[0.22em]">{step.label}</p>
@@ -1088,35 +1217,39 @@ function QuestionCard({
   onNext: () => void;
 }) {
   return (
-    <div className="flex min-h-[62vh] flex-col justify-between rounded-[32px] bg-[linear-gradient(180deg,_#fffef7_0%,_#f4f6f0_100%)] p-6 sm:p-8">
-      <div className="space-y-5">
-        <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink/45">{step}</p>
-        <div className="space-y-3">
-          <h3 className="font-heading text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-            {title}
-          </h3>
-          <p className="max-w-2xl text-sm leading-7 text-ink/70 sm:text-base">{body}</p>
+    <div className="grid min-h-[68vh] overflow-hidden rounded-[34px] border border-ink/8 bg-[linear-gradient(180deg,_#fffef7_0%,_#f4f6f0_100%)] lg:grid-cols-[1.12fr_0.88fr]">
+      <div className="flex flex-col justify-between p-6 sm:p-8">
+        <div className="space-y-5">
+          <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink/45">{step}</p>
+          <div className="space-y-3">
+            <h3 className="font-heading text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+              {title}
+            </h3>
+            <p className="max-w-2xl text-sm leading-7 text-ink/70 sm:text-base">{body}</p>
+          </div>
+          <div>{children}</div>
         </div>
-        <div>{children}</div>
+
+        <div className="mt-8 flex flex-wrap gap-3">
+          {onBack ? (
+            <button
+              className="rounded-full border border-ink/10 bg-white px-5 py-3 text-sm font-medium text-ink"
+              onClick={onBack}
+            >
+              Back
+            </button>
+          ) : null}
+          <button
+            className="rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist disabled:opacity-40"
+            disabled={!canContinue}
+            onClick={onNext}
+          >
+            {nextLabel}
+          </button>
+        </div>
       </div>
 
-      <div className="mt-8 flex flex-wrap gap-3">
-        {onBack ? (
-          <button
-            className="rounded-full bg-ink/8 px-5 py-3 text-sm font-medium text-ink"
-            onClick={onBack}
-          >
-            Back
-          </button>
-        ) : null}
-        <button
-          className="rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist disabled:opacity-40"
-          disabled={!canContinue}
-          onClick={onNext}
-        >
-          {nextLabel}
-        </button>
-      </div>
+      <WalletFlowAside />
     </div>
   );
 }
@@ -1139,33 +1272,37 @@ function FullscreenCard({
   onAction?: () => void;
 }) {
   return (
-    <div className="flex min-h-[62vh] flex-col justify-between rounded-[32px] bg-[linear-gradient(135deg,_rgba(215,241,113,0.14),_rgba(105,225,200,0.18),_rgba(255,255,255,0.94))] p-6 sm:p-8">
-      <div className="space-y-5">
-        <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink/45">{eyebrow}</p>
-        <div className="space-y-3">
-          <h3 className="font-heading text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-            {title}
-          </h3>
-          <p className="max-w-2xl text-sm leading-7 text-ink/70 sm:text-base">{body}</p>
+    <div className="grid min-h-[68vh] overflow-hidden rounded-[34px] border border-ink/8 bg-[linear-gradient(135deg,_rgba(215,241,113,0.14),_rgba(105,225,200,0.12),_rgba(255,255,255,0.98))] lg:grid-cols-[1.12fr_0.88fr]">
+      <div className="flex flex-col justify-between p-6 sm:p-8">
+        <div className="space-y-5">
+          <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink/45">{eyebrow}</p>
+          <div className="space-y-3">
+            <h3 className="font-heading text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+              {title}
+            </h3>
+            <p className="max-w-2xl text-sm leading-7 text-ink/70 sm:text-base">{body}</p>
+          </div>
+          {children}
         </div>
-        {children}
+
+        {actionHref ? (
+          <Link
+            className="mt-8 inline-flex w-fit rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist"
+            href={actionHref}
+          >
+            {actionLabel}
+          </Link>
+        ) : actionLabel ? (
+          <button
+            className="mt-8 inline-flex w-fit rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist"
+            onClick={onAction}
+          >
+            {actionLabel}
+          </button>
+        ) : null}
       </div>
 
-      {actionHref ? (
-        <Link
-          className="mt-8 inline-flex w-fit rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist"
-          href={actionHref}
-        >
-          {actionLabel}
-        </Link>
-      ) : actionLabel ? (
-        <button
-          className="mt-8 inline-flex w-fit rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist"
-          onClick={onAction}
-        >
-          {actionLabel}
-        </button>
-      ) : null}
+      <WalletFlowAside emphasis />
     </div>
   );
 }
@@ -1327,18 +1464,84 @@ function PassPreviewCard({
   );
 }
 
-function ExpectationRow({ label, body }: { label: string; body: string }) {
+function WalletFlowAside({ emphasis = false }: { emphasis?: boolean }) {
   return (
-    <div className="rounded-[22px] bg-white/8 px-4 py-4">
-      <p className="text-sm font-medium text-mist">{label}</p>
-      <p className="mt-1 text-sm leading-6 text-mist/76">{body}</p>
+    <aside className="relative hidden overflow-hidden border-l border-ink/8 bg-[#0f1721] lg:flex lg:flex-col lg:justify-between lg:p-8">
+      <div className="absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top_left,_rgba(215,241,113,0.22),_transparent_46%)]" />
+      <div className="absolute bottom-8 right-8 h-32 w-32 rounded-full bg-lime/10 blur-3xl" />
+      <div className="relative space-y-6">
+        <div className="flex items-center justify-between gap-3">
+          <ZikLogoLockup className="[&_p]:text-mist [&_.font-mono]:text-mist/55 [&_.rounded-2xl]:border-white/12 [&_.rounded-2xl]:bg-white/8" />
+          <div className="rounded-full border border-white/10 bg-white/6 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.2em] text-lime">
+            {emphasis ? "Readying pass" : "Secure setup"}
+          </div>
+        </div>
+
+        <div className="rounded-[30px] border border-white/10 bg-white/6 p-5">
+          <p className="font-heading text-3xl font-semibold tracking-tight text-mist">
+            {emphasis ? "Private by default." : "Built for trust."}
+          </p>
+          <p className="mt-3 text-sm leading-7 text-mist/76">
+            {emphasis
+              ? "Every step keeps the experience calm and private while the pass is bound to this device."
+              : "Zik Pass uses familiar financial signals and a refundable bank step so the journey feels believable from the first screen."}
+          </p>
+        </div>
+      </div>
+
+      <div className="relative mt-8 grid gap-3">
+        <AsideSignal
+          title="No identity handoff"
+          body="The eventual age check shares only an Over-18 result, not your name or address."
+        />
+        <AsideSignal
+          title="Refundable bank check"
+          body="A temporary GBP 0.01 authorisation confirms control of a real account."
+        />
+        <AsideSignal
+          title="On-device storage"
+          body="The pass is created for this browser and stays available here after activation."
+        />
+      </div>
+    </aside>
+  );
+}
+
+function HeroSignalCard({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="rounded-[24px] border border-white/10 bg-white/8 px-4 py-4">
+      <p className="text-sm font-medium text-mist">{title}</p>
+      <p className="mt-1 text-sm leading-6 text-mist/72">{body}</p>
+    </div>
+  );
+}
+
+function HeroMetric({
+  label,
+  value,
+  dark = false
+}: {
+  label: string;
+  value: string;
+  dark?: boolean;
+}) {
+  return (
+    <div>
+      <p
+        className={`font-mono text-[11px] uppercase tracking-[0.22em] ${
+          dark ? "text-ink/42" : "text-mist/48"
+        }`}
+      >
+        {label}
+      </p>
+      <p className={`mt-2 text-sm font-medium ${dark ? "text-ink" : "text-mist"}`}>{value}</p>
     </div>
   );
 }
 
 function TrustPanel({ title, body }: { title: string; body: string }) {
   return (
-    <div className="rounded-[24px] bg-ink/5 p-5">
+    <div className="rounded-[24px] border border-ink/7 bg-[linear-gradient(180deg,_#ffffff_0%,_#f7faee_100%)] p-5">
       <p className="font-medium text-ink">{title}</p>
       <p className="mt-2 text-sm leading-6 text-ink/68">{body}</p>
     </div>
@@ -1346,7 +1549,11 @@ function TrustPanel({ title, body }: { title: string; body: string }) {
 }
 
 function TrustChip({ label }: { label: string }) {
-  return <span className="rounded-full bg-white/10 px-3 py-1">{label}</span>;
+  return (
+    <span className="rounded-full border border-ink/10 bg-white/78 px-3 py-1 shadow-sm">
+      {label}
+    </span>
+  );
 }
 
 function AnswerButton({
@@ -1388,8 +1595,8 @@ function BankOptionCard({
     <button
       className={`rounded-[24px] border px-4 py-5 text-left transition ${
         active
-          ? "border-ink bg-ink text-mist"
-          : "border-ink/10 bg-white text-ink hover:bg-ink/5"
+          ? "border-lime/50 bg-[linear-gradient(135deg,_#111827,_#1d2a16)] text-mist shadow-[0_18px_50px_rgba(14,23,38,0.16)]"
+          : "border-ink/10 bg-white text-ink hover:bg-[#f5f9e7]"
       }`}
       onClick={onClick}
     >
@@ -1469,10 +1676,30 @@ function NoticeCard({
   return (
     <div
       className={`rounded-[24px] px-5 py-4 text-sm shadow-panel ${
-        tone === "good" ? "bg-teal/20 text-ink" : "bg-blush/40 text-ink"
+        tone === "good"
+          ? "border border-teal/25 bg-teal/18 text-ink"
+          : "border border-blush/40 bg-blush/40 text-ink"
       }`}
     >
       <div className="space-y-1">{children}</div>
+    </div>
+  );
+}
+
+function AsideSignal({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="rounded-[24px] border border-white/10 bg-white/6 p-4">
+      <p className="text-sm font-medium text-mist">{title}</p>
+      <p className="mt-2 text-sm leading-6 text-mist/70">{body}</p>
+    </div>
+  );
+}
+
+function InfoBlock({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="rounded-[26px] border border-ink/8 bg-white/78 p-5">
+      <p className="font-heading text-2xl font-semibold tracking-tight text-ink">{title}</p>
+      <p className="mt-3 text-sm leading-7 text-ink/68">{body}</p>
     </div>
   );
 }
