@@ -505,33 +505,9 @@ export function WalletSurface() {
 
   return (
     <div className="grid gap-6">
-      <section className="relative overflow-hidden rounded-[40px] border border-white/80 bg-[linear-gradient(135deg,_rgba(255,255,255,0.96),_rgba(247,251,236,0.98)_48%,_rgba(240,247,221,0.96)_100%)] px-6 py-8 shadow-panel sm:px-10 sm:py-10">
-        <div className="absolute -left-20 top-8 h-56 w-56 rounded-full bg-lime/30 blur-3xl" />
-        <div className="absolute -right-16 bottom-0 h-72 w-72 rounded-full bg-teal/20 blur-3xl" />
-        <div className="relative grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-          <div className="space-y-6">
-            <ZikLogoLockup />
-            <div className="flex flex-wrap gap-2">
-              <StatusPill tone="good">Light-touch onboarding</StatusPill>
-              <StatusPill tone="neutral">Refundable GBP 0.01 check</StatusPill>
-            </div>
-            <div className="space-y-4">
-              <h2 className="max-w-3xl font-heading text-5xl font-semibold leading-[0.92] tracking-tight text-ink sm:text-6xl">
-                Start your Zik Pass in minutes, right from the first screen.
-              </h2>
-              <p className="max-w-2xl text-base leading-8 text-ink/68">
-                Zik Pass uses a soft financial check, a refundable bank authorisation, and
-                activation protection so you can prove you are over 18 without uploading photo ID.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2 text-xs text-ink/70">
-              <TrustChip label="No photo ID required" />
-              <TrustChip label="No biometric upload" />
-              <TrustChip label="Stored on this device" />
-            </div>
-          </div>
-
-          <div className="relative">
+      <section className="relative overflow-hidden rounded-[40px] border border-white/80 bg-white/72 px-6 py-8 shadow-panel backdrop-blur-sm sm:px-10 sm:py-10">
+        <div className="relative grid gap-8 md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] md:items-start">
+          <div className="relative md:order-1">
             <div className="absolute inset-0 translate-x-5 translate-y-5 rounded-[34px] bg-lime/35" />
             <div className="relative overflow-hidden rounded-[34px] border border-ink/8 bg-white p-6 shadow-[0_30px_80px_rgba(14,23,38,0.18)]">
               <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top_right,_rgba(215,241,113,0.3),_transparent_45%)]" />
@@ -611,6 +587,29 @@ export function WalletSurface() {
                   <HeroMetric label="Privacy" value="Over-18 only" dark />
                   <HeroMetric label="Stored" value="On device" dark />
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6 md:order-2 md:flex md:self-stretch md:flex-col md:space-y-0">
+            <div className="flex flex-wrap gap-2">
+              <StatusPill tone="good">Light-touch onboarding</StatusPill>
+              <StatusPill tone="neutral">Refundable GBP 0.01 check</StatusPill>
+            </div>
+            <div className="space-y-6 md:flex md:flex-1 md:flex-col md:justify-center">
+              <div className="space-y-4">
+                <h2 className="max-w-3xl font-heading text-5xl font-semibold leading-[0.92] tracking-tight text-ink sm:text-6xl">
+                  Start your Zik Pass in minutes, right from the first screen.
+                </h2>
+                <p className="max-w-2xl text-base leading-8 text-ink/68">
+                  Zik Pass uses a soft financial check, a refundable bank authorisation, and
+                  activation protection so you can prove you are over 18 without uploading photo ID.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2 text-xs text-ink/70">
+                <TrustChip label="No photo ID required" />
+                <TrustChip label="No biometric upload" />
+                <TrustChip label="Stored on this device" />
               </div>
             </div>
           </div>

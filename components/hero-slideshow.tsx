@@ -132,6 +132,14 @@ export function HeroSlideshow() {
       )}
     >
       <div className={clsx("absolute inset-0 transition-opacity duration-700", activeSlide.glowClassName)} />
+      <div
+        aria-hidden="true"
+        className="absolute inset-y-0 right-0 hidden w-[52%] bg-right-bottom bg-no-repeat opacity-80 lg:block"
+        style={{
+          backgroundImage: "url('/homepage-device-bg.svg')",
+          backgroundSize: "contain"
+        }}
+      />
       <div className="absolute inset-0 bg-[linear-gradient(90deg,_rgba(14,23,38,0.82)_0%,_rgba(14,23,38,0.56)_42%,_rgba(14,23,38,0.16)_100%)]" />
 
       <div className="relative mx-auto flex min-h-[420px] max-w-7xl items-end px-6 py-8 sm:min-h-[520px] sm:px-8 sm:py-10 lg:px-10 lg:py-12">
