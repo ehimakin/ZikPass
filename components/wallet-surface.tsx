@@ -488,23 +488,27 @@ export function WalletSurface() {
   }
 
   const totalQuestions = answers.movedInLastThreeYears ? 7 : 6;
-  const statusHeadline = credential
-    ? active
-      ? "Your Zik Pass is active on this device."
-      : "Your Zik Pass is activating."
-    : enrollment
-      ? "Your setup is in progress."
-      : "Ready when you are.";
-  const statusBody = credential
-    ? active
-      ? "You can now prove you are over 18 without sharing photo ID or personal details."
-      : `Cooling-off is running. Your pass will be ready in about ${remainingSeconds} seconds.`
-    : enrollment
-      ? "You can close this page and come back. Your current setup will resume from the bank verification or activation step."
-      : "The first-time check takes around a minute and ends with a secure Over-18 pass stored on this device.";
+  const hasStatusDetail = Boolean(credential || enrollment);
+  const statusMeta = credential
+    ? [
+        { label: "Pass ID", value: credential.payload.credential_id },
+        {
+          label: "Status",
+          value: active ? "Ready for age checks" : `Activates in ${remainingSeconds}s`
+        },
+        {
+          label: "Stored",
+          value: expiresTime ? new Date(expiresTime).toLocaleDateString() : "On this device"
+        }
+      ]
+    : [
+        { label: "ID required", value: "No photo ID" },
+        { label: "Credit impact", value: "Soft check only" },
+        { label: "Bank step", value: "Refundable GBP 0.01" }
+      ];
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-6 pb-52 sm:pb-44 lg:pb-32">
       <section className="relative overflow-hidden rounded-[40px] border border-white/80 bg-white/72 px-6 py-8 shadow-panel backdrop-blur-sm sm:px-10 sm:py-10">
         <div className="relative grid gap-8 md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] md:items-start">
           <div className="relative md:order-1">
@@ -512,19 +516,26 @@ export function WalletSurface() {
             <div className="relative overflow-hidden rounded-[34px] border border-ink/8 bg-white p-6 shadow-[0_30px_80px_rgba(14,23,38,0.18)]">
               <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top_right,_rgba(215,241,113,0.3),_transparent_45%)]" />
               <div className="relative space-y-6">
-                <div className="flex items-center justify-between gap-4">
+                <div className="mb-8 flex items-center justify-between gap-4">
                   <div>
-                    <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink/45">
-                      Get your Zik Pass
-                    </p>
                     <p className="mt-2 font-heading text-3xl font-semibold tracking-tight text-ink">
-                      Start with your details
+                      Zero Knowledge age verification
+                    </p>
+                    <p className="mt-2 font-mono text-xs tracking-[0.24em] text-ink/45">
+                      Apply below to get your Zik Pass, or learn more about how it works and why it&apos;s private by design.
                     </p>
                   </div>
                   <div className="animate-float-slow rounded-[24px] border border-ink/8 bg-[#f6faea] p-3">
                     <ZikLogoMark className="h-10 w-10 text-ink" />
                   </div>
                 </div>
+
+                {(message || error) && (
+                  <NoticeCard tone={error ? "warn" : "good"}>
+                    {message ? <p>{message}</p> : null}
+                    {error ? <p>{error}</p> : null}
+                  </NoticeCard>
+                )}
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <FieldInput
@@ -591,19 +602,20 @@ export function WalletSurface() {
             </div>
           </div>
 
-          <div className="space-y-6 md:order-2 md:flex md:self-stretch md:flex-col md:space-y-0">
+          <div className="space-y-6 rounded-[32px] py-6 pl-[25px] md:order-2 md:flex md:self-stretch md:flex-col md:space-y-0 md:py-8">
             <div className="flex flex-wrap gap-2">
-              <StatusPill tone="good">Light-touch onboarding</StatusPill>
-              <StatusPill tone="neutral">Refundable GBP 0.01 check</StatusPill>
+              <StatusPill tone="good">How to get your ZikPass</StatusPill>
+              <StatusPill tone="neutral">How ZikPass works</StatusPill>
             </div>
             <div className="space-y-6 md:flex md:flex-1 md:flex-col md:justify-center">
               <div className="space-y-4">
                 <h2 className="max-w-3xl font-heading text-5xl font-semibold leading-[0.92] tracking-tight text-ink sm:text-6xl">
-                  Start your Zik Pass in minutes, right from the first screen.
+                  Prove your age with your name, not your face.
                 </h2>
                 <p className="max-w-2xl text-base leading-8 text-ink/68">
-                  Zik Pass uses a soft financial check, a refundable bank authorisation, and
-                  activation protection so you can prove you are over 18 without uploading photo ID.
+                  ZikPass layers a soft financial check with bank authorisation, and device activation
+                  to prove over 18. Nothing is stored on our servers. That&apos;s what we mean by
+                  Zero knowledge
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 text-xs text-ink/70">
@@ -616,63 +628,7 @@ export function WalletSurface() {
         </div>
       </section>
 
-      {(message || error) && (
-        <NoticeCard tone={error ? "warn" : "good"}>
-          {message ? <p>{message}</p> : null}
-          {error ? <p>{error}</p> : null}
-        </NoticeCard>
-      )}
-
-      <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-        <SurfaceCard
-          title="Your status"
-          subtitle="A cleaner product view of where this device stands in the onboarding journey."
-          className="border-ink/5 bg-white/88"
-        >
-          <div className="space-y-4">
-            <div className="rounded-[28px] border border-ink/8 bg-[linear-gradient(135deg,_#ffffff_0%,_#f5f9e7_100%)] p-6">
-              <div className="flex flex-wrap items-center gap-3">
-                <StatusPill tone={credential ? (active ? "good" : "neutral") : "neutral"}>
-                  {credential ? (active ? "Active" : "Activating") : "Not started"}
-                </StatusPill>
-                {credential ? <StatusPill tone="good">Over-18 pass stored</StatusPill> : null}
-              </div>
-              <p className="mt-4 font-heading text-2xl font-semibold tracking-tight text-ink">
-                {statusHeadline}
-              </p>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-ink/72">{statusBody}</p>
-              {credential || enrollment ? (
-                <button
-                  className="mt-4 rounded-full bg-ink px-4 py-2 text-sm font-medium text-mist"
-                  onClick={resetFlow}
-                >
-                  Delete Zik Pass from this device
-                </button>
-              ) : null}
-            </div>
-
-            {credential ? (
-              <div className="grid gap-3 sm:grid-cols-3">
-                <MetaTile label="Pass ID" value={credential.payload.credential_id} />
-                <MetaTile
-                  label="Status"
-                  value={active ? "Ready for age checks" : `Activates in ${remainingSeconds}s`}
-                />
-                <MetaTile
-                  label="Stored"
-                  value={expiresTime ? new Date(expiresTime).toLocaleDateString() : "On this device"}
-                />
-              </div>
-            ) : (
-              <div className="grid gap-3 sm:grid-cols-3">
-                <MetaTile label="ID required" value="No photo ID" />
-                <MetaTile label="Credit impact" value="Soft check only" />
-                <MetaTile label="Bank step" value="Refundable GBP 0.01" />
-              </div>
-            )}
-          </div>
-        </SurfaceCard>
-
+      <div className="grid gap-6">
         <SurfaceCard
           title="Why people choose Zik Pass"
           subtitle="Designed to feel more like a premium financial product than a compliance prompt."
@@ -717,6 +673,52 @@ export function WalletSurface() {
           </div>
         </details>
       ) : null}
+
+      <div
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex h-44 items-end px-3 pb-10 sm:px-6 lg:px-8"
+        style={{
+          backgroundImage:
+            "linear-gradient(180deg, rgba(255,255,255,0.31) 0%, rgba(255,255,255,1) 50%, rgba(162,206,106,1) 100%)",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "100% 100%"
+        }}
+      >
+        <section
+          aria-live="polite"
+          className="pointer-events-auto mx-auto w-[85%] max-w-[1088px] rounded-[22px] bg-white/80 p-1.5 opacity-25 shadow-[0_-12px_36px_rgba(14,23,38,0.08)] transition-[opacity,background-image,background-color] duration-200 hover:bg-[linear-gradient(180deg,_rgba(255,255,255,0.94),_rgba(244,247,238,0.94))] hover:opacity-100 sm:p-2"
+        >
+          <div className="flex flex-col gap-1.5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-ink/45">
+                  Your status
+                </p>
+                <StatusPill tone={credential ? (active ? "good" : "neutral") : "neutral"}>
+                  {credential ? (active ? "Active" : "Activating") : "Not started"}
+                </StatusPill>
+                {credential ? <StatusPill tone="good">Over-18 pass stored</StatusPill> : null}
+              </div>
+
+              {hasStatusDetail ? (
+                <>
+                  <button
+                    className="rounded-full bg-ink px-2.5 py-1 text-[11px] font-medium text-mist"
+                    onClick={resetFlow}
+                  >
+                    Delete Zik Pass from this device
+                  </button>
+                </>
+              ) : null}
+            </div>
+
+            <div className="grid gap-1.5 sm:grid-cols-3 lg:min-w-[420px]">
+              {statusMeta.map((item) => (
+                <MetaTile key={item.label} label={item.label} value={item.value} />
+              ))}
+            </div>
+          </div>
+        </section>
+      </div>
 
       {isFlowOpen ? (
         <div
@@ -1716,9 +1718,9 @@ function InstructionRow({ number, body }: { number: string; body: string }) {
 
 function MetaTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[24px] bg-white px-4 py-4">
-      <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink/45">{label}</p>
-      <p className="mt-2 text-sm font-medium text-ink">{value}</p>
+    <div className="rounded-[18px] bg-white px-2.5 py-1.5">
+      <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ink/45">{label}</p>
+      <p className="mt-0.5 text-[11px] font-medium text-ink">{value}</p>
     </div>
   );
 }
