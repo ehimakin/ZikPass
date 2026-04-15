@@ -6,8 +6,8 @@ import { StatusPill } from "@/components/status-pill";
 
 const steps = [
   "The user launches Get Zik Pass and answers one plain-language question at a time.",
-  "A refund-reference possession check completes the enrollment and triggers credential delivery.",
-  "The credential lands in the wallet immediately, but remains inactive through cooling-off.",
+  "A refund-reference possession check confirms control of the bank account and registers the holder public key.",
+  "Cooling-off completes before the issuer signs the credential and the wallet stores it on this device.",
   "A betting-style vendor requests a single Zik Pass verification at the point of entry.",
   "The vendor validates issuer trust, holder possession, activation, expiry, and the claim locally."
 ];
@@ -19,8 +19,8 @@ export default function HomePage() {
 
       <main id="learn-more" className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
         <SurfaceCard
-          title="Sprint-two journey"
-          subtitle="A guided consumer flow from new user to credential receipt, cooling-off, and vendor-side access."
+          title="Sprint 5 journey"
+          subtitle="A guided consumer flow from onboarding to a signed device-bound credential and real local verification."
           className="overflow-hidden"
         >
           <div className="grid gap-6 md:grid-cols-2">
@@ -30,9 +30,9 @@ export default function HomePage() {
                 Get a reusable Over-18 pass without handing over identity.
               </h2>
               <p className="max-w-xl text-sm leading-6 text-ink/75">
-                Zik Pass now demonstrates a consumer-friendly onboarding funnel: simple questions,
-                automatic pass delivery after confirmation, visible cooling-off, and a one-click
-                verification step on a dummy betting-site vendor.
+                Zik Pass now demonstrates a consumer-friendly onboarding funnel backed by real
+                holder keys, issuer signing, local device storage, visible cooling-off, and a
+                one-click verification step on a dummy betting-site vendor.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link
@@ -73,19 +73,20 @@ export default function HomePage() {
               <Link className="block rounded-2xl bg-ink/5 p-4 hover:bg-ink/10" href="/wallet">
                 <p className="font-heading text-lg font-medium">Get Zik Pass</p>
                 <p className="text-sm text-ink/70">
-                  Launch the guided question flow, receive the pass, and wait through cooling-off.
+                  Launch the guided question flow, generate a holder key, and receive the signed
+                  pass after cooling-off.
                 </p>
               </Link>
               <Link className="block rounded-2xl bg-ink/5 p-4 hover:bg-ink/10" href="/issuer">
                 <p className="font-heading text-lg font-medium">Issuer admin</p>
                 <p className="text-sm text-ink/70">
-                  Inspect intake records, monitor cooling-off, and issue credentials.
+                  Inspect pending issuance records, monitor cooling-off, and sign credentials.
                 </p>
               </Link>
               <Link className="block rounded-2xl bg-ink/5 p-4 hover:bg-ink/10" href="/verifier">
                 <p className="font-heading text-lg font-medium">Dummy betting vendor</p>
                 <p className="text-sm text-ink/70">
-                  Trigger a single verification step and grant or deny access locally.
+                  Trigger a challenge-response verification step and grant or deny access locally.
                 </p>
               </Link>
             </div>

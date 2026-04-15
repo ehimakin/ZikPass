@@ -9,7 +9,8 @@ export default function IssuerPage() {
           <h1 className="font-heading text-4xl font-semibold tracking-tight">Issuer admin</h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-ink/70">
             The issuer surface shows proof intake, evaluation outcomes, refund-code verification,
-            cooling-off state, notification logging, and credential issuance using a server-only key.
+            cooling-off state, pending issuance records, notification logging, and credential
+            signing using a server-only key.
           </p>
         </div>
         <IssuerDashboard />

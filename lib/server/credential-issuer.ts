@@ -19,7 +19,8 @@ export async function issueCredential(record: EnrollmentRecord): Promise<SignedC
     issued_at: issuedAt.toISOString(),
     activates_at: activatesAt.toISOString(),
     expires_at: expiresAt.toISOString(),
-    assurance_level: "medium",
+    assurance_level: record.assurance_level,
+    issuance_channel: record.issuance_channel,
     subject_public_key: record.holder_public_key
   };
 

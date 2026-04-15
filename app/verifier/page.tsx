@@ -1,21 +1,18 @@
 import { AppShell } from "@/components/app-shell";
 import { VerifierDemo } from "@/components/verifier-demo";
-import { getIssuerPublicKey } from "@/lib/server/issuer-keys";
 
-export default async function VerifierPage() {
-  const issuerPublicKey = await getIssuerPublicKey();
-
+export default function VerifierPage() {
   return (
     <AppShell currentPath="/verifier">
       <main className="grid gap-6">
         <div>
-          <h1 className="font-heading text-4xl font-semibold tracking-tight">Dummy betting vendor</h1>
+          <h1 className="font-heading text-4xl font-semibold tracking-tight">ZikBet vendor demo</h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-ink/70">
-            This surface simulates an adult-content vendor that asks for one Zik Pass approval at
-            the point of entry, then validates the credential locally without calling the issuer.
+            This surface simulates a standalone betting site that launches a Zik-hosted age
+            verification flow in a modal and receives only a minimal over-18 result in return.
           </p>
         </div>
-        <VerifierDemo issuerPublicKey={issuerPublicKey} />
+        <VerifierDemo />
       </main>
     </AppShell>
   );

@@ -33,6 +33,12 @@ export function randomNumericCode(length: number): string {
   return Array.from(bytes, (value) => String(value % 10)).join("");
 }
 
+export function randomAlphaNumericCode(length: number): string {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = crypto.getRandomValues(new Uint8Array(length));
+  return Array.from(bytes, (value) => alphabet[value % alphabet.length]).join("");
+}
+
 export function bytesToBase64Url(bytes: Uint8Array): string {
   if (typeof Buffer !== "undefined") {
     return Buffer.from(bytes)
