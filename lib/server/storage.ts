@@ -1,5 +1,4 @@
 import { promises as fs } from "node:fs";
-import path from "node:path";
 import { runtimeConfig } from "@/lib/shared/config";
 import type {
   EnrollmentApplicationInput,
@@ -7,6 +6,7 @@ import type {
   EnrollmentStatus,
   PhysicalStoreSessionRecord
 } from "@/lib/shared/types";
+import { getRuntimeDataDir, getRuntimeStatePath, getSeedStatePath } from "@/lib/server/runtime-paths";
 
 interface StoreData {
   enrollments: EnrollmentRecord[];
@@ -56,9 +56,9 @@ interface LegacyEnrollmentRecord {
   };
 }
 
-const dataDir = path.join(process.cwd(), "data");
-const seedStatePath = path.join(dataDir, "state.json");
-const runtimeStatePath = path.join(dataDir, "runtime-state.json");
+const dataDir = getRuntimeDataDir();
+const seedStatePath = getSeedStatePath();
+const runtimeStatePath = getRuntimeStatePath();
 
 async function ensureStateFile() {
   await fs.mkdir(dataDir, { recursive: true });
@@ -66,7 +66,11 @@ async function ensureStateFile() {
   try {
     await fs.access(runtimeStatePath);
   } catch {
-    await fs.writeFile(runtimeStatePath, JSON.stringify({ enrollments: [] }, null, 2), "utf8");
+    await fs.writeFile(
+      runtimeStatePath,
+      JSON.stringify({ enrollments: [], physical_sessions: [] }, null, 2),
+      "utf8"
+    );
   }
 }
 

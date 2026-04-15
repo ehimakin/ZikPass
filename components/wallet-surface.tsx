@@ -1447,20 +1447,20 @@ export function WalletSurface() {
           className="fixed inset-0 z-50 bg-[radial-gradient(circle_at_top,_rgba(215,241,113,0.18),rgba(14,23,38,0.64)_58%)] backdrop-blur-md"
           onClick={closeFlow}
         >
-          <div className="flex h-full w-full items-stretch justify-center p-3 sm:p-6">
+          <div className="flex h-full w-full items-stretch justify-center p-2 sm:p-6">
             <div
-              className="relative flex h-full w-full max-w-7xl flex-col overflow-hidden rounded-[40px] border border-white/65 bg-[linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(244,247,238,0.97))] p-3 shadow-[0_36px_120px_rgba(14,23,38,0.28)] sm:p-6"
+              className="relative flex h-full w-full max-w-7xl flex-col overflow-hidden rounded-[30px] border border-white/65 bg-[linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(244,247,238,0.97))] p-2 shadow-[0_36px_120px_rgba(14,23,38,0.28)] sm:rounded-[40px] sm:p-6"
               onClick={(event) => event.stopPropagation()}
             >
               <button
                 aria-label="Close Zik Pass form"
-                className="absolute right-4 top-4 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full border border-ink/10 bg-white text-xl text-ink hover:bg-[#f4f7ee]"
+                className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full border border-ink/10 bg-white text-lg text-ink hover:bg-[#f4f7ee] sm:right-4 sm:top-4 sm:h-11 sm:w-11 sm:text-xl"
                 onClick={closeFlow}
               >
                 ×
               </button>
 
-              <div className="mb-4 pr-12">
+              <div className="mb-2 pr-10 sm:mb-4 sm:pr-12">
                 <JourneyTracker lane={isPhysicalLane ? "physical" : "remote"} state={journeyState} />
               </div>
 
@@ -2181,8 +2181,8 @@ function JourneyTracker({
   const activeIndex = steps.findIndex((step) => step.states.includes(state));
 
   return (
-    <div className="rounded-[28px] border border-[#c6e29e]/55 bg-[linear-gradient(180deg,_rgba(255,255,255,0.92),_rgba(237,247,219,0.96))] px-4 py-4">
-      <div className="grid gap-3 sm:grid-cols-4">
+    <div className="rounded-[22px] border border-[#c6e29e]/55 bg-[linear-gradient(180deg,_rgba(255,255,255,0.92),_rgba(237,247,219,0.96))] px-2.5 py-2.5 sm:rounded-[28px] sm:px-4 sm:py-4">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
         {steps.map((step, index) => {
           const complete = activeIndex > index || state === "pass_issued";
           const active = activeIndex === index;
@@ -2190,7 +2190,7 @@ function JourneyTracker({
           return (
             <div
               key={step.label}
-              className={`rounded-[22px] px-4 py-3 ${
+              className={`rounded-[18px] px-2.5 py-2 sm:rounded-[22px] sm:px-4 sm:py-3 ${
                 complete
                   ? "bg-[linear-gradient(135deg,_#7cb56b,_#a2ce6a)] text-ink shadow-[0_14px_32px_rgba(124,181,107,0.24)]"
                   : active
@@ -2198,8 +2198,12 @@ function JourneyTracker({
                     : "bg-[#eef6df] text-ink/68"
               }`}
             >
-              <p className="font-mono text-[11px] uppercase tracking-[0.22em]">{step.label}</p>
-              <p className="mt-2 text-sm">{step.body}</p>
+              <p className="font-mono text-[9px] uppercase tracking-[0.18em] sm:text-[11px] sm:tracking-[0.22em]">
+                {step.label}
+              </p>
+              <p className="mt-1 text-[11px] leading-4 sm:mt-2 sm:text-sm sm:leading-5">
+                {step.body}
+              </p>
             </div>
           );
         })}
@@ -2230,15 +2234,17 @@ function QuestionCard({
   onNext: () => void;
 }) {
   return (
-    <div className="grid min-h-[68vh] overflow-hidden rounded-[34px] border border-ink/8 bg-transparent">
-      <div className="flex flex-col justify-between p-6 sm:p-8">
-        <div className="space-y-5">
-          <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink/45">{step}</p>
-          <div className="space-y-3">
-            <h3 className="font-heading text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+    <div className="grid min-h-[60vh] overflow-hidden rounded-[28px] border border-ink/8 bg-transparent sm:min-h-[68vh] sm:rounded-[34px]">
+      <div className="flex flex-col justify-between p-4 sm:p-8">
+        <div className="space-y-4 sm:space-y-5">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/45 sm:text-xs sm:tracking-[0.24em]">
+            {step}
+          </p>
+          <div className="space-y-2 sm:space-y-3">
+            <h3 className="font-heading text-2xl font-semibold tracking-tight text-ink sm:text-4xl">
               {title}
             </h3>
-            <p className="max-w-2xl text-sm leading-7 text-ink/70 sm:text-base">{body}</p>
+            <p className="max-w-2xl text-sm leading-6 text-ink/70 sm:text-base sm:leading-7">{body}</p>
             {error ? (
               <p className="max-w-2xl text-sm leading-6 text-[#b4535f]">{error}</p>
             ) : null}
@@ -2246,7 +2252,7 @@ function QuestionCard({
           <div>{children}</div>
         </div>
 
-        <div className="mt-8 flex flex-wrap gap-3">
+        <div className="mt-6 flex flex-wrap gap-3 sm:mt-8">
           {onBack ? (
             <button
               className="rounded-full border border-ink/10 bg-white px-5 py-3 text-sm font-medium text-ink"

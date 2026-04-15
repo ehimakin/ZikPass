@@ -11,14 +11,15 @@ import {
   startPhysicalDeviceAuth,
   verifyPhysicalIdCheck
 } from "@/lib/server/enrollment-service";
+import { getIssuerKeyPath, getRuntimeStatePath } from "@/lib/server/runtime-paths";
 import {
   formatAssuranceLevel,
   getCredentialExperienceVariant,
   parseWalletEntryContext
 } from "@/lib/shared/physical-flow";
 
-const runtimeStatePath = path.join(process.cwd(), "data", "runtime-state.json");
-const issuerKeyPath = path.join(process.cwd(), "data", "issuer-keypair.json");
+const runtimeStatePath = getRuntimeStatePath();
+const issuerKeyPath = getIssuerKeyPath();
 
 const holderPublicKey: JsonWebKey = {
   key_ops: ["verify"],
