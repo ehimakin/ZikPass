@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import type { IdentityMatchInput } from "@/lib/shared/types";
 import type { ProviderSimulatorScenario } from "@/lib/shared/provider-contracts";
 import type { PhysicalStoreContext } from "@/lib/shared/types";
-import { buildApplicationFingerprint } from "@/lib/server/application-guard";
+import {
+  buildApplicationFingerprint,
+  buildPhysicalApplicationFingerprint
+} from "@/lib/server/application-guard";
 import { startEnrollment } from "@/lib/server/enrollment-service";
 
 function validateIdentityMatchInput(input: IdentityMatchInput) {
@@ -31,19 +34,23 @@ export async function POST(request: NextRequest) {
       physicalContext?: PhysicalStoreContext;
     };
 
-    validateIdentityMatchInput(body.identityMatch);
-
     if (!body.holderPublicKey) {
       throw new Error("Holder public key is required before issuance.");
     }
 
-    if (body.lane !== "physical" && !body.bankName?.trim()) {
+    if (body.lane === "physical") {
+      if (!body.physicalContext?.session_id) {
+        throw new Error("A physical store session is required.");
+      }
+    } else if (!body.bankName?.trim()) {
       throw new Error("A bank must be selected for the refundable verification step.");
+    } else {
+      validateIdentityMatchInput(body.identityMatch);
     }
 
     const enrollment = await startEnrollment({
       application: {
-        identity_match: body.identityMatch,
+        identity_match: body.lane === "physical" ? undefined : body.identityMatch,
         bank_name:
           body.lane === "physical"
             ? "In-store verification"
@@ -54,7 +61,13 @@ export async function POST(request: NextRequest) {
         physical_context: body.physicalContext
       },
       holderPublicKey: body.holderPublicKey,
-      applicationFingerprint: buildApplicationFingerprint(body.identityMatch)
+      applicationFingerprint:
+        body.lane === "physical"
+          ? buildPhysicalApplicationFingerprint({
+              sessionId: body.physicalContext?.session_id ?? "",
+              holderPublicKey: body.holderPublicKey
+            })
+          : buildApplicationFingerprint(body.identityMatch)
     });
     return NextResponse.json(enrollment);
   } catch (error) {

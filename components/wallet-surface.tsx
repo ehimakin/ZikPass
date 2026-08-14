@@ -190,9 +190,34 @@ const howZikPassWorksSlides = [
   }
 ] as const;
 
+const physicalHowZikPassWorksSlides = [
+  {
+    label: "Store",
+    title: "Scan a normal retail-card QR",
+    body:
+      "The printed QR is generic. It starts a fresh Zik session on your phone without collecting identity details.",
+    art: "physical-session"
+  },
+  {
+    label: "Staff",
+    title: "Show your physical ID once, in person",
+    body:
+      "A staff member checks your ID at the till and sends Zik only the authorised 18+ result.",
+    art: "staff-check"
+  },
+  {
+    label: "Pass",
+    title: "Receive an in-person verified ZikPass",
+    body:
+      "Zik signs the 18+ credential for the holder public key on this device. Your ID is not uploaded or stored by Zik.",
+    art: "physical-pass"
+  }
+] as const;
+
 const showDevTools = process.env.NODE_ENV !== "production";
 
 const rejectedEnrollmentStatuses: EnrollmentRecord["status"][] = [
+  "declined_physical_verification",
   "declined_identity_mismatch",
   "declined_no_adult_signal",
   "declined_bank_control_failed",
@@ -245,9 +270,8 @@ export function WalletSurface() {
   const currentLane =
     enrollment?.lane ??
     wallet.enrollmentLane ??
-    (entryContext.lane === "physical" ? "physical" : credential?.payload.issuance_channel === "physical"
-      ? "physical"
-      : "remote");
+    credential?.payload.issuance_channel ??
+    (entryContext.lane === "physical" ? "physical" : "remote");
   const credentialExperience = getCredentialExperienceVariant(credential?.payload);
   const isPhysicalLane = currentLane === "physical" || credentialExperience === "physical";
   const activationTime = credential
@@ -312,6 +336,17 @@ export function WalletSurface() {
       setStep("rejected");
       setIsFlowOpen(true);
       setError(nextEnrollment.last_user_message ?? "This in-store verification session expired.");
+      return;
+    }
+
+    if (
+      nextEnrollment.status === "declined_physical_verification" ||
+      nextEnrollment.physical_verification?.status === "rejected"
+    ) {
+      setJourneyState("rejected");
+      setStep("rejected");
+      setIsFlowOpen(true);
+      setError(nextEnrollment.last_user_message ?? "Store staff could not confirm this age check.");
       return;
     }
 
@@ -486,6 +521,33 @@ export function WalletSurface() {
     }
   }, []);
 
+  const createPhysicalSessionFromEntry = useCallback(async () => {
+    try {
+      const response = await fetch("/api/physical/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          storeId: entryContext.lane === "physical" ? entryContext.store_id : undefined,
+          storeName: entryContext.lane === "physical" ? entryContext.store_name : undefined,
+          locationId: entryContext.lane === "physical" ? entryContext.location_id : undefined
+        })
+      });
+      const data = (await response.json()) as PhysicalStoreSessionRecord | ApiError;
+
+      if (!response.ok) {
+        throw new Error((data as ApiError).error);
+      }
+
+      setPhysicalSession(data as PhysicalStoreSessionRecord);
+      setJourneyState("physical_session_detected");
+      setStep("physical-session");
+      setIsFlowOpen(true);
+      setError(null);
+    } catch {
+      setError("We could not start the in-store session from this retail card.");
+    }
+  }, [entryContext]);
+
   useEffect(() => {
     void (async () => {
       try {
@@ -500,7 +562,11 @@ export function WalletSurface() {
         }
 
         if (entryContext.lane === "physical") {
-          await refreshPhysicalSession(entryContext.session_id);
+          if (entryContext.session_id) {
+            await refreshPhysicalSession(entryContext.session_id);
+          } else {
+            await createPhysicalSessionFromEntry();
+          }
           return;
         }
 
@@ -516,7 +582,7 @@ export function WalletSurface() {
         setError("We could not load the local Zik Pass on this browser.");
       }
     })();
-  }, [entryContext, refreshEnrollment, refreshPhysicalSession]);
+  }, [createPhysicalSessionFromEntry, entryContext, refreshEnrollment, refreshPhysicalSession]);
 
   useEffect(() => {
     if (canDeleteLocalPass) {
@@ -607,11 +673,14 @@ export function WalletSurface() {
         return;
       }
 
-      setHeroWorksSlideIndex((current) => (current + 1) % howZikPassWorksSlides.length);
+      const slideCount = isPhysicalLane
+        ? physicalHowZikPassWorksSlides.length
+        : howZikPassWorksSlides.length;
+      setHeroWorksSlideIndex((current) => (current + 1) % slideCount);
     }, heroViewMode === "how_to_get" ? 15000 : 30000);
 
     return () => window.clearInterval(interval);
-  }, [heroViewMode]);
+  }, [heroViewMode, isPhysicalLane]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("PublicKeyCredential" in window)) {
@@ -680,6 +749,11 @@ export function WalletSurface() {
     }
 
     setError(null);
+    if (entryContext.lane === "physical" && !physicalSession) {
+      setError("We are still creating your in-store session. Try again in a moment.");
+      return;
+    }
+
     setJourneyState(entryContext.lane === "physical" ? "physical_session_detected" : "collecting_details");
     setStep(entryContext.lane === "physical" ? "physical-session" : "current-address");
     setIsFlowOpen(true);
@@ -730,20 +804,26 @@ export function WalletSurface() {
           setWallet(nextWallet);
           const physicalContext =
             entryContext.lane === "physical"
-              ? {
-                  session_id: entryContext.session_id,
-                  store_id: entryContext.store_id,
-                  store_name: entryContext.store_name,
-                  location_id: entryContext.location_id
-                }
+              ? physicalSession
+                ? {
+                    session_id: physicalSession.session_id,
+                    store_id: physicalSession.store_id,
+                    store_name: physicalSession.store_name,
+                    location_id: physicalSession.location_id
+                  }
+                : undefined
               : undefined;
+
+          if (entryContext.lane === "physical" && !physicalContext) {
+            throw new Error("A live in-store session is required before issuance can start.");
+          }
 
           const response = await fetch("/api/enrollment/start", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              identityMatch: buildIdentityMatch(),
-              bankName: answers.bankName,
+              identityMatch: entryContext.lane === "physical" ? undefined : buildIdentityMatch(),
+              bankName: entryContext.lane === "physical" ? undefined : answers.bankName,
               holderPublicKey: nextWallet.holderKeyPair?.publicKeyJwk,
               lane: entryContext.lane,
               physicalContext
@@ -966,9 +1046,7 @@ export function WalletSurface() {
   }
 
   const totalQuestions = isPhysicalLane
-    ? answers.movedInLastThreeYears
-      ? 6
-      : 5
+    ? 1
     : answers.movedInLastThreeYears
       ? 7
       : 6;
@@ -1022,11 +1100,15 @@ export function WalletSurface() {
   const activeHeroSlide = isPhysicalLane
     ? {
         pill: "In-store verification",
-        title: "Verify in-store and receive a stronger Zik Pass.",
+        title: "Show your ID once. Keep it offline. Use ZikPass online.",
         body:
-          "This lane starts from a store session, lets staff confirm your ID in person, and issues a higher-assurance pass to this device after device authentication."
+          "A staff member checks your physical ID in person. Zik receives only the authorised 18+ result and issues an in-person verified pass to this device."
       }
     : heroSlides[heroSlideIndex];
+  const activeHowItWorksSlides = isPhysicalLane
+    ? physicalHowZikPassWorksSlides
+    : howZikPassWorksSlides;
+  const activeHowItWorksIndex = heroWorksSlideIndex % activeHowItWorksSlides.length;
   const issuedZignatureSeed = credential
     ? buildCredentialZignatureSeedInput({
         credentialId: credential.payload.credential_id,
@@ -1127,9 +1209,9 @@ export function WalletSurface() {
                       <div className="rounded-[26px] bg-[#f7faee] p-5 text-sm text-ink/76">
                         <p className="font-medium text-ink">This store session is ready</p>
                         <p className="mt-2 leading-6">
-                          Continue to the in-store form, then show your verification code to a staff
-                          member. After that, this device must complete device authentication before
-                          the pass is issued.
+                          Create a local holder key, then show your temporary customer QR to a staff
+                          member with your physical ID. Zik receives the age-check result, not your
+                          identity details.
                         </p>
                       </div>
                     ) : (
@@ -1259,10 +1341,10 @@ export function WalletSurface() {
                     <div
                       className="flex h-full w-full transition-transform duration-500 ease-out"
                       style={{
-                        transform: `translateX(-${heroWorksSlideIndex * 100}%)`
+                        transform: `translateX(-${activeHowItWorksIndex * 100}%)`
                       }}
                     >
-                      {howZikPassWorksSlides.map((slide) => (
+                      {activeHowItWorksSlides.map((slide) => (
                         <div key={slide.label} className="w-full shrink-0 p-5 sm:p-6">
                           <div className="grid h-full gap-6 md:grid-cols-[1.05fr_0.95fr] md:items-center">
                             <div className="space-y-4">
@@ -1283,10 +1365,10 @@ export function WalletSurface() {
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2 text-xs text-ink/70">
-                    {howZikPassWorksSlides.map((slide, index) => (
+                    {activeHowItWorksSlides.map((slide, index) => (
                       <HeroSlidePill
                         key={slide.label}
-                        active={index === heroWorksSlideIndex}
+                        active={index === activeHowItWorksIndex}
                         label={slide.label}
                         onClick={() => setHeroWorksSlideIndex(index)}
                       />
@@ -1301,8 +1383,12 @@ export function WalletSurface() {
 
       <div className="grid gap-6">
         <SurfaceCard
-          title="Why people choose Zik Pass"
-          subtitle="Designed to feel more like a premium financial product than a compliance prompt."
+          title={isPhysicalLane ? "Why physical-first ZikPass" : "Why people choose Zik Pass"}
+          subtitle={
+            isPhysicalLane
+              ? "Built around a normal in-person age check, then minimized into a reusable pass."
+              : "Designed to feel more like a premium financial product than a compliance prompt."
+          }
           className="border-ink/5 bg-white/88"
         >
           <ul className="grid gap-4">
@@ -1311,10 +1397,13 @@ export function WalletSurface() {
                 ✓
               </span>
               <div>
-                <p className="text-sm font-medium text-ink">Familiar first-time check</p>
+                <p className="text-sm font-medium text-ink">
+                  {isPhysicalLane ? "Familiar in-person check" : "Familiar first-time check"}
+                </p>
                 <p className="mt-1 text-sm leading-6 text-ink/68">
-                  You answer a few normal identity questions, confirm a temporary bank reference,
-                  and receive the pass on the same device.
+                  {isPhysicalLane
+                    ? "Show your physical ID to staff at a participating retailer, then keep using ZikPass online."
+                    : "You answer a few normal identity questions, confirm a temporary bank reference, and receive the pass on the same device."}
                 </p>
               </div>
             </li>
@@ -1325,8 +1414,9 @@ export function WalletSurface() {
               <div>
                 <p className="text-sm font-medium text-ink">Private by design</p>
                 <p className="mt-1 text-sm leading-6 text-ink/68">
-                  Sites only learn that you are over 18. They do not receive your name, date of
-                  birth, or bank information.
+                  {isPhysicalLane
+                    ? "Zik receives the staff-confirmed 18+ result, not your name, date of birth, address, ID number, or ID image."
+                    : "Sites only learn that you are over 18. They do not receive your name, date of birth, or bank information."}
                 </p>
               </div>
             </li>
@@ -1335,10 +1425,13 @@ export function WalletSurface() {
                 ✓
               </span>
               <div>
-                <p className="text-sm font-medium text-ink">Protection before first use</p>
+                <p className="text-sm font-medium text-ink">
+                  {isPhysicalLane ? "Stored on this device" : "Protection before first use"}
+                </p>
                 <p className="mt-1 text-sm leading-6 text-ink/68">
-                  A short activation delay gives you time to spot anything unexpected before the
-                  pass can be used.
+                  {isPhysicalLane
+                    ? "The signed in-person verified credential is bound to the holder public key created on this device."
+                    : "A short activation delay gives you time to spot anything unexpected before the pass can be used."}
                 </p>
               </div>
             </li>
@@ -1468,12 +1561,12 @@ export function WalletSurface() {
                 {step === "physical-session" && (physicalSession || enrollment?.physical_verification) ? (
                   <FullscreenCard
                     eyebrow="You’re verifying in-store"
-                    title={`Continue at ${physicalSession?.store_name ?? enrollment?.physical_verification?.session.store_name}`}
-                    body="Staff will verify your ID in person and this device will receive a stronger-assurance Zik Pass after device authentication completes."
+                    title={`Ready at ${physicalSession?.store_name ?? enrollment?.physical_verification?.session.store_name}`}
+                    body="Your physical ID stays with you. Zik only receives an authorised confirmation that staff checked it and confirmed 18+."
                     actionLabel="Continue"
                     onAction={() => {
                       setJourneyState("collecting_details");
-                      setStep("full-name");
+                      setStep("device-security");
                     }}
                   >
                     <div className="grid gap-4 sm:grid-cols-3">
@@ -1487,17 +1580,17 @@ export function WalletSurface() {
                       />
                       <InlineDetail
                         title="Staff step"
-                        body="A staff member will check your ID before Zik issues the pass."
+                        body="A staff member checks your physical ID in person."
                       />
                       <InlineDetail
                         title="Device rule"
-                        body="The same device must complete authentication before issuance."
+                        body="Only this device receives the signed ZikPass."
                       />
                     </div>
                   </FullscreenCard>
                 ) : null}
 
-                {step === "full-name" ? (
+                {step === "full-name" && !isPhysicalLane ? (
                   <QuestionCard
                     step={`Question 1 of ${totalQuestions}`}
                     title="What is your full name?"
@@ -1541,7 +1634,7 @@ export function WalletSurface() {
                   </QuestionCard>
                 ) : null}
 
-                {step === "date-of-birth" ? (
+                {step === "date-of-birth" && !isPhysicalLane ? (
                   <QuestionCard
                     step={`Question 2 of ${totalQuestions}`}
                     title="What is your date of birth?"
@@ -1568,7 +1661,7 @@ export function WalletSurface() {
                   </QuestionCard>
                 ) : null}
 
-                {step === "current-address" ? (
+                {step === "current-address" && !isPhysicalLane ? (
                   <QuestionCard
                     step={`Question 3 of ${totalQuestions}`}
                     title="What is your current home address?"
@@ -1595,7 +1688,7 @@ export function WalletSurface() {
                   </QuestionCard>
                 ) : null}
 
-                {step === "moved-recently" ? (
+                {step === "moved-recently" && !isPhysicalLane ? (
                   <QuestionCard
                     step={`Question 4 of ${totalQuestions}`}
                     title="Have you moved in the last 3 years?"
@@ -1645,7 +1738,7 @@ export function WalletSurface() {
                   </QuestionCard>
                 ) : null}
 
-                {step === "previous-address" ? (
+                {step === "previous-address" && !isPhysicalLane ? (
                   <QuestionCard
                     step={`Question 5 of ${totalQuestions}`}
                     title="What was your previous address?"
@@ -1714,7 +1807,7 @@ export function WalletSurface() {
                     title="Secure this Zik Pass on this device?"
                     body={
                       isPhysicalLane
-                        ? "We create a private holder key on this device now. After staff confirm your ID, this same device must complete device authentication before the in-person verified pass is issued."
+                        ? "We create a private holder key on this device now. Zik receives the public key and the store session only, then waits for staff to confirm the in-person age check."
                         : "We create a private holder key that stays on this device. Only the public key is used to issue your pass."
                     }
                     canContinue={!isPending}
@@ -1723,17 +1816,11 @@ export function WalletSurface() {
                       isPending
                         ? "Starting secure check..."
                         : isPhysicalLane
-                          ? "Continue to in-store verification"
+                          ? "Show my customer QR"
                           : "Use Face ID, fingerprint or passcode"
                     }
                     onBack={() =>
-                      setStep(
-                        isPhysicalLane
-                          ? answers.movedInLastThreeYears
-                            ? "previous-address"
-                            : "moved-recently"
-                          : "bank-selection"
-                      )
+                      setStep(isPhysicalLane ? "physical-session" : "bank-selection")
                     }
                     onNext={startEnrollmentSubmission}
                   >
@@ -1745,7 +1832,7 @@ export function WalletSurface() {
                           title={isPhysicalLane ? "Store step" : "Soft check"}
                           body={
                             isPhysicalLane
-                              ? "Staff will confirm your physical ID after this form."
+                              ? "Staff will confirm your physical ID in person."
                               : "Looks for adult financial activity only."
                           }
                         />
@@ -1765,8 +1852,8 @@ export function WalletSurface() {
                 {step === "physical-verification" && enrollment?.physical_verification ? (
                   <QuestionCard
                     step="In-store verification"
-                    title="Show this code to a staff member"
-                    body="Staff will use this code to open your store session, confirm your physical ID, and move you to device authentication."
+                    title="You’re ready to verify"
+                    body="Take your phone and physical ID to the till. Staff will check your age in person and scan or enter this temporary session code."
                     canContinue={false}
                     error={error}
                     nextLabel="Waiting for staff"
@@ -2090,27 +2177,53 @@ export function WalletSurface() {
               <div className="mt-8 grid gap-4 md:grid-cols-2">
                 <InfoBlock
                   title="What is Zik App?"
-                  body="Zik App is the onboarding experience that helps a new user get set up. It collects a few matching details, guides the refundable bank step, and stores the pass on this device."
+                  body={
+                    isPhysicalLane
+                      ? "Zik App starts a fresh in-store session, creates the holder key on this device, and receives the staff-confirmed 18+ result after the physical ID check."
+                      : "Zik App is the onboarding experience that helps a new user get set up. It collects a few matching details, guides the refundable bank step, and stores the pass on this device."
+                  }
                 />
                 <InfoBlock
                   title="What is Zik Pass?"
-                  body="Zik Pass is the secure Over-18 credential created at the end of that process. Sites can verify it locally without learning your identity."
+                  body={
+                    isPhysicalLane
+                      ? "ZikPass is the signed Over-18 credential issued to this device after an authorised in-person age check."
+                      : "Zik Pass is the secure Over-18 credential created at the end of that process. Sites can verify it locally without learning your identity."
+                  }
                 />
                 <InfoBlock
-                  title="Why the bank step exists"
-                  body="The refundable GBP 0.01 reference helps confirm control of a real adult-linked financial account. It is temporary and used only as a verification signal."
+                  title={isPhysicalLane ? "Why staff check ID" : "Why the bank step exists"}
+                  body={
+                    isPhysicalLane
+                      ? "The physical ID is evidence for the human verifier. Zik only needs the authorised result that the customer was confirmed 18+."
+                      : "The refundable GBP 0.01 reference helps confirm control of a real adult-linked financial account. It is temporary and used only as a verification signal."
+                  }
                 />
                 <InfoBlock
-                  title="Why there is a short wait"
-                  body="The activation window gives you time to spot anything unexpected before the pass can be used. It is a safety feature, not a delay for delay’s sake."
+                  title={isPhysicalLane ? "What Zik does not store" : "Why there is a short wait"}
+                  body={
+                    isPhysicalLane
+                      ? "Zik does not store a copy of the physical ID, an ID image, name, date of birth, address, or ID number for this physical flow."
+                      : "The activation window gives you time to spot anything unexpected before the pass can be used. It is a safety feature, not a delay for delay’s sake."
+                  }
                 />
               </div>
 
               <div className="mt-6 rounded-[28px] bg-[#0f1721] p-6 text-mist">
                 <div className="grid gap-4 md:grid-cols-3">
-                  <HeroMetric label="No ID upload" value="No passport or selfie" />
-                  <HeroMetric label="Soft check" value="Does not affect score" />
-                  <HeroMetric label="What sites see" value="Over-18 confirmation" />
+                  {isPhysicalLane ? (
+                    <>
+                      <HeroMetric label="ID handling" value="Checked in person" />
+                      <HeroMetric label="Zik stores" value="18+ attestation" />
+                      <HeroMetric label="Wallet" value="In-person verified" />
+                    </>
+                  ) : (
+                    <>
+                      <HeroMetric label="No ID upload" value="No passport or selfie" />
+                      <HeroMetric label="Soft check" value="Does not affect score" />
+                      <HeroMetric label="What sites see" value="Over-18 confirmation" />
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -2136,17 +2249,17 @@ function JourneyTracker({
           states: ["physical_session_detected"] as JourneyState[]
         },
         {
-          label: "Details",
-          body: "Confirm identity",
+          label: "Device",
+          body: "Create local key",
           states: ["collecting_details", "submitting"] as JourneyState[]
         },
         {
           label: "Staff",
-          body: "Show your code",
+          body: "Show QR and ID",
           states: ["awaiting_clerk_verification"] as JourneyState[]
         },
         {
-          label: "Device",
+          label: "Issue",
           body: "Authenticate here",
           states: ["device_auth_required", "physical_verification_complete", "pass_issued"] as JourneyState[]
         }
@@ -2182,7 +2295,7 @@ function JourneyTracker({
 
   return (
     <div className="rounded-[22px] border border-[#c6e29e]/55 bg-[linear-gradient(180deg,_rgba(255,255,255,0.92),_rgba(237,247,219,0.96))] px-2.5 py-2.5 sm:rounded-[28px] sm:px-4 sm:py-4">
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+      <div className="-mx-0.5 flex gap-2 overflow-x-auto px-0.5 pb-0.5 sm:hidden">
         {steps.map((step, index) => {
           const complete = activeIndex > index || state === "pass_issued";
           const active = activeIndex === index;
@@ -2190,7 +2303,42 @@ function JourneyTracker({
           return (
             <div
               key={step.label}
-              className={`rounded-[18px] px-2.5 py-2 sm:rounded-[22px] sm:px-4 sm:py-3 ${
+              className={`min-w-[118px] shrink-0 rounded-[16px] px-2.5 py-2 ${
+                complete
+                  ? "bg-[linear-gradient(135deg,_#7cb56b,_#a2ce6a)] text-ink shadow-[0_10px_24px_rgba(124,181,107,0.22)]"
+                  : active
+                    ? "bg-[linear-gradient(135deg,_rgba(255,255,255,0.98),_rgba(226,244,194,0.98))] text-ink ring-1 ring-[#a2ce6a]/70"
+                    : "bg-[#eef6df] text-ink/68"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold ${
+                    complete
+                      ? "bg-ink/90 text-mist"
+                      : active
+                        ? "bg-ink text-mist"
+                        : "bg-white/80 text-ink/60"
+                  }`}
+                >
+                  {complete ? "✓" : index + 1}
+                </span>
+                <p className="font-mono text-[9px] uppercase tracking-[0.16em]">{step.label}</p>
+              </div>
+              <p className="mt-1.5 text-[11px] leading-4">{step.body}</p>
+            </div>
+          );
+        })}
+      </div>
+      <div className="hidden sm:grid sm:grid-cols-4 sm:gap-3">
+        {steps.map((step, index) => {
+          const complete = activeIndex > index || state === "pass_issued";
+          const active = activeIndex === index;
+
+          return (
+            <div
+              key={step.label}
+              className={`rounded-[22px] px-4 py-3 ${
                 complete
                   ? "bg-[linear-gradient(135deg,_#7cb56b,_#a2ce6a)] text-ink shadow-[0_14px_32px_rgba(124,181,107,0.24)]"
                   : active
@@ -2198,12 +2346,8 @@ function JourneyTracker({
                     : "bg-[#eef6df] text-ink/68"
               }`}
             >
-              <p className="font-mono text-[9px] uppercase tracking-[0.18em] sm:text-[11px] sm:tracking-[0.22em]">
-                {step.label}
-              </p>
-              <p className="mt-1 text-[11px] leading-4 sm:mt-2 sm:text-sm sm:leading-5">
-                {step.body}
-              </p>
+              <p className="font-mono text-[11px] uppercase tracking-[0.22em]">{step.label}</p>
+              <p className="mt-2 text-sm leading-5">{step.body}</p>
             </div>
           );
         })}
@@ -2391,12 +2535,15 @@ function PhysicalVerificationPanel({
             {verification.clerk_verification.status === "verified" ? "ID check confirmed" : "Awaiting staff"}
           </StatusPill>
         </div>
-        <p className="mt-5 font-heading text-5xl font-semibold tracking-[0.18em]">
+        <CustomerSessionQr
+          value={`zikpass:physical:${verification.session.session_id}:${verification.user_code.value}`}
+        />
+        <p className="mt-5 text-center font-heading text-5xl font-semibold tracking-[0.18em]">
           {verification.user_code.value}
         </p>
         <p className="mt-3 text-sm leading-6 text-mist/76">
-          This short-lived code links your device to the store session. Show it to staff exactly as
-          it appears here.
+          This short-lived QR/code identifies only this verification session. It does not contain
+          your name, date of birth, address, ID number, or ID image.
         </p>
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
           <BankMetaTile label="Session" value={verification.session.session_id} />
@@ -2425,6 +2572,46 @@ function PhysicalVerificationPanel({
             : enrollment.last_user_message ?? "Waiting for store staff to confirm the in-person ID check."}
         </div>
       </div>
+    </div>
+  );
+}
+
+function CustomerSessionQr({ value }: { value: string }) {
+  const size = 13;
+  const cells = Array.from({ length: size * size }, (_, index) => {
+    const row = Math.floor(index / size);
+    const column = index % size;
+    const finder =
+      (row < 4 && column < 4) ||
+      (row < 4 && column >= size - 4) ||
+      (row >= size - 4 && column < 4);
+
+    if (finder) {
+      return row === 0 ||
+        column === 0 ||
+        row === size - 1 ||
+        column === size - 1 ||
+        row === 3 ||
+        column === 3 ||
+        row === size - 4 ||
+        column === size - 4;
+    }
+
+    const charCode = value.charCodeAt(index % value.length);
+    return ((charCode + row * 17 + column * 31 + index) % 5) < 2;
+  });
+
+  return (
+    <div
+      aria-label="Temporary customer verification QR"
+      className="mx-auto mt-6 grid w-full max-w-[260px] grid-cols-[repeat(13,minmax(0,1fr))] gap-1 rounded-[24px] bg-white p-4"
+    >
+      {cells.map((filled, index) => (
+        <span
+          key={index}
+          className={`aspect-square rounded-[3px] ${filled ? "bg-ink" : "bg-[#edf6d7]"}`}
+        />
+      ))}
     </div>
   );
 }
@@ -2754,8 +2941,53 @@ function HeroViewTab({
 function HowItWorksGraphic({
   art
 }: {
-  art: (typeof howZikPassWorksSlides)[number]["art"];
+  art:
+    | (typeof howZikPassWorksSlides)[number]["art"]
+    | (typeof physicalHowZikPassWorksSlides)[number]["art"];
 }) {
+  if (art === "physical-session") {
+    return (
+      <div className="rounded-[26px] bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
+        <div className="grid gap-3">
+          <WorkflowStage label="1" title="Generic card" body="One printed QR can start many fresh sessions." />
+          <WorkflowStage label="2" title="New session" body="Zik creates a short-lived opaque session." />
+          <WorkflowStage label="3" title="Customer QR" body="The phone displays a temporary code for staff." />
+        </div>
+      </div>
+    );
+  }
+
+  if (art === "staff-check") {
+    return (
+      <div className="rounded-[26px] bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
+        <div className="grid gap-3 sm:grid-cols-3">
+          <InlineDetail title="Staff sees" body="The customer and their physical ID." />
+          <InlineDetail title="Zik receives" body="An authorised 18+ attestation." />
+          <InlineDetail title="Zik does not receive" body="ID image, DOB, address, or ID number." />
+        </div>
+      </div>
+    );
+  }
+
+  if (art === "physical-pass") {
+    return (
+      <div className="rounded-[26px] bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
+        <div className="space-y-4">
+          <div className="rounded-[22px] border border-ink/8 bg-white p-4">
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/42">Wallet shows</p>
+            <p className="mt-2 font-heading text-2xl font-semibold tracking-tight text-ink">
+              18+ · In-person verified
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <InlineDetail title="Signed by" body="Zik issuer key." />
+            <InlineDetail title="Bound to" body="The holder public key on this device." />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (art === "signals") {
     return (
       <div className="rounded-[26px] bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">

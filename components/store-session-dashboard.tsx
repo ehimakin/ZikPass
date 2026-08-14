@@ -2,12 +2,14 @@
 import { useEffect, useState, useTransition } from "react";
 import { SurfaceCard } from "@/components/surface-card";
 import { StatusPill } from "@/components/status-pill";
-import { buildPhysicalWalletUrl } from "@/lib/shared/physical-flow";
+import { buildGenericPhysicalWalletUrl, buildPhysicalWalletUrl } from "@/lib/shared/physical-flow";
 import type { EnrollmentRecord, PhysicalStoreSessionRecord } from "@/lib/shared/types";
 
 interface ApiError {
   error: string;
 }
+
+const demoRetailVerifierToken = "demo-retail-terminal";
 
 export function StoreSessionDashboard() {
   const [sessions, setSessions] = useState<PhysicalStoreSessionRecord[]>([]);
@@ -77,7 +79,10 @@ export function StoreSessionDashboard() {
         try {
           const response = await fetch("/api/physical/sessions/lookup", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              "x-zik-retailer-token": demoRetailVerifierToken
+            },
             body: JSON.stringify({ userCode: lookupCode.trim().toUpperCase() })
           });
           const data = (await response.json()) as PhysicalStoreSessionRecord | ApiError;
@@ -98,7 +103,7 @@ export function StoreSessionDashboard() {
     });
   }
 
-  function confirmIdCheck() {
+  function submitIdCheck(decision: "confirm" | "reject") {
     if (!lookupCode.trim()) {
       return;
     }
@@ -108,11 +113,18 @@ export function StoreSessionDashboard() {
         try {
           const response = await fetch("/api/physical/sessions/verify", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              "x-zik-retailer-token": demoRetailVerifierToken
+            },
             body: JSON.stringify({
               userCode: lookupCode.trim().toUpperCase(),
+              decision,
               checkedBy: "Demo clerk",
-              note: "Physical ID checked in store."
+              note:
+                decision === "confirm"
+                  ? "Physical ID checked in store."
+                  : "Physical ID did not establish 18+."
             })
           });
           const data = (await response.json()) as EnrollmentRecord | ApiError;
@@ -133,17 +145,27 @@ export function StoreSessionDashboard() {
   return (
     <div className="grid gap-6">
       <SurfaceCard
-        title="Store session"
-        subtitle="Start a QR-backed in-store session, then open the wallet flow with store context."
+        title="Retail-card QR"
+        subtitle="The printed card is generic. Scanning it starts a fresh customer session on the phone."
       >
         {error ? <p className="mb-4 text-sm text-[#b4535f]">{error}</p> : null}
         <div className="flex flex-wrap gap-3">
-          <button
+          <a
             className="rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist"
+            href={buildGenericPhysicalWalletUrl({
+              store_id: "zik-london-001",
+              store_name: "Zik Oxford Street",
+              location_id: "front-desk"
+            })}
+          >
+            Open generic retail-card QR
+          </a>
+          <button
+            className="rounded-full border border-ink/10 bg-[#f7faee] px-5 py-3 text-sm font-medium text-ink hover:bg-[#edf3df]"
             disabled={isPending}
             onClick={createSession}
           >
-            {isPending ? "Creating..." : "Create store session"}
+            {isPending ? "Creating..." : "Create session manually"}
           </button>
           {latestSession ? (
             <a
@@ -191,9 +213,16 @@ export function StoreSessionDashboard() {
           <button
             className="rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist"
             disabled={isPending || lookupCode.trim().length < 6}
-            onClick={confirmIdCheck}
+            onClick={() => submitIdCheck("confirm")}
           >
-            Confirm ID checked
+            Confirm 18+
+          </button>
+          <button
+            className="rounded-full border border-[#d27a86]/45 bg-[#fff6f7] px-5 py-3 text-sm font-semibold text-[#9f3748]"
+            disabled={isPending || lookupCode.trim().length < 6}
+            onClick={() => submitIdCheck("reject")}
+          >
+            Unable to verify
           </button>
         </div>
 

@@ -13,6 +13,7 @@ function buildCredential(overrides?: Partial<SignedCredential["payload"]>): Sign
       expires_at: "2027-04-12T12:00:00.000Z",
       assurance_level: "remote_standard",
       issuance_channel: "remote",
+      verification_method: "remote_financial",
       subject_public_key: {
         key_ops: ["verify"],
         ext: true,

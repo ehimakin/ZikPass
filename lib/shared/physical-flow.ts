@@ -9,7 +9,7 @@ export interface RemoteWalletEntryContext {
   lane: "remote";
 }
 
-export interface PhysicalWalletEntryContext extends PhysicalStoreContext {
+export interface PhysicalWalletEntryContext extends Partial<PhysicalStoreContext> {
   lane: "physical";
 }
 
@@ -28,23 +28,41 @@ export function parseWalletEntryContext(
   const storeName = params.get("store_name");
   const locationId = params.get("location_id");
 
-  if (
-    flow === "physical" &&
-    sessionId?.trim() &&
-    storeId?.trim() &&
-    storeName?.trim() &&
-    locationId?.trim()
-  ) {
+  if (flow === "remote") {
+    return { lane: "remote" };
+  }
+
+  if (flow === "physical" || !flow) {
     return {
       lane: "physical",
-      session_id: sessionId.trim(),
-      store_id: storeId.trim(),
-      store_name: storeName.trim(),
-      location_id: locationId.trim()
+      session_id: sessionId?.trim() || undefined,
+      store_id: storeId?.trim() || undefined,
+      store_name: storeName?.trim() || undefined,
+      location_id: locationId?.trim() || undefined
     };
   }
 
-  return { lane: "remote" };
+  return { lane: "physical" };
+}
+
+export function buildGenericPhysicalWalletUrl(
+  context?: Partial<Omit<PhysicalStoreContext, "session_id">>
+): string {
+  const searchParams = new URLSearchParams({ flow: "physical" });
+
+  if (context?.store_id) {
+    searchParams.set("store_id", context.store_id);
+  }
+
+  if (context?.store_name) {
+    searchParams.set("store_name", context.store_name);
+  }
+
+  if (context?.location_id) {
+    searchParams.set("location_id", context.location_id);
+  }
+
+  return `/wallet?${searchParams.toString()}`;
 }
 
 export function buildPhysicalWalletUrl(session: PhysicalStoreSessionRecord): string {

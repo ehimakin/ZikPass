@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { stableStringify } from "@/lib/shared/utils";
 import type { DuplicateApplicationState, EnrollmentRecord, IdentityMatchInput } from "@/lib/shared/types";
 import { listEnrollments } from "@/lib/server/storage";
 
@@ -21,6 +22,19 @@ export function buildApplicationFingerprint(input: IdentityMatchInput): string {
     normalizeDate(input.date_of_birth),
     normalizeValue(input.current_home_address),
     normalizeValue(input.previous_address ?? "")
+  ].join("|");
+
+  return createHash("sha256").update(normalized).digest("hex");
+}
+
+export function buildPhysicalApplicationFingerprint(input: {
+  sessionId: string;
+  holderPublicKey: JsonWebKey;
+}): string {
+  const normalized = [
+    "physical",
+    normalizeValue(input.sessionId),
+    stableStringify(input.holderPublicKey)
   ].join("|");
 
   return createHash("sha256").update(normalized).digest("hex");

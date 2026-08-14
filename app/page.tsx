@@ -5,11 +5,11 @@ import { SurfaceCard } from "@/components/surface-card";
 import { StatusPill } from "@/components/status-pill";
 
 const steps = [
-  "The user launches Get Zik Pass and answers one plain-language question at a time.",
-  "A refund-reference possession check confirms control of the bank account and registers the holder public key.",
-  "Cooling-off completes before the issuer signs the credential and the wallet stores it on this device.",
-  "A betting-style vendor requests a single Zik Pass verification at the point of entry.",
-  "The vendor validates issuer trust, holder possession, activation, expiry, and the claim locally."
+  "A customer scans the generic Zik retail-card QR in a participating store.",
+  "Zik creates a fresh physical verification session and the customer phone shows a short-lived QR/code.",
+  "Store staff check the physical ID in person and submit an authorised 18+ attestation.",
+  "Zik signs an in-person verified credential bound to the holder public key on that device.",
+  "The wallet stores the ZikPass locally; remote financial verification remains available as a secondary route."
 ];
 
 export default function HomePage() {
@@ -19,39 +19,39 @@ export default function HomePage() {
 
       <main id="learn-more" className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
         <SurfaceCard
-          title="Sprint 5 journey"
-          subtitle="A guided consumer flow from onboarding to a signed device-bound credential and real local verification."
+          title="Physical-first ZikPass issuance"
+          subtitle="A retail age check becomes a reusable signed 18+ credential on the customer device."
           className="overflow-hidden"
         >
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-4">
               <StatusPill tone="good">Core principle</StatusPill>
               <h2 className="font-heading text-4xl font-semibold tracking-tight">
-                Get a reusable Over-18 pass without handing over identity.
+                Show your ID once. Keep it offline. Use ZikPass online.
               </h2>
               <p className="max-w-xl text-sm leading-6 text-ink/75">
-                Zik Pass now demonstrates a consumer-friendly onboarding funnel backed by real
-                holder keys, issuer signing, local device storage, visible cooling-off, and a
-                one-click verification step on a dummy betting-site vendor.
+                The primary lane captures a normal in-person age check at a participating retailer.
+                Zik receives the authorised 18+ result, not a copy of the customer&apos;s ID, name,
+                date of birth, address, or ID image.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link
                   className="rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist"
-                  href="/wallet"
+                  href="/wallet?flow=physical&store_id=zik-london-001&store_name=Zik%20Oxford%20Street&location_id=front-desk"
                 >
-                  Get Zik Pass
+                  Start in-store flow
                 </Link>
-                <a
+                <Link
                   className="rounded-full bg-ink/8 px-5 py-3 text-sm font-medium text-ink"
-                  href="#learn-more"
+                  href="/wallet?flow=remote"
                 >
-                  Find out more
-                </a>
+                  Remote verification
+                </Link>
               </div>
             </div>
             <div className="rounded-[24px] bg-ink p-5 text-mist">
               <p className="font-mono text-xs uppercase tracking-[0.24em] text-lime">
-                Verification pipeline
+                Physical issuance pipeline
               </p>
               <ol className="mt-4 space-y-3 text-sm leading-6 text-mist/85">
                 {steps.map((step, index) => (
@@ -73,8 +73,13 @@ export default function HomePage() {
               <Link className="block rounded-2xl bg-ink/5 p-4 hover:bg-ink/10" href="/wallet">
                 <p className="font-heading text-lg font-medium">Get Zik Pass</p>
                 <p className="text-sm text-ink/70">
-                  Launch the guided question flow, generate a holder key, and receive the signed
-                  pass after cooling-off.
+                  Start the physical-first wallet flow or use the secondary remote financial lane.
+                </p>
+              </Link>
+              <Link className="block rounded-2xl bg-ink/5 p-4 hover:bg-ink/10" href="/verify">
+                <p className="font-heading text-lg font-medium">Retail verifier</p>
+                <p className="text-sm text-ink/70">
+                  Resolve a customer QR/code and submit an authorised in-person 18+ attestation.
                 </p>
               </Link>
               <Link className="block rounded-2xl bg-ink/5 p-4 hover:bg-ink/10" href="/issuer">

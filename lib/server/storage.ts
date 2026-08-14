@@ -66,28 +66,23 @@ async function ensureStateFile() {
   try {
     await fs.access(runtimeStatePath);
   } catch {
-    await fs.writeFile(
-      runtimeStatePath,
-      JSON.stringify({ enrollments: [], physical_sessions: [] }, null, 2),
-      "utf8"
-    );
+    await writeJsonAtomic(runtimeStatePath, { enrollments: [], physical_sessions: [] });
   }
 }
 
 async function readStore(): Promise<StoreData> {
   await ensureStateFile();
-  const content = await readStateContent();
-  const parsed = JSON.parse(content) as { enrollments?: LegacyEnrollmentRecord[] };
+  const parsed = await readStateJson<{ enrollments?: LegacyEnrollmentRecord[]; physical_sessions?: unknown[] }>();
 
   return {
     enrollments: (parsed.enrollments ?? []).map(normalizeEnrollment),
-    physical_sessions: normalizePhysicalSessions((parsed as { physical_sessions?: unknown[] }).physical_sessions)
+    physical_sessions: normalizePhysicalSessions(parsed.physical_sessions)
   };
 }
 
 async function writeStore(store: StoreData): Promise<void> {
   await ensureStateFile();
-  await fs.writeFile(runtimeStatePath, JSON.stringify(store, null, 2), "utf8");
+  await writeJsonAtomic(runtimeStatePath, store);
 }
 
 export async function listEnrollments(): Promise<EnrollmentRecord[]> {
@@ -391,7 +386,9 @@ function normalizePhysicalSessions(
         device_auth: candidate.device_auth ?? {
           status: "pending"
         },
-        completed_at: candidate.completed_at
+        attestation: candidate.attestation,
+        completed_at: candidate.completed_at,
+        minimized_at: candidate.minimized_at
       }
     ];
   });
@@ -427,4 +424,25 @@ async function readStateContent(): Promise<string> {
   } catch {
     return fs.readFile(seedStatePath, "utf8");
   }
+}
+
+async function readStateJson<T>(): Promise<T> {
+  const content = await readStateContent();
+
+  try {
+    return JSON.parse(content) as T;
+  } catch {
+    const retriedContent = await readStateContent();
+    return JSON.parse(retriedContent) as T;
+  }
+}
+
+async function writeJsonAtomic(filePath: string, value: unknown): Promise<void> {
+  const tempPath = `${filePath}.${randomSuffix()}.tmp`;
+  await fs.writeFile(tempPath, JSON.stringify(value, null, 2), "utf8");
+  await fs.rename(tempPath, filePath);
+}
+
+function randomSuffix(): string {
+  return Math.random().toString(36).slice(2, 10);
 }

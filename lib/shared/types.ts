@@ -20,6 +20,7 @@ export type ConfidenceLevel = "low" | "medium" | "high";
 export type IssuanceLane = "remote" | "physical";
 export type AssuranceLevel = "remote_standard" | "in_person_verified";
 export type IssuanceChannel = "remote" | "physical";
+export type VerificationMethod = "remote_financial" | "physical_id_check";
 
 export interface CreditAdulthoodProof {
   type: "credit_adulthood_proof";
@@ -101,10 +102,23 @@ export interface PhysicalUserCodeState {
 }
 
 export interface PhysicalClerkVerificationState {
-  status: "pending" | "verified";
+  status: "pending" | "verified" | "rejected";
   checked_at?: string;
   checked_by?: string;
+  verifier_id?: string;
+  retailer_id?: string;
+  verification_method?: "physical_id_check";
   note?: string;
+}
+
+export interface PhysicalVerificationAttestation {
+  session_id: string;
+  over_18: boolean;
+  verification_method: "physical_id_check";
+  verifier_id: string;
+  retailer_id: string;
+  location_id: string;
+  verified_at: string;
 }
 
 export interface PhysicalDeviceAuthState {
@@ -127,10 +141,12 @@ export interface PhysicalVerificationState {
     | "awaiting_device_auth"
     | "verification_complete"
     | "expired"
+    | "rejected"
     | "issued";
   user_code: PhysicalUserCodeState;
   clerk_verification: PhysicalClerkVerificationState;
   device_auth: PhysicalDeviceAuthState;
+  attestation?: PhysicalVerificationAttestation;
   completed_at?: string;
 }
 
@@ -145,14 +161,18 @@ export interface PhysicalStoreSessionRecord extends PhysicalStoreContext {
     | "awaiting_device_auth"
     | "ready_for_issuance"
     | "completed"
-    | "expired";
+    | "expired"
+    | "rejected"
+    | "cancelled";
   user_code?: string;
   user_code_generated_at?: string;
   user_code_expires_at?: string;
   code_consumed_at?: string;
   clerk_verification: PhysicalClerkVerificationState;
   device_auth: PhysicalDeviceAuthState;
+  attestation?: PhysicalVerificationAttestation;
   completed_at?: string;
+  minimized_at?: string;
 }
 
 export type EnrollmentStatus =
@@ -167,6 +187,7 @@ export type EnrollmentStatus =
   | "credential_pending_issuance"
   | "issued"
   | "verification_session_expired"
+  | "declined_physical_verification"
   | "declined_identity_mismatch"
   | "declined_no_adult_signal"
   | "declined_bank_control_failed"
@@ -187,6 +208,11 @@ export interface AgeCredential {
   expires_at: string;
   assurance_level: AssuranceLevel;
   issuance_channel: IssuanceChannel;
+  verification_method: VerificationMethod;
+  physical_attestation?: Pick<
+    PhysicalVerificationAttestation,
+    "session_id" | "verification_method" | "verifier_id" | "retailer_id" | "location_id" | "verified_at"
+  >;
   subject_public_key: JsonWebKey;
 }
 
@@ -227,7 +253,7 @@ export interface IdentityMatchInput {
 }
 
 export interface EnrollmentApplicationInput {
-  identity_match: IdentityMatchInput;
+  identity_match?: IdentityMatchInput;
   bank_name: string;
   submitted_at: string;
   demo_scenario?: ProviderSimulatorScenario;

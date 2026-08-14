@@ -10,7 +10,8 @@ import { ZikLogoLockup } from "@/components/zik-logo";
 const navItems: Array<{ href: Route; label: string }> = [
   { href: "/", label: "Overview" },
   { href: "/wallet", label: "Wallet" },
-  { href: "/store", label: "Store" },
+  { href: "/verify", label: "Retail verify" },
+  { href: "/store", label: "Store demo" },
   { href: "/issuer", label: "Issuer" },
   { href: "/verifier", label: "Verifier" }
 ];

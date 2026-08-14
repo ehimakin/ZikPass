@@ -10,7 +10,9 @@ import type {
   DuplicateApplicationState,
   EnrollmentApplicationInput,
   EnrollmentRecord,
+  IdentityMatchInput,
   PhysicalDeviceAuthState,
+  PhysicalVerificationAttestation,
   PhysicalStoreSessionRecord,
   PhysicalVerificationState
 } from "@/lib/shared/types";
@@ -18,6 +20,7 @@ import { bytesToBase64Url, randomAlphaNumericCode, randomId, randomNumericCode }
 import { assertNoDuplicateApplication, checkDuplicateApplication } from "@/lib/server/application-guard";
 import { issueCredential } from "@/lib/server/credential-issuer";
 import { buildNotification } from "@/lib/server/notifications";
+import { authenticateRetailVerifier } from "@/lib/server/retail-verifier";
 import {
   findPhysicalSessionByUserCode,
   getEnrollment,
@@ -365,7 +368,12 @@ export async function getPhysicalStoreSessionOrThrow(
     throw new Error("Store session not found.");
   }
 
-  if (isPhysicalSessionExpired(session) && session.status !== "completed") {
+  if (
+    isPhysicalSessionExpired(session) &&
+    session.status !== "completed" &&
+    session.status !== "rejected" &&
+    session.status !== "cancelled"
+  ) {
     session.status = "expired";
     session.updated_at = new Date().toISOString();
     await upsertPhysicalSession(session);
@@ -378,7 +386,13 @@ export async function getPhysicalStoreSessionOrThrow(
 export async function lookupPhysicalStoreSessionByCode(
   userCode: string
 ): Promise<PhysicalStoreSessionRecord> {
-  const session = await findPhysicalSessionByUserCode(userCode.trim().toUpperCase());
+  const normalizedCode = userCode.trim().toUpperCase();
+
+  if (!/^[A-Z0-9]{6}$/.test(normalizedCode)) {
+    throw new Error("The customer verification code is malformed.");
+  }
+
+  const session = await findPhysicalSessionByUserCode(normalizedCode);
 
   if (!session) {
     throw new Error("No in-store verification session matches that code.");
@@ -389,25 +403,45 @@ export async function lookupPhysicalStoreSessionByCode(
 
 export async function verifyPhysicalIdCheck(input: {
   userCode: string;
+  verifierToken?: string;
   checkedBy?: string;
   note?: string;
 }): Promise<EnrollmentRecord> {
+  const verifier = authenticateRetailVerifier(input.verifierToken);
   const session = await lookupPhysicalStoreSessionByCode(input.userCode);
   const record = await getPhysicalEnrollmentForSession(session);
 
   ensurePhysicalEnrollmentUsable(record, session);
+
+  if (session.store_id !== verifier.retailer_id || session.location_id !== verifier.location_id) {
+    throw new Error("This verifier is not authorised for the requested store session.");
+  }
 
   if (session.clerk_verification.status === "verified") {
     throw new Error("That session has already been confirmed by staff.");
   }
 
   const now = new Date().toISOString();
+  const attestation: PhysicalVerificationAttestation = {
+    session_id: session.session_id,
+    over_18: true,
+    verification_method: "physical_id_check",
+    verifier_id: verifier.verifier_id,
+    retailer_id: verifier.retailer_id,
+    location_id: verifier.location_id,
+    verified_at: now
+  };
+
   session.clerk_verification = {
     status: "verified",
     checked_at: now,
-    checked_by: input.checkedBy?.trim() || "Store staff",
+    checked_by: input.checkedBy?.trim() || verifier.verifier_id,
+    verifier_id: verifier.verifier_id,
+    retailer_id: verifier.retailer_id,
+    verification_method: "physical_id_check",
     note: input.note?.trim() || "Physical ID checked in person."
   };
+  session.attestation = attestation;
   session.status = session.device_auth.status === "verified" ? "ready_for_issuance" : "awaiting_device_auth";
   session.updated_at = now;
 
@@ -428,6 +462,67 @@ export async function verifyPhysicalIdCheck(input: {
 
   await upsertPhysicalSession(session);
   return persistAndFinalize(record);
+}
+
+export async function rejectPhysicalIdCheck(input: {
+  userCode: string;
+  verifierToken?: string;
+  checkedBy?: string;
+  note?: string;
+}): Promise<EnrollmentRecord> {
+  const verifier = authenticateRetailVerifier(input.verifierToken);
+  const session = await lookupPhysicalStoreSessionByCode(input.userCode);
+  const record = await getPhysicalEnrollmentForSession(session);
+
+  ensurePhysicalEnrollmentUsable(record, session);
+
+  if (session.store_id !== verifier.retailer_id || session.location_id !== verifier.location_id) {
+    throw new Error("This verifier is not authorised for the requested store session.");
+  }
+
+  if (session.clerk_verification.status === "verified") {
+    throw new Error("That session has already been confirmed by staff.");
+  }
+
+  const now = new Date().toISOString();
+  session.clerk_verification = {
+    status: "rejected",
+    checked_at: now,
+    checked_by: input.checkedBy?.trim() || verifier.verifier_id,
+    verifier_id: verifier.verifier_id,
+    retailer_id: verifier.retailer_id,
+    verification_method: "physical_id_check",
+    note: input.note?.trim() || "Physical ID did not establish that the customer is 18+."
+  };
+  session.status = "rejected";
+  session.code_consumed_at = now;
+  session.updated_at = now;
+
+  record.physical_verification = toPhysicalVerificationState(session);
+  record.updated_at = now;
+  record.status = "declined_physical_verification";
+  record.risk_decision = {
+    state: "declined_no_adult_signal",
+    reasons: ["Authorised store staff could not confirm the customer was 18+ from physical ID."],
+    retryable: false,
+    requires_manual_review: false,
+    eligible_for_cooling_off: false,
+    eligible_for_issuance: false,
+    evaluated_at: now
+  };
+  record.last_user_message = "Store staff could not confirm that the physical ID establishes 18+.";
+  record.orchestration = pushOrchestrationEvent(
+    record.orchestration,
+    "declined",
+    "Authorised store staff rejected the in-person age check.",
+    now
+  );
+  record.notifications.unshift(
+    buildNotification("Store staff could not confirm the in-person age check for this session.")
+  );
+
+  await upsertPhysicalSession(session);
+  return upsertEnrollment(record);
 }
 
 export async function startPhysicalDeviceAuth(
@@ -567,7 +662,6 @@ async function startPhysicalEnrollment(input: {
   holderPublicKey: JsonWebKey;
   applicationFingerprint: string;
 }): Promise<EnrollmentRecord> {
-  const duplicateState = await assertNoDuplicateApplication(input.applicationFingerprint);
   const physicalContext = input.application.physical_context;
 
   if (!physicalContext) {
@@ -577,8 +671,16 @@ async function startPhysicalEnrollment(input: {
   const session = await getPhysicalStoreSessionOrThrow(physicalContext.session_id);
 
   if (session.enrollment_id) {
+    const existingRecord = await getPhysicalEnrollmentForSession(session);
+
+    if (canRestartPhysicalEnrollment(existingRecord, session)) {
+      return restartPhysicalEnrollment(existingRecord, session, input);
+    }
+
     throw new Error("This store session has already been used. Ask staff to start a new one.");
   }
+
+  const duplicateState = await assertNoDuplicateApplication(input.applicationFingerprint);
 
   const now = new Date().toISOString();
   const record = createPhysicalEnrollmentRecord({
@@ -697,9 +799,10 @@ function createPhysicalEnrollmentRecord(input: {
     application_fingerprint: input.applicationFingerprint,
     duplicate_state: input.duplicateState,
     application: {
-      ...input.application,
       lane: "physical",
       bank_name: input.application.bank_name || "In-store verification",
+      submitted_at: input.application.submitted_at,
+      demo_scenario: input.application.demo_scenario,
       physical_context: {
         session_id: input.session.session_id,
         store_id: input.session.store_id,
@@ -772,6 +875,79 @@ function createPhysicalEnrollmentRecord(input: {
     provider_scenario: input.application.demo_scenario,
     last_user_message: "Show this code to a staff member to continue in-store verification."
   };
+}
+
+async function restartPhysicalEnrollment(
+  existingRecord: EnrollmentRecord,
+  session: PhysicalStoreSessionRecord,
+  input: {
+    application: EnrollmentApplicationInput;
+    holderPublicKey: JsonWebKey;
+    applicationFingerprint: string;
+  }
+): Promise<EnrollmentRecord> {
+  const duplicateState = await resolvePhysicalRestartDuplicateState(
+    existingRecord.id,
+    input.applicationFingerprint
+  );
+  const now = new Date().toISOString();
+  const restarted = createPhysicalEnrollmentRecord({
+    createdAt: now,
+    application: input.application,
+    holderPublicKey: input.holderPublicKey,
+    applicationFingerprint: input.applicationFingerprint,
+    duplicateState,
+    session
+  });
+
+  existingRecord.updated_at = now;
+  existingRecord.onboarding_completed_at = now;
+  existingRecord.holder_key_registered_at = now;
+  existingRecord.application_fingerprint = restarted.application_fingerprint;
+  existingRecord.duplicate_state = restarted.duplicate_state;
+  existingRecord.application = restarted.application;
+  existingRecord.holder_public_key = restarted.holder_public_key;
+  existingRecord.bank_verification = restarted.bank_verification;
+  existingRecord.proof = restarted.proof;
+  existingRecord.proof_evaluation = restarted.proof_evaluation;
+  existingRecord.cooling_off = restarted.cooling_off;
+  existingRecord.risk_decision = restarted.risk_decision;
+  existingRecord.status = restarted.status;
+  existingRecord.physical_verification = restarted.physical_verification;
+  existingRecord.credential_pending_at = undefined;
+  existingRecord.issuer_signature_created_at = undefined;
+  existingRecord.issued_credential = undefined;
+  existingRecord.last_retryable_error = undefined;
+  existingRecord.last_user_message =
+    "Show this code to a staff member to continue in-store verification.";
+  existingRecord.notifications.unshift(
+    buildNotification(
+      "The holder restarted the in-store flow on this device before verification completed."
+    )
+  );
+  existingRecord.orchestration = pushOrchestrationEvent(
+    createInitialOrchestration(now),
+    "in_person_verification_started",
+    "Physical verification session restarted on the holder device.",
+    now
+  );
+
+  session.user_code = restarted.physical_verification?.user_code.value;
+  session.user_code_generated_at = restarted.physical_verification?.user_code.generated_at;
+  session.user_code_expires_at = restarted.physical_verification?.user_code.expires_at;
+  session.code_consumed_at = undefined;
+  session.completed_at = undefined;
+  session.clerk_verification = {
+    status: "pending"
+  };
+  session.device_auth = {
+    status: "pending"
+  };
+  session.status = "claimed";
+  session.updated_at = now;
+
+  await upsertPhysicalSession(session);
+  return upsertEnrollment(existingRecord);
 }
 
 function createBankVerificationState(
@@ -868,13 +1044,14 @@ async function runInitialProviderPipeline(
 
 async function executeFinancialCheck(record: EnrollmentRecord): Promise<void> {
   const now = new Date().toISOString();
+  const identityMatch = getRemoteIdentityMatch(record);
   const request = {
     application_id: record.id,
     verification_session_id: record.id,
-    full_name: `${record.application.identity_match.first_name} ${record.application.identity_match.last_name}`.trim(),
-    date_of_birth: record.application.identity_match.date_of_birth,
-    current_address: record.application.identity_match.current_home_address,
-    previous_address: record.application.identity_match.previous_address
+    full_name: `${identityMatch.first_name} ${identityMatch.last_name}`.trim(),
+    date_of_birth: identityMatch.date_of_birth,
+    current_address: identityMatch.current_home_address,
+    previous_address: identityMatch.previous_address
   };
 
   record.providers.financial_check.attempts += 1;
@@ -902,10 +1079,11 @@ async function executeFinancialCheck(record: EnrollmentRecord): Promise<void> {
 
 async function executeCopCheck(record: EnrollmentRecord): Promise<void> {
   const now = new Date().toISOString();
+  const identityMatch = getRemoteIdentityMatch(record);
   const request = {
     application_id: record.id,
     verification_session_id: record.id,
-    entered_account_holder_name: `${record.application.identity_match.first_name} ${record.application.identity_match.last_name}`.trim(),
+    entered_account_holder_name: `${identityMatch.first_name} ${identityMatch.last_name}`.trim(),
     bank_name: record.application.bank_name,
     simulated_account_hint: record.application_fingerprint.slice(0, 12)
   };
@@ -1109,8 +1287,18 @@ function buildOperationalError(record: EnrollmentRecord): ProviderErrorShape | u
   return undefined;
 }
 
+function getRemoteIdentityMatch(record: EnrollmentRecord): IdentityMatchInput {
+  if (!record.application.identity_match) {
+    throw new Error("Remote verification requires identity details.");
+  }
+
+  return record.application.identity_match;
+}
+
 function humanizeDeclineMessage(status: EnrollmentRecord["status"]): string {
   switch (status) {
+    case "declined_physical_verification":
+      return "Store staff could not confirm that the physical ID establishes 18+.";
     case "declined_identity_mismatch":
       return "We could not confidently verify your details.";
     case "declined_no_adult_signal":
@@ -1258,6 +1446,16 @@ async function signIssuedCredential(record: EnrollmentRecord): Promise<Enrollmen
     session.code_consumed_at ??= record.updated_at;
     session.completed_at = record.updated_at;
     session.updated_at = record.updated_at;
+    session.minimized_at = record.updated_at;
+    session.user_code = undefined;
+    session.user_code_generated_at = undefined;
+    session.user_code_expires_at = undefined;
+    session.device_auth = {
+      status: "verified",
+      method: session.device_auth.method,
+      verified_at: session.device_auth.verified_at,
+      credential_id: session.device_auth.credential_id
+    };
     await upsertPhysicalSession(session);
   }
 
@@ -1269,6 +1467,31 @@ function buildCoolingOffEnd(createdAt: string, lane: EnrollmentRecord["lane"]): 
     lane === "physical" ? runtimeConfig.physicalCoolingOffSeconds : runtimeConfig.coolingOffSeconds;
 
   return new Date(new Date(createdAt).getTime() + durationSeconds * 1000).toISOString();
+}
+
+async function resolvePhysicalRestartDuplicateState(
+  enrollmentId: string,
+  applicationFingerprint: string
+): Promise<DuplicateApplicationState> {
+  const duplicateState = await checkDuplicateApplication(applicationFingerprint);
+
+  if (
+    duplicateState.blocked &&
+    duplicateState.existing_enrollment_id &&
+    duplicateState.existing_enrollment_id !== enrollmentId
+  ) {
+    throw new Error(
+      "A Zik Pass application for these details is already active on another device flow. Finish or delete the existing application before starting again."
+    );
+  }
+
+  return duplicateState.blocked
+    ? {
+        ...duplicateState,
+        blocked: false,
+        reason: undefined
+      }
+    : duplicateState;
 }
 
 function approvedRiskDecision(now: string, reason: string): ApplicationRiskDecision {
@@ -1307,6 +1530,20 @@ async function getLinkedPhysicalSession(record: EnrollmentRecord): Promise<Physi
   return getPhysicalStoreSessionOrThrow(sessionId);
 }
 
+function canRestartPhysicalEnrollment(
+  record: EnrollmentRecord,
+  session: PhysicalStoreSessionRecord
+): boolean {
+  return (
+    record.lane === "physical" &&
+    !record.issued_credential &&
+    record.status === "physical_verification_pending" &&
+    session.status === "claimed" &&
+    session.clerk_verification.status === "pending" &&
+    session.device_auth.status === "pending"
+  );
+}
+
 function ensurePhysicalEnrollmentUsable(
   record: EnrollmentRecord,
   session: PhysicalStoreSessionRecord
@@ -1326,6 +1563,10 @@ function ensurePhysicalEnrollmentUsable(
 
   if (record.status === "verification_session_expired") {
     throw new Error("This in-person verification session has expired.");
+  }
+
+  if (session.status === "rejected" || record.status === "declined_physical_verification") {
+    throw new Error("This in-person verification session was rejected by store staff.");
   }
 }
 
@@ -1348,6 +1589,13 @@ async function syncPhysicalEnrollmentFromSession(
   if (record.issued_credential) {
     record.physical_verification.status = "issued";
     record.status = "issued";
+    return upsertEnrollment(record);
+  }
+
+  if (session.status === "rejected" || session.clerk_verification.status === "rejected") {
+    record.status = "declined_physical_verification";
+    record.last_user_message = "Store staff could not confirm that the physical ID establishes 18+.";
+    record.physical_verification.status = "rejected";
     return upsertEnrollment(record);
   }
 
@@ -1396,6 +1644,8 @@ function toPhysicalVerificationState(
   let status: PhysicalVerificationState["status"] = "awaiting_clerk_verification";
   if (session.status === "completed") {
     status = "issued";
+  } else if (session.status === "rejected" || session.clerk_verification.status === "rejected") {
+    status = "rejected";
   } else if (session.status === "expired") {
     status = "expired";
   } else if (session.device_auth.status === "verified" && session.clerk_verification.status === "verified") {
@@ -1421,6 +1671,7 @@ function toPhysicalVerificationState(
     },
     clerk_verification: session.clerk_verification,
     device_auth: session.device_auth,
+    attestation: session.attestation ?? existing?.attestation,
     completed_at: session.completed_at ?? existing?.completed_at
   };
 }
