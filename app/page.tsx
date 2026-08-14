@@ -9,7 +9,7 @@ const steps = [
   "Zik creates a fresh physical verification session and the customer phone shows a short-lived QR/code.",
   "Store staff check the physical ID in person and submit an authorised 18+ attestation.",
   "Zik signs an in-person verified credential bound to the holder public key on that device.",
-  "The wallet stores the ZikPass locally; remote financial verification remains available as a secondary route."
+  "The wallet stores the ZikPass locally; a secondary remote route remains available when in-person verification is not possible."
 ];
 
 export default function HomePage() {
@@ -73,7 +73,7 @@ export default function HomePage() {
               <Link className="block rounded-2xl bg-ink/5 p-4 hover:bg-ink/10" href="/wallet">
                 <p className="font-heading text-lg font-medium">Get Zik Pass</p>
                 <p className="text-sm text-ink/70">
-                  Start the physical-first wallet flow or use the secondary remote financial lane.
+                  Start the physical-first wallet flow or use the secondary remote lane.
                 </p>
               </Link>
               <Link className="block rounded-2xl bg-ink/5 p-4 hover:bg-ink/10" href="/verify">
@@ -99,7 +99,7 @@ export default function HomePage() {
 
           <SurfaceCard title="Known prototype limits">
             <ul className="space-y-2 text-sm text-ink/75">
-              <li>No real credit bureau or banking integrations.</li>
+              <li>Retailer authentication and point-of-sale integration are mocked for the prototype.</li>
               <li>No revocation list or issuer callback for verification.</li>
               <li>No production-grade wallet storage or shared-device abuse prevention.</li>
               <li>No true zero-knowledge proof over a hidden date of birth.</li>

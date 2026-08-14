@@ -99,9 +99,9 @@ const slides: HeroSlide[] = [
   {
     id: "step-7",
     eyebrow: "Secondary lane",
-    title: "Remote verification is still available",
+    title: "A secondary route is still available",
     description:
-      "The older financial route remains as a lower-assurance fallback for users who cannot visit a participating retailer.",
+      "Users who cannot visit a participating retailer can choose a lower-assurance remote route.",
     backgroundClassName:
       "bg-[linear-gradient(135deg,_#0b1a14_0%,_#123024_36%,_#1f4f3e_100%)]",
     glowClassName:
