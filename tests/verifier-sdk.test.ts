@@ -19,7 +19,9 @@ async function buildBundle(): Promise<{
     issued_at: "2026-04-08T12:00:00.000Z",
     activates_at: "2026-04-08T12:01:00.000Z",
     expires_at: "2027-04-08T12:00:00.000Z",
-    assurance_level: "medium",
+    assurance_level: "remote_standard",
+    issuance_channel: "remote",
+    verification_method: "remote_financial",
     subject_public_key: holderKeys.publicKeyJwk
   };
 

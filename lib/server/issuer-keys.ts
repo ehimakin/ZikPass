@@ -1,13 +1,14 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { generateKeyPair } from "@/lib/shared/crypto/ed25519";
+import { getIssuerKeyPath } from "@/lib/server/runtime-paths";
 
 interface IssuerKeyMaterial {
   publicKeyJwk: JsonWebKey;
   privateKeyJwk: JsonWebKey;
 }
 
-const keyPath = path.join(process.cwd(), "data", "issuer-keypair.json");
+const keyPath = getIssuerKeyPath();
 
 export async function getIssuerKeyMaterial(): Promise<IssuerKeyMaterial> {
   await fs.mkdir(path.dirname(keyPath), { recursive: true });

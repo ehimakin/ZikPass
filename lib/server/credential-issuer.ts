@@ -19,7 +19,20 @@ export async function issueCredential(record: EnrollmentRecord): Promise<SignedC
     issued_at: issuedAt.toISOString(),
     activates_at: activatesAt.toISOString(),
     expires_at: expiresAt.toISOString(),
-    assurance_level: "medium",
+    assurance_level: record.assurance_level,
+    issuance_channel: record.issuance_channel,
+    verification_method:
+      record.issuance_channel === "physical" ? "physical_id_check" : "remote_financial",
+    physical_attestation: record.physical_verification?.attestation
+      ? {
+          session_id: record.physical_verification.attestation.session_id,
+          verification_method: record.physical_verification.attestation.verification_method,
+          verifier_id: record.physical_verification.attestation.verifier_id,
+          retailer_id: record.physical_verification.attestation.retailer_id,
+          location_id: record.physical_verification.attestation.location_id,
+          verified_at: record.physical_verification.attestation.verified_at
+        }
+      : undefined,
     subject_public_key: record.holder_public_key
   };
 

@@ -1,0 +1,353 @@
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { buildPhysicalApplicationFingerprint } from "@/lib/server/application-guard";
+import {
+  completePhysicalDeviceAuth,
+  createPhysicalStoreSession,
+  issueEnrollmentCredential,
+  lookupPhysicalStoreSessionByCode,
+  rejectPhysicalIdCheck,
+  startEnrollment,
+  startPhysicalDeviceAuth,
+  verifyPhysicalIdCheck
+} from "@/lib/server/enrollment-service";
+import { getIssuerKeyPath, getRuntimeStatePath } from "@/lib/server/runtime-paths";
+import {
+  formatAssuranceLevel,
+  getCredentialExperienceVariant,
+  parseWalletEntryContext
+} from "@/lib/shared/physical-flow";
+import type { PhysicalStoreSessionRecord } from "@/lib/shared/types";
+
+const runtimeStatePath = getRuntimeStatePath();
+const issuerKeyPath = getIssuerKeyPath();
+
+const holderPublicKey: JsonWebKey = {
+  key_ops: ["verify"],
+  ext: true,
+  crv: "Ed25519",
+  kty: "OKP",
+  x: "demo-public-key"
+};
+const verifierToken = "demo-retail-terminal";
+
+let originalRuntimeState: string | null = null;
+let originalIssuerKey: string | null = null;
+
+async function fileExists(filePath: string): Promise<boolean> {
+  try {
+    await fs.access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function resetRuntimeFiles() {
+  await fs.mkdir(path.dirname(runtimeStatePath), { recursive: true });
+  await fs.writeFile(
+    runtimeStatePath,
+    JSON.stringify({ enrollments: [], physical_sessions: [] }, null, 2),
+    "utf8"
+  );
+
+  if (!(await fileExists(issuerKeyPath))) {
+    return;
+  }
+
+  await fs.rm(issuerKeyPath);
+}
+
+function physicalApplication(session: PhysicalStoreSessionRecord, submittedAt: string) {
+  return {
+    bank_name: "In-store verification",
+    submitted_at: submittedAt,
+    lane: "physical" as const,
+    physical_context: {
+      session_id: session.session_id,
+      store_id: session.store_id,
+      store_name: session.store_name,
+      location_id: session.location_id
+    }
+  };
+}
+
+function physicalFingerprint(
+  session: PhysicalStoreSessionRecord,
+  key: JsonWebKey = holderPublicKey
+): string {
+  return buildPhysicalApplicationFingerprint({
+    sessionId: session.session_id,
+    holderPublicKey: key
+  });
+}
+
+describe.sequential("physical flow", () => {
+  beforeAll(async () => {
+    originalRuntimeState = (await fileExists(runtimeStatePath))
+      ? await fs.readFile(runtimeStatePath, "utf8")
+      : null;
+    originalIssuerKey = (await fileExists(issuerKeyPath))
+      ? await fs.readFile(issuerKeyPath, "utf8")
+      : null;
+  });
+
+  beforeEach(async () => {
+    await resetRuntimeFiles();
+  });
+
+  afterAll(async () => {
+    if (originalRuntimeState === null) {
+      await fs.rm(runtimeStatePath, { force: true });
+    } else {
+      await fs.writeFile(runtimeStatePath, originalRuntimeState, "utf8");
+    }
+
+    if (originalIssuerKey === null) {
+      await fs.rm(issuerKeyPath, { force: true });
+    } else {
+      await fs.writeFile(issuerKeyPath, originalIssuerKey, "utf8");
+    }
+  });
+
+  it("parses a physical QR wallet entry context", () => {
+    const params = new URLSearchParams({
+      flow: "physical",
+      store_id: "store_1",
+      store_name: "Zik Oxford Street",
+      location_id: "desk_1",
+      session_id: "store_abcd1234"
+    });
+
+    expect(parseWalletEntryContext(params)).toEqual({
+      lane: "physical",
+      store_id: "store_1",
+      store_name: "Zik Oxford Street",
+      location_id: "desk_1",
+      session_id: "store_abcd1234"
+    });
+  });
+
+  it("parses a generic retail-card wallet entry without a unique card or session id", () => {
+    const params = new URLSearchParams({
+      flow: "physical",
+      store_id: "zik-london-001",
+      store_name: "Zik Oxford Street",
+      location_id: "front-desk"
+    });
+
+    expect(parseWalletEntryContext(params)).toEqual({
+      lane: "physical",
+      store_id: "zik-london-001",
+      store_name: "Zik Oxford Street",
+      location_id: "front-desk",
+      session_id: undefined
+    });
+  });
+
+  it("treats the plain wallet route as the physical-first entry", () => {
+    expect(parseWalletEntryContext(new URLSearchParams())).toEqual({
+      lane: "physical",
+      session_id: undefined,
+      store_id: undefined,
+      store_name: undefined,
+      location_id: undefined
+    });
+
+    expect(parseWalletEntryContext(new URLSearchParams({ flow: "remote" }))).toEqual({
+      lane: "remote"
+    });
+  });
+
+  it("issues an in-person verified credential only after clerk and device auth complete", async () => {
+    const session = await createPhysicalStoreSession({
+      storeId: "zik-london-001",
+      storeName: "Zik Oxford Street",
+      locationId: "front-desk"
+    });
+
+    const enrollment = await startEnrollment({
+      application: physicalApplication(session, "2026-04-15T10:00:00.000Z"),
+      holderPublicKey,
+      applicationFingerprint: physicalFingerprint(session)
+    });
+
+    expect(enrollment.lane).toBe("physical");
+    expect(enrollment.status).toBe("physical_verification_pending");
+    expect(enrollment.physical_verification?.user_code.value).toHaveLength(6);
+    expect(enrollment.application.identity_match).toBeUndefined();
+    expect(enrollment.assurance_level).toBe("in_person_verified");
+    expect(enrollment.issuance_channel).toBe("physical");
+
+    await expect(issueEnrollmentCredential(enrollment.id)).rejects.toThrow(
+      /not yet eligible/i
+    );
+
+    const clerkConfirmed = await verifyPhysicalIdCheck({
+      userCode: enrollment.physical_verification?.user_code.value ?? "",
+      verifierToken
+    });
+
+    expect(clerkConfirmed.status).toBe("device_auth_pending");
+    expect(clerkConfirmed.physical_verification?.clerk_verification.status).toBe("verified");
+    expect(clerkConfirmed.physical_verification?.attestation).toMatchObject({
+      over_18: true,
+      verification_method: "physical_id_check",
+      verifier_id: "demo-clerk-terminal-001"
+    });
+
+    const authStart = await startPhysicalDeviceAuth(enrollment.id);
+    expect(authStart.challenge_id).toMatch(/^deviceauth_/);
+
+    const issued = await completePhysicalDeviceAuth({
+      enrollmentId: enrollment.id,
+      challengeId: authStart.challenge_id,
+      method: "demo_device_check"
+    });
+
+    expect(issued.status).toBe("issued");
+    expect(issued.issued_credential?.payload.assurance_level).toBe("in_person_verified");
+    expect(issued.issued_credential?.payload.issuance_channel).toBe("physical");
+    expect(issued.issued_credential?.payload.verification_method).toBe("physical_id_check");
+    expect(issued.issued_credential?.payload.physical_attestation).toMatchObject({
+      session_id: session.session_id,
+      verification_method: "physical_id_check",
+      verifier_id: "demo-clerk-terminal-001"
+    });
+    expect(JSON.stringify(issued.issued_credential?.payload)).not.toMatch(
+      /Morgan|1994|High Street|date_of_birth|first_name|last_name|current_home_address/i
+    );
+  });
+
+  it("rejects replaying a physical session after store verification has already advanced", async () => {
+    const session = await createPhysicalStoreSession({
+      storeId: "zik-london-001",
+      storeName: "Zik Oxford Street",
+      locationId: "front-desk"
+    });
+
+    const firstEnrollment = await startEnrollment({
+      application: physicalApplication(session, "2026-04-15T10:00:00.000Z"),
+      holderPublicKey,
+      applicationFingerprint: physicalFingerprint(session)
+    });
+
+    const lookedUp = await lookupPhysicalStoreSessionByCode(
+      firstEnrollment.physical_verification?.user_code.value ?? ""
+    );
+    expect(lookedUp.enrollment_id).toBe(firstEnrollment.id);
+
+    const clerkConfirmed = await verifyPhysicalIdCheck({
+      userCode: firstEnrollment.physical_verification?.user_code.value ?? "",
+      verifierToken
+    });
+
+    expect(clerkConfirmed.status).toBe("device_auth_pending");
+
+    await expect(
+      startEnrollment({
+        application: physicalApplication(session, "2026-04-15T10:01:00.000Z"),
+        holderPublicKey,
+        applicationFingerprint: `${physicalFingerprint(session)}-second`
+      })
+    ).rejects.toThrow(/already been used/i);
+
+    await expect(
+      verifyPhysicalIdCheck({
+        userCode: firstEnrollment.physical_verification?.user_code.value ?? "",
+        verifierToken
+      })
+    ).rejects.toThrow(/already been confirmed/i);
+  });
+
+  it("allows restarting the same unverified physical session after local device state is cleared", async () => {
+    const session = await createPhysicalStoreSession({
+      storeId: "zik-london-001",
+      storeName: "Zik Oxford Street",
+      locationId: "front-desk"
+    });
+
+    const firstEnrollment = await startEnrollment({
+      application: physicalApplication(session, "2026-04-15T10:00:00.000Z"),
+      holderPublicKey,
+      applicationFingerprint: "restart-fingerprint-1"
+    });
+
+    const replacementKey = {
+      ...holderPublicKey,
+      x: "replacement-public-key"
+    };
+    const restarted = await startEnrollment({
+      application: physicalApplication(session, "2026-04-15T10:01:00.000Z"),
+      holderPublicKey: replacementKey,
+      applicationFingerprint: "restart-fingerprint-2"
+    });
+
+    expect(restarted.id).toBe(firstEnrollment.id);
+    expect(restarted.status).toBe("physical_verification_pending");
+    expect(restarted.holder_public_key.x).toBe("replacement-public-key");
+    expect(restarted.application_fingerprint).toBe("restart-fingerprint-2");
+    expect(restarted.physical_verification?.user_code.value).not.toBe(
+      firstEnrollment.physical_verification?.user_code.value
+    );
+  });
+
+  it("rejects an expired store session before physical enrollment starts", async () => {
+    const session = await createPhysicalStoreSession({
+      storeId: "zik-london-001",
+      storeName: "Zik Oxford Street",
+      locationId: "front-desk"
+    });
+
+    const storeState = JSON.parse(await fs.readFile(runtimeStatePath, "utf8")) as {
+      physical_sessions: PhysicalStoreSessionRecord[];
+    };
+    storeState.physical_sessions[0].expires_at = "2020-01-01T00:00:00.000Z";
+    await fs.writeFile(runtimeStatePath, JSON.stringify(storeState, null, 2), "utf8");
+
+    await expect(
+      startEnrollment({
+        application: physicalApplication(session, "2026-04-15T10:00:00.000Z"),
+        holderPublicKey,
+        applicationFingerprint: "expired-session-fingerprint"
+      })
+    ).rejects.toThrow(/expired/i);
+  });
+
+  it("rejects unauthorised verifier confirmation and supports explicit staff rejection", async () => {
+    const session = await createPhysicalStoreSession();
+    const enrollment = await startEnrollment({
+      application: physicalApplication(session, "2026-04-15T10:00:00.000Z"),
+      holderPublicKey,
+      applicationFingerprint: physicalFingerprint(session)
+    });
+
+    await expect(
+      verifyPhysicalIdCheck({
+        userCode: enrollment.physical_verification?.user_code.value ?? "",
+        verifierToken: "wrong-token"
+      })
+    ).rejects.toThrow(/authorised retail verifier/i);
+
+    const rejected = await rejectPhysicalIdCheck({
+      userCode: enrollment.physical_verification?.user_code.value ?? "",
+      verifierToken
+    });
+
+    expect(rejected.status).toBe("declined_physical_verification");
+    expect(rejected.physical_verification?.status).toBe("rejected");
+    await expect(issueEnrollmentCredential(enrollment.id)).rejects.toThrow(/not yet eligible/i);
+  });
+
+  it("formats assurance and experience labels for wallet rendering", () => {
+    expect(formatAssuranceLevel("remote_standard")).toBe("Remote standard");
+    expect(formatAssuranceLevel("in_person_verified")).toBe("In-person verified");
+    expect(
+      getCredentialExperienceVariant({
+        assurance_level: "in_person_verified",
+        issuance_channel: "physical"
+      })
+    ).toBe("physical");
+  });
+});
