@@ -19,9 +19,9 @@ const slides: HeroSlide[] = [
   {
     id: "hero",
     eyebrow: "Overview",
-    title: "The Zero-Knowledge online ID",
+    title: "Show your ID once. Keep it offline.",
     description:
-      "Zik Pass gives users a reusable Over-18 credential, then lets vendors verify it locally without exposing identity.",
+      "ZikPass turns an approved in-person age check into a reusable signed 18+ credential stored on the customer device.",
     backgroundClassName:
       "bg-[linear-gradient(135deg,_#10203a_0%,_#1f4356_42%,_#2d5c53_100%)]",
     glowClassName:
@@ -29,9 +29,10 @@ const slides: HeroSlide[] = [
   },
   {
     id: "step-1",
-    eyebrow: "Get started",
-    title: "Start your Zik Pass",
-    description: "Click “Get Zik Pass” to begin proving you’re over 18.",
+    eyebrow: "Retail card",
+    title: "Scan the Zik retail QR",
+    description:
+      "The printed card is generic. Scanning it starts a fresh physical verification session on your phone.",
     backgroundClassName:
       "bg-[linear-gradient(135deg,_#0f1a2a_0%,_#213150_46%,_#305966_100%)]",
     glowClassName:
@@ -41,9 +42,9 @@ const slides: HeroSlide[] = [
     id: "step-2",
     eyebrow: "Step 1",
     stepNumber: "Step 1",
-    title: "Confirm you’re a real account holder",
+    title: "Create a temporary customer QR",
     description:
-      "We’ll send a small refundable transaction to your bank with a unique code. Check your banking app and enter the code to continue. This proves you’re in control of a real adult account.",
+      "Your phone creates a local holder key and shows a short-lived QR/code for this verification session only.",
     backgroundClassName:
       "bg-[linear-gradient(135deg,_#0d1722_0%,_#173b47_48%,_#20615c_100%)]",
     glowClassName:
@@ -53,9 +54,9 @@ const slides: HeroSlide[] = [
     id: "step-3",
     eyebrow: "Step 2",
     stepNumber: "Step 2",
-    title: "Quick security check on your device",
+    title: "Show your physical ID in person",
     description:
-      "Unlock your device with Face ID, fingerprint, or passcode. This makes sure it’s really you completing the process.",
+      "A staff member checks your physical ID at the till. Zik does not upload, photograph, or store your ID.",
     backgroundClassName:
       "bg-[linear-gradient(135deg,_#121825_0%,_#2b3156_42%,_#31436c_100%)]",
     glowClassName:
@@ -65,9 +66,9 @@ const slides: HeroSlide[] = [
     id: "step-4",
     eyebrow: "Step 3",
     stepNumber: "Step 3",
-    title: "We verify your eligibility",
+    title: "Staff confirms 18+",
     description:
-      "Behind the scenes, Zik checks for signs of real adult financial activity. We don’t see your transactions, balance, or identity, only whether you meet the criteria.",
+      "The authorised store verifier sends Zik the result: an adult completed the approved in-person age check.",
     backgroundClassName:
       "bg-[linear-gradient(135deg,_#0f1b24_0%,_#23425a_44%,_#356a5f_100%)]",
     glowClassName:
@@ -75,10 +76,10 @@ const slides: HeroSlide[] = [
   },
   {
     id: "step-5",
-    eyebrow: "Waiting period",
-    title: "Short waiting period",
+    eyebrow: "Device binding",
+    title: "Authenticate on this device",
     description:
-      "Your Zik Pass activates after a brief delay. This gives you time to spot and stop anything unexpected.",
+      "The pass is issued to the holder public key created on the customer device. The issuer never needs the private key.",
     backgroundClassName:
       "bg-[linear-gradient(135deg,_#1a1521_0%,_#2d304e_40%,_#305962_100%)]",
     glowClassName:
@@ -87,9 +88,9 @@ const slides: HeroSlide[] = [
   {
     id: "step-6",
     eyebrow: "Pass delivery",
-    title: "You receive your Zik Pass",
+    title: "Receive your ZikPass",
     description:
-      "Your secure Over-18 pass is created and stored on your device. No ID and no personal data are shared.",
+      "Your wallet shows 18+ and In-person verified. The credential contains the attestation result, not your identity.",
     backgroundClassName:
       "bg-[linear-gradient(135deg,_#101e2f_0%,_#25415b_45%,_#46655d_100%)]",
     glowClassName:
@@ -97,10 +98,10 @@ const slides: HeroSlide[] = [
   },
   {
     id: "step-7",
-    eyebrow: "Ready to use",
-    title: "Use it anywhere",
+    eyebrow: "Secondary lane",
+    title: "Remote verification is still available",
     description:
-      "When a site asks if you’re over 18, tap “Verify with Zik” and approve the request. The site only sees: “Yes, this user is over 18.” Nothing else.",
+      "The older financial route remains as a lower-assurance fallback for users who cannot visit a participating retailer.",
     backgroundClassName:
       "bg-[linear-gradient(135deg,_#0b1a14_0%,_#123024_36%,_#1f4f3e_100%)]",
     glowClassName:
@@ -164,14 +165,14 @@ export function HeroSlideshow() {
                 className="rounded-full bg-lime px-5 py-3 text-sm font-semibold text-ink"
                 href="/wallet"
               >
-                Get Zik Pass
+                Start physical flow
               </Link>
-              <a
+              <Link
                 className="rounded-full bg-white/12 px-5 py-3 text-sm font-medium text-mist backdrop-blur hover:bg-white/18"
-                href="#learn-more"
+                href="/verify"
               >
-                Find out more
-              </a>
+                Retail verifier
+              </Link>
             </div>
             <div className="mt-6 flex flex-wrap gap-2">
               {slides.map((slide, index) => (
