@@ -73,7 +73,7 @@ function getSubtleCrypto(): SubtleCrypto {
 
   const secureContextHint =
     typeof window !== "undefined" && !window.isSecureContext
-      ? " Open the app on http://localhost:3000 or HTTPS instead of a LAN IP or other insecure origin."
+      ? " Open the app on localhost or HTTPS instead of a LAN IP or other insecure origin."
       : "";
 
   throw new Error(

@@ -1,6 +1,7 @@
 "use client";
 
 import { generateKeyPair, signString } from "@/lib/shared/crypto/ed25519";
+import type { ExportedKeyPair } from "@/lib/shared/crypto/ed25519";
 import type { PresentationBundle, SignedCredential, WalletState } from "@/lib/shared/types";
 
 const DB_NAME = "zik-pass-wallet";
@@ -44,13 +45,47 @@ export async function ensureHolderKeyPair(existing?: WalletState): Promise<Walle
     return wallet;
   }
 
-  const keyPair = await generateKeyPair();
+  let keyPair: ExportedKeyPair;
+
+  try {
+    keyPair = await generateKeyPair();
+  } catch (error) {
+    if (!canUseDevelopmentKeyFallback()) {
+      throw error;
+    }
+
+    keyPair = await requestDevelopmentKeyPair();
+  }
+
   const nextWallet: WalletState = {
     ...wallet,
     holderKeyPair: keyPair
   };
   await saveWalletState(nextWallet);
   return nextWallet;
+}
+
+function canUseDevelopmentKeyFallback(): boolean {
+  return process.env.NODE_ENV === "development" &&
+    typeof window !== "undefined" &&
+    !window.isSecureContext;
+}
+
+async function requestDevelopmentKeyPair(): Promise<ExportedKeyPair> {
+  const response = await fetch("/api/wallet/holder-key", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" }
+  });
+  const data = (await response.json()) as ExportedKeyPair | { error?: string };
+
+  if (!response.ok) {
+    throw new Error(
+      (data as { error?: string }).error ??
+        "Unable to create a local demo holder key. Use HTTPS or localhost instead."
+    );
+  }
+
+  return data as ExportedKeyPair;
 }
 
 export async function storeCredential(
