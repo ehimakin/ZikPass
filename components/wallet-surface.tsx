@@ -232,6 +232,7 @@ export function WalletSurface({
   const [heroWorksSlideIndex, setHeroWorksSlideIndex] = useState(0);
   const [nowMs, setNowMs] = useState(Date.now());
   const [deleteButtonState, setDeleteButtonState] = useState<DeleteButtonState>("idle");
+  const [isStatusDockOpen, setIsStatusDockOpen] = useState(true);
   const [deviceAuthMethod, setDeviceAuthMethod] = useState<"webauthn" | "demo_device_check">(
     "demo_device_check"
   );
@@ -1465,7 +1466,7 @@ export function WalletSurface({
       ) : null}
 
       <div
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex h-44 items-end px-3 pb-10 sm:px-6 lg:px-8"
+        className={`pointer-events-none fixed inset-x-0 bottom-0 z-40 flex items-end px-3 pb-10 transition-[height] duration-200 sm:px-6 lg:px-8 ${isStatusDockOpen ? "h-44" : "h-24"}`}
         style={{
           backgroundImage:
             "linear-gradient(180deg, rgba(255,255,255,0.31) 0%, rgba(255,255,255,1) 50%, rgba(162,206,106,1) 100%)",
@@ -1477,63 +1478,70 @@ export function WalletSurface({
           aria-live="polite"
           className="pointer-events-auto mx-auto w-[85%] max-w-[1088px] rounded-[22px] bg-white/80 p-1.5 opacity-25 shadow-[0_-12px_36px_rgba(14,23,38,0.08)] transition-[opacity,background-image,background-color] duration-200 hover:bg-[linear-gradient(180deg,_rgba(255,255,255,0.94),_rgba(244,247,238,0.94))] hover:opacity-100 sm:p-2"
         >
-          <div className="flex flex-col gap-1.5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-2 px-1 py-0.5">
             <div className="flex flex-wrap items-center gap-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-ink/45">
-                  Your status
-                </p>
-                <StatusPill
-                  tone={
-                    walletStatus.status === "pass_issued_and_stored_locally"
-                      ? walletStatus.credential_active
-                        ? "good"
-                        : "neutral"
-                      : walletStatus.status === "pass_expired"
-                        ? "warn"
-                        : walletStatus.status === "pass_pending_issuance"
-                          ? "neutral"
-                          : "neutral"
-                  }
-                >
-                  {walletStatus.status === "pass_issued_and_stored_locally"
+              <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-ink/45">
+                Your status
+              </p>
+              <StatusPill
+                tone={
+                  walletStatus.status === "pass_issued_and_stored_locally"
                     ? walletStatus.credential_active
-                      ? "Active"
-                      : "Activating"
+                      ? "good"
+                      : "neutral"
                     : walletStatus.status === "pass_expired"
-                      ? "Expired"
+                      ? "warn"
                       : walletStatus.status === "pass_pending_issuance"
-                        ? "Pending issuance"
-                        : "Not started"}
+                        ? "neutral"
+                        : "neutral"
+                }
+              >
+                {walletStatus.status === "pass_issued_and_stored_locally"
+                  ? walletStatus.credential_active
+                    ? "Active"
+                    : "Activating"
+                  : walletStatus.status === "pass_expired"
+                    ? "Expired"
+                    : walletStatus.status === "pass_pending_issuance"
+                      ? "Pending issuance"
+                      : "Not started"}
+              </StatusPill>
+              {credential ? (
+                <StatusPill tone="good">
+                  {formatAssuranceLevel(credential.payload.assurance_level)}
                 </StatusPill>
-                {credential ? (
-                  <StatusPill tone="good">
-                    {formatAssuranceLevel(credential.payload.assurance_level)}
-                  </StatusPill>
-                ) : null}
-              </div>
+              ) : null}
 
               {canDeleteLocalPass || deleteButtonState === "deleted" ? (
-                <>
-                  <button
-                    className="rounded-full bg-ink px-2.5 py-1 text-[11px] font-medium text-mist disabled:opacity-55"
-                    disabled={deleteButtonState === "deleted"}
-                    onClick={resetFlow}
-                  >
-                    {deleteButtonState === "deleted"
-                      ? "Deleted"
-                      : "Delete Zik Pass from this device"}
-                  </button>
-                </>
+                <button
+                  className="rounded-full bg-ink px-2.5 py-1 text-[11px] font-medium text-mist disabled:opacity-55"
+                  disabled={deleteButtonState === "deleted"}
+                  onClick={resetFlow}
+                >
+                  {deleteButtonState === "deleted"
+                    ? "Deleted"
+                    : "Delete Zik Pass from this device"}
+                </button>
               ) : null}
             </div>
-
-            <div className="grid gap-1.5 sm:grid-cols-3 lg:min-w-[420px]">
+            <button
+              aria-expanded={isStatusDockOpen}
+              aria-label={isStatusDockOpen ? "Collapse wallet status details" : "Expand wallet status details"}
+              className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded-full border border-ink/10 bg-white text-sm font-semibold text-ink hover:bg-[#edf3df]"
+              onClick={() => setIsStatusDockOpen((current) => !current)}
+              title={isStatusDockOpen ? "Collapse status details" : "Expand status details"}
+              type="button"
+            >
+              {isStatusDockOpen ? "-" : "+"}
+            </button>
+          </div>
+          {isStatusDockOpen ? (
+            <div className="mt-1 grid gap-1.5 sm:grid-cols-3 lg:min-w-[420px]">
               {statusMeta.map((item) => (
                 <MetaTile key={item.label} label={item.label} value={item.value} />
               ))}
             </div>
-          </div>
+          ) : null}
         </section>
       </div>
 

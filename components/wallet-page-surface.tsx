@@ -23,6 +23,7 @@ export function WalletPageSurface() {
   const [wallet, setWallet] = useState<WalletState | null>(null);
   const [enrollment, setEnrollment] = useState<EnrollmentRecord | null>(null);
   const [isActionsOpen, setIsActionsOpen] = useState(false);
+  const [isStatusDockOpen, setIsStatusDockOpen] = useState(true);
   const [nowMs, setNowMs] = useState(Date.now());
   const [isPending, setIsPending] = useState(false);
   const [deleteButtonState, setDeleteButtonState] = useState<"idle" | "deleted">("idle");
@@ -156,9 +157,11 @@ export function WalletPageSurface() {
       <WalletStatusDock
         credential={credential}
         deleteButtonState={deleteButtonState}
+        isOpen={isStatusDockOpen}
         remainingSeconds={remainingSeconds}
         status={walletStatus}
         wallet={wallet}
+        onToggle={() => setIsStatusDockOpen((current) => !current)}
         onReset={() => {
           setIsPending(true);
           void clearWallet()
@@ -231,17 +234,21 @@ function WalletDemoTools({
 function WalletStatusDock({
   credential,
   deleteButtonState,
+  isOpen,
   remainingSeconds,
   status,
   wallet,
-  onReset
+  onReset,
+  onToggle
 }: {
   credential: WalletState["credential"];
   deleteButtonState: "idle" | "deleted";
+  isOpen: boolean;
   remainingSeconds: number;
   status: ReturnType<typeof getWalletStatusSnapshot>;
   wallet: WalletState;
   onReset: () => void;
+  onToggle: () => void;
 }) {
   const statusLabel =
     status.status === "pass_issued_and_stored_locally"
@@ -276,7 +283,7 @@ function WalletStatusDock({
 
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex h-44 items-end px-3 pb-10 sm:px-6 lg:px-8"
+      className={`pointer-events-none fixed inset-x-0 bottom-0 z-40 flex items-end px-3 pb-10 transition-[height] duration-200 sm:px-6 lg:px-8 ${isOpen ? "h-44" : "h-24"}`}
       style={{
         backgroundImage:
           "linear-gradient(180deg, rgba(255,255,255,0.31) 0%, rgba(255,255,255,1) 50%, rgba(162,206,106,1) 100%)",
@@ -288,7 +295,7 @@ function WalletStatusDock({
         aria-live="polite"
         className="pointer-events-auto mx-auto w-[85%] max-w-[1088px] rounded-[22px] bg-white/80 p-1.5 opacity-25 shadow-[0_-12px_36px_rgba(14,23,38,0.08)] transition-[opacity,background-image,background-color] duration-200 hover:bg-[linear-gradient(180deg,_rgba(255,255,255,0.94),_rgba(244,247,238,0.94))] hover:opacity-100 sm:p-2"
       >
-        <div className="flex flex-col gap-1.5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap items-center gap-2 px-1 py-0.5">
           <div className="flex flex-wrap items-center gap-2">
             <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-ink/45">Your status</p>
             <StatusPill tone={statusLabel === "Active" ? "good" : statusLabel === "Expired" ? "warn" : "neutral"}>
@@ -305,7 +312,19 @@ function WalletStatusDock({
               </button>
             ) : null}
           </div>
-          <div className="grid gap-1.5 sm:grid-cols-3 lg:min-w-[420px]">
+          <button
+            aria-expanded={isOpen}
+            aria-label={isOpen ? "Collapse wallet status details" : "Expand wallet status details"}
+            className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded-full border border-ink/10 bg-white text-sm font-semibold text-ink hover:bg-[#edf3df]"
+            onClick={onToggle}
+            title={isOpen ? "Collapse status details" : "Expand status details"}
+            type="button"
+          >
+            {isOpen ? "-" : "+"}
+          </button>
+        </div>
+        {isOpen ? (
+          <div className="mt-1 grid gap-1.5 sm:grid-cols-3 lg:min-w-[420px]">
             {statusMeta.map((item) => (
               <div key={item.label} className="rounded-[18px] bg-white px-2.5 py-1.5">
                 <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ink/45">{item.label}</p>
@@ -313,7 +332,7 @@ function WalletStatusDock({
               </div>
             ))}
           </div>
-        </div>
+        ) : null}
       </section>
     </div>
   );
