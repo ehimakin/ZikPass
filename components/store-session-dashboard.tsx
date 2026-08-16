@@ -2,7 +2,12 @@
 import { useEffect, useState, useTransition } from "react";
 import { SurfaceCard } from "@/components/surface-card";
 import { StatusPill } from "@/components/status-pill";
-import { buildGenericPhysicalWalletUrl, buildPhysicalWalletUrl } from "@/lib/shared/physical-flow";
+import {
+  buildGenericPhysicalWalletUrl,
+  buildPhysicalWalletUrl,
+  isRetailVerificationCodeReady,
+  parseRetailVerificationCode
+} from "@/lib/shared/physical-flow";
 import type { EnrollmentRecord, PhysicalStoreSessionRecord } from "@/lib/shared/types";
 
 interface ApiError {
@@ -19,6 +24,8 @@ export function StoreSessionDashboard() {
   const [verificationResult, setVerificationResult] = useState<EnrollmentRecord | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const parsedLookupCode = parseRetailVerificationCode(lookupCode);
+  const canLookupSession = isRetailVerificationCodeReady(parsedLookupCode) && !isPending;
 
   useEffect(() => {
     void refreshSessions();
@@ -70,10 +77,11 @@ export function StoreSessionDashboard() {
   }
 
   function lookupSession() {
-    if (!lookupCode.trim()) {
+    if (!canLookupSession) {
       return;
     }
 
+    setLookupCode(parsedLookupCode);
     startTransition(() => {
       void (async () => {
         try {
@@ -83,7 +91,7 @@ export function StoreSessionDashboard() {
               "Content-Type": "application/json",
               "x-zik-retailer-token": demoRetailVerifierToken
             },
-            body: JSON.stringify({ userCode: lookupCode.trim().toUpperCase() })
+            body: JSON.stringify({ userCode: parsedLookupCode })
           });
           const data = (await response.json()) as PhysicalStoreSessionRecord | ApiError;
 
@@ -104,10 +112,11 @@ export function StoreSessionDashboard() {
   }
 
   function submitIdCheck(decision: "confirm" | "reject") {
-    if (!lookupCode.trim()) {
+    if (!isRetailVerificationCodeReady(parsedLookupCode)) {
       return;
     }
 
+    setLookupCode(parsedLookupCode);
     startTransition(() => {
       void (async () => {
         try {
@@ -118,7 +127,7 @@ export function StoreSessionDashboard() {
               "x-zik-retailer-token": demoRetailVerifierToken
             },
             body: JSON.stringify({
-              userCode: lookupCode.trim().toUpperCase(),
+              userCode: parsedLookupCode,
               decision,
               checkedBy: "Demo clerk",
               note:
@@ -198,28 +207,28 @@ export function StoreSessionDashboard() {
         <div className="flex flex-col gap-3 sm:flex-row">
           <input
             className="w-full rounded-[22px] border border-ink/10 bg-ink/5 px-5 py-4 text-lg font-medium tracking-[0.28em] text-ink outline-none"
-            maxLength={6}
+            maxLength={256}
             placeholder="ABC123"
             value={lookupCode}
-            onChange={(event) => setLookupCode(event.target.value.replace(/[^A-Z0-9]/gi, "").toUpperCase())}
+            onChange={(event) => setLookupCode(parseRetailVerificationCode(event.target.value))}
           />
           <button
             className="rounded-full border border-ink/10 bg-white px-5 py-3 text-sm font-medium text-ink"
-            disabled={isPending || lookupCode.trim().length < 6}
+            disabled={!canLookupSession}
             onClick={lookupSession}
           >
             Find session
           </button>
           <button
             className="rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist"
-            disabled={isPending || lookupCode.trim().length < 6}
+            disabled={isPending || !isRetailVerificationCodeReady(parsedLookupCode)}
             onClick={() => submitIdCheck("confirm")}
           >
             Confirm 18+
           </button>
           <button
             className="rounded-full border border-[#d27a86]/45 bg-[#fff6f7] px-5 py-3 text-sm font-semibold text-[#9f3748]"
-            disabled={isPending || lookupCode.trim().length < 6}
+            disabled={isPending || !isRetailVerificationCodeReady(parsedLookupCode)}
             onClick={() => submitIdCheck("reject")}
           >
             Unable to verify

@@ -24,11 +24,11 @@ export function AppShell({
   currentPath?: string;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const showWalletBackground = currentPath === "/wallet";
+  const showHeroBackground = currentPath === "/" || currentPath === "/wallet";
 
   return (
-    <div className={clsx("relative min-h-screen text-ink", showWalletBackground ? "bg-white" : "bg-mist")}>
-      {showWalletBackground ? (
+    <div className={clsx("relative min-h-screen text-ink", showHeroBackground ? "bg-white" : "bg-mist")}>
+      {showHeroBackground ? (
         <div
           aria-hidden="true"
           className="pointer-events-none fixed inset-x-0 top-0 z-0 h-screen bg-white"
@@ -39,10 +39,9 @@ export function AppShell({
             backgroundSize: "100% auto"
           }}
         />
-      ) : null}
-      {!showWalletBackground ? (
+      ) : (
         <div className="absolute inset-x-0 top-0 -z-10 h-[460px] bg-[radial-gradient(circle_at_top_left,_rgba(215,241,113,0.66),_transparent_38%),radial-gradient(circle_at_top_right,_rgba(201,242,123,0.38),_transparent_34%),linear-gradient(180deg,_#fbfff1_0%,_#f4f7ee_42%,_#eef2e6_100%)]" />
-      ) : null}
+      )}
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 pb-16 pt-6 sm:px-6 lg:px-8">
         <header className="mb-10 rounded-[32px] bg-transparent px-4 py-4">
           <div className="flex items-center justify-between gap-4">

@@ -2,12 +2,12 @@ import { Suspense } from "react";
 import { AppShell } from "@/components/app-shell";
 import { WalletSurface } from "@/components/wallet-surface";
 
-export default function HomePage() {
+export default function OnboardingPage() {
   return (
-    <AppShell currentPath="/">
+    <AppShell currentPath="/onboarding">
       <main>
         <Suspense fallback={null}>
-          <WalletSurface />
+          <WalletSurface onboardingMode />
         </Suspense>
       </main>
     </AppShell>

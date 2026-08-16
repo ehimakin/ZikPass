@@ -3,8 +3,9 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import QRCode from "qrcode";
 import type { InputHTMLAttributes, ReactNode } from "react";
-import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Zignature } from "@/components/zignature";
 import { SurfaceCard } from "@/components/surface-card";
 import { StatusPill } from "@/components/status-pill";
@@ -17,16 +18,19 @@ import {
   storeEnrollmentContext
 } from "@/lib/client/wallet-client";
 import {
+  ZIK_APP_DOWNLOAD_URL,
+  buildRetailVerificationScanUrl,
+  buildZikAppDeepLink,
   formatAssuranceLevel,
   formatIssuanceChannel,
   getCredentialExperienceVariant,
+  getPhysicalProcessState,
   parseWalletEntryContext
 } from "@/lib/shared/physical-flow";
 import { base64UrlToBytes, stableStringify } from "@/lib/shared/utils";
 import { buildCredentialZignatureSeedInput } from "@/lib/shared/zignature";
 import type {
   EnrollmentRecord,
-  IdentityMatchInput,
   PhysicalStoreSessionRecord,
   WalletState
 } from "@/lib/shared/types";
@@ -55,7 +59,6 @@ type FlowStep =
   | "physical-verification"
   | "device-auth"
   | "bank-verification"
-  | "checking"
   | "cooling"
   | "success"
   | "rejected";
@@ -70,9 +73,6 @@ type JourneyState =
   | "physical_verification_complete"
   | "bank_verification_pending"
   | "bank_verification_confirming"
-  | "bank_verification_complete"
-  | "financial_check_in_progress"
-  | "confidence_assessment_in_progress"
   | "cooling_off_pending"
   | "activation_ready"
   | "pass_issued"
@@ -86,12 +86,6 @@ interface Answers {
   movedInLastThreeYears?: boolean;
   previousAddress: string;
   bankName: string;
-}
-
-interface CheckingStage {
-  label: string;
-  detail: string;
-  journeyState: JourneyState;
 }
 
 const initialAnswers: Answers = {
@@ -110,39 +104,6 @@ const bankOptions = [
   "NatWest",
   "Santander UK",
   "HSBC UK"
-];
-
-const checkingStages: CheckingStage[] = [
-  {
-    label: "Finding financial record",
-    detail: "Securely matching your details with adult financial signals.",
-    journeyState: "financial_check_in_progress"
-  },
-  {
-    label: "Performing financial check",
-    detail: "Running a soft check that does not affect your credit score.",
-    journeyState: "financial_check_in_progress"
-  },
-  {
-    label: "Reviewing adult financial activity",
-    detail: "Looking for signs of a real adult-linked financial account.",
-    journeyState: "financial_check_in_progress"
-  },
-  {
-    label: "Determining credential confidence",
-    detail: "Confirming the match is strong enough to issue a pass.",
-    journeyState: "confidence_assessment_in_progress"
-  },
-  {
-    label: "Preparing secure pass",
-    detail: "Binding your Zik Pass to the key created on this device.",
-    journeyState: "confidence_assessment_in_progress"
-  },
-  {
-    label: "Finalising verification",
-    detail: "Creating your Over-18 pass and getting it ready to activate.",
-    journeyState: "activation_ready"
-  }
 ];
 
 const heroSlides = [
@@ -236,14 +197,28 @@ function isRetryableEnrollment(status: EnrollmentRecord["status"]): boolean {
   return status === "retry_provider_failure";
 }
 
-export function WalletSurface() {
+export function WalletSurface({
+  onboardingMode = false,
+  onboardingHref = "/onboarding" as Route
+}: {
+  onboardingMode?: boolean;
+  onboardingHref?: Route;
+} = {}) {
   type HeroViewMode = "how_to_get" | "how_it_works";
   type DeleteButtonState = "idle" | "deleted";
   const searchParams = useSearchParams();
   const entryContext = useMemo(() => parseWalletEntryContext(searchParams), [searchParams]);
+  const physicalEntryExplicit = useMemo(
+    () =>
+      searchParams.get("flow") === "physical" ||
+      Boolean(searchParams.get("session_id")) ||
+      Boolean(searchParams.get("store_id")),
+    [searchParams]
+  );
   const [wallet, setWallet] = useState<WalletState>({});
   const [enrollment, setEnrollment] = useState<EnrollmentRecord | null>(null);
   const [physicalSession, setPhysicalSession] = useState<PhysicalStoreSessionRecord | null>(null);
+  const [onboardingStarted, setOnboardingStarted] = useState(false);
   const [step, setStep] = useState<FlowStep>("full-name");
   const [journeyState, setJourneyState] = useState<JourneyState>("idle");
   const [isFlowOpen, setIsFlowOpen] = useState(false);
@@ -255,9 +230,6 @@ export function WalletSurface() {
   const [heroViewMode, setHeroViewMode] = useState<HeroViewMode>("how_to_get");
   const [heroSlideIndex, setHeroSlideIndex] = useState(0);
   const [heroWorksSlideIndex, setHeroWorksSlideIndex] = useState(0);
-  const [checkingStageIndex, setCheckingStageIndex] = useState(0);
-  const [pendingCompletionEnrollment, setPendingCompletionEnrollment] =
-    useState<EnrollmentRecord | null>(null);
   const [nowMs, setNowMs] = useState(Date.now());
   const [deleteButtonState, setDeleteButtonState] = useState<DeleteButtonState>("idle");
   const [deviceAuthMethod, setDeviceAuthMethod] = useState<"webauthn" | "demo_device_check">(
@@ -265,6 +237,7 @@ export function WalletSurface() {
   );
   const [deviceAuthSummary, setDeviceAuthSummary] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const physicalEnrollmentStartRef = useRef<string | null>(null);
 
   const credential = wallet.credential;
   const currentLane =
@@ -375,9 +348,7 @@ export function WalletSurface() {
       if (nextEnrollment.cooling_off.duration_seconds > 0 && !nextEnrollment.issued_credential) {
         setStep("cooling");
       } else {
-        setStep("checking");
-        setCheckingStageIndex(0);
-        setPendingCompletionEnrollment(nextEnrollment);
+        setStep("cooling");
       }
       return;
     }
@@ -433,53 +404,6 @@ export function WalletSurface() {
 
     setJourneyState("pass_issued");
     setStep("success");
-  }, [applyEnrollment, syncPhysicalEnrollmentState]);
-
-  const finalizeChecking = useCallback(async (nextEnrollment: EnrollmentRecord) => {
-    setPendingCompletionEnrollment(null);
-
-    if (nextEnrollment.lane === "physical") {
-      await syncPhysicalEnrollmentState(nextEnrollment);
-      return;
-    }
-
-    await applyEnrollment(nextEnrollment);
-
-    if (isRejectedEnrollment(nextEnrollment.status)) {
-      setJourneyState("rejected");
-      setStep("rejected");
-      setError(nextEnrollment.last_user_message ?? null);
-      return;
-    }
-
-    if (nextEnrollment.status === "approved_pending_review" || nextEnrollment.status === "manual_review_required") {
-      setJourneyState("rejected");
-      setStep("rejected");
-      return;
-    }
-
-    if (nextEnrollment.status === "issued") {
-      setJourneyState("pass_issued");
-      setStep("success");
-      return;
-    }
-
-    if (nextEnrollment.status === "bank_verification_pending") {
-      setJourneyState("bank_verification_pending");
-      setStep("bank-verification");
-      setError(nextEnrollment.last_user_message ?? "We still need your bank verification code.");
-      return;
-    }
-
-    if (nextEnrollment.status === "retry_provider_failure") {
-      setJourneyState("bank_verification_pending");
-      setStep("bank-verification");
-      setError(nextEnrollment.last_user_message ?? "We could not complete your check right now.");
-      return;
-    }
-
-    setJourneyState("cooling_off_pending");
-    setStep("cooling");
   }, [applyEnrollment, syncPhysicalEnrollmentState]);
 
   const refreshEnrollment = useCallback(
@@ -561,7 +485,7 @@ export function WalletSurface() {
           return;
         }
 
-        if (entryContext.lane === "physical") {
+        if (entryContext.lane === "physical" && physicalEntryExplicit) {
           if (entryContext.session_id) {
             await refreshPhysicalSession(entryContext.session_id);
           } else {
@@ -582,7 +506,14 @@ export function WalletSurface() {
         setError("We could not load the local Zik Pass on this browser.");
       }
     })();
-  }, [createPhysicalSessionFromEntry, entryContext, refreshEnrollment, refreshPhysicalSession]);
+  }, [
+    createPhysicalSessionFromEntry,
+    entryContext,
+    onboardingMode,
+    physicalEntryExplicit,
+    refreshEnrollment,
+    refreshPhysicalSession
+  ]);
 
   useEffect(() => {
     if (canDeleteLocalPass) {
@@ -603,7 +534,7 @@ export function WalletSurface() {
   }, [activationTime]);
 
   useEffect(() => {
-    if (!enrollment?.id || step === "checking") {
+    if (!enrollment?.id) {
       return;
     }
 
@@ -624,32 +555,6 @@ export function WalletSurface() {
 
     return () => window.clearInterval(interval);
   }, [enrollment?.id, enrollment?.status, refreshEnrollment, step]);
-
-  useEffect(() => {
-    if (step !== "checking") {
-      return;
-    }
-
-    if (checkingStageIndex >= checkingStages.length - 1) {
-      const timer = window.setTimeout(() => {
-        if (!pendingCompletionEnrollment) {
-          return;
-        }
-
-        void finalizeChecking(pendingCompletionEnrollment);
-      }, 1200);
-
-      return () => window.clearTimeout(timer);
-    }
-
-    const timer = window.setTimeout(() => {
-      const nextIndex = checkingStageIndex + 1;
-      setCheckingStageIndex(nextIndex);
-      setJourneyState(checkingStages[nextIndex].journeyState);
-    }, 1200);
-
-    return () => window.clearTimeout(timer);
-  }, [checkingStageIndex, finalizeChecking, pendingCompletionEnrollment, step]);
 
   useEffect(() => {
     if (step !== "cooling" || !credential || !active) {
@@ -702,19 +607,6 @@ export function WalletSurface() {
     setError(null);
   }
 
-  function buildIdentityMatch(): IdentityMatchInput {
-    return {
-      first_name: answers.firstName.trim(),
-      last_name: answers.lastName.trim(),
-      date_of_birth: answers.dateOfBirth,
-      current_home_address: answers.currentHomeAddress.trim(),
-      previous_address:
-        answers.movedInLastThreeYears && answers.previousAddress.trim()
-          ? answers.previousAddress.trim()
-          : undefined
-    };
-  }
-
   function openFlow() {
     setError(null);
     setIsFlowOpen(true);
@@ -744,6 +636,17 @@ export function WalletSurface() {
       return;
     }
 
+    if (onboardingMode) {
+      setOnboardingStarted(true);
+      setError(null);
+
+      if (!physicalSession) {
+        setIsFlowOpen(true);
+        void createPhysicalSessionFromEntry();
+        return;
+      }
+    }
+
     if (!isPhysicalLane && !heroFormValid) {
       return;
     }
@@ -771,12 +674,11 @@ export function WalletSurface() {
         setWallet(clearedWallet);
         setEnrollment(null);
         setPhysicalSession(null);
+        setOnboardingStarted(false);
         setAnswers(initialAnswers);
         setHasTriedHeroSubmit(false);
         setPossessionCode("");
         setDeviceAuthSummary(null);
-        setCheckingStageIndex(0);
-        setPendingCompletionEnrollment(null);
         setJourneyState("idle");
         setStep("full-name");
         setIsFlowOpen(false);
@@ -786,7 +688,7 @@ export function WalletSurface() {
     });
   }
 
-  function startEnrollmentSubmission() {
+  const startEnrollmentSubmission = useCallback(() => {
     setJourneyState("submitting");
     setError(null);
 
@@ -822,7 +724,19 @@ export function WalletSurface() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              identityMatch: entryContext.lane === "physical" ? undefined : buildIdentityMatch(),
+              identityMatch:
+                entryContext.lane === "physical"
+                  ? undefined
+                  : {
+                      first_name: answers.firstName.trim(),
+                      last_name: answers.lastName.trim(),
+                      date_of_birth: answers.dateOfBirth,
+                      current_home_address: answers.currentHomeAddress.trim(),
+                      previous_address:
+                        answers.movedInLastThreeYears && answers.previousAddress.trim()
+                          ? answers.previousAddress.trim()
+                          : undefined
+                    },
               bankName: entryContext.lane === "physical" ? undefined : answers.bankName,
               holderPublicKey: nextWallet.holderKeyPair?.publicKeyJwk,
               lane: entryContext.lane,
@@ -847,7 +761,7 @@ export function WalletSurface() {
             nextEnrollment.status === "bank_verification_pending" ||
             nextEnrollment.status === "physical_verification_pending"
           ) {
-            setSuccess();
+            setError(null);
           }
         } catch (err) {
           setJourneyState(entryContext.lane === "physical" ? "physical_session_detected" : "collecting_details");
@@ -855,7 +769,50 @@ export function WalletSurface() {
         }
       })();
     });
-  }
+  }, [
+    answers.bankName,
+    answers.currentHomeAddress,
+    answers.dateOfBirth,
+    answers.firstName,
+    answers.lastName,
+    answers.movedInLastThreeYears,
+    answers.previousAddress,
+    entryContext.lane,
+    physicalSession,
+    startTransition,
+    syncFromEnrollment,
+    walletStatus.blocks_new_pass
+  ]);
+
+  useEffect(() => {
+    if (
+      (!physicalEntryExplicit && (!onboardingMode || !onboardingStarted)) ||
+      !physicalSession ||
+      enrollment ||
+      credential ||
+      isPending ||
+      walletStatus.blocks_new_pass
+    ) {
+      return;
+    }
+
+    if (physicalEnrollmentStartRef.current === physicalSession.session_id) {
+      return;
+    }
+
+    physicalEnrollmentStartRef.current = physicalSession.session_id;
+    startEnrollmentSubmission();
+  }, [
+    credential,
+    enrollment,
+    isPending,
+    onboardingMode,
+    onboardingStarted,
+    physicalEntryExplicit,
+    physicalSession,
+    startEnrollmentSubmission,
+    walletStatus.blocks_new_pass
+  ]);
 
   function verifyBankStep() {
     if (!enrollment) {
@@ -888,11 +845,7 @@ export function WalletSurface() {
             return;
           }
 
-          await applyEnrollment(nextEnrollment);
-          setPendingCompletionEnrollment(nextEnrollment);
-          setCheckingStageIndex(0);
-          setJourneyState("bank_verification_complete");
-          setStep("checking");
+          await syncFromEnrollment(nextEnrollment);
         } catch (err) {
           setJourneyState("bank_verification_pending");
           setError(err instanceof Error ? err.message : "Bank verification failed.");
@@ -1118,11 +1071,37 @@ export function WalletSurface() {
   const pendingZignatureSeed = enrollment
     ? `pending:${enrollment.id}:${stableStringify(enrollment.holder_public_key)}`
     : null;
+  const showPhysicalV2Flow = physicalEntryExplicit || (!onboardingMode && enrollment?.lane === "physical");
+
+  if (showPhysicalV2Flow) {
+    return (
+      <PhysicalOnboardingExperience
+        credential={credential}
+        deviceAuthMethod={deviceAuthMethod}
+        deviceAuthSummary={deviceAuthSummary}
+        enrollment={enrollment}
+        error={error}
+        isPending={isPending}
+        physicalSession={physicalSession}
+        step={step}
+        remainingSeconds={remainingSeconds}
+        coolingProgress={coolingProgress}
+        issuedZignatureSeed={issuedZignatureSeed}
+        pendingZignatureSeed={pendingZignatureSeed}
+        onAuthenticateDevice={startDeviceAuthentication}
+        onReset={resetFlow}
+      />
+    );
+  }
 
   return (
     <div className="grid gap-6 pb-52 sm:pb-44 lg:pb-32">
       <section className="relative overflow-hidden rounded-[40px] border border-white/80 bg-white/72 px-6 py-8 shadow-panel backdrop-blur-sm sm:px-10 sm:py-10">
-        <div className="relative grid gap-8 md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] md:items-start">
+        <div
+          className={`relative grid gap-8 md:items-start ${
+            onboardingMode ? "md:grid-cols-1" : "md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]"
+          }`}
+        >
           <div className="relative md:order-1">
             <div className="absolute inset-0 translate-x-5 translate-y-5 rounded-[34px] bg-lime/35" />
             <div className="relative overflow-hidden rounded-[34px] border border-ink/8 bg-white p-6 shadow-[0_30px_80px_rgba(14,23,38,0.18)]">
@@ -1131,7 +1110,11 @@ export function WalletSurface() {
                 <div className="mb-8 flex items-center justify-between gap-4">
                   <div>
                     <p className="mt-2 font-heading text-3xl font-semibold tracking-tight text-ink">
-                      {isPhysicalLane ? "In-person verified onboarding" : "Zero Knowledge age verification"}
+                      {onboardingMode
+                        ? "Anonymous digital ID, physically verified"
+                        : isPhysicalLane
+                          ? "In-person verified onboarding"
+                          : "Zero Knowledge age verification"}
                     </p>
                     {!showHeroPassPreview ? (
                       <p className="mt-2 font-mono text-xs tracking-[0.24em] text-ink/45">
@@ -1259,24 +1242,39 @@ export function WalletSurface() {
                     )}
 
                     <div className="flex flex-wrap gap-3">
-                      <button
-                        className={`rounded-full px-6 py-3 text-sm font-semibold transition ${
-                          isPhysicalLane || canStartFromHero
-                            ? "bg-ink text-mist"
-                            : "cursor-default bg-ink/12 text-gray-300"
-                        }`}
-                        aria-disabled={isPhysicalLane ? undefined : !canStartFromHero}
-                        disabled={isPending}
-                        onClick={startFromHero}
-                      >
-                        {isPhysicalLane ? "Continue in-store" : "Get Zik Pass"}
-                      </button>
-                      <button
-                        className="rounded-full border border-ink/10 bg-[#f7faee] px-6 py-3 text-sm font-medium text-ink hover:bg-[#edf3df]"
-                        onClick={() => setIsLearnMoreOpen(true)}
-                      >
-                        Learn more
-                      </button>
+                      {isPhysicalLane && !onboardingMode ? (
+                        <Link
+                          className="rounded-full bg-ink px-6 py-3 text-sm font-semibold text-mist transition"
+                          href={onboardingHref}
+                        >
+                          Continue in-store
+                        </Link>
+                      ) : (
+                        <button
+                          className={`rounded-full px-6 py-3 text-sm font-semibold transition ${
+                            isPhysicalLane || canStartFromHero
+                              ? "bg-ink text-mist"
+                              : "cursor-default bg-ink/12 text-gray-300"
+                          }`}
+                          aria-disabled={isPhysicalLane ? undefined : !canStartFromHero}
+                          disabled={isPending}
+                          onClick={startFromHero}
+                        >
+                          {onboardingMode
+                            ? "Begin physical ID Check"
+                            : isPhysicalLane
+                              ? "Continue in-store"
+                              : "Get Zik Pass"}
+                        </button>
+                      )}
+                      {!onboardingMode ? (
+                        <button
+                          className="rounded-full border border-ink/10 bg-[#f7faee] px-6 py-3 text-sm font-medium text-ink hover:bg-[#edf3df]"
+                          onClick={() => setIsLearnMoreOpen(true)}
+                        >
+                          Learn more
+                        </button>
+                      ) : null}
                     </div>
 
                     <div className="grid gap-4 rounded-[26px] bg-[#f7faee] p-5 sm:grid-cols-3">
@@ -1300,7 +1298,8 @@ export function WalletSurface() {
             </div>
           </div>
 
-          <div className="space-y-6 rounded-[32px] py-6 pl-[25px] md:order-2 md:flex md:self-stretch md:flex-col md:space-y-0 md:py-8">
+          {!onboardingMode ? (
+            <div className="space-y-6 rounded-[32px] py-6 pl-[25px] md:order-2 md:flex md:self-stretch md:flex-col md:space-y-0 md:py-8">
             <div className="flex flex-wrap gap-2">
               <HeroViewTab
                 active={heroViewMode === "how_to_get"}
@@ -1377,20 +1376,22 @@ export function WalletSurface() {
                 </>
               )}
             </div>
-          </div>
+            </div>
+          ) : null}
         </div>
       </section>
 
-      <div className="grid gap-6">
-        <SurfaceCard
-          title={isPhysicalLane ? "Why physical-first ZikPass" : "Why people choose Zik Pass"}
-          subtitle={
-            isPhysicalLane
-              ? "Built around a normal in-person age check, then minimized into a reusable pass."
-              : "Designed to feel more like a premium financial product than a compliance prompt."
-          }
-          className="border-ink/5 bg-white/88"
-        >
+      {!onboardingMode ? (
+        <div className="grid gap-6">
+          <SurfaceCard
+            title={isPhysicalLane ? "Why physical-first ZikPass" : "Why people choose Zik Pass"}
+            subtitle={
+              isPhysicalLane
+                ? "Built around a normal in-person age check, then minimized into a reusable pass."
+                : "Designed to feel more like a premium financial product than a compliance prompt."
+            }
+            className="border-ink/5 bg-white/88"
+          >
           <ul className="grid gap-4">
             <li className="flex items-start gap-3">
               <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#eef6df] text-sm font-semibold text-ink">
@@ -1436,8 +1437,9 @@ export function WalletSurface() {
               </div>
             </li>
           </ul>
-        </SurfaceCard>
-      </div>
+          </SurfaceCard>
+        </div>
+      ) : null}
 
       {showDevTools ? (
         <details className="rounded-[24px] bg-white/70 p-4 text-sm text-ink/72 shadow-panel">
@@ -1540,9 +1542,9 @@ export function WalletSurface() {
           className="fixed inset-0 z-50 bg-[radial-gradient(circle_at_top,_rgba(215,241,113,0.18),rgba(14,23,38,0.64)_58%)] backdrop-blur-md"
           onClick={closeFlow}
         >
-          <div className="flex h-full w-full items-stretch justify-center p-2 sm:p-6">
+          <div className="flex h-full w-full flex-col items-stretch justify-center p-2 sm:p-6">
             <div
-              className="relative flex h-full w-full max-w-7xl flex-col overflow-hidden rounded-[30px] border border-white/65 bg-[linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(244,247,238,0.97))] p-2 shadow-[0_36px_120px_rgba(14,23,38,0.28)] sm:rounded-[40px] sm:p-6"
+              className="relative mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col overflow-hidden rounded-[30px] border border-white/65 bg-[linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(244,247,238,0.97))] p-2 shadow-[0_36px_120px_rgba(14,23,38,0.28)] sm:rounded-[40px] sm:p-6"
               onClick={(event) => event.stopPropagation()}
             >
               <button
@@ -1553,11 +1555,7 @@ export function WalletSurface() {
                 ×
               </button>
 
-              <div className="mb-2 pr-10 sm:mb-4 sm:pr-12">
-                <JourneyTracker lane={isPhysicalLane ? "physical" : "remote"} state={journeyState} />
-              </div>
-
-              <div className="h-full overflow-y-auto pr-0 sm:pr-2">
+              <div className="min-h-0 flex-1 overflow-y-auto pr-0 sm:pr-2">
                 {step === "physical-session" && (physicalSession || enrollment?.physical_verification) ? (
                   <FullscreenCard
                     eyebrow="You’re verifying in-store"
@@ -1971,16 +1969,6 @@ export function WalletSurface() {
                   </QuestionCard>
                 ) : null}
 
-                {step === "checking" ? (
-                  <FullscreenCard
-                    eyebrow="Checking in progress"
-                    title="We’re preparing your Zik Pass."
-                    body="This usually takes less than a minute. Please keep this window open while we complete the checks."
-                  >
-                    <CheckingPanel activeIndex={checkingStageIndex} />
-                  </FullscreenCard>
-                ) : null}
-
                 {step === "cooling" && enrollment ? (
                   <FullscreenCard
                     eyebrow={isPhysicalLane ? "Issuance in progress" : "Cooling-off in progress"}
@@ -2054,6 +2042,10 @@ export function WalletSurface() {
                         : "You can now verify that you are over 18 without sharing photo ID, your date of birth, or your name."
                     }
                     showPassPreview
+                    actionLabel="Done"
+                    actionClassName="h-[150px] w-[400px] max-w-full items-center justify-center bg-[linear-gradient(135deg,_#7cb56b,_#a2ce6a)] px-8 py-4 text-center text-4xl text-white transition-[filter] hover:brightness-95"
+                    actionAside
+                    onAction={closeFlow}
                   >
                     <div className="grid gap-4">
                       <PassPreviewCard
@@ -2141,6 +2133,11 @@ export function WalletSurface() {
                   </FullscreenCard>
                 ) : null}
               </div>
+
+            </div>
+
+            <div className="mx-auto mt-[30px] w-full max-w-7xl shrink-0">
+              <JourneyTracker lane={isPhysicalLane ? "physical" : "remote"} state={journeyState} />
             </div>
           </div>
         </div>
@@ -2234,6 +2231,369 @@ export function WalletSurface() {
   );
 }
 
+function PhysicalOnboardingExperience({
+  credential,
+  deviceAuthMethod,
+  deviceAuthSummary,
+  enrollment,
+  error,
+  isPending,
+  physicalSession,
+  step,
+  remainingSeconds,
+  coolingProgress,
+  issuedZignatureSeed,
+  pendingZignatureSeed,
+  onAuthenticateDevice,
+  onReset
+}: {
+  credential: WalletState["credential"];
+  deviceAuthMethod: "webauthn" | "demo_device_check";
+  deviceAuthSummary: string | null;
+  enrollment: EnrollmentRecord | null;
+  error: string | null;
+  isPending: boolean;
+  physicalSession: PhysicalStoreSessionRecord | null;
+  step: FlowStep;
+  remainingSeconds: number;
+  coolingProgress: number;
+  issuedZignatureSeed: string | null;
+  pendingZignatureSeed: string | null;
+  onAuthenticateDevice: () => void;
+  onReset: () => void;
+}) {
+  const verification = enrollment?.physical_verification;
+  const [browserOrigin, setBrowserOrigin] = useState("");
+  const storeName =
+    verification?.session.store_name ?? physicalSession?.store_name ?? "this store";
+  const sessionCode = verification?.user_code.value;
+  const processState = getPhysicalProcessState({
+    credentialIssued: Boolean(credential),
+    enrollment,
+    session: physicalSession,
+    hasSessionStarted: Boolean(physicalSession)
+  });
+  const challengeUrl = verification && sessionCode
+    ? buildRetailVerificationScanUrl({
+        userCode: sessionCode,
+        sessionId: verification.session.session_id
+      })
+    : null;
+  const challengeValue =
+    challengeUrl && browserOrigin
+      ? `${browserOrigin}${challengeUrl}`
+      : challengeUrl ?? `zikpass:physical:preparing:${physicalSession?.session_id ?? "new"}`;
+
+  useEffect(() => {
+    setBrowserOrigin(window.location.origin);
+  }, []);
+
+  if (processState === "expired") {
+    return (
+      <PhysicalStageFrame
+        accent="bg-[#d27a86]"
+        progress={24}
+        title="This code has expired"
+        body="Scan the Zik card again to restart."
+      >
+        <div className="zik-stage-pop grid place-items-center gap-7">
+          <div className="grid h-36 w-36 place-items-center rounded-full border-[10px] border-[#d27a86]/35 text-7xl font-semibold text-[#b24f61]">
+            !
+          </div>
+          <button
+            className="rounded-full bg-ink px-7 py-4 text-base font-semibold text-mist"
+            onClick={onReset}
+            type="button"
+          >
+            Start again
+          </button>
+        </div>
+      </PhysicalStageFrame>
+    );
+  }
+
+  if (processState === "rejected" || step === "rejected") {
+    return (
+      <PhysicalStageFrame
+        accent="bg-[#df8291]"
+        progress={32}
+        title="We couldn't verify your age"
+        body={error ?? enrollment?.last_user_message ?? "Ask the staff member for help or try again."}
+      >
+        <div className="zik-stage-pop grid place-items-center gap-7">
+          <div className="grid h-36 w-36 place-items-center rounded-full border-[10px] border-[#df8291]/35 text-7xl font-semibold text-[#b24f61]">
+            !
+          </div>
+          <button
+            className="rounded-full bg-ink px-7 py-4 text-base font-semibold text-mist"
+            onClick={onReset}
+            type="button"
+          >
+            Start again
+          </button>
+        </div>
+      </PhysicalStageFrame>
+    );
+  }
+
+  if (processState === "credential_issued" && credential) {
+    const appHref = buildZikAppDeepLink({
+      credentialId: credential.payload.credential_id
+    });
+
+    return (
+      <PhysicalStageFrame
+        accent="bg-ink"
+        progress={100}
+        title="ZikPass ready"
+        body="Your in-person verified pass has been delivered to this device."
+      >
+        <div className="zik-stage-pop grid w-full max-w-xl gap-7">
+          <div className="rounded-[30px] border border-ink/8 bg-[#f7faee] p-5 text-ink ring-1 ring-ink/4">
+            <p className="font-mono text-xs uppercase text-ink/48">Over 18</p>
+            <p className="mt-2 font-heading text-5xl font-semibold">In-person verified</p>
+            <Zignature
+              animate
+              className="mt-6 h-24 w-full"
+              seedInput={issuedZignatureSeed ?? credential.payload.credential_id}
+              stroke="#86a92a"
+              strokeWidth={3.2}
+              variant="full"
+              width={340}
+              height={100}
+            />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <a
+              className="rounded-full bg-ink px-7 py-4 text-center text-base font-semibold text-mist"
+              href={appHref}
+            >
+              Open Zik
+            </a>
+            <a
+              className="rounded-full border border-ink/15 px-7 py-4 text-center text-base font-semibold text-ink"
+              href={ZIK_APP_DOWNLOAD_URL}
+            >
+              Get the Zik app
+            </a>
+          </div>
+        </div>
+      </PhysicalStageFrame>
+    );
+  }
+
+  if (processState === "verified" && verification) {
+    const appHref = buildZikAppDeepLink({
+      enrollmentId: enrollment?.id
+    });
+
+    return (
+      <PhysicalStageFrame
+        accent="bg-[#69b889]"
+        progress={78}
+        title="You're verified."
+        body="Your ZikPass is ready to be secured on this device."
+      >
+        <div className="zik-stage-pop grid w-full max-w-md place-items-center gap-6 text-center">
+          <div className="relative grid h-44 w-44 place-items-center rounded-full border border-[#69b889]/35 bg-[#f7faee]">
+            <div className="absolute h-28 w-28 animate-ping rounded-full bg-lime/35" />
+            <div className="grid h-28 w-28 place-items-center rounded-full bg-lime text-6xl font-semibold text-ink">
+              ✓
+            </div>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-ink/68">
+              {deviceAuthMethod === "webauthn" ? "Face ID, fingerprint, or passcode" : "Device check ready"}
+            </p>
+            {deviceAuthSummary ? (
+              <p className="mt-2 text-sm text-ink/72">{deviceAuthSummary}</p>
+            ) : null}
+          </div>
+          <div className="grid w-full gap-3">
+            <a
+              className="rounded-full border border-ink/15 px-7 py-4 text-center text-base font-semibold text-ink"
+              href={appHref}
+            >
+              Open Zik
+            </a>
+            <button
+              className="rounded-full bg-ink px-7 py-4 text-base font-semibold text-mist disabled:opacity-55"
+              disabled={isPending}
+              onClick={onAuthenticateDevice}
+              type="button"
+            >
+              {isPending ? "Securing..." : "Get Zik"}
+            </button>
+          </div>
+        </div>
+      </PhysicalStageFrame>
+    );
+  }
+
+  if (processState === "app_handoff" || step === "cooling") {
+    return (
+      <PhysicalStageFrame
+        accent="bg-[#69c5c3]"
+        progress={92}
+        title={remainingSeconds > 0 ? "Adding your pass" : "Issuing your pass"}
+        body={
+          remainingSeconds > 0
+            ? `This finishes in ${remainingSeconds}s.`
+            : "Zik is signing the credential for this device."
+        }
+      >
+        <div className="zik-stage-pop grid w-full max-w-xl gap-7">
+          <div className="grid place-items-center">
+            <div className="h-24 w-24 animate-spin rounded-full border-[10px] border-ink/10 border-t-lime" />
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-ink/10">
+            <div
+              className="h-full rounded-full bg-lime transition-[width] duration-700"
+              style={{ width: `${Math.max(coolingProgress, 68)}%` }}
+            />
+          </div>
+          <Zignature
+            className="h-20 w-full opacity-80"
+            seedInput={pendingZignatureSeed ?? enrollment?.id ?? "physical-pending"}
+            stroke="#86a92a"
+            strokeWidth={3}
+            variant="compact"
+            width={260}
+            height={80}
+          />
+        </div>
+      </PhysicalStageFrame>
+    );
+  }
+
+  if (processState === "awaiting_retail_verification" && verification && sessionCode) {
+    return (
+      <PhysicalStageFrame
+        accent="bg-[#69b889]"
+        progress={56}
+        title="Present your ID"
+        body={`Show this screen and your physical ID to staff at ${storeName}.`}
+      >
+        <div className="zik-stage-pop grid w-full max-w-[520px] place-items-center gap-5">
+          <a
+            aria-label="Open retailer verification screen for this temporary customer QR"
+            className="block w-full"
+            href={challengeUrl ?? "/verify"}
+          >
+            <PhysicalChallengeQr value={challengeValue} />
+          </a>
+          <p className="font-heading text-6xl font-semibold tracking-[0.18em] text-ink sm:text-7xl">
+            {sessionCode}
+          </p>
+          <p className="max-w-sm text-center text-sm font-semibold text-ink/64">
+            Waiting for the clerk to confirm 18+
+          </p>
+        </div>
+      </PhysicalStageFrame>
+    );
+  }
+
+  return (
+    <PhysicalStageFrame
+      accent="bg-lime"
+      progress={18}
+      title="Preparing your challenge"
+      body={error ? "Still working. Keep this page open while we reconnect." : "Creating a secure one-time verification session."}
+    >
+      <div className="zik-stage-pop grid place-items-center gap-8">
+        <div className="relative grid h-44 w-44 place-items-center rounded-full border-[12px] border-ink/12">
+          <div className="absolute h-32 w-32 animate-ping rounded-full bg-ink/10" />
+          <div className="h-24 w-24 animate-spin rounded-full border-[10px] border-ink/14 border-t-ink" />
+        </div>
+        {error ? <p className="max-w-sm text-center text-sm font-semibold text-[#8B1D36]">{error}</p> : null}
+      </div>
+    </PhysicalStageFrame>
+  );
+}
+
+function PhysicalStageFrame({
+  accent,
+  title,
+  body,
+  progress,
+  children
+}: {
+  accent: string;
+  title: string;
+  body: string;
+  progress: number;
+  children: ReactNode;
+}) {
+  return (
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(215,241,113,0.28),_transparent_42%),_#f4f7ee] px-4 py-5 text-ink sm:px-6 sm:py-7">
+      <div className="relative mx-auto flex min-h-[calc(100vh-2.5rem)] max-w-6xl flex-col overflow-hidden rounded-[40px] border border-white/80 bg-white/76 px-5 py-7 shadow-panel backdrop-blur-sm sm:min-h-[calc(100vh-3.5rem)] sm:px-8">
+        <div className={`absolute inset-x-0 top-0 h-1.5 ${accent}`} />
+        <p className="hidden text-center text-sm font-semibold text-ink/45 lg:block">Continue on your phone</p>
+        <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center gap-10 text-center">
+          <div className="zik-stage-copy">
+            <h1 className="font-heading text-6xl font-semibold leading-[0.9] text-ink sm:text-8xl">{title}</h1>
+            <p className="mx-auto mt-5 max-w-xl text-lg font-semibold text-ink/68">{body}</p>
+          </div>
+          {children}
+        </div>
+
+        <div className="mx-auto w-full max-w-3xl">
+          <div className="h-1.5 overflow-hidden rounded-full bg-ink/10">
+            <div
+              className={`h-full rounded-full transition-[width] duration-700 ${accent}`}
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function PhysicalChallengeQr({ value }: { value: string }) {
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    void QRCode.toDataURL(value, {
+      color: {
+        dark: "#0E1726",
+        light: "#FFFFFF"
+      },
+      errorCorrectionLevel: "M",
+      margin: 1,
+      width: 430
+    }).then((nextDataUrl) => {
+      if (active) {
+        setQrDataUrl(nextDataUrl);
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [value]);
+
+  return (
+    <div
+      aria-label="Temporary customer verification QR"
+      className="grid w-full max-w-[430px] place-items-center rounded-[34px] bg-white p-5 shadow-[0_28px_90px_rgba(0,0,0,0.22)]"
+    >
+      {qrDataUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          alt="Temporary customer verification QR"
+          className="h-auto w-full rounded-[18px]"
+          src={qrDataUrl}
+        />
+      ) : (
+        <div className="h-[320px] w-full animate-pulse rounded-[18px] bg-ink/10" />
+      )}
+    </div>
+  );
+}
+
 function JourneyTracker({
   lane,
   state
@@ -2273,16 +2633,7 @@ function JourneyTracker({
         {
           label: "Bank",
           body: "Confirm GBP 0.01",
-          states: [
-            "bank_verification_pending",
-            "bank_verification_confirming",
-            "bank_verification_complete"
-          ] as JourneyState[]
-        },
-        {
-          label: "Review",
-          body: "Run secure checks",
-          states: ["financial_check_in_progress", "confidence_assessment_in_progress"] as JourneyState[]
+          states: ["bank_verification_pending", "bank_verification_confirming"] as JourneyState[]
         },
         {
           label: "Activation",
@@ -2330,7 +2681,7 @@ function JourneyTracker({
           );
         })}
       </div>
-      <div className="hidden sm:grid sm:grid-cols-4 sm:gap-3">
+      <div className={`hidden sm:grid sm:gap-3 ${lane === "physical" ? "sm:grid-cols-4" : "sm:grid-cols-3"}`}>
         {steps.map((step, index) => {
           const complete = activeIndex > index || state === "pass_issued";
           const active = activeIndex === index;
@@ -2426,6 +2777,8 @@ function FullscreenCard({
   actionLabel,
   actionHref,
   onAction,
+  actionClassName,
+  actionAside = false,
   showPassPreview = false,
   passPreviewEmphasis = false
 }: {
@@ -2436,9 +2789,13 @@ function FullscreenCard({
   actionLabel?: string;
   actionHref?: Route;
   onAction?: () => void;
+  actionClassName?: string;
+  actionAside?: boolean;
   showPassPreview?: boolean;
   passPreviewEmphasis?: boolean;
 }) {
+  const renderActionAside = actionAside && Boolean(actionLabel);
+
   return (
     <div
       className={`grid min-h-[68vh] overflow-hidden rounded-[34px] border border-ink/8 bg-transparent ${
@@ -2457,16 +2814,20 @@ function FullscreenCard({
           {children}
         </div>
 
-        {actionHref ? (
+        {!renderActionAside && actionHref ? (
           <Link
-            className="mt-8 inline-flex w-fit rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist"
+            className={`mt-8 inline-flex rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist ${
+              actionClassName ?? "w-fit"
+            }`}
             href={actionHref}
           >
             {actionLabel}
           </Link>
-        ) : actionLabel ? (
+        ) : !renderActionAside && actionLabel ? (
           <button
-            className="mt-8 inline-flex w-fit rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist"
+            className={`mt-8 inline-flex rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist ${
+              actionClassName ?? "w-fit"
+            }`}
             onClick={onAction}
           >
             {actionLabel}
@@ -2474,7 +2835,22 @@ function FullscreenCard({
         ) : null}
       </div>
 
-      {showPassPreview ? <WalletFlowAside emphasis={passPreviewEmphasis} /> : null}
+      {showPassPreview ? (
+        renderActionAside ? (
+          <aside className="relative flex items-center justify-center border-l border-ink/10 p-6 sm:p-8">
+            <button
+              className={`inline-flex items-center justify-center rounded-full px-8 py-4 font-semibold ${
+                actionClassName ?? "w-full max-w-xs justify-center"
+              }`}
+              onClick={onAction}
+            >
+              {actionLabel}
+            </button>
+          </aside>
+        ) : (
+          <WalletFlowAside emphasis={passPreviewEmphasis} />
+        )
+      ) : null}
     </div>
   );
 }
@@ -2679,76 +3055,6 @@ function BankVerificationPanel({ enrollment }: { enrollment: EnrollmentRecord })
             {enrollment.last_user_message}
           </p>
         ) : null}
-      </div>
-    </div>
-  );
-}
-
-function CheckingPanel({ activeIndex }: { activeIndex: number }) {
-  const progress = ((activeIndex + 1) / checkingStages.length) * 100;
-
-  return (
-    <div className="grid gap-5 lg:grid-cols-[0.75fr_1.25fr]">
-      <div className="rounded-[28px] bg-ink p-6 text-mist">
-        <div className="flex items-center gap-4">
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-white/20">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/25 border-t-lime" />
-          </div>
-          <div>
-            <p className="font-heading text-2xl font-semibold tracking-tight">
-              {checkingStages[activeIndex].label}
-            </p>
-            <p className="mt-1 text-sm text-mist/76">{checkingStages[activeIndex].detail}</p>
-          </div>
-        </div>
-        <div className="mt-5 h-3 overflow-hidden rounded-full bg-white/10">
-          <div
-            className="h-full rounded-full bg-[linear-gradient(90deg,_#d7f171,_#69e1c8)] transition-[width] duration-700"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      </div>
-
-      <div className="rounded-[28px] bg-white p-5">
-        <div className="space-y-3">
-          {checkingStages.map((stage, index) => {
-            const complete = index < activeIndex;
-            const current = index === activeIndex;
-
-            return (
-              <div
-                key={stage.label}
-                className={`rounded-[22px] border px-4 py-4 ${
-                  complete
-                    ? "border-transparent bg-ink text-mist"
-                    : current
-                      ? "border-lime/50 bg-lime/10"
-                      : "border-ink/8 bg-ink/3"
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <span
-                    className={`mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
-                      complete
-                        ? "bg-lime text-ink"
-                        : current
-                          ? "bg-ink text-mist"
-                          : "bg-ink/8 text-ink/60"
-                    }`}
-                  >
-                    {complete ? "✓" : index + 1}
-                  </span>
-                  <div>
-                    <p className={`font-medium ${complete ? "text-mist" : "text-ink"}`}>{stage.label}</p>
-                    <p className={`mt-1 text-sm leading-6 ${complete ? "text-mist/76" : "text-ink/64"}`}>
-                      {stage.detail}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
       </div>
     </div>
   );

@@ -14,8 +14,14 @@ import {
 } from "@/lib/server/enrollment-service";
 import { getIssuerKeyPath, getRuntimeStatePath } from "@/lib/server/runtime-paths";
 import {
+  ZIK_APP_DOWNLOAD_URL,
+  buildRetailVerificationScanUrl,
+  buildZikAppDeepLink,
   formatAssuranceLevel,
   getCredentialExperienceVariant,
+  getPhysicalProcessState,
+  isRetailVerificationCodeReady,
+  parseRetailVerificationCode,
   parseWalletEntryContext
 } from "@/lib/shared/physical-flow";
 import type { PhysicalStoreSessionRecord } from "@/lib/shared/types";
@@ -218,6 +224,66 @@ describe.sequential("physical flow", () => {
     expect(JSON.stringify(issued.issued_credential?.payload)).not.toMatch(
       /Morgan|1994|High Street|date_of_birth|first_name|last_name|current_home_address/i
     );
+  });
+
+  it("maps physical sessions to the Version 2.0 process states", async () => {
+    const session = await createPhysicalStoreSession({
+      storeId: "zik-london-001",
+      storeName: "Zik Oxford Street",
+      locationId: "front-desk"
+    });
+
+    expect(getPhysicalProcessState({ session })).toBe("preparing_challenge");
+
+    const enrollment = await startEnrollment({
+      application: physicalApplication(session, "2026-04-15T10:00:00.000Z"),
+      holderPublicKey,
+      applicationFingerprint: physicalFingerprint(session)
+    });
+
+    expect(getPhysicalProcessState({ enrollment })).toBe("awaiting_retail_verification");
+
+    const clerkConfirmed = await verifyPhysicalIdCheck({
+      userCode: enrollment.physical_verification?.user_code.value ?? "",
+      verifierToken
+    });
+
+    expect(getPhysicalProcessState({ enrollment: clerkConfirmed })).toBe("verified");
+
+    const authStart = await startPhysicalDeviceAuth(enrollment.id);
+    const issued = await completePhysicalDeviceAuth({
+      enrollmentId: enrollment.id,
+      challengeId: authStart.challenge_id,
+      method: "demo_device_check"
+    });
+
+    expect(getPhysicalProcessState({ enrollment: issued })).toBe("credential_issued");
+  });
+
+  it("builds production-shaped scan and app handoff URLs", () => {
+    expect(
+      buildRetailVerificationScanUrl({
+        userCode: "ab12cd",
+        sessionId: "store_demo"
+      })
+    ).toBe("/verify?code=AB12CD&session_id=store_demo");
+    expect(buildZikAppDeepLink({ credentialId: "zp_demo" })).toBe(
+      "zik://pass/open?credential_id=zp_demo"
+    );
+    expect(buildZikAppDeepLink({ enrollmentId: "enroll_demo" })).toBe(
+      "zik://pass/open?enrollment_id=enroll_demo"
+    );
+    expect(ZIK_APP_DOWNLOAD_URL).toBe("https://zik.app/download");
+  });
+
+  it("parses clerk-entered codes from short text or scanned URLs", () => {
+    expect(parseRetailVerificationCode(" ab12cd ")).toBe("AB12CD");
+    expect(parseRetailVerificationCode("http://localhost:3001/verify?code=ab12cd&session_id=store_demo")).toBe(
+      "AB12CD"
+    );
+    expect(parseRetailVerificationCode("/verify?code=xy98pq")).toBe("XY98PQ");
+    expect(isRetailVerificationCodeReady("AB12C")).toBe(false);
+    expect(isRetailVerificationCodeReady("AB12CD")).toBe(true);
   });
 
   it("rejects replaying a physical session after store verification has already advanced", async () => {

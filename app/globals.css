@@ -80,3 +80,23 @@ pre {
 .animate-zignature-draw {
   animation: zignatureDraw 900ms ease-out forwards;
 }
+
+@keyframes zikStageCopy {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.zik-stage-copy {
+  animation: zikStageCopy 520ms ease-out both;
+}
+
+.zik-stage-pop {
+  animation: zikStageCopy 640ms ease-out 80ms both;
+}
