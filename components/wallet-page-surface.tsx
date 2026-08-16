@@ -20,7 +20,7 @@ export function WalletPageSurface() {
   const [wallet, setWallet] = useState<WalletState | null>(null);
   const [enrollment, setEnrollment] = useState<EnrollmentRecord | null>(null);
   const [isActionsOpen, setIsActionsOpen] = useState(false);
-  const [isStatusDockOpen, setIsStatusDockOpen] = useState(true);
+  const [isStatusDockOpen, setIsStatusDockOpen] = useState(false);
   const [nowMs, setNowMs] = useState(Date.now());
   const [isPending, setIsPending] = useState(false);
   const [deleteButtonState, setDeleteButtonState] = useState<"idle" | "deleted">("idle");

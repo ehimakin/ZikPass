@@ -175,6 +175,53 @@ const physicalHowZikPassWorksSlides = [
   }
 ] as const;
 
+const parentalControlsSlide = {
+  title: "Zik Parental Controls",
+  body:
+    "A future set of wallet controls for reviewing pass transfers, managing trusted devices, and adding extra safeguards around pass use."
+} as const;
+
+const physicalHeroBulletPoints = [
+  "Check your preferred ID is accepted",
+  "Select your nearest store to reserve your pass",
+  "Visit the store in person to redeem your pass"
+] as const;
+
+interface AffiliateStore {
+  id: string;
+  name: string;
+  area: string;
+  address: string;
+  mapPosition: {
+    left: string;
+    top: string;
+  };
+}
+
+const affiliateStores: AffiliateStore[] = [
+  {
+    id: "zik-london-001",
+    name: "Zik Oxford Street",
+    area: "Central London",
+    address: "Oxford Street",
+    mapPosition: { left: "28%", top: "34%" }
+  },
+  {
+    id: "zik-london-002",
+    name: "Zik Camden",
+    area: "North London",
+    address: "Camden High Street",
+    mapPosition: { left: "62%", top: "25%" }
+  },
+  {
+    id: "zik-london-003",
+    name: "Zik Shoreditch",
+    area: "East London",
+    address: "Old Street",
+    mapPosition: { left: "70%", top: "66%" }
+  }
+];
+
 const showDevTools = process.env.NODE_ENV !== "production";
 
 const rejectedEnrollmentStatuses: EnrollmentRecord["status"][] = [
@@ -206,7 +253,7 @@ export function WalletSurface({
   homepageMode?: boolean;
   onboardingHref?: Route;
 } = {}) {
-  type HeroViewMode = "how_to_get" | "how_it_works";
+  type HeroViewMode = "how_to_get" | "how_it_works" | "parental_controls";
   type DeleteButtonState = "idle" | "deleted";
   const searchParams = useSearchParams();
   const entryContext = useMemo(() => parseWalletEntryContext(searchParams), [searchParams]);
@@ -220,6 +267,7 @@ export function WalletSurface({
   const [wallet, setWallet] = useState<WalletState>({});
   const [enrollment, setEnrollment] = useState<EnrollmentRecord | null>(null);
   const [physicalSession, setPhysicalSession] = useState<PhysicalStoreSessionRecord | null>(null);
+  const [selectedAffiliateStoreId, setSelectedAffiliateStoreId] = useState<string | null>(null);
   const [onboardingStarted, setOnboardingStarted] = useState(false);
   const [step, setStep] = useState<FlowStep>("full-name");
   const [journeyState, setJourneyState] = useState<JourneyState>("idle");
@@ -234,7 +282,7 @@ export function WalletSurface({
   const [heroWorksSlideIndex, setHeroWorksSlideIndex] = useState(0);
   const [nowMs, setNowMs] = useState(Date.now());
   const [deleteButtonState, setDeleteButtonState] = useState<DeleteButtonState>("idle");
-  const [isStatusDockOpen, setIsStatusDockOpen] = useState(true);
+  const [isStatusDockOpen, setIsStatusDockOpen] = useState(false);
   const [deviceAuthMethod, setDeviceAuthMethod] = useState<"webauthn" | "demo_device_check">(
     "demo_device_check"
   );
@@ -460,15 +508,17 @@ export function WalletSurface({
     }
   }, []);
 
-  const createPhysicalSessionFromEntry = useCallback(async () => {
+  const createPhysicalSessionFromEntry = useCallback(async (selectedStore?: AffiliateStore) => {
     try {
       const response = await fetch("/api/physical/sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          storeId: entryContext.lane === "physical" ? entryContext.store_id : undefined,
-          storeName: entryContext.lane === "physical" ? entryContext.store_name : undefined,
-          locationId: entryContext.lane === "physical" ? entryContext.location_id : undefined
+          storeId: selectedStore?.id ?? (entryContext.lane === "physical" ? entryContext.store_id : undefined),
+          storeName:
+            selectedStore?.name ?? (entryContext.lane === "physical" ? entryContext.store_name : undefined),
+          locationId:
+            selectedStore ? "front-desk" : entryContext.lane === "physical" ? entryContext.location_id : undefined
         })
       });
       const data = (await response.json()) as PhysicalStoreSessionRecord | ApiError;
@@ -483,7 +533,7 @@ export function WalletSurface({
       setIsFlowOpen(true);
       setError(null);
     } catch {
-      setError("We could not start the in-store session from this retail card.");
+      setError("We could not start the in-store session for this store.");
     }
   }, [entryContext]);
 
@@ -587,6 +637,10 @@ export function WalletSurface({
   }, [active, credential, step]);
 
   useEffect(() => {
+    if (heroViewMode === "parental_controls") {
+      return;
+    }
+
     const interval = window.setInterval(() => {
       if (heroViewMode === "how_to_get") {
         setHeroSlideIndex((current) => (current + 1) % heroSlides.length);
@@ -656,8 +710,14 @@ export function WalletSurface({
       setError(null);
 
       if (!physicalSession) {
+        const selectedStore = affiliateStores.find((store) => store.id === selectedAffiliateStoreId);
+        if (isPhysicalLane && !physicalEntryExplicit && !selectedStore) {
+          setError("Select an affiliate store before beginning.");
+          return;
+        }
+
         setIsFlowOpen(true);
-        void createPhysicalSessionFromEntry();
+        void createPhysicalSessionFromEntry(selectedStore);
         return;
       }
     }
@@ -1041,14 +1101,10 @@ export function WalletSurface({
       ]
       : walletStatus.status === "pass_pending_issuance"
         ? [
-            { label: "State", value: "Pending issuance" },
+            { label: "Status", value: "Pending issuance" },
             {
-              label: "Lane",
+              label: "Type",
               value: isPhysicalLane ? "In-person verification" : "Remote verification"
-            },
-            {
-              label: "Cooling-off",
-              value: remainingSeconds > 0 ? `${remainingSeconds}s remaining` : "Awaiting issuer sign"
             },
             { label: "Storage", value: "Holder key on this device" }
           ]
@@ -1066,9 +1122,9 @@ export function WalletSurface({
   const activeHeroSlide = isPhysicalLane
     ? {
         pill: "In-store verification",
-        title: "Show your ID once. Keep it offline. Use ZikPass online.",
-        body:
-          "A staff member checks your physical ID in person. Zik receives only the authorised 18+ result and issues an in-person verified pass to this device."
+        title:
+          "Anonymous online 18+ ID. Physically verified. Without EVER needing to digitise any Identity data.",
+        body: physicalHeroBulletPoints.join(". ")
       }
     : heroSlides[heroSlideIndex];
   const activeHowItWorksSlides = isPhysicalLane
@@ -1084,26 +1140,37 @@ export function WalletSurface({
   const pendingZignatureSeed = enrollment
     ? `pending:${enrollment.id}:${stableStringify(enrollment.holder_public_key)}`
     : null;
-  const showPhysicalV2Flow = physicalEntryExplicit || (!onboardingMode && enrollment?.lane === "physical");
+  const showPhysicalV2Flow = physicalEntryExplicit;
 
   if (showPhysicalV2Flow) {
     return (
-      <PhysicalOnboardingExperience
-        credential={credential}
-        deviceAuthMethod={deviceAuthMethod}
-        deviceAuthSummary={deviceAuthSummary}
-        enrollment={enrollment}
-        error={error}
-        isPending={isPending}
-        physicalSession={physicalSession}
-        step={step}
-        remainingSeconds={remainingSeconds}
-        coolingProgress={coolingProgress}
-        issuedZignatureSeed={issuedZignatureSeed}
-        pendingZignatureSeed={pendingZignatureSeed}
-        onAuthenticateDevice={startDeviceAuthentication}
-        onReset={resetFlow}
-      />
+      <div className="relative min-h-screen">
+        <PhysicalOnboardingExperience
+          credential={credential}
+          deviceAuthMethod={deviceAuthMethod}
+          deviceAuthSummary={deviceAuthSummary}
+          enrollment={enrollment}
+          error={error}
+          isPending={isPending}
+          physicalSession={physicalSession}
+          step={step}
+          remainingSeconds={remainingSeconds}
+          coolingProgress={coolingProgress}
+          issuedZignatureSeed={issuedZignatureSeed}
+          pendingZignatureSeed={pendingZignatureSeed}
+          onAuthenticateDevice={startDeviceAuthentication}
+          onReset={resetFlow}
+        />
+        <WalletStatusFooter
+          canDeleteLocalPass={canDeleteLocalPass}
+          deleteButtonState={deleteButtonState}
+          isOpen={isStatusDockOpen}
+          onReset={resetFlow}
+          onToggle={() => setIsStatusDockOpen((current) => !current)}
+          status={walletStatus}
+          statusMeta={statusMeta}
+        />
+      </div>
     );
   }
 
@@ -1126,12 +1193,12 @@ export function WalletSurface({
                   <div>
                     <p className="mt-2 font-heading text-3xl font-semibold tracking-tight text-ink">
                       {onboardingMode
-                        ? "Anonymous digital ID, physically verified"
+                        ? "Customer Onboarding"
                         : isPhysicalLane
                           ? "In-person verified onboarding"
                           : "Zero Knowledge age verification"}
                     </p>
-                    {!showHeroPassPreview ? (
+                    {!showHeroPassPreview && !onboardingMode ? (
                       <p className="mt-2 font-mono text-xs tracking-[0.24em] text-ink/45">
                         {isPhysicalLane
                           ? "This store session will issue a stronger-assurance Zik Pass to this device."
@@ -1166,29 +1233,27 @@ export function WalletSurface({
                   </div>
                 ) : walletStatus.status === "pass_pending_issuance" ? (
                   <div className="grid gap-5">
-                    <CredentialVisualPreview
-                      title="Pass pending issuance"
-                      body={
-                        isPhysicalLane
-                          ? "This device already holds the private holder key for the in-person verified pass. Zik will issue it after staff verification, device authentication, and any lane-specific cooling-off are complete."
-                          : "This device already holds the private holder key for your Zik Pass. Cooling-off must complete before Zik signs the credential and locks in the final Zignature."
-                      }
-                      seedInput={pendingZignatureSeed ?? "pending"}
-                      variant="compact"
-                      muted
-                    />
+                    {!homepageMode ? (
+                      <CredentialVisualPreview
+                        title="Pass pending issuance"
+                        body={
+                          isPhysicalLane
+                            ? "This device already holds the private holder key for the in-person verified pass. Zik will issue it after staff verification and device authentication are complete."
+                            : "This device already holds the private holder key for your Zik Pass. Zik will sign the credential and lock in the final Zignature when issuance is complete."
+                        }
+                        seedInput={pendingZignatureSeed ?? "pending"}
+                        variant="compact"
+                        muted
+                      />
+                    ) : null}
                     <div className="grid gap-3 sm:grid-cols-3">
-                      <MetaTile label="State" value="Pending issuance" />
+                      <MetaTile label="Status" value="Pending issuance" />
                       <MetaTile
-                        label="Lane"
+                        label="Type"
                         value={isPhysicalLane ? "In-store verification" : "Remote verification"}
                       />
                       <MetaTile
-                        label="Cooling-off"
-                        value={remainingSeconds > 0 ? `${remainingSeconds}s remaining` : "Awaiting signature"}
-                      />
-                      <MetaTile
-                        label={isPhysicalLane ? "Store step" : "Privacy"}
+                        label={isPhysicalLane ? "ID Challenge" : "Privacy"}
                         value={isPhysicalLane ? "Staff + device auth required" : "No account required"}
                       />
                     </div>
@@ -1204,14 +1269,24 @@ export function WalletSurface({
                 ) : (
                   <>
                     {isPhysicalLane ? (
-                      <div className="rounded-[26px] bg-[#f7faee] p-5 text-sm text-ink/76">
-                        <p className="font-medium text-ink">This store session is ready</p>
-                        <p className="mt-2 leading-6">
-                          Create a local holder key, then show your temporary customer QR to a staff
-                          member with your physical ID. Zik receives the age-check result, not your
-                          identity details.
-                        </p>
-                      </div>
+                      onboardingMode && !physicalEntryExplicit ? (
+                        <div className="rounded-[26px] bg-[#f7faee] p-5 text-sm text-ink/76">
+                          <p className="font-medium text-ink">Select a store</p>
+                          <AffiliateStoreSelector
+                            selectedStoreId={selectedAffiliateStoreId}
+                            onSelect={setSelectedAffiliateStoreId}
+                          />
+                        </div>
+                      ) : (
+                        <div className="rounded-[26px] bg-[#f7faee] p-5 text-sm text-ink/76">
+                          <p className="font-medium text-ink">This store session is ready</p>
+                          <p className="mt-2 leading-6">
+                            Create a local holder key, then show your temporary customer QR to a staff
+                            member with your physical ID. Zik receives the age-check result, not your
+                            identity details.
+                          </p>
+                        </div>
+                      )
                     ) : (
                       <>
                         <div className="grid gap-4 sm:grid-cols-2">
@@ -1256,17 +1331,29 @@ export function WalletSurface({
                       </>
                     )}
 
-                    <div className={isPhysicalLane ? "flex flex-wrap gap-3 pt-[90px]" : "flex flex-wrap gap-3"}>
+                    <div
+                      className={
+                        onboardingMode
+                          ? "flex flex-col items-center justify-center gap-3 pt-[35px] text-center"
+                          : isPhysicalLane
+                            ? "flex flex-wrap gap-3 pt-[90px]"
+                            : "flex flex-wrap gap-3"
+                      }
+                    >
                       {isPhysicalLane && !onboardingMode ? (
                         <Link
                           className="rounded-full bg-ink px-6 py-3 text-sm font-semibold text-mist transition"
                           href={onboardingHref}
                         >
-                          Continue in-store
+                          Get Zik Pass
                         </Link>
                       ) : (
                         <button
-                          className={`rounded-full px-6 py-3 text-sm font-semibold transition ${
+                          className={`rounded-full font-semibold transition ${
+                            onboardingMode
+                              ? "mb-[20px] min-h-[82px] min-w-[150px] px-[34px] py-5 text-[26px]"
+                              : "px-6 py-3 text-sm"
+                          } ${
                             isPhysicalLane || canStartFromHero
                               ? "bg-ink text-mist"
                               : "cursor-default bg-ink/12 text-gray-300"
@@ -1276,12 +1363,17 @@ export function WalletSurface({
                           onClick={startFromHero}
                         >
                           {onboardingMode
-                            ? "Begin physical ID Check"
+                            ? "Begin"
                             : isPhysicalLane
                               ? "Continue in-store"
                               : "Get Zik Pass"}
                         </button>
                       )}
+                      {onboardingMode ? (
+                        <p className="mb-[50px] max-w-sm text-xs leading-5 text-ink/55">
+                          A physical check of your ID will be made by the affiliate verifier
+                        </p>
+                      ) : null}
                       {!onboardingMode ? (
                         <button
                           className="rounded-full border border-ink/10 bg-[#f7faee] px-6 py-3 text-sm font-medium text-ink hover:bg-[#edf3df]"
@@ -1323,6 +1415,11 @@ export function WalletSurface({
                 label="How to get your ZikPass"
                 onClick={() => setHeroViewMode("how_to_get")}
               />
+              <HeroViewTab
+                active={heroViewMode === "parental_controls"}
+                label="Zik Parental Controls"
+                onClick={() => setHeroViewMode("parental_controls")}
+              />
               {!homepageMode ? (
                 <HeroViewTab
                   active={heroViewMode === "how_it_works"}
@@ -1331,28 +1428,70 @@ export function WalletSurface({
                 />
               ) : null}
             </div>
-            <div className="space-y-6 md:flex md:flex-1 md:flex-col md:justify-center">
-              {homepageMode || heroViewMode === "how_to_get" ? (
+            <div className="space-y-[13px] md:flex md:flex-1 md:flex-col md:justify-center">
+              {heroViewMode === "how_to_get" ? (
                 <>
-                  <div className="min-h-[248px] space-y-4 sm:min-h-[272px]">
-                    <h2 className="max-w-3xl font-heading text-5xl font-semibold leading-[0.92] tracking-tight text-ink sm:text-6xl">
+                  <div
+                    className={`${isPhysicalLane ? "mt-[30px]" : "-mt-[10px]"} min-h-[248px] space-y-4 sm:min-h-[272px]`}
+                  >
+                    <h2
+                      className={`max-w-3xl font-heading font-semibold leading-[0.92] tracking-tight text-ink ${
+                        isPhysicalLane ? "text-[1.9rem] sm:text-[2.35rem]" : "text-5xl sm:text-6xl"
+                      }`}
+                    >
                       {activeHeroSlide.title}
                     </h2>
-                    <p className="max-w-2xl text-base leading-8 text-ink/68">
-                      {activeHeroSlide.body}
-                    </p>
+                    {isPhysicalLane ? (
+                      <ul className="!mt-[26px] list-disc space-y-1 pl-5 text-base leading-8 text-ink/68">
+                        {physicalHeroBulletPoints.map((point) => (
+                          <li key={point}>{point}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="max-w-2xl text-base leading-8 text-ink/68">
+                        {activeHeroSlide.body}
+                      </p>
+                    )}
                   </div>
                   <div className="flex flex-wrap gap-2 text-xs text-ink/70">
-                    {(isPhysicalLane ? [activeHeroSlide] : heroSlides).map((slide, index) => (
-                      <HeroSlidePill
-                        key={slide.pill}
-                        active={isPhysicalLane || index === heroSlideIndex}
-                        label={slide.pill}
-                        onClick={() => setHeroSlideIndex(index)}
-                      />
-                    ))}
+                    {isPhysicalLane ? (
+                      <button
+                        className="rounded-full bg-ink px-4 py-[10px] text-[12px] font-semibold text-mist transition hover:bg-[#24364d]"
+                        onClick={() => setIsLearnMoreOpen(true)}
+                        type="button"
+                      >
+                        Learn more
+                      </button>
+                    ) : (
+                      heroSlides.map((slide, index) => (
+                        <HeroSlidePill
+                          key={slide.pill}
+                          active={index === heroSlideIndex}
+                          label={slide.pill}
+                          onClick={() => setHeroSlideIndex(index)}
+                        />
+                      ))
+                    )}
                   </div>
                 </>
+              ) : heroViewMode === "parental_controls" ? (
+                <div className="-mt-[10px] min-h-[248px] space-y-4 sm:min-h-[272px]">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-ink/44">
+                    Coming soon
+                  </p>
+                  <h2 className="max-w-3xl font-heading text-5xl font-semibold leading-[0.92] tracking-tight text-ink sm:text-6xl">
+                    {parentalControlsSlide.title}
+                  </h2>
+                  <p className="max-w-2xl text-base leading-8 text-ink/68">
+                    {parentalControlsSlide.body}
+                  </p>
+                  <Link
+                    className="inline-flex w-fit rounded-full bg-ink px-4 py-[10px] text-[12px] font-semibold text-mist transition hover:bg-[#24364d]"
+                    href="/ZikParental"
+                  >
+                    Learn more
+                  </Link>
+                </div>
               ) : (
                 <>
                   <div className="min-h-[248px] overflow-hidden rounded-[28px] border border-ink/10 bg-white/74 shadow-[0_18px_40px_rgba(14,23,38,0.06)] sm:min-h-[272px]">
@@ -1873,7 +2012,6 @@ export function WalletSurface({
                   <QuestionCard
                     step="In-store verification"
                     title="You’re ready to verify"
-                    body="Take your phone and physical ID to the till. Staff will check your age in person and scan or enter this temporary session code."
                     canContinue={false}
                     error={error}
                     nextLabel="Waiting for staff"
@@ -2249,6 +2387,157 @@ export function WalletSurface({
           </div>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function AffiliateStoreSelector({
+  selectedStoreId,
+  onSelect
+}: {
+  selectedStoreId: string | null;
+  onSelect: (storeId: string) => void;
+}) {
+  return (
+    <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+      <div
+        className="relative min-h-[220px] overflow-hidden rounded-[24px] border border-ink/8 bg-[#dfe8d3]"
+        style={{
+          backgroundImage:
+            "linear-gradient(28deg, transparent 46%, rgba(255,255,255,0.74) 47%, rgba(255,255,255,0.74) 50%, transparent 51%), linear-gradient(112deg, transparent 44%, rgba(255,255,255,0.58) 45%, rgba(255,255,255,0.58) 48%, transparent 49%), linear-gradient(180deg, rgba(215,241,113,0.35), transparent 62%)"
+        }}
+      >
+        <p className="absolute left-4 top-4 rounded-full bg-white/75 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-ink/55">
+          Affiliate locations
+        </p>
+        {affiliateStores.map((store) => {
+          const isSelected = store.id === selectedStoreId;
+
+          return (
+            <button
+              key={store.id}
+              aria-label={`Select ${store.name}`}
+              aria-pressed={isSelected}
+              className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-4 p-1 shadow-[0_8px_18px_rgba(14,23,38,0.16)] transition-transform hover:scale-110 ${
+                isSelected ? "border-ink bg-lime" : "border-white bg-ink"
+              }`}
+              onClick={() => onSelect(store.id)}
+              style={store.mapPosition}
+              type="button"
+            >
+              <span className="block h-4 w-4 rounded-full bg-current" />
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="grid content-start gap-2">
+        {affiliateStores.map((store) => {
+          const isSelected = store.id === selectedStoreId;
+
+          return (
+            <button
+              key={store.id}
+              aria-pressed={isSelected}
+              className={`rounded-[18px] border p-3 text-left transition ${
+                isSelected
+                  ? "border-ink bg-ink text-mist"
+                  : "border-ink/8 bg-white/75 text-ink hover:bg-white"
+              }`}
+              onClick={() => onSelect(store.id)}
+              type="button"
+            >
+              <span className="block text-sm font-semibold">{store.name}</span>
+              <span className={isSelected ? "mt-1 block text-xs text-mist/70" : "mt-1 block text-xs text-ink/55"}>
+                {store.area} · {store.address}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function WalletStatusFooter({
+  canDeleteLocalPass,
+  deleteButtonState,
+  isOpen,
+  onReset,
+  onToggle,
+  status,
+  statusMeta
+}: {
+  canDeleteLocalPass: boolean;
+  deleteButtonState: "idle" | "deleted";
+  isOpen: boolean;
+  onReset: () => void;
+  onToggle: () => void;
+  status: ReturnType<typeof getWalletStatusSnapshot>;
+  statusMeta: Array<{ label: string; value: string }>;
+}) {
+  const statusLabel =
+    status.status === "pass_issued_and_stored_locally"
+      ? status.credential_active
+        ? "Active"
+        : "Activating"
+      : status.status === "pass_expired"
+        ? "Expired"
+        : status.status === "pass_pending_issuance"
+          ? "Pending issuance"
+          : "Not started";
+
+  return (
+    <div
+      className={`pointer-events-none fixed inset-x-0 bottom-0 z-40 flex items-end px-3 pb-10 transition-[height] duration-200 sm:px-6 lg:px-8 ${isOpen ? "h-44" : "h-24"}`}
+      style={{
+        backgroundImage:
+          "linear-gradient(180deg, rgba(255,255,255,0.31) 0%, rgba(255,255,255,1) 50%, rgba(162,206,106,1) 100%)",
+        backgroundRepeat: "no-repeat",
+        backgroundSize: "100% 100%"
+      }}
+    >
+      <section
+        aria-live="polite"
+        className="pointer-events-auto mx-auto w-[85%] max-w-[1088px] rounded-[22px] bg-white/80 p-1.5 opacity-25 shadow-[0_-12px_36px_rgba(14,23,38,0.08)] transition-[opacity,background-image,background-color] duration-200 hover:bg-[linear-gradient(180deg,_rgba(255,255,255,0.94),_rgba(244,247,238,0.94))] hover:opacity-100 sm:p-2"
+      >
+        <div className="flex flex-wrap items-center gap-2 px-1 py-0.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-ink/45">Your status</p>
+            <StatusPill tone={statusLabel === "Active" ? "good" : statusLabel === "Expired" ? "warn" : "neutral"}>
+              {statusLabel}
+            </StatusPill>
+            {canDeleteLocalPass || deleteButtonState === "deleted" ? (
+              <button
+                className="rounded-full bg-ink px-2.5 py-1 text-[11px] font-medium text-mist disabled:opacity-55"
+                disabled={deleteButtonState === "deleted"}
+                onClick={onReset}
+              >
+                {deleteButtonState === "deleted" ? "Deleted" : "Delete Zik Pass from this device"}
+              </button>
+            ) : null}
+          </div>
+          <button
+            aria-expanded={isOpen}
+            aria-label={isOpen ? "Collapse wallet status details" : "Expand wallet status details"}
+            className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded-full border border-ink/10 bg-white text-sm font-semibold text-ink hover:bg-[#edf3df]"
+            onClick={onToggle}
+            title={isOpen ? "Collapse status details" : "Expand status details"}
+            type="button"
+          >
+            {isOpen ? "-" : "+"}
+          </button>
+        </div>
+        {isOpen ? (
+          <div className="mt-1 grid gap-1.5 sm:grid-cols-3 lg:min-w-[420px]">
+            {statusMeta.map((item) => (
+              <div className={item.label === "Flow" ? "hidden sm:block" : ""} key={item.label}>
+                <MetaTile label={item.label} value={item.value} />
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </section>
     </div>
   );
 }
@@ -2742,7 +3031,7 @@ function QuestionCard({
 }: {
   step: string;
   title: string;
-  body: string;
+  body?: string;
   children: ReactNode;
   canContinue: boolean;
   error?: string | null;
@@ -2761,7 +3050,9 @@ function QuestionCard({
             <h3 className="font-heading text-2xl font-semibold tracking-tight text-ink sm:text-4xl">
               {title}
             </h3>
-            <p className="max-w-2xl text-sm leading-6 text-ink/70 sm:text-base sm:leading-7">{body}</p>
+            {body ? (
+              <p className="max-w-2xl text-sm leading-6 text-ink/70 sm:text-base sm:leading-7">{body}</p>
+            ) : null}
             {error ? (
               <p className="max-w-2xl text-sm leading-6 text-[#b4535f]">{error}</p>
             ) : null}
@@ -2954,13 +3245,12 @@ function PhysicalVerificationPanel({
       </div>
 
       <div className="rounded-[28px] bg-white p-5 text-sm text-ink/76">
-        <p className="font-medium text-ink">What happens next</p>
-        <div className="mt-3 space-y-3">
+        <div className="space-y-3">
           <InstructionRow number="1" body="Show this code to the staff member assisting you." />
-          <InstructionRow number="2" body="They confirm they have checked your ID in person." />
+          <InstructionRow number="2" body="When prompted, show your ID." />
           <InstructionRow
             number="3"
-            body="You complete device authentication here before Zik issues the pass."
+            body="Complete device authentication in person for stronger proof."
           />
         </div>
         <div className="mt-5 rounded-[20px] bg-ink/5 px-4 py-3 text-sm text-ink/72">

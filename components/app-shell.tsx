@@ -74,7 +74,7 @@ export function AppShell({
           )}
         >
           <div className="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
-            <div className="rounded-[32px] bg-transparent px-4 py-4">
+            <div className="rounded-[32px] border-2 border-white/50 bg-transparent px-4 py-4 transition-colors duration-200 hover:border-white focus-within:border-white">
               <div className="flex items-center justify-between gap-4">
                 <Link href="/" className="flex items-center">
                   <ZikLogoLockup subdued />
@@ -113,13 +113,12 @@ export function AppShell({
           >
             <ZikLogoLockup subdued />
           </Link>
-          <div className="flex min-h-screen items-start justify-end px-4 pb-4 pt-[210px] sm:px-6 sm:pb-6 sm:pt-[210px]">
+          <div className="flex min-h-screen items-start justify-center px-4 pb-4 pt-[210px] sm:px-6 sm:pb-6 sm:pt-[210px]">
             <div
-              className="w-full max-w-sm rounded-[34px] border border-white/70 bg-white/96 p-6 shadow-[0_30px_90px_rgba(14,23,38,0.22)]"
+              className="mt-[40px] w-full max-w-sm rounded-[34px] border border-white/70 bg-white/96 p-6 shadow-[0_30px_90px_rgba(14,23,38,0.22)]"
               onClick={(event) => event.stopPropagation()}
             >
-              <div className="flex items-center justify-between gap-4">
-                <ZikLogoLockup subdued />
+              <div className="flex items-center justify-end gap-4">
                 <button
                   aria-label="Close site menu"
                   className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-ink/10 bg-[#f4f7ee] text-lg text-ink"
