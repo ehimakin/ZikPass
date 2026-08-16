@@ -1555,7 +1555,7 @@ export function WalletSurface({
                 ×
               </button>
 
-              <div className="min-h-0 flex-1 overflow-y-auto pr-0 sm:pr-2">
+              <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto pr-0 sm:pr-2">
                 {step === "physical-session" && (physicalSession || enrollment?.physical_verification) ? (
                   <FullscreenCard
                     eyebrow="You’re verifying in-store"
@@ -1985,7 +1985,7 @@ export function WalletSurface({
                     showPassPreview
                     passPreviewEmphasis
                   >
-                    <div className="grid gap-4">
+                    <div className="grid min-w-0 gap-4">
                       <PassPreviewCard
                         credentialId={credential?.payload.credential_id ?? enrollment.id}
                         active={false}
@@ -2043,7 +2043,7 @@ export function WalletSurface({
                     }
                     showPassPreview
                     actionLabel="Done"
-                    actionClassName="h-[150px] w-[400px] max-w-full items-center justify-center bg-[linear-gradient(135deg,_#7cb56b,_#a2ce6a)] px-8 py-4 text-center text-4xl text-white transition-[filter] hover:brightness-95"
+                    actionClassName="h-[150px] w-full max-w-[400px] items-center justify-center bg-[linear-gradient(135deg,_#7cb56b,_#a2ce6a)] px-5 py-4 text-center text-3xl text-white transition-[filter] hover:brightness-95 sm:w-[400px] sm:px-8 sm:text-4xl"
                     actionAside
                     onAction={closeFlow}
                   >
@@ -2798,18 +2798,18 @@ function FullscreenCard({
 
   return (
     <div
-      className={`grid min-h-[68vh] overflow-hidden rounded-[34px] border border-ink/8 bg-transparent ${
+      className={`grid min-h-[68vh] min-w-0 w-full max-w-full overflow-hidden rounded-[34px] border border-ink/8 bg-transparent ${
         showPassPreview ? "lg:grid-cols-[1.12fr_0.88fr]" : ""
       }`}
     >
-      <div className="flex flex-col justify-between p-6 sm:p-8">
+      <div className="flex min-w-0 flex-col justify-between p-4 sm:p-8">
         <div className="space-y-5">
           <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink/45">{eyebrow}</p>
           <div className="space-y-3">
-            <h3 className="font-heading text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+            <h3 className="break-words font-heading text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
               {title}
             </h3>
-            <p className="max-w-2xl text-sm leading-7 text-ink/70 sm:text-base">{body}</p>
+            <p className="max-w-2xl break-words text-sm leading-7 text-ink/70 sm:text-base">{body}</p>
           </div>
           {children}
         </div>
@@ -2837,9 +2837,9 @@ function FullscreenCard({
 
       {showPassPreview ? (
         renderActionAside ? (
-          <aside className="relative flex items-center justify-center border-l border-ink/10 p-6 sm:p-8">
+          <aside className="relative flex min-w-0 w-full items-center justify-center border-t border-ink/10 p-4 sm:p-8 lg:border-l lg:border-t-0">
             <button
-              className={`inline-flex items-center justify-center rounded-full px-8 py-4 font-semibold ${
+              className={`inline-flex h-[150px] w-full max-w-[400px] items-center justify-center rounded-full px-5 py-4 text-center font-semibold sm:px-8 ${
                 actionClassName ?? "w-full max-w-xs justify-center"
               }`}
               onClick={onAction}
@@ -3070,9 +3070,9 @@ export function PassPreviewCard({
   zignatureSeedInput: string;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-[32px] bg-[linear-gradient(135deg,_#243818_0%,_#557f33_48%,_#a2ce6a_100%)] p-6 text-mist">
+    <div className="relative min-w-0 w-full max-w-full overflow-hidden rounded-[32px] bg-[linear-gradient(135deg,_#243818_0%,_#557f33_48%,_#a2ce6a_100%)] p-4 text-mist sm:p-6">
       <div className="absolute -right-10 top-0 h-40 w-40 rounded-full bg-[#e9f8c9]/20 blur-3xl" />
-      <div className="relative">
+      <div className="relative min-w-0">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.24em] text-[#edf9d1]">Zik Pass</p>
@@ -3080,15 +3080,15 @@ export function PassPreviewCard({
           </div>
           <StatusPill tone={active ? "good" : "neutral"}>{active ? "Active" : "Activating"}</StatusPill>
         </div>
-        <div className="mt-7 rounded-[26px] border border-white/12 bg-white/8 px-4 py-4">
-          <div className="flex items-center justify-between gap-3">
+        <div className="mt-7 min-w-0 rounded-[26px] border border-white/12 bg-white/8 px-3 py-4 sm:px-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[#edf9d1]/72">
                 Your Zignature
               </p>
               <p className="mt-1 text-sm text-mist/78">Unique to this pass</p>
             </div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#edf9d1]/55">
+            <p className="break-words text-right font-mono text-[11px] uppercase tracking-[0.18em] text-[#edf9d1]/55">
               Deterministic mark
             </p>
           </div>
@@ -3103,7 +3103,7 @@ export function PassPreviewCard({
             height={96}
           />
         </div>
-        <div className="mt-5 grid gap-4 sm:grid-cols-3">
+        <div className="mt-5 grid min-w-0 gap-4 sm:grid-cols-3">
           <BankMetaTile label="Pass ID" value={credentialId} />
           <BankMetaTile label="Identity shared" value="No" />
           <BankMetaTile label="Bound to device" value="Yes" />
@@ -3444,9 +3444,9 @@ function FieldTextarea({
 
 function InlineDetail({ title, body }: { title: string; body: string }) {
   return (
-    <div className="rounded-[20px] bg-white/75 px-4 py-4">
+    <div className="min-w-0 rounded-[20px] bg-white/75 px-4 py-4">
       <p className="text-sm font-medium text-ink">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-ink/64">{body}</p>
+      <p className="mt-2 break-words text-sm leading-6 text-ink/64">{body}</p>
     </div>
   );
 }
@@ -3495,18 +3495,18 @@ function InstructionRow({ number, body }: { number: string; body: string }) {
 
 function MetaTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[18px] bg-white px-2.5 py-1.5">
+    <div className="min-w-0 rounded-[18px] bg-white px-2.5 py-1.5">
       <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ink/45">{label}</p>
-      <p className="mt-0.5 text-[11px] font-medium text-ink">{value}</p>
+      <p className="mt-0.5 break-words text-[11px] font-medium text-ink">{value}</p>
     </div>
   );
 }
 
 function BankMetaTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[22px] bg-white/8 px-4 py-4">
+    <div className="min-w-0 rounded-[22px] bg-white/8 px-4 py-4">
       <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/55">{label}</p>
-      <p className="mt-2 text-sm font-medium text-mist">{value}</p>
+      <p className="mt-2 break-words text-sm font-medium text-mist">{value}</p>
     </div>
   );
 }

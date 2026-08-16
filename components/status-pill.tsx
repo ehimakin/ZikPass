@@ -15,7 +15,7 @@ export function StatusPill({
   children: ReactNode;
 }) {
   return (
-    <span className={clsx("inline-flex rounded-full px-3 py-1 text-xs font-medium", tones[tone])}>
+    <span className={clsx("inline-flex max-w-full break-words rounded-full px-3 py-1 text-center text-xs font-medium", tones[tone])}>
       {children}
     </span>
   );
