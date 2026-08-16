@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Route } from "next";
 import Link from "next/link";
 import clsx from "clsx";
@@ -24,7 +24,31 @@ export function AppShell({
   currentPath?: string;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const scrollIdleTimer = useRef<number | null>(null);
   const showHeroBackground = currentPath === "/" || currentPath === "/wallet";
+
+  useEffect(() => {
+    function handleScroll() {
+      setHeaderVisible(window.scrollY <= 8);
+
+      if (scrollIdleTimer.current) {
+        window.clearTimeout(scrollIdleTimer.current);
+      }
+
+      scrollIdleTimer.current = window.setTimeout(() => {
+        setHeaderVisible(true);
+      }, 240);
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollIdleTimer.current) {
+        window.clearTimeout(scrollIdleTimer.current);
+      }
+    };
+  }, []);
 
   return (
     <div className={clsx("relative min-h-screen text-ink", showHeroBackground ? "bg-white" : "bg-mist")}>
@@ -42,28 +66,38 @@ export function AppShell({
       ) : (
         <div className="absolute inset-x-0 top-0 -z-10 h-[460px] bg-[radial-gradient(circle_at_top_left,_rgba(215,241,113,0.66),_transparent_38%),radial-gradient(circle_at_top_right,_rgba(201,242,123,0.38),_transparent_34%),linear-gradient(180deg,_#fbfff1_0%,_#f4f7ee_42%,_#eef2e6_100%)]" />
       )}
-      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 pb-16 pt-6 sm:px-6 lg:px-8">
-        <header className="mb-10 rounded-[32px] bg-transparent px-4 py-4">
-          <div className="flex items-center justify-between gap-4">
-            <Link href="/" className="flex items-center">
-              <ZikLogoLockup subdued />
-            </Link>
-            <button
-              aria-label="Open site menu"
-              className="inline-flex items-center gap-3 rounded-full border border-ink/10 bg-[#f4f7ee] px-4 py-3 text-sm font-medium text-ink hover:bg-[#ebf0df]"
-              onClick={() => setMenuOpen(true)}
-            >
-              <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink/55">
-                Menu
-              </span>
-              <span className="flex flex-col gap-1">
-                <span className="block h-[2px] w-4 rounded-full bg-ink" />
-                <span className="block h-[2px] w-4 rounded-full bg-ink" />
-                <span className="block h-[2px] w-4 rounded-full bg-ink" />
-              </span>
-            </button>
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 pb-16 sm:px-6 lg:px-8">
+        <header
+          className={clsx(
+            "fixed inset-x-0 top-0 z-40 transition-[opacity,transform] duration-200 ease-out",
+            headerVisible || menuOpen ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-3 opacity-0"
+          )}
+        >
+          <div className="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+            <div className="rounded-[32px] bg-transparent px-4 py-4">
+              <div className="flex items-center justify-between gap-4">
+                <Link href="/" className="flex items-center">
+                  <ZikLogoLockup subdued />
+                </Link>
+                <button
+                  aria-label="Open site menu"
+                  className="inline-flex items-center gap-3 rounded-full border border-ink/10 bg-[#f4f7ee] px-4 py-3 text-sm font-medium text-ink hover:bg-[#ebf0df]"
+                  onClick={() => setMenuOpen(true)}
+                >
+                  <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink/55">
+                    Menu
+                  </span>
+                  <span className="flex flex-col gap-1">
+                    <span className="block h-[2px] w-4 rounded-full bg-ink" />
+                    <span className="block h-[2px] w-4 rounded-full bg-ink" />
+                    <span className="block h-[2px] w-4 rounded-full bg-ink" />
+                  </span>
+                </button>
+              </div>
+            </div>
           </div>
         </header>
+        <div aria-hidden="true" className="h-[106px] shrink-0" />
         {children}
       </div>
 
