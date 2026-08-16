@@ -5,10 +5,7 @@ import { useEffect, useState } from "react";
 import { PassPreviewCard } from "@/components/wallet-surface";
 import { clearWallet, loadWalletState, storeCredential } from "@/lib/client/wallet-client";
 import { StatusPill } from "@/components/status-pill";
-import {
-  formatAssuranceLevel,
-  formatIssuanceChannel
-} from "@/lib/shared/physical-flow";
+import { formatIssuanceChannel } from "@/lib/shared/physical-flow";
 import { buildCredentialZignatureSeedInput } from "@/lib/shared/zignature";
 import type { EnrollmentRecord, WalletState } from "@/lib/shared/types";
 import { getWalletStatusSnapshot } from "@/lib/shared/wallet-state";
@@ -263,7 +260,6 @@ function WalletStatusDock({
   const statusMeta = credential
     ? [
         { label: "Pass ID", value: credential.payload.credential_id },
-        { label: "Assurance", value: formatAssuranceLevel(credential.payload.assurance_level) },
         { label: "Issued via", value: formatIssuanceChannel(credential.payload.issuance_channel) },
         {
           label: "Status",
@@ -301,7 +297,6 @@ function WalletStatusDock({
             <StatusPill tone={statusLabel === "Active" ? "good" : statusLabel === "Expired" ? "warn" : "neutral"}>
               {statusLabel}
             </StatusPill>
-            {credential ? <StatusPill tone="good">{formatAssuranceLevel(credential.payload.assurance_level)}</StatusPill> : null}
             {credential || wallet.holderKeyPair || wallet.enrollmentId ? (
               <button
                 className="rounded-full bg-ink px-2.5 py-1 text-[11px] font-medium text-mist disabled:opacity-55"

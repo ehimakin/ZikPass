@@ -48,23 +48,35 @@ export function ZikLogoMark({
 
 export function ZikLogoLockup({
   className,
-  subdued = false
+  subdued = false,
+  stacked = false
 }: {
   className?: string;
   subdued?: boolean;
+  stacked?: boolean;
 }) {
   return (
-    <div className={clsx("flex items-center gap-3", className)}>
+    <div
+      className={clsx(
+        stacked ? "flex flex-col items-center gap-5 text-center" : "flex items-center gap-3",
+        className
+      )}
+    >
       <div
         className={clsx(
-          "inline-flex h-11 w-11 items-center justify-center rounded-2xl border",
+          "inline-flex items-center justify-center border",
+          stacked
+            ? "h-[min(70vw,16rem)] w-[min(70vw,16rem)] rounded-[4rem]"
+            : "h-11 w-11 rounded-2xl",
           subdued ? "border-ink/10 bg-white/80" : "border-white/60 bg-white/82"
         )}
       >
-        <ZikLogoMark className="h-7 w-7" />
+        <ZikLogoMark className={stacked ? "h-[72%] w-[72%]" : "h-7 w-7"} />
       </div>
       <div>
-        <p className="font-heading text-xl font-semibold tracking-tight text-ink">Zik Pass</p>
+        <p className={clsx("font-heading font-semibold tracking-tight text-ink", stacked ? "text-4xl" : "text-xl")}>
+          Zik Pass
+        </p>
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink/50">
           Private over-18 verification
         </p>

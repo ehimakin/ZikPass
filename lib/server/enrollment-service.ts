@@ -448,7 +448,7 @@ export async function verifyPhysicalIdCheck(input: {
   record.physical_verification = toPhysicalVerificationState(session);
   record.updated_at = now;
   record.last_user_message =
-    "ID check confirmed. Complete device authentication on this device to receive your pass.";
+    "ID check confirmed. Device authentication will now complete the pass issuance.";
   record.status = session.device_auth.status === "verified" ? "approved_with_cooling_off" : "device_auth_pending";
   record.orchestration = pushOrchestrationEvent(
     record.orchestration,
@@ -1618,7 +1618,7 @@ async function syncPhysicalEnrollmentFromSession(
   if (session.device_auth.status !== "verified") {
     record.status = "device_auth_pending";
     record.last_user_message =
-      "ID check confirmed. Complete device authentication on this device to continue.";
+      "ID check confirmed. Device authentication will now complete the pass issuance.";
     return upsertEnrollment(record);
   }
 

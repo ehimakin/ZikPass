@@ -21,14 +21,18 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
   const [enrollment, setEnrollment] = useState<EnrollmentRecord | null>(null);
   const [state, setState] = useState<RetailState>(initialCode ? "loading" : "scan");
   const [error, setError] = useState<string | null>(null);
+  const [completionNotice, setCompletionNotice] = useState<string | null>(null);
   const [hasResolvedInitialCode, setHasResolvedInitialCode] = useState(false);
   const [isPending, startTransition] = useTransition();
   const canLookup = isRetailVerificationCodeReady(code) && !isPending;
+  const hasErrorState = state === "error" || state === "rejected" || Boolean(error);
 
   const lookupSession = useCallback((nextCode = code) => {
     const parsedCode = parseRetailVerificationCode(nextCode);
 
     if (!isRetailVerificationCodeReady(parsedCode)) {
+      setState("error");
+      setError("Enter the six-character customer code shown on the device.");
       return;
     }
 
@@ -154,10 +158,63 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
     return () => window.clearTimeout(timer);
   }, [canLookup, lookupSession, state]);
 
+  useEffect(() => {
+    const sessionId = enrollment?.physical_verification?.session.session_id;
+    if (state !== "confirmed" || !sessionId) {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function checkIssuanceStatus() {
+      try {
+        const response = await fetch(`/api/physical/sessions/${sessionId}`);
+        if (!response.ok || cancelled) {
+          return;
+        }
+
+        const nextSession = (await response.json()) as PhysicalStoreSessionRecord;
+        if (nextSession.status !== "completed") {
+          return;
+        }
+
+        setCode("");
+        setSession(null);
+        setEnrollment(null);
+        setState("scan");
+        setError(null);
+        setCompletionNotice("Pass issued successfully. Ready for the next customer.");
+      } catch {
+        // Issuance status is best-effort here; the customer flow remains authoritative.
+      }
+    }
+
+    void checkIssuanceStatus();
+    const timer = window.setInterval(() => {
+      void checkIssuanceStatus();
+    }, 2000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [enrollment?.physical_verification?.session.session_id, state]);
+
+  useEffect(() => {
+    if (!completionNotice) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => setCompletionNotice(null), 4000);
+    return () => window.clearTimeout(timer);
+  }, [completionNotice]);
+
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(215,241,113,0.28),_transparent_42%),_#f4f7ee] px-4 py-5 text-ink sm:px-6 sm:py-7">
       <div className="relative mx-auto flex min-h-[calc(100vh-2.5rem)] max-w-5xl flex-col overflow-hidden rounded-[40px] border border-white/80 bg-white/76 px-5 py-7 shadow-panel backdrop-blur-sm sm:min-h-[calc(100vh-3.5rem)] sm:px-8">
-        <div className="absolute inset-x-0 top-0 h-1.5 bg-[#69b889]" />
+        <div
+          className={`absolute inset-x-0 top-0 h-1.5 ${hasErrorState ? "bg-[#d27a86]" : "bg-[#69b889]"}`}
+        />
         <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center gap-9 text-center">
           <div className="zik-stage-copy">
           <p className="font-mono text-xs font-semibold uppercase tracking-[0.22em] text-ink/45">
@@ -170,6 +227,14 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
           </div>
 
           <div className="zik-stage-pop grid w-full max-w-xl gap-5">
+          {completionNotice ? (
+            <p
+              className="rounded-[24px] border border-[#69b889]/35 bg-[#eef8e8] px-5 py-4 text-base font-semibold text-ink"
+              role="status"
+            >
+              {completionNotice}
+            </p>
+          ) : null}
           <input
             aria-label="Customer verification code"
             className="h-20 w-full rounded-[8px] border border-white/18 bg-white px-5 text-center font-heading text-5xl font-semibold uppercase tracking-[0.2em] text-ink outline-none"
@@ -184,6 +249,12 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
               if (!isRetailVerificationCodeReady(nextCode)) {
                 setState("scan");
                 setSession(null);
+              }
+            }}
+            onBlur={() => {
+              if (code && !isRetailVerificationCodeReady(code)) {
+                setState("error");
+                setError("Enter the six-character customer code shown on the device.");
               }
             }}
           />
@@ -246,7 +317,9 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
 
         <div className="mx-auto h-1.5 w-full max-w-3xl overflow-hidden rounded-full bg-ink/10">
           <div
-            className="h-full rounded-full bg-[#69b889] transition-[width] duration-700"
+            className={`h-full rounded-full transition-[width,background-color] duration-700 ${
+              hasErrorState ? "bg-[#d27a86]" : "bg-[#69b889]"
+            }`}
             style={{ width: state === "confirmed" || state === "rejected" ? "100%" : state === "ready" ? "62%" : "24%" }}
           />
         </div>

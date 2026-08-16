@@ -1,3 +1,4 @@
+import { AppShell } from "@/components/app-shell";
 import { RetailVerificationScreen } from "@/components/retail-verification-screen";
 
 export default async function VerifyPage({
@@ -6,7 +7,11 @@ export default async function VerifyPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
-  return <RetailVerificationScreen initialCode={getParam(params.code)} />;
+  return (
+    <AppShell currentPath="/verify">
+      <RetailVerificationScreen initialCode={getParam(params.code)} />
+    </AppShell>
+  );
 }
 
 function getParam(value: string | string[] | undefined): string | undefined {

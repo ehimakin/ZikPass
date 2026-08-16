@@ -66,9 +66,8 @@ export async function ensureHolderKeyPair(existing?: WalletState): Promise<Walle
 }
 
 function canUseDevelopmentKeyFallback(): boolean {
-  return process.env.NODE_ENV === "development" &&
-    typeof window !== "undefined" &&
-    !window.isSecureContext;
+  // Some mobile browsers expose a secure context but still do not implement Ed25519.
+  return process.env.NODE_ENV !== "production" && typeof window !== "undefined";
 }
 
 async function requestDevelopmentKeyPair(): Promise<ExportedKeyPair> {

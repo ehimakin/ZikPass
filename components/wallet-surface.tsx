@@ -199,9 +199,11 @@ function isRetryableEnrollment(status: EnrollmentRecord["status"]): boolean {
 
 export function WalletSurface({
   onboardingMode = false,
+  homepageMode = false,
   onboardingHref = "/onboarding" as Route
 }: {
   onboardingMode?: boolean;
+  homepageMode?: boolean;
   onboardingHref?: Route;
 } = {}) {
   type HeroViewMode = "how_to_get" | "how_it_works";
@@ -308,7 +310,9 @@ export function WalletSurface({
     ) {
       setJourneyState("rejected");
       setStep("rejected");
-      setIsFlowOpen(true);
+      if (!onboardingMode) {
+        setIsFlowOpen(true);
+      }
       setError(nextEnrollment.last_user_message ?? "This in-store verification session expired.");
       return;
     }
@@ -319,7 +323,9 @@ export function WalletSurface({
     ) {
       setJourneyState("rejected");
       setStep("rejected");
-      setIsFlowOpen(true);
+      if (!onboardingMode) {
+        setIsFlowOpen(true);
+      }
       setError(nextEnrollment.last_user_message ?? "Store staff could not confirm this age check.");
       return;
     }
@@ -333,14 +339,18 @@ export function WalletSurface({
     if (nextEnrollment.status === "physical_verification_pending") {
       setJourneyState("awaiting_clerk_verification");
       setStep("physical-verification");
-      setIsFlowOpen(true);
+      if (!onboardingMode) {
+        setIsFlowOpen(true);
+      }
       return;
     }
 
     if (nextEnrollment.status === "device_auth_pending") {
       setJourneyState("device_auth_required");
       setStep("device-auth");
-      setIsFlowOpen(true);
+      if (!onboardingMode) {
+        setIsFlowOpen(true);
+      }
       return;
     }
 
@@ -356,7 +366,7 @@ export function WalletSurface({
 
     setJourneyState("pass_issued");
     setStep("success");
-  }, [applyEnrollment]);
+  }, [applyEnrollment, onboardingMode]);
 
   const syncFromEnrollment = useCallback(async (nextEnrollment: EnrollmentRecord) => {
     if (nextEnrollment.lane === "physical") {
@@ -369,7 +379,9 @@ export function WalletSurface({
     if (isRejectedEnrollment(nextEnrollment.status)) {
       setJourneyState("rejected");
       setStep("rejected");
-      setIsFlowOpen(true);
+      if (!onboardingMode) {
+        setIsFlowOpen(true);
+      }
       setError(nextEnrollment.last_user_message ?? null);
       return;
     }
@@ -393,7 +405,9 @@ export function WalletSurface({
     ) {
       setJourneyState("rejected");
       setStep("rejected");
-      setIsFlowOpen(true);
+      if (!onboardingMode) {
+        setIsFlowOpen(true);
+      }
       return;
     }
 
@@ -405,7 +419,7 @@ export function WalletSurface({
 
     setJourneyState("pass_issued");
     setStep("success");
-  }, [applyEnrollment, syncPhysicalEnrollmentState]);
+  }, [applyEnrollment, onboardingMode, syncPhysicalEnrollmentState]);
 
   const refreshEnrollment = useCallback(
     async (enrollmentId: string) => {
@@ -1008,7 +1022,6 @@ export function WalletSurface({
     credential
       ? [
         { label: "Pass ID", value: credential.payload.credential_id },
-        { label: "Assurance", value: formatAssuranceLevel(credential.payload.assurance_level) },
         { label: "Issued via", value: formatIssuanceChannel(credential.payload.issuance_channel) },
         {
           label: "Status",
@@ -1042,7 +1055,6 @@ export function WalletSurface({
         : isPhysicalLane
           ? [
               { label: "Flow", value: "In-store verification" },
-              { label: "Assurance", value: "Higher assurance" },
               { label: "Staff step", value: "Clerk confirms physical ID" }
             ]
           : [
@@ -1096,7 +1108,9 @@ export function WalletSurface({
   }
 
   return (
-    <div className="grid gap-6 pb-52 sm:pb-44 lg:pb-32">
+    <div
+      className={`${homepageMode ? "mt-[100px] " : ""}grid gap-6 pb-52 sm:pb-44 lg:pb-32`}
+    >
       <section className="relative overflow-hidden rounded-[40px] border border-white/80 bg-white/72 px-6 py-8 shadow-panel backdrop-blur-sm sm:px-10 sm:py-10">
         <div
           className={`relative grid gap-8 md:items-start ${
@@ -1242,7 +1256,7 @@ export function WalletSurface({
                       </>
                     )}
 
-                    <div className="flex flex-wrap gap-3">
+                    <div className={isPhysicalLane ? "flex flex-wrap gap-3 pt-[90px]" : "flex flex-wrap gap-3"}>
                       {isPhysicalLane && !onboardingMode ? (
                         <Link
                           className="rounded-full bg-ink px-6 py-3 text-sm font-semibold text-mist transition"
@@ -1278,21 +1292,23 @@ export function WalletSurface({
                       ) : null}
                     </div>
 
-                    <div className="grid gap-4 rounded-[26px] bg-[#f7faee] p-5 sm:grid-cols-3">
-                      {isPhysicalLane ? (
-                        <>
-                          <HeroMetric label="Assurance" value="In-person verified" dark />
-                          <HeroMetric label="Staff step" value="Clerk confirms ID" dark />
-                          <HeroMetric label="Stored" value="On this device" dark />
-                        </>
-                      ) : (
-                        <>
-                          <HeroMetric label="Soft check" value="No score impact" dark />
-                          <HeroMetric label="Privacy" value="Over-18 only" dark />
-                          <HeroMetric label="Stored" value="On device" dark />
-                        </>
-                      )}
-                    </div>
+                    {!onboardingMode && !homepageMode ? (
+                      <div className="grid gap-4 rounded-[26px] bg-[#f7faee] p-5 sm:grid-cols-3">
+                        {isPhysicalLane ? (
+                          <>
+                            <HeroMetric label="Assurance" value="In-person verified" dark />
+                            <HeroMetric label="Staff step" value="Clerk confirms ID" dark />
+                            <HeroMetric label="Stored" value="On this device" dark />
+                          </>
+                        ) : (
+                          <>
+                            <HeroMetric label="Soft check" value="No score impact" dark />
+                            <HeroMetric label="Privacy" value="Over-18 only" dark />
+                            <HeroMetric label="Stored" value="On device" dark />
+                          </>
+                        )}
+                      </div>
+                    ) : null}
                   </>
                 )}
               </div>
@@ -1307,14 +1323,16 @@ export function WalletSurface({
                 label="How to get your ZikPass"
                 onClick={() => setHeroViewMode("how_to_get")}
               />
-              <HeroViewTab
-                active={heroViewMode === "how_it_works"}
-                label="How ZikPass works"
-                onClick={() => setHeroViewMode("how_it_works")}
-              />
+              {!homepageMode ? (
+                <HeroViewTab
+                  active={heroViewMode === "how_it_works"}
+                  label="How ZikPass works"
+                  onClick={() => setHeroViewMode("how_it_works")}
+                />
+              ) : null}
             </div>
             <div className="space-y-6 md:flex md:flex-1 md:flex-col md:justify-center">
-              {heroViewMode === "how_to_get" ? (
+              {homepageMode || heroViewMode === "how_to_get" ? (
                 <>
                   <div className="min-h-[248px] space-y-4 sm:min-h-[272px]">
                     <h2 className="max-w-3xl font-heading text-5xl font-semibold leading-[0.92] tracking-tight text-ink sm:text-6xl">
@@ -1382,7 +1400,7 @@ export function WalletSurface({
         </div>
       </section>
 
-      {!onboardingMode ? (
+      {!onboardingMode && !homepageMode ? (
         <div className="grid gap-6">
           <SurfaceCard
             title={isPhysicalLane ? "Why physical-first ZikPass" : "Why people choose Zik Pass"}
@@ -1506,12 +1524,6 @@ export function WalletSurface({
                       ? "Pending issuance"
                       : "Not started"}
               </StatusPill>
-              {credential ? (
-                <StatusPill tone="good">
-                  {formatAssuranceLevel(credential.payload.assurance_level)}
-                </StatusPill>
-              ) : null}
-
               {canDeleteLocalPass || deleteButtonState === "deleted" ? (
                 <button
                   className="rounded-full bg-ink px-2.5 py-1 text-[11px] font-medium text-mist disabled:opacity-55"
@@ -1538,7 +1550,9 @@ export function WalletSurface({
           {isStatusDockOpen ? (
             <div className="mt-1 grid gap-1.5 sm:grid-cols-3 lg:min-w-[420px]">
               {statusMeta.map((item) => (
-                <MetaTile key={item.label} label={item.label} value={item.value} />
+                <div className={item.label === "Flow" ? "hidden sm:block" : ""} key={item.label}>
+                  <MetaTile label={item.label} value={item.value} />
+                </div>
               ))}
             </div>
           ) : null}

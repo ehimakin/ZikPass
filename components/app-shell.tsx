@@ -70,7 +70,7 @@ export function AppShell({
         <header
           className={clsx(
             "fixed inset-x-0 top-0 z-40 transition-[opacity,transform] duration-200 ease-out",
-            headerVisible || menuOpen ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-3 opacity-0"
+            headerVisible || menuOpen ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-3 opacity-25"
           )}
         >
           <div className="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
