@@ -3060,7 +3060,7 @@ function BankVerificationPanel({ enrollment }: { enrollment: EnrollmentRecord })
   );
 }
 
-function PassPreviewCard({
+export function PassPreviewCard({
   credentialId,
   active,
   zignatureSeedInput
