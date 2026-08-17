@@ -29,6 +29,57 @@ export type PhysicalProcessState =
 export const ZIK_APP_DOWNLOAD_URL = "https://zik.app/download";
 export const PHYSICAL_USER_CODE_LENGTH = 6;
 
+export type OnboardingEntryMode = "affiliate" | "app";
+
+export function getOnboardingEntryMode(
+  params:
+    | URLSearchParams
+    | {
+        get(name: string): string | null;
+      }
+): OnboardingEntryMode {
+  const source = params.get("source") ?? params.get("entry");
+  const hasStoreContext = Boolean(
+    params.get("session_id")?.trim() ||
+      params.get("store_id")?.trim() ||
+      params.get("store_name")?.trim() ||
+      params.get("location_id")?.trim()
+  );
+
+  return source === "affiliate" && hasStoreContext || hasStoreContext ? "affiliate" : "app";
+}
+
+export function buildAffiliateOnboardingUrl(
+  context: Partial<PhysicalStoreContext>
+): string {
+  const searchParams = new URLSearchParams({
+    source: "affiliate",
+    flow: "physical"
+  });
+
+  if (context.session_id) {
+    searchParams.set("session_id", context.session_id);
+  }
+
+  if (context.store_id) {
+    searchParams.set("store_id", context.store_id);
+  }
+
+  if (context.store_name) {
+    searchParams.set("store_name", context.store_name);
+  }
+
+  if (context.location_id) {
+    searchParams.set("location_id", context.location_id);
+  }
+
+  return `/onboarding?${searchParams.toString()}`;
+}
+
+export function buildAppOnboardingUrl(): string {
+  return "/onboarding?source=app";
+}
+
 export function parseWalletEntryContext(
   params:
     | URLSearchParams

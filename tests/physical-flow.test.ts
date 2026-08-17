@@ -15,10 +15,13 @@ import {
 import { getIssuerKeyPath, getRuntimeStatePath } from "@/lib/server/runtime-paths";
 import {
   ZIK_APP_DOWNLOAD_URL,
+  buildAffiliateOnboardingUrl,
+  buildAppOnboardingUrl,
   buildRetailVerificationScanUrl,
   buildZikAppDeepLink,
   formatAssuranceLevel,
   getCredentialExperienceVariant,
+  getOnboardingEntryMode,
   getPhysicalProcessState,
   isRetailVerificationCodeReady,
   parseRetailVerificationCode,
@@ -164,6 +167,27 @@ describe.sequential("physical flow", () => {
     expect(parseWalletEntryContext(new URLSearchParams({ flow: "remote" }))).toEqual({
       lane: "remote"
     });
+  });
+
+  it("keeps app onboarding store-unspecified and makes affiliate onboarding explicit", () => {
+    expect(getOnboardingEntryMode(new URLSearchParams({ source: "app" }))).toBe("app");
+    expect(getOnboardingEntryMode(new URLSearchParams({ flow: "physical" }))).toBe("app");
+    expect(
+      getOnboardingEntryMode(
+        new URLSearchParams({ source: "affiliate", store_id: "store_1" })
+      )
+    ).toBe("affiliate");
+
+    expect(buildAppOnboardingUrl()).toBe("/onboarding?source=app");
+    expect(
+      buildAffiliateOnboardingUrl({
+        store_id: "store_1",
+        store_name: "Zik Oxford Street",
+        location_id: "desk_1"
+      })
+    ).toBe(
+      "/onboarding?source=affiliate&flow=physical&store_id=store_1&store_name=Zik+Oxford+Street&location_id=desk_1"
+    );
   });
 
   it("issues an in-person verified credential only after clerk and device auth complete", async () => {

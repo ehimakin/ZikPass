@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { useEffect, useState } from "react";
 import { PassPreviewCard } from "@/components/wallet-surface";
+import { PwaInstallButton } from "@/components/pwa-install-button";
+import { NativeAppHandoffButton } from "@/components/native-app-handoff-button";
 import { clearWallet, loadWalletState, storeCredential } from "@/lib/client/wallet-client";
 import { StatusPill } from "@/components/status-pill";
-import { formatIssuanceChannel } from "@/lib/shared/physical-flow";
+import { buildAppOnboardingUrl, formatIssuanceChannel } from "@/lib/shared/physical-flow";
 import { buildCredentialZignatureSeedInput } from "@/lib/shared/zignature";
 import type { EnrollmentRecord, WalletState } from "@/lib/shared/types";
 import { getWalletStatusSnapshot } from "@/lib/shared/wallet-state";
@@ -88,7 +91,7 @@ export function WalletPageSurface() {
         <SavedWalletState
           active={active}
           credentialId={credential.payload.credential_id}
-          issuedVia={credential.payload.issuance_channel === "physical" ? "In-person verified" : "Remote verified"}
+          enrollmentId={wallet.enrollmentId}
           isActionsOpen={isActionsOpen}
           onToggleActions={() => setIsActionsOpen((current) => !current)}
           zignatureSeed={zignatureSeed}
@@ -336,14 +339,14 @@ function WalletStatusDock({
 function SavedWalletState({
   active,
   credentialId,
-  issuedVia,
+  enrollmentId,
   isActionsOpen,
   onToggleActions,
   zignatureSeed
 }: {
   active: boolean;
   credentialId: string;
-  issuedVia: string;
+  enrollmentId?: string;
   isActionsOpen: boolean;
   onToggleActions: () => void;
   zignatureSeed: string;
@@ -359,9 +362,9 @@ function SavedWalletState({
       <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top_right,_rgba(215,241,113,0.34),_transparent_48%)]" />
       <div className="relative flex items-start justify-between gap-5">
         <div>
-          <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink/45">Wallet status</p>
-          <h1 className="mt-3 font-heading text-5xl font-semibold leading-[0.95] sm:text-7xl">Your Zik Pass</h1>
-          <p className="mt-4 text-sm leading-7 text-ink/68">Stored locally on this device.</p>
+          <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink/45">Wallet</p>
+          <h1 className="mt-3 font-heading text-5xl font-semibold leading-[1.1] sm:text-7xl">Your Zik Pass</h1>
+          {/* <p className="mt-4 text-sm leading-7 text-ink/68">/</p> */}
         </div>
         <span className="rounded-full bg-[#eef6df] px-4 py-2 text-sm font-semibold text-ink">
           {active ? "Active" : "Activating"}
@@ -429,9 +432,20 @@ function SavedWalletState({
         </div>
       ) : null}
 
+      <div className="relative mt-8 flex flex-wrap items-center gap-4 text-sm text-ink/68">
+        <PwaInstallButton
+          className="rounded-full border border-ink/12 bg-[#f7faee] px-5 py-3 text-sm font-semibold text-ink transition hover:bg-[#edf3df]"
+          label="Install ZikPass on this device"
+        />
+        <NativeAppHandoffButton
+          className="rounded-full border border-ink/12 bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-[#edf3df]"
+          enrollmentId={enrollmentId}
+        />
+        <p>Keep your ZikPass available from the device home screen.</p>
+      </div>
+
       <div className="relative mt-auto flex flex-wrap items-center justify-between gap-4 pt-10 text-sm text-ink/68">
-        <span>{issuedVia}</span>
-        <span>Over-18 confirmation only</span>
+        {/* <span>{issuedVia}</span> */}
       </div>
     </section>
   );
@@ -442,7 +456,7 @@ function EmptyWalletState() {
     <section className="relative flex flex-1 flex-col items-center justify-center overflow-hidden rounded-[40px] border border-white/80 bg-white/72 px-6 py-20 text-center shadow-panel backdrop-blur-sm sm:px-10">
       <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top_right,_rgba(215,241,113,0.34),_transparent_48%)]" />
       <div className="relative max-w-3xl">
-        <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink/45">Wallet status</p>
+        <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink/45">Wallet Status</p>
         <h1 className="mt-4 font-heading text-5xl font-semibold leading-[0.95] sm:text-7xl">
           No passes presently in wallet
         </h1>
@@ -452,7 +466,7 @@ function EmptyWalletState() {
       </div>
       <Link
         className="relative mt-8 rounded-full bg-ink px-8 py-4 text-base font-semibold text-mist transition hover:bg-ink/85"
-        href="/onboarding"
+        href={buildAppOnboardingUrl() as Route}
       >
         Get ZikPass
       </Link>

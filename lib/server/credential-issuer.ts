@@ -5,7 +5,10 @@ import type { AgeCredential, EnrollmentRecord, SignedCredential } from "@/lib/sh
 import { randomId } from "@/lib/shared/utils";
 import { getIssuerKeyMaterial } from "@/lib/server/issuer-keys";
 
-export async function issueCredential(record: EnrollmentRecord): Promise<SignedCredential> {
+export async function issueCredential(
+  record: EnrollmentRecord,
+  holderPublicKey: JsonWebKey = record.holder_public_key
+): Promise<SignedCredential> {
   const issuedAt = new Date();
   const activatesAt = new Date(record.cooling_off.ends_at);
   const expiresAt = new Date(
@@ -33,7 +36,7 @@ export async function issueCredential(record: EnrollmentRecord): Promise<SignedC
           verified_at: record.physical_verification.attestation.verified_at
         }
       : undefined,
-    subject_public_key: record.holder_public_key
+    subject_public_key: holderPublicKey
   };
 
   const keyMaterial = await getIssuerKeyMaterial();

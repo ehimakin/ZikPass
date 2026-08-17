@@ -4,6 +4,7 @@ import type {
   EnrollmentApplicationInput,
   EnrollmentRecord,
   EnrollmentStatus,
+  NativeAppHandoffRecord,
   PhysicalStoreSessionRecord
 } from "@/lib/shared/types";
 import { getRuntimeDataDir, getRuntimeStatePath, getSeedStatePath } from "@/lib/server/runtime-paths";
@@ -11,6 +12,7 @@ import { getRuntimeDataDir, getRuntimeStatePath, getSeedStatePath } from "@/lib/
 interface StoreData {
   enrollments: EnrollmentRecord[];
   physical_sessions: PhysicalStoreSessionRecord[];
+  mobile_handoffs: NativeAppHandoffRecord[];
 }
 
 interface LegacyEnrollmentRecord {
@@ -72,11 +74,16 @@ async function ensureStateFile() {
 
 async function readStore(): Promise<StoreData> {
   await ensureStateFile();
-  const parsed = await readStateJson<{ enrollments?: LegacyEnrollmentRecord[]; physical_sessions?: unknown[] }>();
+  const parsed = await readStateJson<{
+    enrollments?: LegacyEnrollmentRecord[];
+    physical_sessions?: unknown[];
+    mobile_handoffs?: unknown[];
+  }>();
 
   return {
     enrollments: (parsed.enrollments ?? []).map(normalizeEnrollment),
-    physical_sessions: normalizePhysicalSessions(parsed.physical_sessions)
+    physical_sessions: normalizePhysicalSessions(parsed.physical_sessions),
+    mobile_handoffs: normalizeMobileHandoffs(parsed.mobile_handoffs)
   };
 }
 
@@ -138,6 +145,29 @@ export async function upsertPhysicalSession(
     store.physical_sessions[index] = record;
   } else {
     store.physical_sessions.push(record);
+  }
+
+  await writeStore(store);
+  return record;
+}
+
+export async function getMobileAppHandoff(
+  tokenHash: string
+): Promise<NativeAppHandoffRecord | undefined> {
+  const store = await readStore();
+  return store.mobile_handoffs.find((handoff) => handoff.token_hash === tokenHash);
+}
+
+export async function upsertMobileAppHandoff(
+  record: NativeAppHandoffRecord
+): Promise<NativeAppHandoffRecord> {
+  const store = await readStore();
+  const index = store.mobile_handoffs.findIndex((handoff) => handoff.token_hash === record.token_hash);
+
+  if (index >= 0) {
+    store.mobile_handoffs[index] = record;
+  } else {
+    store.mobile_handoffs.push(record);
   }
 
   await writeStore(store);
@@ -389,6 +419,40 @@ function normalizePhysicalSessions(
         attestation: candidate.attestation,
         completed_at: candidate.completed_at,
         minimized_at: candidate.minimized_at
+      }
+    ];
+  });
+}
+
+function normalizeMobileHandoffs(input: unknown[] | undefined): NativeAppHandoffRecord[] {
+  if (!Array.isArray(input)) {
+    return [];
+  }
+
+  return input.flatMap((value) => {
+    if (!value || typeof value !== "object") {
+      return [];
+    }
+
+    const candidate = value as Partial<NativeAppHandoffRecord>;
+    if (
+      typeof candidate.token_hash !== "string" ||
+      typeof candidate.enrollment_id !== "string" ||
+      typeof candidate.created_at !== "string" ||
+      typeof candidate.expires_at !== "string"
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        token_hash: candidate.token_hash,
+        enrollment_id: candidate.enrollment_id,
+        created_at: candidate.created_at,
+        expires_at: candidate.expires_at,
+        claimed_at: candidate.claimed_at,
+        holder_public_key: candidate.holder_public_key,
+        issued_credential: candidate.issued_credential
       }
     ];
   });

@@ -222,6 +222,16 @@ export interface SignedCredential {
   algorithm: "Ed25519";
 }
 
+export interface NativeAppHandoffRecord {
+  token_hash: string;
+  enrollment_id: string;
+  created_at: string;
+  expires_at: string;
+  claimed_at?: string;
+  holder_public_key?: JsonWebKey;
+  issued_credential?: SignedCredential;
+}
+
 export interface PresentationBundle {
   credential: SignedCredential;
   challenge: string;

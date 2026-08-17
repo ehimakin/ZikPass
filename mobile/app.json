@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "ZikPass",
+    "slug": "zikpass",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "scheme": "zik",
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Use Face ID to protect your ZikPass."
+        }
+      ]
+    ],
+    "ios": {
+      "bundleIdentifier": "com.zikpass.wallet",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "com.zikpass.wallet"
+    },
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

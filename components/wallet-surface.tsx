@@ -7,6 +7,8 @@ import QRCode from "qrcode";
 import type { InputHTMLAttributes, ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Zignature } from "@/components/zignature";
+import { PwaInstallButton } from "@/components/pwa-install-button";
+import { NativeAppHandoffButton } from "@/components/native-app-handoff-button";
 import { SurfaceCard } from "@/components/surface-card";
 import { StatusPill } from "@/components/status-pill";
 import { ZikLogoMark } from "@/components/zik-logo";
@@ -18,9 +20,9 @@ import {
   storeEnrollmentContext
 } from "@/lib/client/wallet-client";
 import {
-  ZIK_APP_DOWNLOAD_URL,
   buildRetailVerificationScanUrl,
   buildZikAppDeepLink,
+  getOnboardingEntryMode,
   formatAssuranceLevel,
   formatIssuanceChannel,
   getCredentialExperienceVariant,
@@ -259,10 +261,12 @@ export function WalletSurface({
   const entryContext = useMemo(() => parseWalletEntryContext(searchParams), [searchParams]);
   const physicalEntryExplicit = useMemo(
     () =>
-      searchParams.get("flow") === "physical" ||
-      Boolean(searchParams.get("session_id")) ||
-      Boolean(searchParams.get("store_id")),
-    [searchParams]
+      onboardingMode
+        ? getOnboardingEntryMode(searchParams) === "affiliate"
+        : searchParams.get("flow") === "physical" ||
+          Boolean(searchParams.get("session_id")) ||
+          Boolean(searchParams.get("store_id")),
+    [onboardingMode, searchParams]
   );
   const [wallet, setWallet] = useState<WalletState>({});
   const [enrollment, setEnrollment] = useState<EnrollmentRecord | null>(null);
@@ -1123,7 +1127,7 @@ export function WalletSurface({
     ? {
         pill: "In-store verification",
         title:
-          "Anonymous online 18+ ID. Physically verified. Without EVER needing to digitise any Identity data.",
+          "Anonymous online ID. Physically verified.\nWithout needing to digitise your Identity.",
         body: physicalHeroBulletPoints.join(". ")
       }
     : heroSlides[heroSlideIndex];
@@ -1195,7 +1199,7 @@ export function WalletSurface({
                       {onboardingMode
                         ? "Customer Onboarding"
                         : isPhysicalLane
-                          ? "In-person verified onboarding"
+                          ? "Verify offline, use online. No digital footpwinx"
                           : "Zero Knowledge age verification"}
                     </p>
                     {!showHeroPassPreview && !onboardingMode ? (
@@ -1212,24 +1216,32 @@ export function WalletSurface({
                 </div>
 
                 {credential ? (
-                  <div className="grid gap-5">
-                    <CredentialVisualPreview
-                      title="Your pass"
-                      body="This device already holds a signed ZikPass credential. Its Zignature is unique to this pass and deterministic for the credential."
-                      seedInput={issuedZignatureSeed ?? credential.payload.credential_id}
-                    />
-                    <div className="grid gap-3 sm:grid-cols-3">
-                      <MetaTile label="Pass ID" value={credential.payload.credential_id} />
-                      <MetaTile
-                        label="Assurance"
-                        value={formatAssuranceLevel(credential.payload.assurance_level)}
-                      />
+                  <div className="rounded-[28px] border border-ink/8 bg-[#f7faee] p-5">
+                    <p className="font-heading text-2xl font-semibold tracking-tight text-ink">Your pass</p>
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
                       <MetaTile
                         label="Status"
-                        value={active ? "Ready for age checks" : `Activates in ${remainingSeconds}s`}
+                        value={
+                          walletStatus.credential_expired
+                            ? "Expired"
+                            : walletStatus.credential_active
+                              ? "Issued"
+                              : "Pending"
+                        }
                       />
-                      <MetaTile label="Issued via" value={formatIssuanceChannel(credential.payload.issuance_channel)} />
+                      <MetaTile
+                        label="Issued At"
+                        value={formatDateLabel(credential.payload.issued_at, "Unavailable")}
+                      />
                     </div>
+                    {homepageMode ? (
+                      <Link
+                        className="mt-4 inline-flex w-fit rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist transition hover:bg-[#24364d]"
+                        href="/wallet"
+                      >
+                        View pass
+                      </Link>
+                    ) : null}
                   </div>
                 ) : walletStatus.status === "pass_pending_issuance" ? (
                   <div className="grid gap-5">
@@ -1436,6 +1448,8 @@ export function WalletSurface({
                   >
                     <h2
                       className={`max-w-3xl font-heading font-semibold leading-[0.92] tracking-tight text-ink ${
+                        isPhysicalLane ? "whitespace-pre-line" : ""
+                      } ${
                         isPhysicalLane ? "text-[1.9rem] sm:text-[2.35rem]" : "text-5xl sm:text-6xl"
                       }`}
                     >
@@ -2205,7 +2219,7 @@ export function WalletSurface({
                     actionLabel="Done"
                     actionClassName="h-[150px] w-full max-w-[400px] items-center justify-center bg-[linear-gradient(135deg,_#7cb56b,_#a2ce6a)] px-5 py-4 text-center text-3xl text-white transition-[filter] hover:brightness-95 sm:w-[400px] sm:px-8 sm:text-4xl"
                     actionAside
-                    onAction={closeFlow}
+                    actionHref="/wallet"
                   >
                     <div className="grid gap-4">
                       <PassPreviewCard
@@ -2648,10 +2662,6 @@ function PhysicalOnboardingExperience({
   }
 
   if (processState === "credential_issued" && credential) {
-    const appHref = buildZikAppDeepLink({
-      credentialId: credential.payload.credential_id
-    });
-
     return (
       <PhysicalStageFrame
         accent="bg-ink"
@@ -2675,18 +2685,16 @@ function PhysicalOnboardingExperience({
             />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <a
+            <PwaInstallButton
               className="rounded-full bg-ink px-7 py-4 text-center text-base font-semibold text-mist"
-              href={appHref}
-            >
-              Open Zik
-            </a>
-            <a
+              label="Install ZikPass"
+            />
+            <Link
               className="rounded-full border border-ink/15 px-7 py-4 text-center text-base font-semibold text-ink"
-              href={ZIK_APP_DOWNLOAD_URL}
+              href="/wallet"
             >
-              Get the Zik app
-            </a>
+              Open wallet
+            </Link>
           </div>
         </div>
       </PhysicalStageFrame>
@@ -3151,14 +3159,25 @@ function FullscreenCard({
       {showPassPreview ? (
         renderActionAside ? (
           <aside className="relative flex min-w-0 w-full items-center justify-center border-t border-ink/10 p-4 sm:p-8 lg:border-l lg:border-t-0">
-            <button
-              className={`inline-flex h-[150px] w-full max-w-[400px] items-center justify-center rounded-full px-5 py-4 text-center font-semibold sm:px-8 ${
-                actionClassName ?? "w-full max-w-xs justify-center"
-              }`}
-              onClick={onAction}
-            >
-              {actionLabel}
-            </button>
+            {actionHref ? (
+              <Link
+                className={`inline-flex h-[150px] w-full max-w-[400px] items-center justify-center rounded-full px-5 py-4 text-center font-semibold sm:px-8 ${
+                  actionClassName ?? "w-full max-w-xs justify-center"
+                }`}
+                href={actionHref}
+              >
+                {actionLabel}
+              </Link>
+            ) : (
+              <button
+                className={`inline-flex h-[150px] w-full max-w-[400px] items-center justify-center rounded-full px-5 py-4 text-center font-semibold sm:px-8 ${
+                  actionClassName ?? "w-full max-w-xs justify-center"
+                }`}
+                onClick={onAction}
+              >
+                {actionLabel}
+              </button>
+            )}
           </aside>
         ) : (
           <WalletFlowAside emphasis={passPreviewEmphasis} />
@@ -3244,7 +3263,7 @@ function PhysicalVerificationPanel({
         </div>
       </div>
 
-      <div className="rounded-[28px] bg-white p-5 text-sm text-ink/76">
+                      <div className="rounded-[28px] bg-white p-5 text-sm text-ink/76">
         <div className="space-y-3">
           <InstructionRow number="1" body="Show this code to the staff member assisting you." />
           <InstructionRow number="2" body="When prompted, show your ID." />
@@ -3258,9 +3277,17 @@ function PhysicalVerificationPanel({
           verification.clerk_verification.status === "verified"
             ? "ID check confirmed. Device authentication is next."
             : enrollment.last_user_message ?? "Waiting for store staff to confirm the in-person ID check."}
-        </div>
-      </div>
-    </div>
+                        </div>
+                      </div>
+                      <PwaInstallButton
+                        className="w-full rounded-[22px] border border-ink/12 bg-[#f7faee] px-5 py-4 text-left text-sm font-semibold text-ink transition hover:bg-[#edf3df] sm:w-fit"
+                        label="Install ZikPass on this device"
+                      />
+                      <NativeAppHandoffButton
+                        className="w-full rounded-[22px] border border-ink/12 bg-white px-5 py-4 text-left text-sm font-semibold text-ink transition hover:bg-[#edf3df] sm:w-fit"
+                        enrollmentId={enrollment?.id}
+                      />
+                    </div>
   );
 }
 

@@ -11,9 +11,7 @@ const navItems: Array<{ href: Route; label: string }> = [
   { href: "/", label: "Overview" },
   { href: "/wallet", label: "Wallet" },
   { href: "/verify", label: "Retail verify" },
-  { href: "/store", label: "Store demo" },
-  { href: "/issuer", label: "Issuer" },
-  { href: "/verifier", label: "Verifier" }
+  { href: "/store", label: "Store demo" }
 ];
 
 export function AppShell({
