@@ -5,6 +5,7 @@ import { buildPhysicalApplicationFingerprint } from "@/lib/server/application-gu
 import {
   completePhysicalDeviceAuth,
   createPhysicalStoreSession,
+  getEnrollmentOrThrow,
   issueEnrollmentCredential,
   lookupPhysicalStoreSessionByCode,
   rejectPhysicalIdCheck,
@@ -29,6 +30,13 @@ import {
   parseRetailVerificationCode,
   parseWalletEntryContext
 } from "@/lib/shared/physical-flow";
+import {
+  PHYSICAL_CUSTOMER_PAUSE_THRESHOLD_MS,
+  derivePhysicalVerificationStatus,
+  isPhysicalCustomerPaused,
+  isPhysicalStoreSessionExpired,
+  isPhysicalVerificationSessionUsable
+} from "@/lib/shared/physical-journey";
 import type { PhysicalStoreSessionRecord } from "@/lib/shared/types";
 
 const runtimeStatePath = getRuntimeStatePath();
@@ -524,5 +532,185 @@ describe.sequential("physical flow", () => {
         issuance_channel: "physical"
       })
     ).toBe("physical");
+  });
+
+  describe("Sprint 7 physical journey characterization", () => {
+    it("keeps a session usable once the customer code expires after clerk confirmation, but not before", async () => {
+      const session = await createPhysicalStoreSession();
+      const enrollment = await startEnrollment({
+        application: physicalApplication(session, "2026-04-15T10:00:00.000Z"),
+        holderPublicKey,
+        applicationFingerprint: physicalFingerprint(session)
+      });
+
+      const clerkConfirmed = await verifyPhysicalIdCheck({
+        userCode: enrollment.physical_verification?.user_code.value ?? "",
+        verifierToken
+      });
+      expect(clerkConfirmed.status).toBe("device_auth_pending");
+
+      const storeState = JSON.parse(await fs.readFile(runtimeStatePath, "utf8")) as {
+        enrollments: Array<{ physical_verification: { user_code: { expires_at: string } } }>;
+        physical_sessions: Array<{ user_code_expires_at?: string }>;
+      };
+      storeState.enrollments[0].physical_verification.user_code.expires_at =
+        "2020-01-01T00:00:00.000Z";
+      storeState.physical_sessions[0].user_code_expires_at = "2020-01-01T00:00:00.000Z";
+      await fs.writeFile(runtimeStatePath, JSON.stringify(storeState, null, 2), "utf8");
+
+      const authStart = await startPhysicalDeviceAuth(enrollment.id);
+      expect(authStart.challenge_id).toMatch(/^deviceauth_/);
+
+      expect(
+        isPhysicalVerificationSessionUsable({
+          sessionExpiresAt: new Date(Date.now() + 60_000).toISOString(),
+          userCodeExpiresAt: "2020-01-01T00:00:00.000Z",
+          clerkVerificationStatus: "verified"
+        })
+      ).toBe(true);
+
+      expect(
+        isPhysicalVerificationSessionUsable({
+          sessionExpiresAt: new Date(Date.now() + 60_000).toISOString(),
+          userCodeExpiresAt: "2020-01-01T00:00:00.000Z",
+          clerkVerificationStatus: "pending"
+        })
+      ).toBe(false);
+    });
+
+    it("derives a paused heartbeat once the customer device has gone stale beyond the clerk-screen threshold", async () => {
+      const now = Date.now();
+
+      expect(
+        isPhysicalCustomerPaused({ customerLastSeenAt: new Date(now - 1_000).toISOString() }, now)
+      ).toBe(false);
+
+      expect(
+        isPhysicalCustomerPaused(
+          { customerLastSeenAt: new Date(now - PHYSICAL_CUSTOMER_PAUSE_THRESHOLD_MS - 1).toISOString() },
+          now
+        )
+      ).toBe(true);
+
+      expect(isPhysicalCustomerPaused({ customerLastSeenAt: undefined }, now)).toBe(false);
+
+      const session = await createPhysicalStoreSession();
+      const touched = await touchPhysicalStoreSession(session.session_id);
+      expect(
+        isPhysicalCustomerPaused({ customerLastSeenAt: touched.customer_last_seen_at })
+      ).toBe(false);
+    });
+
+    it("marks a session expired mid-flow, before clerk verification ever completes", async () => {
+      const session = await createPhysicalStoreSession({
+        storeId: "zik-london-001",
+        storeName: "Zik Oxford Street",
+        locationId: "front-desk"
+      });
+      const enrollment = await startEnrollment({
+        application: physicalApplication(session, "2026-04-15T10:00:00.000Z"),
+        holderPublicKey,
+        applicationFingerprint: physicalFingerprint(session)
+      });
+
+      expect(isPhysicalStoreSessionExpired(session)).toBe(false);
+      expect(enrollment.status).toBe("physical_verification_pending");
+
+      const storeState = JSON.parse(await fs.readFile(runtimeStatePath, "utf8")) as {
+        physical_sessions: PhysicalStoreSessionRecord[];
+      };
+      storeState.physical_sessions[0].expires_at = "2020-01-01T00:00:00.000Z";
+      await fs.writeFile(runtimeStatePath, JSON.stringify(storeState, null, 2), "utf8");
+
+      // getEnrollmentOrThrow re-derives the linked session via
+      // getPhysicalStoreSessionOrThrow, which always throws for an expired
+      // session (its exclusion list only covers completed/rejected/cancelled).
+      // The enrollment sync that runs first still persists the correct
+      // "verification_session_expired" status before that throw happens.
+      await expect(getEnrollmentOrThrow(enrollment.id)).rejects.toThrow(/expired/i);
+
+      const persistedState = JSON.parse(await fs.readFile(runtimeStatePath, "utf8")) as {
+        enrollments: Array<{ status: string; physical_verification?: { status: string } }>;
+      };
+      expect(persistedState.enrollments[0].status).toBe("verification_session_expired");
+      expect(persistedState.enrollments[0].physical_verification?.status).toBe("expired");
+
+      await expect(
+        verifyPhysicalIdCheck({
+          userCode: enrollment.physical_verification?.user_code.value ?? "",
+          verifierToken
+        })
+      ).rejects.toThrow(/expired/i);
+    });
+
+    it("derives a rejected verification status once staff decline the in-person ID check", async () => {
+      const session = await createPhysicalStoreSession();
+      const enrollment = await startEnrollment({
+        application: physicalApplication(session, "2026-04-15T10:00:00.000Z"),
+        holderPublicKey,
+        applicationFingerprint: physicalFingerprint(session)
+      });
+
+      const rejected = await rejectPhysicalIdCheck({
+        userCode: enrollment.physical_verification?.user_code.value ?? "",
+        verifierToken
+      });
+
+      expect(rejected.status).toBe("declined_physical_verification");
+      expect(rejected.physical_verification?.status).toBe("rejected");
+
+      expect(
+        derivePhysicalVerificationStatus({
+          status: "rejected",
+          clerk_verification: { status: "rejected" },
+          device_auth: { status: "pending" }
+        })
+      ).toBe("rejected");
+
+      expect(
+        derivePhysicalVerificationStatus({
+          status: "claimed",
+          clerk_verification: { status: "rejected" },
+          device_auth: { status: "pending" }
+        })
+      ).toBe("rejected");
+    });
+
+    it("replays an idempotent app handoff claim without minting a second credential (device binding unchanged by this slice)", async () => {
+      const session = await createPhysicalStoreSession();
+      const enrollment = await startEnrollment({
+        application: physicalApplication(session, "2026-04-15T10:00:00.000Z"),
+        holderPublicKey,
+        applicationFingerprint: physicalFingerprint(session)
+      });
+
+      await verifyPhysicalIdCheck({
+        userCode: enrollment.physical_verification?.user_code.value ?? "",
+        verifierToken
+      });
+      const authStart = await startPhysicalDeviceAuth(enrollment.id);
+      await completePhysicalDeviceAuth({
+        enrollmentId: enrollment.id,
+        challengeId: authStart.challenge_id,
+        method: "demo_device_check"
+      });
+
+      const handoff = await createNativeAppHandoff(enrollment.id);
+      const firstClaim = await claimNativeAppHandoff({
+        token: handoff.token,
+        holderPublicKey: nativeHolderPublicKey
+      });
+      const secondClaim = await claimNativeAppHandoff({
+        token: handoff.token,
+        holderPublicKey: nativeHolderPublicKey
+      });
+      const thirdClaim = await claimNativeAppHandoff({
+        token: handoff.token,
+        holderPublicKey: nativeHolderPublicKey
+      });
+
+      expect(secondClaim).toEqual(firstClaim);
+      expect(thirdClaim).toEqual(firstClaim);
+    });
   });
 });

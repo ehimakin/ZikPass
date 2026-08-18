@@ -5,6 +5,7 @@ import {
   isRetailVerificationCodeReady,
   parseRetailVerificationCode
 } from "@/lib/shared/physical-flow";
+import { isPhysicalCustomerPaused } from "@/lib/shared/physical-journey";
 import type { EnrollmentRecord, PhysicalStoreSessionRecord } from "@/lib/shared/types";
 
 interface ApiError {
@@ -12,7 +13,6 @@ interface ApiError {
 }
 
 const demoRetailVerifierToken = "demo-retail-terminal";
-const customerPauseThresholdMs = 12_000;
 
 type RetailState = "scan" | "loading" | "ready" | "confirmed" | "rejected" | "error";
 
@@ -196,11 +196,8 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
 
         const nextSession = (await response.json()) as PhysicalStoreSessionRecord;
         if (nextSession.status !== "completed") {
-          const lastSeenAt = nextSession.customer_last_seen_at
-            ? new Date(nextSession.customer_last_seen_at).getTime()
-            : 0;
           setCustomerPaused(
-            Boolean(lastSeenAt && Date.now() - lastSeenAt > customerPauseThresholdMs)
+            isPhysicalCustomerPaused({ customerLastSeenAt: nextSession.customer_last_seen_at })
           );
           return;
         }

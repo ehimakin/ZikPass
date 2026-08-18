@@ -17,6 +17,11 @@ import type {
   PhysicalVerificationState
 } from "@/lib/shared/types";
 import { bytesToBase64Url, randomAlphaNumericCode, randomId, randomNumericCode } from "@/lib/shared/utils";
+import {
+  derivePhysicalVerificationStatus,
+  isPhysicalStoreSessionExpired,
+  isPhysicalVerificationSessionUsable
+} from "@/lib/shared/physical-journey";
 import { assertNoDuplicateApplication, checkDuplicateApplication } from "@/lib/server/application-guard";
 import { issueCredential } from "@/lib/server/credential-issuer";
 import { buildNotification } from "@/lib/server/notifications";
@@ -1519,7 +1524,7 @@ function approvedRiskDecision(now: string, reason: string): ApplicationRiskDecis
 }
 
 function isPhysicalSessionExpired(session: PhysicalStoreSessionRecord): boolean {
-  return new Date(session.expires_at).getTime() <= Date.now();
+  return isPhysicalStoreSessionExpired(session);
 }
 
 async function getPhysicalEnrollmentForSession(
@@ -1564,11 +1569,13 @@ function ensurePhysicalEnrollmentUsable(
     throw new Error("This enrollment is not using the in-person verification lane.");
   }
 
-  const codeExpired = new Date(record.physical_verification.user_code.expires_at).getTime() <= Date.now();
   if (
     !record.issued_credential &&
-    (isPhysicalSessionExpired(session) ||
-      (codeExpired && session.clerk_verification.status !== "verified"))
+    !isPhysicalVerificationSessionUsable({
+      sessionExpiresAt: session.expires_at,
+      userCodeExpiresAt: record.physical_verification.user_code.expires_at,
+      clerkVerificationStatus: session.clerk_verification.status
+    })
   ) {
     throw new Error("This in-person verification session has expired. Ask staff to start again.");
   }
@@ -1595,10 +1602,11 @@ async function syncPhysicalEnrollmentFromSession(
   }
 
   const now = new Date().toISOString();
-  const codeExpired = new Date(record.physical_verification.user_code.expires_at).getTime() <= Date.now();
-  const expired =
-    isPhysicalSessionExpired(session) ||
-    (codeExpired && session.clerk_verification.status !== "verified");
+  const expired = !isPhysicalVerificationSessionUsable({
+    sessionExpiresAt: session.expires_at,
+    userCodeExpiresAt: record.physical_verification.user_code.expires_at,
+    clerkVerificationStatus: session.clerk_verification.status
+  });
 
   record.physical_verification = toPhysicalVerificationState(session, record.physical_verification);
   record.updated_at = now;
@@ -1658,18 +1666,7 @@ function toPhysicalVerificationState(
     expires_at: session.user_code_expires_at ?? session.expires_at
   };
 
-  let status: PhysicalVerificationState["status"] = "awaiting_clerk_verification";
-  if (session.status === "completed") {
-    status = "issued";
-  } else if (session.status === "rejected" || session.clerk_verification.status === "rejected") {
-    status = "rejected";
-  } else if (session.status === "expired") {
-    status = "expired";
-  } else if (session.device_auth.status === "verified" && session.clerk_verification.status === "verified") {
-    status = "verification_complete";
-  } else if (session.clerk_verification.status === "verified") {
-    status = "awaiting_device_auth";
-  }
+  const status = derivePhysicalVerificationStatus(session);
 
   return {
     session: {
