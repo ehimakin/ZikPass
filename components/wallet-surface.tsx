@@ -8,7 +8,6 @@ import type { InputHTMLAttributes, ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Zignature } from "@/components/zignature";
 import { PwaInstallButton } from "@/components/pwa-install-button";
-import { NativeAppHandoffButton } from "@/components/native-app-handoff-button";
 import { SurfaceCard } from "@/components/surface-card";
 import { StatusPill } from "@/components/status-pill";
 import { ZikLogoMark } from "@/components/zik-logo";
@@ -3281,11 +3280,8 @@ function PhysicalVerificationPanel({
                       </div>
                       <PwaInstallButton
                         className="w-full rounded-[22px] border border-ink/12 bg-[#f7faee] px-5 py-4 text-left text-sm font-semibold text-ink transition hover:bg-[#edf3df] sm:w-fit"
-                        label="Install ZikPass on this device"
-                      />
-                      <NativeAppHandoffButton
-                        className="w-full rounded-[22px] border border-ink/12 bg-white px-5 py-4 text-left text-sm font-semibold text-ink transition hover:bg-[#edf3df] sm:w-fit"
                         enrollmentId={enrollment?.id}
+                        label="Install ZikPass on this device"
                       />
                     </div>
   );

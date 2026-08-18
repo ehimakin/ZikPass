@@ -131,6 +131,35 @@ export async function storeEnrollmentContext(
   return nextWallet;
 }
 
+export async function markPwaInstalled(): Promise<WalletState> {
+  const wallet = await loadWalletState();
+  const nextWallet: WalletState = {
+    ...wallet,
+    pwaInstalledAt: wallet.pwaInstalledAt ?? new Date().toISOString()
+  };
+  await saveWalletState(nextWallet);
+  return nextWallet;
+}
+
+export async function claimPwaHandoff(token: string): Promise<WalletState> {
+  const wallet = await ensureHolderKeyPair(await loadWalletState());
+  const response = await fetch("/api/mobile/handoff/claim", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      token,
+      holderPublicKey: wallet.holderKeyPair?.publicKeyJwk
+    })
+  });
+  const data = (await response.json()) as SignedCredential | { error?: string };
+
+  if (!response.ok) {
+    throw new Error((data as { error?: string }).error ?? "Unable to restore the ZikPass on this device.");
+  }
+
+  return storeCredential(data as SignedCredential, wallet.enrollmentId);
+}
+
 export async function createPresentationBundle(
   challenge: string,
   options?: {
@@ -277,6 +306,10 @@ export function normalizeWalletState(input: unknown): WalletState {
 
   if (candidate.localCredentialStoredAt && typeof candidate.localCredentialStoredAt === "string") {
     nextState.localCredentialStoredAt = candidate.localCredentialStoredAt;
+  }
+
+  if (candidate.pwaInstalledAt && typeof candidate.pwaInstalledAt === "string") {
+    nextState.pwaInstalledAt = candidate.pwaInstalledAt;
   }
 
   if (hasKeyPair(candidate.holderKeyPair)) {

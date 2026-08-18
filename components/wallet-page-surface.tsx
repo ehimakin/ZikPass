@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import type { Route } from "next";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { PassPreviewCard } from "@/components/wallet-surface";
 import { PwaInstallButton } from "@/components/pwa-install-button";
-import { NativeAppHandoffButton } from "@/components/native-app-handoff-button";
-import { clearWallet, loadWalletState, storeCredential } from "@/lib/client/wallet-client";
+import { claimPwaHandoff, clearWallet, loadWalletState, storeCredential } from "@/lib/client/wallet-client";
 import { StatusPill } from "@/components/status-pill";
 import { buildAppOnboardingUrl, formatIssuanceChannel } from "@/lib/shared/physical-flow";
 import { buildCredentialZignatureSeedInput } from "@/lib/shared/zignature";
@@ -32,7 +31,37 @@ export function WalletPageSurface() {
   useEffect(() => {
     void (async () => {
       try {
-        const walletState = await loadWalletState();
+        let walletState = await loadWalletState();
+        const searchParams = new URLSearchParams(window.location.search);
+        const handoffToken = searchParams.get("handoff_token");
+        const launchedFromPwa = searchParams.get("source") === "pwa";
+        const isStandalone =
+          window.matchMedia("(display-mode: standalone)").matches ||
+          (navigator as Navigator & { standalone?: boolean }).standalone === true;
+
+        if ((isStandalone || launchedFromPwa) && !walletState.credential) {
+          let token = handoffToken;
+          if (!token) {
+            const recoveryResponse = await fetch("/api/pwa/handoff/recover", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" }
+            });
+            const recoveryData = (await recoveryResponse.json()) as {
+              token?: string | null;
+              expires_at?: string | null;
+            };
+            token = recoveryData.token ?? null;
+          }
+
+          if (token) {
+            walletState = await claimPwaHandoff(token);
+          }
+
+          if (handoffToken || token) {
+            window.history.replaceState({}, "", "/wallet?source=pwa");
+          }
+        }
+
         setWallet(walletState);
 
         if (walletState.enrollmentId) {
@@ -41,9 +70,13 @@ export function WalletPageSurface() {
             setEnrollment((await response.json()) as EnrollmentRecord);
           }
         }
-      } catch {
+      } catch (reason: unknown) {
         setWallet({});
-        setError("We could not load the local Zik Pass on this browser.");
+        setError(
+          reason instanceof Error
+            ? reason.message
+            : "We could not load the local Zik Pass on this browser."
+        );
       }
     })();
   }, []);
@@ -51,6 +84,14 @@ export function WalletPageSurface() {
   useEffect(() => {
     const interval = window.setInterval(() => setNowMs(Date.now()), 1000);
     return () => window.clearInterval(interval);
+  }, []);
+
+  const handlePwaInstalled = useCallback(() => {
+    setWallet((current) =>
+      current
+        ? { ...current, pwaInstalledAt: current.pwaInstalledAt ?? new Date().toISOString() }
+        : current
+    );
   }, []);
 
   if (!wallet) {
@@ -84,7 +125,6 @@ export function WalletPageSurface() {
         subjectPublicKey: credential.payload.subject_public_key
       })
     : "wallet-preview";
-
   return (
     <main className="flex min-h-[calc(100vh-168px)] flex-1 flex-col overflow-visible px-4 pb-52 pt-8 text-ink sm:px-6 sm:pb-44 lg:px-8 lg:pb-32">
       {credential ? (
@@ -92,6 +132,8 @@ export function WalletPageSurface() {
           active={active}
           credentialId={credential.payload.credential_id}
           enrollmentId={wallet.enrollmentId}
+          onPwaInstalled={handlePwaInstalled}
+          pwaInstalledAt={wallet.pwaInstalledAt}
           isActionsOpen={isActionsOpen}
           onToggleActions={() => setIsActionsOpen((current) => !current)}
           zignatureSeed={zignatureSeed}
@@ -272,7 +314,10 @@ function WalletStatusDock({
               ? "Ready for age checks"
               : `Activates in ${remainingSeconds}s`
         },
-        { label: "Stored", value: "On this device" }
+        {
+          label: "Stored",
+          value: wallet.pwaInstalledAt ? "ZikPass home screen app" : "Browser wallet"
+        }
       ]
     : [
         { label: "ID required", value: "Physical ID check" },
@@ -340,6 +385,8 @@ function SavedWalletState({
   active,
   credentialId,
   enrollmentId,
+  onPwaInstalled,
+  pwaInstalledAt,
   isActionsOpen,
   onToggleActions,
   zignatureSeed
@@ -347,6 +394,8 @@ function SavedWalletState({
   active: boolean;
   credentialId: string;
   enrollmentId?: string;
+  onPwaInstalled: () => void;
+  pwaInstalledAt?: string;
   isActionsOpen: boolean;
   onToggleActions: () => void;
   zignatureSeed: string;
@@ -435,13 +484,11 @@ function SavedWalletState({
       <div className="relative mt-8 flex flex-wrap items-center gap-4 text-sm text-ink/68">
         <PwaInstallButton
           className="rounded-full border border-ink/12 bg-[#f7faee] px-5 py-3 text-sm font-semibold text-ink transition hover:bg-[#edf3df]"
-          label="Install ZikPass on this device"
-        />
-        <NativeAppHandoffButton
-          className="rounded-full border border-ink/12 bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-[#edf3df]"
           enrollmentId={enrollmentId}
+          label="Install ZikPass on this device"
+          onInstalled={onPwaInstalled}
         />
-        <p>Keep your ZikPass available from the device home screen.</p>
+        {pwaInstalledAt ? <p>ZikPass is assigned to this device home screen.</p> : null}
       </div>
 
       <div className="relative mt-auto flex flex-wrap items-center justify-between gap-4 pt-10 text-sm text-ink/68">

@@ -158,6 +158,22 @@ export async function getMobileAppHandoff(
   return store.mobile_handoffs.find((handoff) => handoff.token_hash === tokenHash);
 }
 
+export async function findLatestRecoverableMobileAppHandoff(
+  clientIp: string,
+  now = Date.now()
+): Promise<NativeAppHandoffRecord | undefined> {
+  const store = await readStore();
+  return store.mobile_handoffs
+    .filter(
+      (handoff) =>
+        handoff.client_ip === clientIp &&
+        !handoff.claimed_at &&
+        !handoff.superseded_at &&
+        new Date(handoff.expires_at).getTime() > now
+    )
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
+}
+
 export async function upsertMobileAppHandoff(
   record: NativeAppHandoffRecord
 ): Promise<NativeAppHandoffRecord> {
@@ -450,7 +466,9 @@ function normalizeMobileHandoffs(input: unknown[] | undefined): NativeAppHandoff
         enrollment_id: candidate.enrollment_id,
         created_at: candidate.created_at,
         expires_at: candidate.expires_at,
+        client_ip: candidate.client_ip,
         claimed_at: candidate.claimed_at,
+        superseded_at: candidate.superseded_at,
         holder_public_key: candidate.holder_public_key,
         issued_credential: candidate.issued_credential
       }

@@ -1,12 +1,19 @@
 import { createHash, randomBytes } from "node:crypto";
 import { getEnrollmentOrThrow } from "@/lib/server/enrollment-service";
 import { issueCredential } from "@/lib/server/credential-issuer";
-import { getMobileAppHandoff, upsertMobileAppHandoff } from "@/lib/server/storage";
+import {
+  findLatestRecoverableMobileAppHandoff,
+  getMobileAppHandoff,
+  upsertMobileAppHandoff
+} from "@/lib/server/storage";
 import type { SignedCredential } from "@/lib/shared/types";
 
 const HANDOFF_TTL_MS = 10 * 60 * 1000;
 
-export async function createNativeAppHandoff(enrollmentId: string): Promise<{
+export async function createNativeAppHandoff(
+  enrollmentId: string,
+  options?: { clientIp?: string }
+): Promise<{
   token: string;
   expiresAt: string;
 }> {
@@ -22,7 +29,8 @@ export async function createNativeAppHandoff(enrollmentId: string): Promise<{
     token_hash: hashToken(token),
     enrollment_id: enrollmentId,
     created_at: new Date(now).toISOString(),
-    expires_at: expiresAt
+    expires_at: expiresAt,
+    client_ip: options?.clientIp
   });
 
   return { token, expiresAt };
@@ -39,7 +47,7 @@ export async function claimNativeAppHandoff(input: {
     throw new Error("This app handoff has expired or is not recognised.");
   }
 
-  if (handoff.claimed_at) {
+  if (handoff.claimed_at || handoff.superseded_at) {
     throw new Error("This app handoff has already been claimed.");
   }
 
@@ -59,11 +67,28 @@ export async function claimNativeAppHandoff(input: {
   return credential;
 }
 
+export async function recoverNativeAppHandoff(clientIp: string): Promise<{
+  token: string;
+  expiresAt: string;
+} | null> {
+  const pending = await findLatestRecoverableMobileAppHandoff(clientIp);
+  if (!pending) {
+    return null;
+  }
+
+  await upsertMobileAppHandoff({
+    ...pending,
+    superseded_at: new Date().toISOString()
+  });
+  return createNativeAppHandoff(pending.enrollment_id, { clientIp });
+}
+
 export function buildNativeAppHandoffUrls(origin: string, token: string) {
   const encodedToken = encodeURIComponent(token);
   return {
     customSchemeUrl: `zik://handoff?token=${encodedToken}`,
-    webHandoffUrl: `${origin.replace(/\/$/, "")}/app/handoff?token=${encodedToken}`
+    webHandoffUrl: `${origin.replace(/\/$/, "")}/app/handoff?token=${encodedToken}`,
+    pwaStartUrl: `/wallet?source=pwa&handoff_token=${encodedToken}`
   };
 }
 

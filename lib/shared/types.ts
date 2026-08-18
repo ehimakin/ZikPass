@@ -227,7 +227,9 @@ export interface NativeAppHandoffRecord {
   enrollment_id: string;
   created_at: string;
   expires_at: string;
+  client_ip?: string;
   claimed_at?: string;
+  superseded_at?: string;
   holder_public_key?: JsonWebKey;
   issued_credential?: SignedCredential;
 }
@@ -366,6 +368,7 @@ export interface WalletState {
   enrollmentLane?: IssuanceLane;
   physicalSessionId?: string;
   localCredentialStoredAt?: string;
+  pwaInstalledAt?: string;
 }
 
 export interface WalletStatusSnapshot {
