@@ -61,6 +61,7 @@ interface LegacyEnrollmentRecord {
 const dataDir = getRuntimeDataDir();
 const seedStatePath = getSeedStatePath();
 const runtimeStatePath = getRuntimeStatePath();
+let storeMutationQueue = Promise.resolve();
 
 async function ensureStateFile() {
   await fs.mkdir(dataDir, { recursive: true });
@@ -114,6 +115,25 @@ export async function getPhysicalSession(
   return store.physical_sessions.find((session) => session.session_id === id);
 }
 
+export async function touchPhysicalSessionLastSeen(
+  id: string,
+  lastSeenAt: string
+): Promise<PhysicalStoreSessionRecord | undefined> {
+  return mutateStore((store) => {
+    const session = store.physical_sessions.find((candidate) => candidate.session_id === id);
+    if (!session) {
+      return undefined;
+    }
+
+    if (session.status !== "completed" && session.status !== "rejected" && session.status !== "cancelled") {
+      session.customer_last_seen_at = lastSeenAt;
+      session.updated_at = lastSeenAt;
+    }
+
+    return session;
+  });
+}
+
 export async function findPhysicalSessionByUserCode(
   code: string
 ): Promise<PhysicalStoreSessionRecord | undefined> {
@@ -122,33 +142,33 @@ export async function findPhysicalSessionByUserCode(
 }
 
 export async function upsertEnrollment(record: EnrollmentRecord): Promise<EnrollmentRecord> {
-  const store = await readStore();
-  const index = store.enrollments.findIndex((enrollment) => enrollment.id === record.id);
+  return mutateStore((store) => {
+    const index = store.enrollments.findIndex((enrollment) => enrollment.id === record.id);
 
-  if (index >= 0) {
-    store.enrollments[index] = record;
-  } else {
-    store.enrollments.push(record);
-  }
+    if (index >= 0) {
+      store.enrollments[index] = record;
+    } else {
+      store.enrollments.push(record);
+    }
 
-  await writeStore(store);
-  return record;
+    return record;
+  });
 }
 
 export async function upsertPhysicalSession(
   record: PhysicalStoreSessionRecord
 ): Promise<PhysicalStoreSessionRecord> {
-  const store = await readStore();
-  const index = store.physical_sessions.findIndex((session) => session.session_id === record.session_id);
+  return mutateStore((store) => {
+    const index = store.physical_sessions.findIndex((session) => session.session_id === record.session_id);
 
-  if (index >= 0) {
-    store.physical_sessions[index] = record;
-  } else {
-    store.physical_sessions.push(record);
-  }
+    if (index >= 0) {
+      store.physical_sessions[index] = record;
+    } else {
+      store.physical_sessions.push(record);
+    }
 
-  await writeStore(store);
-  return record;
+    return record;
+  });
 }
 
 export async function getMobileAppHandoff(
@@ -177,17 +197,32 @@ export async function findLatestRecoverableMobileAppHandoff(
 export async function upsertMobileAppHandoff(
   record: NativeAppHandoffRecord
 ): Promise<NativeAppHandoffRecord> {
-  const store = await readStore();
-  const index = store.mobile_handoffs.findIndex((handoff) => handoff.token_hash === record.token_hash);
+  return mutateStore((store) => {
+    const index = store.mobile_handoffs.findIndex((handoff) => handoff.token_hash === record.token_hash);
 
-  if (index >= 0) {
-    store.mobile_handoffs[index] = record;
-  } else {
-    store.mobile_handoffs.push(record);
-  }
+    if (index >= 0) {
+      store.mobile_handoffs[index] = record;
+    } else {
+      store.mobile_handoffs.push(record);
+    }
 
-  await writeStore(store);
-  return record;
+    return record;
+  });
+}
+
+async function mutateStore<T>(mutator: (store: StoreData) => T | Promise<T>): Promise<T> {
+  const operation = storeMutationQueue.then(async () => {
+    const store = await readStore();
+    const result = await mutator(store);
+    await writeStore(store);
+    return result;
+  });
+
+  storeMutationQueue = operation.then(
+    () => undefined,
+    () => undefined
+  );
+  return operation;
 }
 
 function normalizeEnrollment(record: LegacyEnrollmentRecord): EnrollmentRecord {
@@ -434,7 +469,8 @@ function normalizePhysicalSessions(
         },
         attestation: candidate.attestation,
         completed_at: candidate.completed_at,
-        minimized_at: candidate.minimized_at
+        minimized_at: candidate.minimized_at,
+        customer_last_seen_at: candidate.customer_last_seen_at
       }
     ];
   });

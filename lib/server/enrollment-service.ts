@@ -26,6 +26,7 @@ import {
   getEnrollment,
   getPhysicalSession,
   listEnrollments,
+  touchPhysicalSessionLastSeen,
   upsertEnrollment,
   upsertPhysicalSession
 } from "@/lib/server/storage";
@@ -380,6 +381,17 @@ export async function getPhysicalStoreSessionOrThrow(
     throw new Error("This store session has expired. Ask staff to start a new one.");
   }
 
+  return session;
+}
+
+export async function touchPhysicalStoreSession(
+  sessionId: string
+): Promise<PhysicalStoreSessionRecord> {
+  await getPhysicalStoreSessionOrThrow(sessionId);
+  const session = await touchPhysicalSessionLastSeen(sessionId, new Date().toISOString());
+  if (!session) {
+    throw new Error("Store session not found.");
+  }
   return session;
 }
 
@@ -1552,8 +1564,12 @@ function ensurePhysicalEnrollmentUsable(
     throw new Error("This enrollment is not using the in-person verification lane.");
   }
 
-  const codeExpiry = new Date(record.physical_verification.user_code.expires_at).getTime();
-  if (!record.issued_credential && (isPhysicalSessionExpired(session) || codeExpiry <= Date.now())) {
+  const codeExpired = new Date(record.physical_verification.user_code.expires_at).getTime() <= Date.now();
+  if (
+    !record.issued_credential &&
+    (isPhysicalSessionExpired(session) ||
+      (codeExpired && session.clerk_verification.status !== "verified"))
+  ) {
     throw new Error("This in-person verification session has expired. Ask staff to start again.");
   }
 
@@ -1579,9 +1595,10 @@ async function syncPhysicalEnrollmentFromSession(
   }
 
   const now = new Date().toISOString();
+  const codeExpired = new Date(record.physical_verification.user_code.expires_at).getTime() <= Date.now();
   const expired =
     isPhysicalSessionExpired(session) ||
-    new Date(record.physical_verification.user_code.expires_at).getTime() <= Date.now();
+    (codeExpired && session.clerk_verification.status !== "verified");
 
   record.physical_verification = toPhysicalVerificationState(session, record.physical_verification);
   record.updated_at = now;

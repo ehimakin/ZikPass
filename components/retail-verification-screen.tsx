@@ -12,6 +12,7 @@ interface ApiError {
 }
 
 const demoRetailVerifierToken = "demo-retail-terminal";
+const customerPauseThresholdMs = 12_000;
 
 type RetailState = "scan" | "loading" | "ready" | "confirmed" | "rejected" | "error";
 
@@ -21,6 +22,7 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
   const [enrollment, setEnrollment] = useState<EnrollmentRecord | null>(null);
   const [state, setState] = useState<RetailState>(initialCode ? "loading" : "scan");
   const [error, setError] = useState<string | null>(null);
+  const [customerPaused, setCustomerPaused] = useState(false);
   const [completionNotice, setCompletionNotice] = useState<string | null>(null);
   const [hasResolvedInitialCode, setHasResolvedInitialCode] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -39,6 +41,7 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
     setCode(parsedCode);
     setState("loading");
     setError(null);
+    setCustomerPaused(false);
 
     startTransition(() => {
       void (async () => {
@@ -88,6 +91,7 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
 
     setCode(parsedCode);
     setError(null);
+    setCustomerPaused(false);
 
     startTransition(() => {
       void (async () => {
@@ -134,11 +138,19 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
           : state === "loading"
             ? "Loading check"
             : state === "error"
-              ? "Still working..."
+              ? "Session needs attention"
               : "Scan customer QR";
+  const hasPausedState = state === "confirmed" && customerPaused;
+  const accentClass = hasErrorState
+    ? "bg-[#d27a86]"
+    : hasPausedState
+      ? "bg-[#d4a449]"
+      : "bg-[#69b889]";
   const body =
     state === "confirmed"
-      ? "The customer phone will update automatically."
+      ? hasPausedState
+        ? "The customer device appears to be paused. Ask them to reopen ZikPass after charging; this session is still waiting for device authentication."
+        : "The customer phone will update automatically."
       : state === "rejected"
         ? "Ask the customer to speak with staff or restart."
         : state === "ready"
@@ -169,15 +181,31 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
     async function checkIssuanceStatus() {
       try {
         const response = await fetch(`/api/physical/sessions/${sessionId}`);
-        if (!response.ok || cancelled) {
+        if (!response.ok) {
+          if (!cancelled) {
+            setCustomerPaused(false);
+            setError("This in-store session expired before the pass was issued. Ask the customer to restart.");
+            setState("error");
+          }
+          return;
+        }
+
+        if (cancelled) {
           return;
         }
 
         const nextSession = (await response.json()) as PhysicalStoreSessionRecord;
         if (nextSession.status !== "completed") {
+          const lastSeenAt = nextSession.customer_last_seen_at
+            ? new Date(nextSession.customer_last_seen_at).getTime()
+            : 0;
+          setCustomerPaused(
+            Boolean(lastSeenAt && Date.now() - lastSeenAt > customerPauseThresholdMs)
+          );
           return;
         }
 
+        setCustomerPaused(false);
         setCode("");
         setSession(null);
         setEnrollment(null);
@@ -185,7 +213,9 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
         setError(null);
         setCompletionNotice("Pass issued successfully. Ready for the next customer.");
       } catch {
-        // Issuance status is best-effort here; the customer flow remains authoritative.
+        if (!cancelled) {
+          setCustomerPaused(true);
+        }
       }
     }
 
@@ -213,7 +243,7 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(215,241,113,0.28),_transparent_42%),_#f4f7ee] px-4 py-5 text-ink sm:px-6 sm:py-7">
       <div className="relative mx-auto flex min-h-[calc(100vh-2.5rem)] max-w-5xl flex-col overflow-hidden rounded-[40px] border border-white/80 bg-white/76 px-5 py-7 shadow-panel backdrop-blur-sm sm:min-h-[calc(100vh-3.5rem)] sm:px-8">
         <div
-          className={`absolute inset-x-0 top-0 h-1.5 ${hasErrorState ? "bg-[#d27a86]" : "bg-[#69b889]"}`}
+          className={`absolute inset-x-0 top-0 h-1.5 ${accentClass}`}
         />
         <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center gap-9 text-center">
           <div className="zik-stage-copy">
@@ -317,9 +347,7 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
 
         <div className="mx-auto h-1.5 w-full max-w-3xl overflow-hidden rounded-full bg-ink/10">
           <div
-            className={`h-full rounded-full transition-[width,background-color] duration-700 ${
-              hasErrorState ? "bg-[#d27a86]" : "bg-[#69b889]"
-            }`}
+            className={`h-full rounded-full transition-[width,background-color] duration-700 ${accentClass}`}
             style={{ width: state === "confirmed" || state === "rejected" ? "100%" : state === "ready" ? "62%" : "24%" }}
           />
         </div>

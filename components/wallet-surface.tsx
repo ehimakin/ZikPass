@@ -583,6 +583,29 @@ export function WalletSurface({
     refreshPhysicalSession
   ]);
 
+  const physicalSessionId =
+    enrollment?.physical_verification?.session.session_id ?? physicalSession?.session_id;
+
+  useEffect(() => {
+    if (!physicalSessionId) {
+      return;
+    }
+
+    const sendHeartbeat = () => {
+      void fetch("/api/physical/sessions/heartbeat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: physicalSessionId })
+      }).catch(() => {
+        // The clerk can still rely on the server session state if a heartbeat is missed.
+      });
+    };
+
+    sendHeartbeat();
+    const interval = window.setInterval(sendHeartbeat, 5000);
+    return () => window.clearInterval(interval);
+  }, [physicalSessionId]);
+
   useEffect(() => {
     if (canDeleteLocalPass) {
       setDeleteButtonState("idle");

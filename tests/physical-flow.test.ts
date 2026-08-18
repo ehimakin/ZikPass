@@ -10,8 +10,10 @@ import {
   rejectPhysicalIdCheck,
   startEnrollment,
   startPhysicalDeviceAuth,
+  touchPhysicalStoreSession,
   verifyPhysicalIdCheck
 } from "@/lib/server/enrollment-service";
+import { claimNativeAppHandoff, createNativeAppHandoff } from "@/lib/server/mobile-handoff";
 import { getIssuerKeyPath, getRuntimeStatePath } from "@/lib/server/runtime-paths";
 import {
   ZIK_APP_DOWNLOAD_URL,
@@ -38,6 +40,13 @@ const holderPublicKey: JsonWebKey = {
   crv: "Ed25519",
   kty: "OKP",
   x: "demo-public-key"
+};
+const nativeHolderPublicKey: JsonWebKey = {
+  key_ops: ["verify"],
+  ext: true,
+  crv: "Ed25519",
+  kty: "OKP",
+  x: Buffer.alloc(32, 7).toString("base64url")
 };
 const verifierToken = "demo-retail-terminal";
 
@@ -248,6 +257,82 @@ describe.sequential("physical flow", () => {
     expect(JSON.stringify(issued.issued_credential?.payload)).not.toMatch(
       /Morgan|1994|High Street|date_of_birth|first_name|last_name|current_home_address/i
     );
+  });
+
+  it("keeps the post-clerk flow resumable after the customer code expires", async () => {
+    const session = await createPhysicalStoreSession();
+    const enrollment = await startEnrollment({
+      application: physicalApplication(session, "2026-04-15T10:00:00.000Z"),
+      holderPublicKey,
+      applicationFingerprint: physicalFingerprint(session)
+    });
+
+    const clerkConfirmed = await verifyPhysicalIdCheck({
+      userCode: enrollment.physical_verification?.user_code.value ?? "",
+      verifierToken
+    });
+    expect(clerkConfirmed.status).toBe("device_auth_pending");
+
+    const storeState = JSON.parse(await fs.readFile(runtimeStatePath, "utf8")) as {
+      enrollments: Array<{
+        physical_verification?: { user_code: { expires_at: string } };
+      }>;
+      physical_sessions: Array<{
+        user_code_expires_at?: string;
+      }>;
+    };
+    storeState.enrollments[0].physical_verification!.user_code.expires_at =
+      "2020-01-01T00:00:00.000Z";
+    storeState.physical_sessions[0].user_code_expires_at = "2020-01-01T00:00:00.000Z";
+    await fs.writeFile(runtimeStatePath, JSON.stringify(storeState, null, 2), "utf8");
+
+    const authStart = await startPhysicalDeviceAuth(enrollment.id);
+    expect(authStart.challenge_id).toMatch(/^deviceauth_/);
+  });
+
+  it("replays a completed device handoff when the original response was lost", async () => {
+    const session = await createPhysicalStoreSession();
+    const enrollment = await startEnrollment({
+      application: physicalApplication(session, "2026-04-15T10:00:00.000Z"),
+      holderPublicKey,
+      applicationFingerprint: physicalFingerprint(session)
+    });
+
+    await verifyPhysicalIdCheck({
+      userCode: enrollment.physical_verification?.user_code.value ?? "",
+      verifierToken
+    });
+    const authStart = await startPhysicalDeviceAuth(enrollment.id);
+    await completePhysicalDeviceAuth({
+      enrollmentId: enrollment.id,
+      challengeId: authStart.challenge_id,
+      method: "demo_device_check"
+    });
+
+    const handoff = await createNativeAppHandoff(enrollment.id);
+    const firstClaim = await claimNativeAppHandoff({
+      token: handoff.token,
+      holderPublicKey: nativeHolderPublicKey
+    });
+    const replayedClaim = await claimNativeAppHandoff({
+      token: handoff.token,
+      holderPublicKey: nativeHolderPublicKey
+    });
+
+    expect(replayedClaim).toEqual(firstClaim);
+    await expect(
+      claimNativeAppHandoff({
+        token: handoff.token,
+        holderPublicKey: { ...nativeHolderPublicKey, x: Buffer.alloc(32, 8).toString("base64url") }
+      })
+    ).rejects.toThrow(/already been claimed/i);
+  });
+
+  it("records customer presence for clerk recovery visibility", async () => {
+    const session = await createPhysicalStoreSession();
+    const touched = await touchPhysicalStoreSession(session.session_id);
+
+    expect(touched.customer_last_seen_at).toEqual(expect.any(String));
   });
 
   it("maps physical sessions to the Version 2.0 process states", async () => {

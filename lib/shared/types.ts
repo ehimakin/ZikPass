@@ -173,6 +173,7 @@ export interface PhysicalStoreSessionRecord extends PhysicalStoreContext {
   attestation?: PhysicalVerificationAttestation;
   completed_at?: string;
   minimized_at?: string;
+  customer_last_seen_at?: string;
 }
 
 export type EnrollmentStatus =

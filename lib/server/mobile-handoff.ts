@@ -43,12 +43,24 @@ export async function claimNativeAppHandoff(input: {
   validateHolderPublicKey(input.holderPublicKey);
   const handoff = await getMobileAppHandoff(hashToken(input.token));
 
-  if (!handoff || new Date(handoff.expires_at).getTime() <= Date.now()) {
+  if (!handoff) {
     throw new Error("This app handoff has expired or is not recognised.");
   }
 
-  if (handoff.claimed_at || handoff.superseded_at) {
+  if (handoff.claimed_at) {
+    if (
+      handoff.issued_credential &&
+      handoff.holder_public_key &&
+      sameHolderPublicKey(handoff.holder_public_key, input.holderPublicKey)
+    ) {
+      return handoff.issued_credential;
+    }
+
     throw new Error("This app handoff has already been claimed.");
+  }
+
+  if (handoff.superseded_at || new Date(handoff.expires_at).getTime() <= Date.now()) {
+    throw new Error("This app handoff has expired or is not recognised.");
   }
 
   const enrollment = await getEnrollmentOrThrow(handoff.enrollment_id);
@@ -110,4 +122,8 @@ function validateHolderPublicKey(value: JsonWebKey) {
   if (keyBytes.length !== 32) {
     throw new Error("The native holder public key is malformed.");
   }
+}
+
+function sameHolderPublicKey(left: JsonWebKey, right: JsonWebKey): boolean {
+  return left.kty === right.kty && left.crv === right.crv && left.x === right.x;
 }
