@@ -24,6 +24,7 @@ import {
 } from "@/lib/shared/physical-journey";
 import { assertNoDuplicateApplication, checkDuplicateApplication } from "@/lib/server/application-guard";
 import { issueCredential } from "@/lib/server/credential-issuer";
+import { createPrimaryDeviceBindingIfMissing } from "@/lib/server/device-bindings";
 import { buildNotification } from "@/lib/server/notifications";
 import { authenticateRetailVerifier } from "@/lib/server/retail-verifier";
 import {
@@ -1437,6 +1438,7 @@ async function signIssuedCredential(record: EnrollmentRecord): Promise<Enrollmen
   record.orchestration.issuance_status = "signing";
 
   record.issued_credential = await issueCredential(record);
+  await createPrimaryDeviceBindingIfMissing(record.id, record.holder_public_key);
   record.issuer_signature_created_at = new Date().toISOString();
   record.status = "issued";
   record.updated_at = record.issuer_signature_created_at;

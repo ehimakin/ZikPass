@@ -4,9 +4,13 @@ import Link from "next/link";
 import type { Route } from "next";
 import { useCallback, useEffect, useState } from "react";
 import { PassPreviewCard } from "@/components/wallet-surface";
+import { ExtendPassPanel } from "@/components/extend-pass-panel";
 import { PwaInstallButton } from "@/components/pwa-install-button";
+import { RecoveryPanel } from "@/components/recovery-panel";
 import { claimPwaHandoff, clearWallet, loadWalletState, storeCredential } from "@/lib/client/wallet-client";
 import { StatusPill } from "@/components/status-pill";
+import { classifyError } from "@/lib/shared/errors";
+import type { ErrorCode } from "@/lib/shared/errors";
 import { buildAppOnboardingUrl, formatIssuanceChannel } from "@/lib/shared/physical-flow";
 import { buildCredentialZignatureSeedInput } from "@/lib/shared/zignature";
 import type { EnrollmentRecord, WalletState } from "@/lib/shared/types";
@@ -27,59 +31,72 @@ export function WalletPageSurface() {
   const [isPending, setIsPending] = useState(false);
   const [deleteButtonState, setDeleteButtonState] = useState<"idle" | "deleted">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [errorRecoveryAction, setErrorRecoveryAction] = useState<
+    ReturnType<typeof classifyError>["recoveryAction"]
+  >("retry");
+
+  const loadWallet = useCallback(async () => {
+    setError(null);
+
+    // A failure reading local storage genuinely has nothing to preserve;
+    // any other failure below keeps whatever wallet state was already
+    // loaded here, so a lost response or duplicate-claim error can never
+    // overwrite an already-valid local credential with an empty wallet.
+    let walletState = await loadWalletState().catch(() => ({}) as WalletState);
+
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      const handoffToken = searchParams.get("handoff_token");
+      const launchedFromPwa = searchParams.get("source") === "pwa";
+      const isStandalone =
+        window.matchMedia("(display-mode: standalone)").matches ||
+        (navigator as Navigator & { standalone?: boolean }).standalone === true;
+
+      if ((isStandalone || launchedFromPwa) && !walletState.credential) {
+        let token = handoffToken;
+        if (!token) {
+          const recoveryResponse = await fetch("/api/pwa/handoff/recover", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
+          });
+          const recoveryData = (await recoveryResponse.json()) as {
+            token?: string | null;
+            expires_at?: string | null;
+          };
+          token = recoveryData.token ?? null;
+        }
+
+        if (token) {
+          walletState = await claimPwaHandoff(token);
+        }
+
+        if (handoffToken || token) {
+          window.history.replaceState({}, "", "/wallet?source=pwa");
+        }
+      }
+    } catch (reason: unknown) {
+      const classified = classifyError(reason);
+      setError(classified.message);
+      setErrorRecoveryAction(classified.recoveryAction);
+    }
+
+    setWallet(walletState);
+
+    if (walletState.enrollmentId) {
+      try {
+        const response = await fetch(`/api/enrollment/${walletState.enrollmentId}`);
+        if (response.ok) {
+          setEnrollment((await response.json()) as EnrollmentRecord);
+        }
+      } catch {
+        // Enrollment status is supplementary — keep the wallet/credential already loaded.
+      }
+    }
+  }, []);
 
   useEffect(() => {
-    void (async () => {
-      try {
-        let walletState = await loadWalletState();
-        const searchParams = new URLSearchParams(window.location.search);
-        const handoffToken = searchParams.get("handoff_token");
-        const launchedFromPwa = searchParams.get("source") === "pwa";
-        const isStandalone =
-          window.matchMedia("(display-mode: standalone)").matches ||
-          (navigator as Navigator & { standalone?: boolean }).standalone === true;
-
-        if ((isStandalone || launchedFromPwa) && !walletState.credential) {
-          let token = handoffToken;
-          if (!token) {
-            const recoveryResponse = await fetch("/api/pwa/handoff/recover", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" }
-            });
-            const recoveryData = (await recoveryResponse.json()) as {
-              token?: string | null;
-              expires_at?: string | null;
-            };
-            token = recoveryData.token ?? null;
-          }
-
-          if (token) {
-            walletState = await claimPwaHandoff(token);
-          }
-
-          if (handoffToken || token) {
-            window.history.replaceState({}, "", "/wallet?source=pwa");
-          }
-        }
-
-        setWallet(walletState);
-
-        if (walletState.enrollmentId) {
-          const response = await fetch(`/api/enrollment/${walletState.enrollmentId}`);
-          if (response.ok) {
-            setEnrollment((await response.json()) as EnrollmentRecord);
-          }
-        }
-      } catch (reason: unknown) {
-        setWallet({});
-        setError(
-          reason instanceof Error
-            ? reason.message
-            : "We could not load the local Zik Pass on this browser."
-        );
-      }
-    })();
-  }, []);
+    void loadWallet();
+  }, [loadWallet]);
 
   useEffect(() => {
     const interval = window.setInterval(() => setNowMs(Date.now()), 1000);
@@ -127,6 +144,17 @@ export function WalletPageSurface() {
     : "wallet-preview";
   return (
     <main className="flex min-h-[calc(100vh-168px)] flex-1 flex-col overflow-visible px-4 pb-52 pt-8 text-ink sm:px-6 sm:pb-44 lg:px-8 lg:pb-32">
+      {error ? (
+        <div className="mb-6">
+          <RecoveryPanel
+            message={error}
+            onRetry={() => void loadWallet()}
+            operation="wallet.load"
+            recoveryAction={errorRecoveryAction}
+            title="We could not finish loading this device's pass"
+          />
+        </div>
+      ) : null}
       {credential ? (
         <SavedWalletState
           active={active}
@@ -195,6 +223,11 @@ export function WalletPageSurface() {
         }}
         showCoolingOff={Boolean(enrollment) && enrollment?.status === "approved_with_cooling_off"}
         error={error}
+        onSimulateError={(scenario, message) => {
+          const classified = classifyError(new Error(message), scenario);
+          setError(classified.message);
+          setErrorRecoveryAction(classified.recoveryAction);
+        }}
       />
       <WalletStatusDock
         credential={credential}
@@ -222,6 +255,24 @@ export function WalletPageSurface() {
   );
 }
 
+const DEMO_ERROR_SCENARIOS: Array<{
+  scenario: ErrorCode;
+  label: string;
+  message: string;
+}> = [
+  { scenario: "network_failure", label: "Simulate network failure", message: "Failed to fetch the ZikPass wallet." },
+  {
+    scenario: "storage_unavailable",
+    label: "Simulate storage unavailable",
+    message: "This browser does not support IndexedDB, so Zik Pass cannot store a device-bound credential."
+  },
+  {
+    scenario: "lost_response",
+    label: "Simulate a lost response after issuance",
+    message: "The connection dropped after your pass was issued, before the confirmation arrived."
+  }
+];
+
 function WalletDemoTools({
   deleteButtonState,
   enrollment,
@@ -229,6 +280,7 @@ function WalletDemoTools({
   isPending,
   onAdvanceCoolingOff,
   onReset,
+  onSimulateError,
   showCoolingOff
 }: {
   deleteButtonState: "idle" | "deleted";
@@ -237,6 +289,7 @@ function WalletDemoTools({
   isPending: boolean;
   onAdvanceCoolingOff: () => void;
   onReset: () => void;
+  onSimulateError: (scenario: ErrorCode, message: string) => void;
   showCoolingOff: boolean;
 }) {
   if (process.env.NODE_ENV === "production") {
@@ -265,6 +318,27 @@ function WalletDemoTools({
             </button>
           ) : null}
           {enrollment ? <span className="self-center text-xs text-ink/55">Enrollment {enrollment.id}</span> : null}
+        </div>
+        <div className="mt-4 border-t border-ink/8 pt-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-ink/45">
+            Accessibility &amp; recovery test fixtures
+          </p>
+          <p className="mt-1 text-xs text-ink/55">
+            Deterministically triggers the recovery panel below for keyboard/screen-reader testing — no real
+            failure occurs.
+          </p>
+          <div className="mt-2 flex flex-wrap gap-3">
+            {DEMO_ERROR_SCENARIOS.map((entry) => (
+              <button
+                className="rounded-full border border-ink/15 bg-white px-4 py-2 text-sm font-medium text-ink disabled:opacity-55"
+                disabled={isPending}
+                key={entry.scenario}
+                onClick={() => onSimulateError(entry.scenario, entry.message)}
+              >
+                {entry.label}
+              </button>
+            ))}
+          </div>
         </div>
         {deleteButtonState === "deleted" ? <p className="mt-3 text-xs text-ink/55">Local wallet reset.</p> : null}
         {error ? <p className="mt-3 text-xs text-red-700" role="alert">{error}</p> : null}
@@ -401,9 +475,16 @@ function SavedWalletState({
   zignatureSeed: string;
 }) {
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [isExtendOpen, setIsExtendOpen] = useState(false);
 
   function showPlaceholderMessage(label: string) {
     setActionMessage(`${label} will be available in a future wallet update.`);
+    setIsExtendOpen(false);
+  }
+
+  function toggleExtendPanel() {
+    setActionMessage(null);
+    setIsExtendOpen((current) => !current);
   }
 
   return (
@@ -457,12 +538,13 @@ function SavedWalletState({
               <span className="mt-1 block text-xs font-normal text-ink/55">Remove it from this device</span>
             </button>
             <button
+              aria-expanded={isExtendOpen}
               className="rounded-[20px] border border-ink/10 bg-white px-4 py-4 text-left text-sm font-semibold text-ink transition hover:bg-[#edf3df]"
-              onClick={() => showPlaceholderMessage("Transfer pass")}
+              onClick={toggleExtendPanel}
               type="button"
             >
-              Transfer pass
-              <span className="mt-1 block text-xs font-normal text-ink/55">Move it to another device</span>
+              Extend pass
+              <span className="mt-1 block text-xs font-normal text-ink/55">Add another authorised device</span>
             </button>
             <button
               className="rounded-[20px] border border-ink/10 bg-white px-4 py-4 text-left text-sm font-semibold text-ink transition hover:bg-[#edf3df]"
@@ -477,6 +559,18 @@ function SavedWalletState({
             <p className="mt-4 rounded-[18px] bg-white px-4 py-3 text-sm text-ink/68" role="status">
               {actionMessage}
             </p>
+          ) : null}
+          {isExtendOpen ? (
+            <div className="mt-4 rounded-[22px] border border-ink/8 bg-white px-5 py-5">
+              {enrollmentId ? (
+                <ExtendPassPanel enrollmentId={enrollmentId} />
+              ) : (
+                <p role="status">
+                  This pass does not have an enrollment on record yet, so it cannot be extended to another
+                  device.
+                </p>
+              )}
+            </div>
           ) : null}
         </div>
       ) : null}

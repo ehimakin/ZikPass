@@ -8,6 +8,13 @@ export interface RuntimeConfig {
   credentialTtlHours: number;
   providerLatencyMs: number;
   bankVerificationMaxAttempts: number;
+  // Device extension / payment policy. Global defaults; a StorePlanRecord
+  // may override device limit, price, or currency for a specific store.
+  deviceLimitIncluded: number;
+  deviceExtensionPriceMinor: number;
+  deviceExtensionCurrency: string;
+  platformSharePercent: number;
+  passIssuancePriceMinor: number;
 }
 
 export const runtimeConfig: RuntimeConfig = {
@@ -21,5 +28,10 @@ export const runtimeConfig: RuntimeConfig = {
   ),
   credentialTtlHours: Number(process.env.ZIK_CREDENTIAL_TTL_HOURS ?? 24 * 365),
   providerLatencyMs: Number(process.env.ZIK_PROVIDER_LATENCY_MS ?? 80),
-  bankVerificationMaxAttempts: Number(process.env.ZIK_BANK_MAX_ATTEMPTS ?? 3)
+  bankVerificationMaxAttempts: Number(process.env.ZIK_BANK_MAX_ATTEMPTS ?? 3),
+  deviceLimitIncluded: Number(process.env.ZIK_DEVICE_LIMIT_INCLUDED ?? 2),
+  deviceExtensionPriceMinor: Number(process.env.ZIK_DEVICE_EXTENSION_PRICE_MINOR ?? 299),
+  deviceExtensionCurrency: process.env.ZIK_DEVICE_EXTENSION_CURRENCY ?? "GBP",
+  platformSharePercent: Number(process.env.ZIK_PLATFORM_SHARE_PERCENT ?? 20),
+  passIssuancePriceMinor: Number(process.env.ZIK_PASS_ISSUANCE_PRICE_MINOR ?? 0)
 };

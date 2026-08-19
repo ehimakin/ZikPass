@@ -39,6 +39,20 @@ export async function issueCredential(
     subject_public_key: holderPublicKey
   };
 
+  return signCredentialPayload(payload);
+}
+
+export async function rebindIssuedCredential(
+  credential: SignedCredential,
+  holderPublicKey: JsonWebKey
+): Promise<SignedCredential> {
+  return signCredentialPayload({
+    ...credential.payload,
+    subject_public_key: holderPublicKey
+  });
+}
+
+async function signCredentialPayload(payload: AgeCredential): Promise<SignedCredential> {
   const keyMaterial = await getIssuerKeyMaterial();
   const zignature = await signString(
     keyMaterial.privateKeyJwk,

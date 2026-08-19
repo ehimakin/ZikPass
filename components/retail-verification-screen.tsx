@@ -6,6 +6,7 @@ import {
   parseRetailVerificationCode
 } from "@/lib/shared/physical-flow";
 import { isPhysicalCustomerPaused } from "@/lib/shared/physical-journey";
+import { ClerkPaymentStatus } from "@/components/clerk-payment-status";
 import type { EnrollmentRecord, PhysicalStoreSessionRecord } from "@/lib/shared/types";
 
 interface ApiError {
@@ -307,6 +308,9 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
                   Your attestation: I physically checked this person&apos;s ID and confirmed they are at least 18.
                 </p>
               </div>
+              {session.enrollment_id ? (
+                <ClerkPaymentStatus enrollmentId={session.enrollment_id} storeId={session.store_id} />
+              ) : null}
               <div className="grid gap-3 sm:grid-cols-2">
                 <button
                   className="rounded-full bg-ink px-7 py-4 text-base font-semibold text-mist disabled:opacity-50"

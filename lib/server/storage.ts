@@ -1,11 +1,15 @@
 import { promises as fs } from "node:fs";
 import { runtimeConfig } from "@/lib/shared/config";
 import type {
+  DeviceBindingRecord,
   EnrollmentApplicationInput,
   EnrollmentRecord,
   EnrollmentStatus,
+  ErrorReportRecord,
   NativeAppHandoffRecord,
-  PhysicalStoreSessionRecord
+  PaymentRecord,
+  PhysicalStoreSessionRecord,
+  StorePlanRecord
 } from "@/lib/shared/types";
 import { getRuntimeDataDir, getRuntimeStatePath, getSeedStatePath } from "@/lib/server/runtime-paths";
 
@@ -13,6 +17,10 @@ interface StoreData {
   enrollments: EnrollmentRecord[];
   physical_sessions: PhysicalStoreSessionRecord[];
   mobile_handoffs: NativeAppHandoffRecord[];
+  device_bindings: DeviceBindingRecord[];
+  payments: PaymentRecord[];
+  store_plans: StorePlanRecord[];
+  error_reports: ErrorReportRecord[];
 }
 
 interface LegacyEnrollmentRecord {
@@ -79,12 +87,20 @@ async function readStore(): Promise<StoreData> {
     enrollments?: LegacyEnrollmentRecord[];
     physical_sessions?: unknown[];
     mobile_handoffs?: unknown[];
+    device_bindings?: unknown[];
+    payments?: unknown[];
+    store_plans?: unknown[];
+    error_reports?: unknown[];
   }>();
 
   return {
     enrollments: (parsed.enrollments ?? []).map(normalizeEnrollment),
     physical_sessions: normalizePhysicalSessions(parsed.physical_sessions),
-    mobile_handoffs: normalizeMobileHandoffs(parsed.mobile_handoffs)
+    mobile_handoffs: normalizeMobileHandoffs(parsed.mobile_handoffs),
+    device_bindings: normalizeDeviceBindings(parsed.device_bindings),
+    payments: normalizePayments(parsed.payments),
+    store_plans: normalizeStorePlans(parsed.store_plans),
+    error_reports: normalizeErrorReports(parsed.error_reports)
   };
 }
 
@@ -206,6 +222,107 @@ export async function upsertMobileAppHandoff(
       store.mobile_handoffs.push(record);
     }
 
+    return record;
+  });
+}
+
+export async function listDeviceBindings(enrollmentId: string): Promise<DeviceBindingRecord[]> {
+  const store = await readStore();
+  return store.device_bindings.filter((binding) => binding.enrollment_id === enrollmentId);
+}
+
+export async function insertDeviceBindingIfMissing(
+  record: DeviceBindingRecord
+): Promise<DeviceBindingRecord> {
+  return mutateStore((store) => {
+    const existing = store.device_bindings.find((binding) => binding.binding_id === record.binding_id);
+    if (existing) {
+      return existing;
+    }
+
+    store.device_bindings.push(record);
+    return record;
+  });
+}
+
+/**
+ * Atomically reads and (optionally) rewrites the device_bindings and
+ * payments collections together in a single serialized transaction — this
+ * is what keeps "check active count, maybe consume a payment, create a
+ * binding" free of duplicate-binding races across concurrent requests.
+ */
+export async function runDeviceBindingTransaction<T>(
+  transaction: (input: {
+    bindings: DeviceBindingRecord[];
+    payments: PaymentRecord[];
+  }) => { result: T; bindings?: DeviceBindingRecord[]; payments?: PaymentRecord[] }
+): Promise<T> {
+  return mutateStore((store) => {
+    const outcome = transaction({ bindings: store.device_bindings, payments: store.payments });
+
+    if (outcome.bindings) {
+      store.device_bindings = outcome.bindings;
+    }
+
+    if (outcome.payments) {
+      store.payments = outcome.payments;
+    }
+
+    return outcome.result;
+  });
+}
+
+export async function listPaymentsForEnrollment(enrollmentId: string): Promise<PaymentRecord[]> {
+  const store = await readStore();
+  return store.payments.filter((payment) => payment.enrollment_id === enrollmentId);
+}
+
+export async function getPayment(paymentId: string): Promise<PaymentRecord | undefined> {
+  const store = await readStore();
+  return store.payments.find((payment) => payment.payment_id === paymentId);
+}
+
+/**
+ * Atomically reads and rewrites the payments collection — used for
+ * idempotent create (find-existing-pending-or-insert) and idempotent
+ * confirm/fail transitions.
+ */
+export async function runPaymentTransaction<T>(
+  transaction: (payments: PaymentRecord[]) => { result: T; payments?: PaymentRecord[] }
+): Promise<T> {
+  return mutateStore((store) => {
+    const outcome = transaction(store.payments);
+
+    if (outcome.payments) {
+      store.payments = outcome.payments;
+    }
+
+    return outcome.result;
+  });
+}
+
+export async function getStorePlan(storeId: string): Promise<StorePlanRecord | undefined> {
+  const store = await readStore();
+  return store.store_plans.find((plan) => plan.store_id === storeId);
+}
+
+export async function upsertStorePlan(record: StorePlanRecord): Promise<StorePlanRecord> {
+  return mutateStore((store) => {
+    const index = store.store_plans.findIndex((plan) => plan.store_id === record.store_id);
+
+    if (index >= 0) {
+      store.store_plans[index] = record;
+    } else {
+      store.store_plans.push(record);
+    }
+
+    return record;
+  });
+}
+
+export async function insertErrorReport(record: ErrorReportRecord): Promise<ErrorReportRecord> {
+  return mutateStore((store) => {
+    store.error_reports.push(record);
     return record;
   });
 }
@@ -507,6 +624,143 @@ function normalizeMobileHandoffs(input: unknown[] | undefined): NativeAppHandoff
         superseded_at: candidate.superseded_at,
         holder_public_key: candidate.holder_public_key,
         issued_credential: candidate.issued_credential
+      }
+    ];
+  });
+}
+
+function normalizeDeviceBindings(input: unknown[] | undefined): DeviceBindingRecord[] {
+  if (!Array.isArray(input)) {
+    return [];
+  }
+
+  return input.flatMap((value) => {
+    if (!value || typeof value !== "object") {
+      return [];
+    }
+
+    const candidate = value as Partial<DeviceBindingRecord>;
+    if (
+      typeof candidate.binding_id !== "string" ||
+      typeof candidate.enrollment_id !== "string" ||
+      !candidate.holder_public_key ||
+      typeof candidate.linked_at !== "string"
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        binding_id: candidate.binding_id,
+        enrollment_id: candidate.enrollment_id,
+        holder_public_key: candidate.holder_public_key,
+        status: candidate.status ?? "active",
+        is_primary: candidate.is_primary ?? false,
+        linked_at: candidate.linked_at,
+        last_seen_at: candidate.last_seen_at,
+        revoked_at: candidate.revoked_at,
+        entitlement_payment_id: candidate.entitlement_payment_id
+      }
+    ];
+  });
+}
+
+function normalizePayments(input: unknown[] | undefined): PaymentRecord[] {
+  if (!Array.isArray(input)) {
+    return [];
+  }
+
+  return input.flatMap((value) => {
+    if (!value || typeof value !== "object") {
+      return [];
+    }
+
+    const candidate = value as Partial<PaymentRecord>;
+    if (
+      typeof candidate.payment_id !== "string" ||
+      typeof candidate.enrollment_id !== "string" ||
+      typeof candidate.purpose !== "string" ||
+      typeof candidate.method !== "string" ||
+      typeof candidate.created_at !== "string"
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        payment_id: candidate.payment_id,
+        idempotency_key: candidate.idempotency_key ?? candidate.payment_id,
+        enrollment_id: candidate.enrollment_id,
+        store_id: candidate.store_id,
+        purpose: candidate.purpose,
+        method: candidate.method,
+        amount_minor: candidate.amount_minor ?? 0,
+        currency: candidate.currency ?? "GBP",
+        status: candidate.status ?? "pending",
+        created_at: candidate.created_at,
+        confirmed_at: candidate.confirmed_at,
+        failed_at: candidate.failed_at,
+        confirmed_by: candidate.confirmed_by,
+        consumed_by_binding_id: candidate.consumed_by_binding_id,
+        platform_share_minor: candidate.platform_share_minor ?? 0,
+        store_share_minor: candidate.store_share_minor ?? 0,
+        settlement_status: "unsettled"
+      }
+    ];
+  });
+}
+
+function normalizeStorePlans(input: unknown[] | undefined): StorePlanRecord[] {
+  if (!Array.isArray(input)) {
+    return [];
+  }
+
+  return input.flatMap((value) => {
+    if (!value || typeof value !== "object") {
+      return [];
+    }
+
+    const candidate = value as Partial<StorePlanRecord>;
+    if (typeof candidate.store_id !== "string" || typeof candidate.updated_at !== "string") {
+      return [];
+    }
+
+    return [
+      {
+        store_id: candidate.store_id,
+        device_limit: candidate.device_limit,
+        extension_price_minor: candidate.extension_price_minor,
+        currency: candidate.currency,
+        updated_at: candidate.updated_at
+      }
+    ];
+  });
+}
+
+function normalizeErrorReports(input: unknown[] | undefined): ErrorReportRecord[] {
+  if (!Array.isArray(input)) {
+    return [];
+  }
+
+  return input.flatMap((value) => {
+    if (!value || typeof value !== "object") {
+      return [];
+    }
+
+    const candidate = value as Partial<ErrorReportRecord>;
+    if (typeof candidate.reference !== "string" || typeof candidate.created_at !== "string") {
+      return [];
+    }
+
+    return [
+      {
+        reference: candidate.reference,
+        created_at: candidate.created_at,
+        message: candidate.message ?? "",
+        operation: candidate.operation,
+        route: candidate.route,
+        recovery_action: candidate.recovery_action ?? "report",
+        context: candidate.context
       }
     ];
   });

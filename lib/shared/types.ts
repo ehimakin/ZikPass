@@ -380,3 +380,78 @@ export interface WalletStatusSnapshot {
   credential_active: boolean;
   credential_expired: boolean;
 }
+
+/**
+ * Device-binding ledger: policy/bookkeeping layer sitting on top of the
+ * existing reuse-or-rebind credential delivery mechanism. It does not
+ * change what a signed credential means cryptographically; it only tracks
+ * which devices are authorised to hold a copy of one logical pass.
+ */
+export type DeviceBindingStatus = "active" | "pending" | "revoked";
+
+export interface DeviceBindingRecord {
+  binding_id: string;
+  enrollment_id: string;
+  holder_public_key: JsonWebKey;
+  status: DeviceBindingStatus;
+  is_primary: boolean;
+  linked_at: string;
+  last_seen_at?: string;
+  revoked_at?: string;
+  entitlement_payment_id?: string;
+}
+
+export type DeviceBindingAuthorization =
+  | { outcome: "existing"; binding: DeviceBindingRecord }
+  | { outcome: "authorized"; binding: DeviceBindingRecord }
+  | { outcome: "authorized_via_payment"; binding: DeviceBindingRecord }
+  | { outcome: "payment_required"; device_limit: number; active_count: number };
+
+export type PaymentPurpose = "pass_issuance" | "device_extension";
+export type PaymentMethod = "cash_in_store" | "online_demo";
+export type PaymentStatus = "pending" | "confirmed" | "failed";
+
+/**
+ * Demo-safe payment record. No card numbers or live payment credentials are
+ * ever collected or stored here; settlement_status is permanently
+ * "unsettled" because no real partner-store settlement exists in this MVP.
+ */
+export interface PaymentRecord {
+  payment_id: string;
+  idempotency_key: string;
+  enrollment_id: string;
+  store_id?: string;
+  purpose: PaymentPurpose;
+  method: PaymentMethod;
+  amount_minor: number;
+  currency: string;
+  status: PaymentStatus;
+  created_at: string;
+  confirmed_at?: string;
+  failed_at?: string;
+  confirmed_by?: string;
+  consumed_by_binding_id?: string;
+  platform_share_minor: number;
+  store_share_minor: number;
+  settlement_status: "unsettled";
+}
+
+export interface StorePlanRecord {
+  store_id: string;
+  device_limit?: number;
+  extension_price_minor?: number;
+  currency?: string;
+  updated_at: string;
+}
+
+export type ErrorRecoveryAction = "retry" | "resume" | "restart" | "report";
+
+export interface ErrorReportRecord {
+  reference: string;
+  created_at: string;
+  message: string;
+  operation?: string;
+  route?: string;
+  recovery_action: ErrorRecoveryAction;
+  context?: Record<string, string | number | boolean | null>;
+}

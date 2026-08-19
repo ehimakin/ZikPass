@@ -311,7 +311,7 @@ describe.sequential("physical flow", () => {
       verifierToken
     });
     const authStart = await startPhysicalDeviceAuth(enrollment.id);
-    await completePhysicalDeviceAuth({
+    const issued = await completePhysicalDeviceAuth({
       enrollmentId: enrollment.id,
       challengeId: authStart.challenge_id,
       method: "demo_device_check"
@@ -327,6 +327,8 @@ describe.sequential("physical flow", () => {
       holderPublicKey: nativeHolderPublicKey
     });
 
+    expect(firstClaim.payload.credential_id).toBe(issued.issued_credential?.payload.credential_id);
+    expect(firstClaim.payload.subject_public_key).toEqual(nativeHolderPublicKey);
     expect(replayedClaim).toEqual(firstClaim);
     await expect(
       claimNativeAppHandoff({

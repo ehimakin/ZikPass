@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
+import { GlobalErrorReporter } from "@/components/global-error-reporter";
 import { PwaRegistration } from "@/components/pwa-install-button";
 import "./globals.css";
 
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <body>
         <PwaRegistration />
+        <GlobalErrorReporter />
         {children}
       </body>
     </html>

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { toErrorResponse } from "@/lib/server/api-errors";
 import { claimNativeAppHandoff } from "@/lib/server/mobile-handoff";
 
 export async function POST(request: NextRequest) {
@@ -19,9 +20,6 @@ export async function POST(request: NextRequest) {
       })
     );
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unable to claim the native app handoff." },
-      { status: 400 }
-    );
+    return toErrorResponse(error);
   }
 }

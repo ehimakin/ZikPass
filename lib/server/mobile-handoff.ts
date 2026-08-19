@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { getEnrollmentOrThrow } from "@/lib/server/enrollment-service";
-import { issueCredential } from "@/lib/server/credential-issuer";
+import { rebindIssuedCredential } from "@/lib/server/credential-issuer";
+import { authorizeDeviceBindingOrThrow } from "@/lib/server/device-bindings";
 import {
   findLatestRecoverableMobileAppHandoff,
   getMobileAppHandoff,
@@ -68,7 +69,20 @@ export async function claimNativeAppHandoff(input: {
     throw new Error("This ZikPass is not ready for native app storage.");
   }
 
-  const credential = await issueCredential(enrollment, input.holderPublicKey);
+  // The device-binding ledger is the policy gate (device limit, payment
+  // entitlement). It never changes what the credential means
+  // cryptographically — that stays the reuse-or-rebind decision below.
+  await authorizeDeviceBindingOrThrow({
+    enrollmentId: handoff.enrollment_id,
+    holderPublicKey: input.holderPublicKey
+  });
+
+  const credential = sameHolderPublicKey(
+    enrollment.issued_credential.payload.subject_public_key,
+    input.holderPublicKey
+  )
+    ? enrollment.issued_credential
+    : await rebindIssuedCredential(enrollment.issued_credential, input.holderPublicKey);
   await upsertMobileAppHandoff({
     ...handoff,
     claimed_at: new Date().toISOString(),
