@@ -14,7 +14,7 @@ export function HomepageSplash({ enabled }: { enabled: boolean }) {
       return;
     }
 
-    document.cookie = `${splashCookieName}=1; Max-Age=31536000; Path=/; SameSite=Lax`;
+    document.cookie = `${splashCookieName}=${Date.now()}; Max-Age=31536000; Path=/; SameSite=Lax`;
     const timer = window.setTimeout(() => setVisible(false), splashDurationMs);
 
     return () => window.clearTimeout(timer);

@@ -3,10 +3,13 @@ import { cookies } from "next/headers";
 import { AppShell } from "@/components/app-shell";
 import { HomepageSplash } from "@/components/homepage-splash";
 import { WalletSurface } from "@/components/wallet-surface";
+import { runtimeConfig } from "@/lib/shared/config";
 
 export default async function HomePage() {
   const cookieStore = await cookies();
-  const hasSeenSplash = cookieStore.get("zikpass-home-splash-seen")?.value === "1";
+  const lastSeenAt = Number(cookieStore.get("zikpass-home-splash-seen")?.value);
+  const suppressWindowMs = runtimeConfig.homepageSplashSuppressSeconds * 1000;
+  const seenRecently = Number.isFinite(lastSeenAt) && Date.now() - lastSeenAt < suppressWindowMs;
 
   return (
     <AppShell currentPath="/">
@@ -15,7 +18,7 @@ export default async function HomePage() {
           <WalletSurface homepageMode />
         </Suspense>
       </main>
-      <HomepageSplash enabled={!hasSeenSplash} />
+      <HomepageSplash enabled={!seenRecently} />
     </AppShell>
   );
 }
