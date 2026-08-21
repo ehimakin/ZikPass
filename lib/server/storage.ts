@@ -1,6 +1,8 @@
 import { promises as fs } from "node:fs";
 import { runtimeConfig } from "@/lib/shared/config";
 import type {
+  AffiliateAuthorizationCodeRecord,
+  AffiliateAuthorizationRequest,
   DeviceBindingRecord,
   EnrollmentApplicationInput,
   EnrollmentRecord,
@@ -21,6 +23,8 @@ interface StoreData {
   payments: PaymentRecord[];
   store_plans: StorePlanRecord[];
   error_reports: ErrorReportRecord[];
+  affiliate_authorization_requests: AffiliateAuthorizationRequest[];
+  affiliate_authorization_codes: AffiliateAuthorizationCodeRecord[];
 }
 
 interface LegacyEnrollmentRecord {
@@ -91,6 +95,8 @@ async function readStore(): Promise<StoreData> {
     payments?: unknown[];
     store_plans?: unknown[];
     error_reports?: unknown[];
+    affiliate_authorization_requests?: unknown[];
+    affiliate_authorization_codes?: unknown[];
   }>();
 
   return {
@@ -100,7 +106,13 @@ async function readStore(): Promise<StoreData> {
     device_bindings: normalizeDeviceBindings(parsed.device_bindings),
     payments: normalizePayments(parsed.payments),
     store_plans: normalizeStorePlans(parsed.store_plans),
-    error_reports: normalizeErrorReports(parsed.error_reports)
+    error_reports: normalizeErrorReports(parsed.error_reports),
+    affiliate_authorization_requests: normalizeAffiliateAuthorizationRequests(
+      parsed.affiliate_authorization_requests
+    ),
+    affiliate_authorization_codes: normalizeAffiliateAuthorizationCodes(
+      parsed.affiliate_authorization_codes
+    )
   };
 }
 
@@ -335,6 +347,93 @@ export async function listErrorReports(): Promise<ErrorReportRecord[]> {
 export async function getErrorReport(reference: string): Promise<ErrorReportRecord | undefined> {
   const store = await readStore();
   return store.error_reports.find((report) => report.reference === reference);
+}
+
+export async function insertAffiliateAuthorizationRequest(
+  record: AffiliateAuthorizationRequest
+): Promise<AffiliateAuthorizationRequest> {
+  return mutateStore((store) => {
+    store.affiliate_authorization_requests.push(record);
+    return record;
+  });
+}
+
+export async function getAffiliateAuthorizationRequest(
+  requestId: string
+): Promise<AffiliateAuthorizationRequest | undefined> {
+  const store = await readStore();
+  return store.affiliate_authorization_requests.find((request) => request.request_id === requestId);
+}
+
+export async function findPendingAffiliateAuthorizationRequest(input: {
+  clientId: string;
+  state: string;
+  redirectUri: string;
+  now?: number;
+}): Promise<AffiliateAuthorizationRequest | undefined> {
+  const store = await readStore();
+  const now = input.now ?? Date.now();
+  return store.affiliate_authorization_requests.find(
+    (request) =>
+      request.client_id === input.clientId &&
+      request.state === input.state &&
+      request.redirect_uri === input.redirectUri &&
+      request.status === "pending" &&
+      new Date(request.challenge_expires_at).getTime() > now
+  );
+}
+
+/**
+ * Atomically reads and rewrites the affiliate authorization request
+ * collection — every state transition (challenge completed, denied,
+ * cancelled) goes through here so two concurrent completion attempts for
+ * the same request can't both succeed.
+ */
+export async function runAffiliateAuthorizationRequestTransaction<T>(
+  transaction: (requests: AffiliateAuthorizationRequest[]) =>
+    | { result: T; requests?: AffiliateAuthorizationRequest[] }
+    | Promise<{ result: T; requests?: AffiliateAuthorizationRequest[] }>
+): Promise<T> {
+  return mutateStore(async (store) => {
+    const outcome = await transaction(store.affiliate_authorization_requests);
+
+    if (outcome.requests) {
+      store.affiliate_authorization_requests = outcome.requests;
+    }
+
+    return outcome.result;
+  });
+}
+
+export async function insertAffiliateAuthorizationCode(
+  record: AffiliateAuthorizationCodeRecord
+): Promise<AffiliateAuthorizationCodeRecord> {
+  return mutateStore((store) => {
+    store.affiliate_authorization_codes.push(record);
+    return record;
+  });
+}
+
+/**
+ * Atomically reads and rewrites the authorization-code collection so a
+ * replayed exchange attempt can never race the first, legitimate one —
+ * only one caller ever observes consumed_at as unset.
+ */
+export async function runAffiliateAuthorizationCodeTransaction<T>(
+  transaction: (codes: AffiliateAuthorizationCodeRecord[]) => {
+    result: T;
+    codes?: AffiliateAuthorizationCodeRecord[];
+  }
+): Promise<T> {
+  return mutateStore((store) => {
+    const outcome = transaction(store.affiliate_authorization_codes);
+
+    if (outcome.codes) {
+      store.affiliate_authorization_codes = outcome.codes;
+    }
+
+    return outcome.result;
+  });
 }
 
 async function mutateStore<T>(mutator: (store: StoreData) => T | Promise<T>): Promise<T> {
@@ -772,6 +871,90 @@ function normalizeErrorReports(input: unknown[] | undefined): ErrorReportRecord[
         route: candidate.route,
         recovery_action: candidate.recovery_action ?? "report",
         context: candidate.context
+      }
+    ];
+  });
+}
+
+function normalizeAffiliateAuthorizationRequests(
+  input: unknown[] | undefined
+): AffiliateAuthorizationRequest[] {
+  if (!Array.isArray(input)) {
+    return [];
+  }
+
+  return input.flatMap((value) => {
+    if (!value || typeof value !== "object") {
+      return [];
+    }
+
+    const candidate = value as Partial<AffiliateAuthorizationRequest>;
+    if (
+      typeof candidate.request_id !== "string" ||
+      typeof candidate.client_id !== "string" ||
+      typeof candidate.redirect_uri !== "string" ||
+      typeof candidate.state !== "string" ||
+      typeof candidate.nonce !== "string" ||
+      typeof candidate.challenge !== "string" ||
+      typeof candidate.challenge_expires_at !== "string" ||
+      typeof candidate.created_at !== "string"
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        request_id: candidate.request_id,
+        client_id: candidate.client_id,
+        redirect_uri: candidate.redirect_uri,
+        state: candidate.state,
+        nonce: candidate.nonce,
+        challenge: candidate.challenge,
+        challenge_expires_at: candidate.challenge_expires_at,
+        status: candidate.status ?? "pending",
+        created_at: candidate.created_at,
+        updated_at: candidate.updated_at ?? candidate.created_at,
+        completed_at: candidate.completed_at,
+        denial_reason: candidate.denial_reason,
+        result: candidate.result
+      }
+    ];
+  });
+}
+
+function normalizeAffiliateAuthorizationCodes(
+  input: unknown[] | undefined
+): AffiliateAuthorizationCodeRecord[] {
+  if (!Array.isArray(input)) {
+    return [];
+  }
+
+  return input.flatMap((value) => {
+    if (!value || typeof value !== "object") {
+      return [];
+    }
+
+    const candidate = value as Partial<AffiliateAuthorizationCodeRecord>;
+    if (
+      typeof candidate.code_hash !== "string" ||
+      typeof candidate.request_id !== "string" ||
+      typeof candidate.client_id !== "string" ||
+      typeof candidate.redirect_uri !== "string" ||
+      typeof candidate.created_at !== "string" ||
+      typeof candidate.expires_at !== "string"
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        code_hash: candidate.code_hash,
+        request_id: candidate.request_id,
+        client_id: candidate.client_id,
+        redirect_uri: candidate.redirect_uri,
+        created_at: candidate.created_at,
+        expires_at: candidate.expires_at,
+        consumed_at: candidate.consumed_at
       }
     ];
   });

@@ -24,6 +24,16 @@ The older non-physical enrollment pipeline remains in the codebase for regressio
 - `/issuer` is a demo operational view for inspecting enrollments and error reports.
 - `/verify/zik` is a hosted verifier demo that validates a presentation locally.
 
+### Affiliate age verification (demo)
+
+- `/affiliate-demo` is a local-only demonstration of a third-party 18+ site ("Nightfall") integrating with ZikPass using a genuine OAuth-style authorization-code protocol, not the older `postMessage`-based verifier.
+- The visible "Use ZikPass to confirm I am 18+" control only starts a server-tracked authorization request; the actual decision is a server-validated, one-time cryptographic challenge signed by the wallet's holder key, never a browser-only `verified: true` flag.
+- `/affiliate-demo/confirm` is the ZikPass-hosted confirmation step. It reuses the existing wallet/presentation-bundle machinery to sign the server-issued challenge, then redirects back to the affiliate with a short-lived, single-use authorization code (or no code, on denial).
+- `/affiliate-demo/callback` simulates the affiliate's own backend calling `POST /api/affiliate/token` server-to-server to exchange that code. The affiliate never trusts the browser directly.
+- A successful exchange returns only `{ age_over, threshold, assurance, verified_at, expires_at, verification_id }`. No name, date of birth, address, government ID, selfie/biometric data, raw credential payload, holder private key, or reusable ZikPass identifier is ever included.
+- Every denial path (no pass, expired pass, replay, wrong audience/nonce/state, expired challenge/code, cancellation, unsupported device, server error) surfaces as the same calm, generic message to the customer: no stack traces, internal reasons, or raw tokens are shown or logged.
+- See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the challenge/code lifecycle and [`docs/TESTING.md`](docs/TESTING.md) for the manual walkthrough.
+
 ### Device delivery
 
 - The browser wallet stores the holder key and credential in browser storage for this prototype.
@@ -47,6 +57,9 @@ The older non-physical enrollment pipeline remains in the codebase for regressio
 | `/wallet` | Saved-pass wallet; accepts physical query context for direct entry |
 | `/verify` | Clerk verification and customer-code lookup |
 | `/verify/zik` | Demo relying-party verifier |
+| `/affiliate-demo` | Demo 18+ affiliate site; starts an OAuth-style age-verification request |
+| `/affiliate-demo/confirm` | ZikPass-hosted confirmation and challenge signing for the affiliate demo |
+| `/affiliate-demo/callback` | Simulated affiliate backend; exchanges the one-time code server-to-server |
 | `/store` | Demo store session dashboard |
 | `/issuer` | Demo issuer/enrollment and error-report view |
 | `/app/handoff` | Native-wallet fallback and web-wallet installation handoff |
@@ -115,6 +128,7 @@ All supported environment variables are documented in [`.env.example`](.env.exam
 - `demo_device_check` is not equivalent to a platform biometric assertion.
 - Browser-held keys are not hardware-backed. The native scaffold is the future path for stronger key protection.
 - The cryptographic design is a prototype and has not received a production security review.
+- The affiliate demo registers a single hardcoded client (`nightfall-demo`) with an allowlisted redirect URI; there is no affiliate onboarding, key management, or per-client secret in this prototype.
 
 ## Working agreements for contributors
 

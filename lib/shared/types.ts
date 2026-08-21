@@ -459,3 +459,70 @@ export interface ErrorReportRecord {
   recovery_action: ErrorRecoveryAction;
   context?: Record<string, string | number | boolean | null>;
 }
+
+/**
+ * Local demonstration of an OAuth-style authorization-code exchange for a
+ * third-party ("affiliate") age check. This intentionally replaces the
+ * older postMessage-based /verify/zik pattern for new integrations: the
+ * affiliate never computes or trusts its own verified boolean, it only
+ * trusts the response of a server-to-server code exchange.
+ */
+export type AffiliateAuthorizationStatus =
+  | "pending"
+  | "approved"
+  | "denied"
+  | "expired"
+  | "cancelled";
+
+export type AffiliateDenialReason =
+  | "no_pass"
+  | "expired_pass"
+  | "revoked_or_invalid_pass"
+  | "malformed_challenge"
+  | "wrong_audience"
+  | "wrong_nonce"
+  | "wrong_state"
+  | "invalid_signature"
+  | "expired_challenge"
+  | "consumed_challenge"
+  | "expired_code"
+  | "replayed_code"
+  | "cancelled"
+  | "unsupported_device"
+  | "server_error";
+
+export interface AffiliateVerificationResult {
+  verification_id: string;
+  age_over: boolean;
+  threshold: number;
+  assurance: AssuranceLevel;
+  verified_at: string;
+  expires_at: string;
+}
+
+export interface AffiliateAuthorizationRequest {
+  request_id: string;
+  client_id: string;
+  redirect_uri: string;
+  state: string;
+  nonce: string;
+  challenge: string;
+  challenge_expires_at: string;
+  status: AffiliateAuthorizationStatus;
+  created_at: string;
+  updated_at: string;
+  completed_at?: string;
+  denial_reason?: AffiliateDenialReason;
+  result?: AffiliateVerificationResult;
+}
+
+/** Bearer-style one-time code; only the hash is ever persisted. */
+export interface AffiliateAuthorizationCodeRecord {
+  code_hash: string;
+  request_id: string;
+  client_id: string;
+  redirect_uri: string;
+  created_at: string;
+  expires_at: string;
+  consumed_at?: string;
+}

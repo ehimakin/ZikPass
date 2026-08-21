@@ -13,6 +13,8 @@ npm run build
 
 Tests are Vitest-based and use the JSON runtime store. They may modify the runtime state directory during a run; do not point `ZIK_RUNTIME_DATA_DIR` at a directory containing data you need to preserve.
 
+`tests/affiliate-verifier.test.ts` covers the affiliate demo end to end using real signed credentials (not mocks): a successful verification with the exact minimal response shape, every denial path (no pass, expired pass, invalid signature, wrong audience/nonce/state, malformed challenge, replayed challenge, replayed/expired authorization code, cancellation), unregistered redirect URIs, oversized/hostile `state` values, redaction of the returned fields, and idempotent duplicate authorization requests.
+
 ## Basic local run
 
 ```bash
@@ -57,6 +59,15 @@ The handoff is short-lived and single-use, but a repeated claim with the same ho
 5. Attempt a third device. It should show `payment_required` and offer the demo extension payment path.
 6. Confirm the demo extension payment, retry the handoff, and verify the third device is linked.
 7. Repeat the payment or claim request to verify it does not create duplicate bindings or consume the same entitlement twice.
+
+## Affiliate age verification demo
+
+1. Open `/affiliate-demo` and confirm the "Demo environment" label, the restrained non-explicit copy, and that no explicit branding or copyrighted content is shown.
+2. Click `Use ZikPass to confirm I am 18+`. You should land on `/affiliate-demo/confirm`.
+3. With no pass on the device, the confirm screen should report no active pass and offer `Open Zik wallet` and `Return to Nightfall`. Choosing `Return to Nightfall` should redirect to `/affiliate-demo/callback`, which shows the single generic denial sentence — never an internal reason, stack trace, or raw token.
+4. Complete onboarding in the same browser to obtain a real pass, then repeat from step 1. Approving on the confirm screen should redirect to `/affiliate-demo/callback` with a `code` and `state` in the URL; the callback screen exchanges it server-to-server and shows only the minimal result (age over threshold, assurance, verified/expiry timestamps, verification ID) — no name, date of birth, or other identity data.
+5. Reload `/affiliate-demo/callback` with the same URL (same `code`) to confirm a replayed code is rejected with the generic denial message rather than being honored twice.
+6. Confirm `GET /api/affiliate/result/[id]` only includes the `challenge` field while the request is still pending, and that `POST /api/affiliate/token` never returns anything but the generic message on failure, regardless of the underlying reason.
 
 ## Error and recovery checks
 

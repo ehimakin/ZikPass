@@ -20,6 +20,10 @@ export interface RuntimeConfig {
   // Short in dev by default so the branding is easy to see while working;
   // long in production so real visitors aren't shown it on every reload.
   homepageSplashSuppressSeconds: number;
+  // Affiliate age-check demo: how long a signing challenge and an issued
+  // one-time authorization code each remain valid.
+  affiliateChallengeTtlSeconds: number;
+  affiliateAuthorizationCodeTtlSeconds: number;
 }
 
 export const runtimeConfig: RuntimeConfig = {
@@ -42,5 +46,9 @@ export const runtimeConfig: RuntimeConfig = {
   homepageSplashSuppressSeconds: Number(
     process.env.ZIK_HOMEPAGE_SPLASH_SUPPRESS_SECONDS ??
       (process.env.NODE_ENV === "production" ? 1800 : 120)
+  ),
+  affiliateChallengeTtlSeconds: Number(process.env.ZIK_AFFILIATE_CHALLENGE_TTL_SECONDS ?? 120),
+  affiliateAuthorizationCodeTtlSeconds: Number(
+    process.env.ZIK_AFFILIATE_CODE_TTL_SECONDS ?? 120
   )
 };
