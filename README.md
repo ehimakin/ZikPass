@@ -1,135 +1,76 @@
-# Zik Pass
+# ZikPass
 
-Zik Pass is a privacy-first, zero-knowledge-inspired age verification prototype. The current sprint demonstrates a consumer-friendly journey: a new user answers a few simple questions, receives a signed Over-18 credential, waits through a cooling-off period, and then uses that credential at a dummy betting-style vendor that verifies it locally without learning identity details.
+ZikPass is a privacy-first age-assurance prototype. It demonstrates an in-person identity check, device authentication, a signed over-18 credential, a browser wallet, and a path towards a native wallet. The current implementation is a working prototype, not a production identity, payments, or compliance service.
 
-## Current sprint scope
+This branch is `v2-ui-overhaul`. The branch is currently aligned with `origin/v2-ui-overhaul`; `main` and `dev` are older parallel branches and are intentionally not merged as part of routine local setup.
 
-- Issuer/admin surface for monitoring proof intake, possession simulation, cooling-off state, notification logging, and credential issuance
-- User wallet surface with a `Get Zik Pass` button that launches a single-question full-screen card flow
-- Credential delivery immediately after possession confirmation, followed by a visible cooling-off period before use
-- Dummy betting vendor surface with a single `Verify with Zik Pass` action and fully local signature, activation, and claim verification
-- Shared TypeScript modules for proof capture, proof evaluation, possession verification, credential issuance, wallet handling, crypto, and verifier logic
-- JSON-backed prototype persistence in [`data/state.json`](/Users/ehim/dev/ZikPass/data/state.json)
+## Current product flows
 
-## Trust model
+### Customer onboarding
 
-Zik Pass issues a credential only when all of the following are true:
+- `/` is the customer-facing homepage and physical-first entry point.
+- `/onboarding` is the customer onboarding surface. App-led onboarding can begin without a store; affiliate-led onboarding can include store/session context in the URL.
+- A physical enrollment creates a short customer code. The customer shows that code to the clerk, the clerk looks it up, and the clerk confirms the physical ID check.
+- The customer then completes device authentication. WebAuthn is supported where the browser exposes it; `demo_device_check` is available for prototype testing.
+- Issuance is gated by a confirmed payment record. Cash/card-at-till and digital-wallet paths are represented, but digital wallet confirmation is explicitly demo-only.
+- `/wallet` displays the saved pass, its status, device storage state, and wallet actions.
 
-1. The mocked credit adulthood proof passes the configured rule.
-2. The user completes the refund-reference possession check.
-3. The wallet generated a local holder keypair that is bound into the credential.
+The older non-physical enrollment pipeline remains in the codebase for regression and prototype comparison. It uses mocked provider responses and should not be described as a live financial or identity integration.
 
-After issuance, the credential includes an activation time. Vendors deny access until the cooling-off period has elapsed, even though the wallet already holds the signed credential.
+### Store and clerk flow
 
-The verifier trusts a known issuer public key and validates the presentation bundle locally. The core decision does not require a callback to the issuer.
+- `/store` creates and monitors demo store sessions.
+- `/verify` is the clerk-facing verification screen. It accepts a customer code, reports unknown or malformed codes, and advances the associated physical session after a clerk confirmation.
+- `/issuer` is a demo operational view for inspecting enrollments and error reports.
+- `/verify/zik` is a hosted verifier demo that validates a presentation locally.
 
-## Proof model
+### Device delivery
 
-Sprint one uses a simulated `credit_adulthood_proof`:
+- The browser wallet stores the holder key and credential in browser storage for this prototype.
+- `Install ZikPass on this device` creates a short-lived handoff and supports PWA installation/recovery. The PWA route is `/wallet?source=pwa`.
+- The native scaffold lives in `mobile/`. Native handoff URLs use `zik://handoff?token=...`, but the Expo app is not yet the production wallet.
+- A handoff claim is idempotent for the same holder key. A different device key can be bound to the same logical credential when the device policy allows it.
 
-```json
-{
-  "type": "credit_adulthood_proof",
-  "signals": {
-    "has_primary_credit_account": true,
-    "oldest_account_age_months": 24,
-    "active_accounts_count": 1
-  },
-  "derived": {
-    "confidence": "high"
-  }
-}
-```
+### Wallet device policy
 
-The default approval rule is:
+- Each issued pass has a persisted device-binding ledger.
+- The default included device limit is two.
+- A further device requires a confirmed `device_extension` payment. Payment and device authorization are serialized and idempotent.
+- The wallet calls this action `Extend pass`; it does not mint a new logical pass ID.
 
-- `has_primary_credit_account === true`
-- `oldest_account_age_months >= 12`
+## Route map
 
-The threshold is configurable through `ZIK_MIN_OLDEST_ACCOUNT_MONTHS`.
+| Route | Responsibility |
+| --- | --- |
+| `/` | Homepage and primary customer entry point |
+| `/onboarding` | Customer onboarding and physical/app-led flow |
+| `/wallet` | Saved-pass wallet; accepts physical query context for direct entry |
+| `/verify` | Clerk verification and customer-code lookup |
+| `/verify/zik` | Demo relying-party verifier |
+| `/store` | Demo store session dashboard |
+| `/issuer` | Demo issuer/enrollment and error-report view |
+| `/app/handoff` | Native-wallet fallback and web-wallet installation handoff |
+| `/ZikParental` | Placeholder product surface for parental controls |
 
-## Credential format
+The complete API route list and request ownership are in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
-Issued credentials contain only the minimum claim and metadata needed for the demo:
-
-```json
-{
-  "credential_id": "zp_xxxx",
-  "over18": true,
-  "issuer": "Zik Pass",
-  "issued_at": "timestamp",
-  "activates_at": "timestamp",
-  "expires_at": "timestamp",
-  "assurance_level": "medium",
-  "subject_public_key": "holder_public_key_jwk"
-}
-```
-
-The credential intentionally excludes name, date of birth, address, government ID, and raw proof evidence.
-
-## Signing and verification model
-
-- The issuer generates or loads an Ed25519 keypair on the server and stores it in `data/issuer-keypair.json`.
-- The credential payload is canonically serialized and signed with the issuer private key.
-- The resulting signature is called a Zignature.
-- The verifier checks the Zignature locally with the issuer public key.
-- The verifier also checks `activates_at` so a newly delivered credential cannot be used before cooling-off finishes.
-- The wallet signs the verifier's fresh challenge with its holder private key.
-- The verifier checks that holder signature using the `subject_public_key` embedded in the credential.
-
-This binds the credential to the wallet without disclosing identity.
-
-## Holder binding
-
-The wallet generates an Ed25519 keypair in the browser using Web Crypto. The private key remains in `localStorage` for the prototype, and the public key is sent to the issuer and embedded in the credential. During presentation, the wallet signs the verifier challenge so the verifier can prove control of the bound key.
-
-## Architecture
-
-This sprint uses one Next.js App Router codebase so UI surfaces, API routes, crypto utilities, and shared types stay easy to run and extend locally.
-
-### Key folders
+## Repository layout
 
 ```text
-/Users/ehim/dev/ZikPass
-├── app
-│   ├── api
-│   │   ├── config/public-key
-│   │   ├── enrollment
-│   │   └── issuer/sessions
-│   ├── issuer
-│   ├── verifier
-│   └── wallet
-├── components
-├── data
-├── lib
-│   ├── client
-│   ├── server
-│   └── shared
-└── tests
+app/                 Next.js App Router pages and API route handlers
+components/          Customer, clerk, issuer, wallet, recovery, and shared UI
+lib/client/          Browser key, wallet, PWA, and error-reporting clients
+lib/server/          Enrollment, physical journey, payment, binding, storage, and crypto services
+lib/shared/          Types, config, crypto, journey/status helpers, and verifier SDK
+mobile/              Expo native-wallet scaffold, not yet the primary delivery path
+tests/               Vitest unit and integration-style service tests
+data/                Seed state and example issuer key material only
+docs/                Current architecture, testing, and contributor guidance
 ```
 
-### Responsibility mapping
+## Local setup
 
-- `lib/server/mock-credit-profile.ts`: derives mocked adulthood signals from the identity-match input
-- `lib/server/proof-evaluator.ts`: applies issuance rules
-- `lib/server/possession-verification.ts`: creates refund-code possession challenges
-- `lib/server/credential-issuer.ts`: signs credentials with the issuer private key
-- `lib/client/wallet-client.ts`: manages local keypair, credential storage, and presentation
-- `lib/shared/verifier-sdk.ts`: runs issuer signature, holder signature, expiry, and claim checks
-- `lib/shared/crypto/*`: shared Ed25519 helpers
-- `lib/shared/types.ts`: shared domain types
-
-## Local persistence
-
-- Server state: JSON file in [`data/state.json`](/Users/ehim/dev/ZikPass/data/state.json)
-- Issuer key material: generated on first use in `data/issuer-keypair.json`
-- Wallet state: browser `localStorage`
-
-Production storage and key management would need to be replaced with secure infrastructure.
-
-## Run locally
-
-From the project root:
+Requirements: Node.js compatible with the installed Next.js toolchain and npm.
 
 ```bash
 npm install
@@ -137,56 +78,52 @@ cp .env.example .env
 npm run dev
 ```
 
-Then open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000). To use another port:
+
+```bash
+npm run dev -- --port 3001
+```
 
 Useful commands:
 
 ```bash
 npm run lint
-npm run test
+npm test
 npm run build
 ```
 
-## Demo flow
+See [`docs/TESTING.md`](docs/TESTING.md) for predictable manual flows, including the clerk lookup, payment gate, PWA handoff, device extension, and recovery paths.
 
-1. Open `/wallet`.
-2. Click `Get Zik Pass`.
-3. Answer the guided questions and confirm the refund-reference code.
-4. Confirm the wallet receives the credential immediately after the possession step.
-5. Wait for the cooling-off timer to finish or use `Advance demo state`.
-6. Open `/verifier`.
-7. Click `Verify with Zik Pass`.
-8. Confirm the vendor shows valid issuer signature, valid holder signature, active credential, unexpired credential, `over18 === true`, and `Access granted`.
+## Persistence and configuration
 
-To demonstrate denial:
+The prototype uses JSON-backed state with a serialized mutation queue. By default, runtime state and the generated issuer key are written under `data/`. Set `ZIK_RUNTIME_DATA_DIR` to point at another writable directory. In serverless-looking environments, the implementation falls back to a temporary directory, so persistence is not durable.
 
-- Attempt verification before cooling-off finishes to fail the activation check.
-- Enable `Tamper the credential payload` to break the issuer signature and claim.
-- Enable `Verify after expiry time` to simulate a valid signature on an expired credential.
-- Enable `Break holder challenge signature` to fail holder possession verification.
+- Seed state: [`data/state.json`](data/state.json)
+- Runtime state: `runtime-state.json` in the configured runtime data directory
+- Issuer key: `issuer-keypair.json` in the configured runtime data directory
+- Browser wallet: IndexedDB/local browser storage, depending on the wallet client path
 
-## Environment variables
+All supported environment variables are documented in [`.env.example`](.env.example). Never commit `.env`, runtime state, or generated issuer keys.
 
-See [`.env.example`](/Users/ehim/dev/ZikPass/.env.example):
+## Prototype boundaries
 
-- `ZIK_MIN_OLDEST_ACCOUNT_MONTHS`: proof approval threshold
-- `ZIK_COOLING_OFF_SECONDS`: demo cooling-off duration
-- `ZIK_CREDENTIAL_TTL_HOURS`: credential lifetime
+- Provider, bank, identity, and payment integrations are mocked.
+- The online wallet payment path is a demo confirmation; no card details are collected or charged.
+- Store plans, platform shares, and payment settlement records are shaped for demonstration and are not connected to a payment processor or accounting system.
+- The JSON store is not suitable for multi-instance production deployment or concurrent processes on separate hosts.
+- Retail verification and issuer surfaces are demo screens; production authentication, authorization, audit controls, rate limits, and abuse monitoring are still required.
+- `demo_device_check` is not equivalent to a platform biometric assertion.
+- Browser-held keys are not hardware-backed. The native scaffold is the future path for stronger key protection.
+- The cryptographic design is a prototype and has not received a production security review.
 
-## Known limitations
+## Working agreements for contributors
 
-This prototype still does not include:
+- Keep product ownership and final architecture decisions with the project owner.
+- Prefer existing shared types and service boundaries over adding route-local state models.
+- Keep API handlers thin: validate input, call a server service, and return a stable response shape.
+- Preserve idempotency for retryable operations such as handoff claims, payment confirmation, and device authorization.
+- Do not log raw identity data, private keys, handoff tokens, or payment details.
+- Add or update a focused Vitest test when changing a shared service or state transition.
+- Check mobile and desktop states for user-facing changes, especially recovery, modal overflow, and fixed navigation.
 
-- Real CRA or bank integrations
-- Real email or SMS delivery
-- Revocation lists or status checks
-- True zero-knowledge proofs over hidden date of birth data
-- Production-grade wallet storage or hardware-backed key protection
-- Full defenses against shared-device or household abuse
-
-## Assumptions and simplifications
-
-- The verifier page reads the wallet from same-origin browser storage for demo convenience.
-- The issuer public key is loaded by the app at page render time; the verification decision itself is local.
-- JSON storage is intentionally simple and is not safe for concurrent multi-instance deployment.
-- If cooling-off is manually advanced after issuance, the server re-signs the credential with an updated activation time for the local demo.
+For the system map and extension points, start with [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), then [`docs/TESTING.md`](docs/TESTING.md).

@@ -1,5 +1,10 @@
 # 🚀 Zik Pass — MVP Definition (Sprint 1)
 
+> Historical product note: this Sprint 1 definition predates the current physical-first flow,
+> payment gate, device-binding ledger, recovery reporting, and PWA handoff. It remains useful as
+> background context only. For the current implementation, use `README.md`,
+> `docs/ARCHITECTURE.md`, and `docs/TESTING.md`.
+
 ## 🧠 Core Product Idea
 Zik Pass is a zero-knowledge-inspired system that allows users to prove they are over 18 using cryptographic credentials derived from real-world financial signals—without revealing their identity.
 

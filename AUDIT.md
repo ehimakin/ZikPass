@@ -1,5 +1,11 @@
 # Zik Pass — Code Review & Security Audit
 
+> Historical snapshot: this audit was performed against commit `f9434d8` on 2026-08-17. The
+> current `v2-ui-overhaul` head has advanced to `c64216d` and now includes additional physical
+> journey, payment, device-binding, error-recovery, and PWA handoff work. Treat the findings
+> below as historical review context and re-check them against the current code before using
+> them as release criteria.
+
 **Date:** 2026-08-17
 **Branch:** `v2-ui-overhaul` (commit `f9434d8`)
 **Scope:** Full repository — `app/`, `lib/`, `components/`, `tests/`, config
