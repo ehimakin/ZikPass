@@ -327,6 +327,16 @@ export async function insertErrorReport(record: ErrorReportRecord): Promise<Erro
   });
 }
 
+export async function listErrorReports(): Promise<ErrorReportRecord[]> {
+  const store = await readStore();
+  return store.error_reports.sort((a, b) => b.created_at.localeCompare(a.created_at));
+}
+
+export async function getErrorReport(reference: string): Promise<ErrorReportRecord | undefined> {
+  const store = await readStore();
+  return store.error_reports.find((report) => report.reference === reference);
+}
+
 async function mutateStore<T>(mutator: (store: StoreData) => T | Promise<T>): Promise<T> {
   const operation = storeMutationQueue.then(async () => {
     const store = await readStore();

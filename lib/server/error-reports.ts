@@ -1,6 +1,6 @@
 import { randomId } from "@/lib/shared/utils";
 import { classifyError, redactErrorContext } from "@/lib/shared/errors";
-import { insertErrorReport } from "@/lib/server/storage";
+import { getErrorReport, insertErrorReport, listErrorReports } from "@/lib/server/storage";
 import type { ErrorReportRecord } from "@/lib/shared/types";
 
 export async function reportError(input: {
@@ -21,4 +21,12 @@ export async function reportError(input: {
   };
 
   return insertErrorReport(record);
+}
+
+export async function getErrorReports(): Promise<ErrorReportRecord[]> {
+  return listErrorReports();
+}
+
+export async function getErrorReportByReference(reference: string): Promise<ErrorReportRecord | undefined> {
+  return getErrorReport(reference);
 }
