@@ -3304,6 +3304,9 @@ function PhysicalVerificationPanel({
             ? "ID check confirmed. Device authentication is next."
             : enrollment.last_user_message ?? "Waiting for store staff to confirm the in-person ID check."}
                         </div>
+                        <div className="mt-4">
+                          <PassPaymentChoice enrollmentId={enrollment.id} storeId={verification.session.store_id} />
+                        </div>
                       </div>
                       <PwaInstallButton
                         className="w-full rounded-[22px] border border-ink/12 bg-[#f7faee] px-5 py-4 text-left text-sm font-semibold text-ink transition hover:bg-[#edf3df] sm:w-fit"
