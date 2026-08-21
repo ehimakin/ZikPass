@@ -2831,7 +2831,7 @@ function PhysicalOnboardingExperience({
             Waiting for the clerk to confirm 18+
           </p>
           {enrollment?.id ? (
-            <PassPaymentChoice enrollmentId={enrollment.id} storeId={verification.session.store_id} />
+            <PassPaymentChoice clerkLookupAt={verification.clerk_lookup_at} enrollmentId={enrollment.id} storeId={verification.session.store_id} />
           ) : null}
         </div>
       </PhysicalStageFrame>
@@ -3305,7 +3305,7 @@ function PhysicalVerificationPanel({
             : enrollment.last_user_message ?? "Waiting for store staff to confirm the in-person ID check."}
                         </div>
                         <div className="mt-4">
-                          <PassPaymentChoice enrollmentId={enrollment.id} storeId={verification.session.store_id} />
+                          <PassPaymentChoice clerkLookupAt={verification.clerk_lookup_at} enrollmentId={enrollment.id} storeId={verification.session.store_id} />
                         </div>
                       </div>
                       <PwaInstallButton

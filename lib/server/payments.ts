@@ -172,3 +172,13 @@ export async function getPaymentOrThrow(paymentId: string): Promise<PaymentRecor
 export async function getPaymentsForEnrollment(enrollmentId: string): Promise<PaymentRecord[]> {
   return listPaymentsForEnrollment(enrollmentId);
 }
+
+/**
+ * The pass-issuance gate: true once a pass_issuance payment for this
+ * enrollment has been confirmed by any method (clerk-confirmed cash/card,
+ * or the customer's own digital-wallet confirmation).
+ */
+export async function hasConfirmedPassIssuancePayment(enrollmentId: string): Promise<boolean> {
+  const payments = await listPaymentsForEnrollment(enrollmentId);
+  return payments.some((payment) => payment.purpose === "pass_issuance" && payment.status === "confirmed");
+}

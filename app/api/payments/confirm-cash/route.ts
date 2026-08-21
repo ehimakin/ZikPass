@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { toErrorResponse } from "@/lib/server/api-errors";
+import { triggerIssuanceRecheck } from "@/lib/server/payment-issuance";
 import { confirmCashPayment } from "@/lib/server/payments";
 
 export async function POST(request: NextRequest) {
@@ -14,6 +15,7 @@ export async function POST(request: NextRequest) {
       paymentId: body.paymentId.trim(),
       confirmedBy: body.confirmedBy?.trim() || "Demo clerk"
     });
+    await triggerIssuanceRecheck(payment);
 
     return NextResponse.json(payment);
   } catch (error) {

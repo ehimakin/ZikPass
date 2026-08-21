@@ -16,6 +16,7 @@ import {
   verifyPhysicalIdCheck
 } from "@/lib/server/enrollment-service";
 import { claimNativeAppHandoff, createNativeAppHandoff } from "@/lib/server/mobile-handoff";
+import { confirmCashPayment, createPaymentRecord } from "@/lib/server/payments";
 import { getIssuerKeyPath, getRuntimeStatePath } from "@/lib/server/runtime-paths";
 import {
   ZIK_APP_DOWNLOAD_URL,
@@ -98,6 +99,16 @@ function physicalApplication(session: PhysicalStoreSessionRecord, submittedAt: s
       location_id: session.location_id
     }
   };
+}
+
+async function confirmPassIssuancePayment(enrollmentId: string, storeId: string): Promise<void> {
+  const payment = await createPaymentRecord({
+    enrollmentId,
+    purpose: "pass_issuance",
+    method: "cash_in_store",
+    storeId
+  });
+  await confirmCashPayment({ paymentId: payment.payment_id, confirmedBy: "Demo clerk" });
 }
 
 function physicalFingerprint(
@@ -248,11 +259,19 @@ describe.sequential("physical flow", () => {
     const authStart = await startPhysicalDeviceAuth(enrollment.id);
     expect(authStart.challenge_id).toMatch(/^deviceauth_/);
 
-    const issued = await completePhysicalDeviceAuth({
+    const deviceAuthDone = await completePhysicalDeviceAuth({
       enrollmentId: enrollment.id,
       challengeId: authStart.challenge_id,
       method: "demo_device_check"
     });
+
+    // ID check and device auth are done, but payment is not — the pass
+    // must not be issued yet.
+    expect(deviceAuthDone.status).toBe("approved_with_cooling_off");
+    expect(deviceAuthDone.issued_credential).toBeUndefined();
+
+    await confirmPassIssuancePayment(enrollment.id, session.store_id);
+    const issued = await getEnrollmentOrThrow(enrollment.id);
 
     expect(issued.status).toBe("issued");
     expect(issued.issued_credential?.payload.assurance_level).toBe("in_person_verified");
@@ -311,6 +330,7 @@ describe.sequential("physical flow", () => {
       userCode: enrollment.physical_verification?.user_code.value ?? "",
       verifierToken
     });
+    await confirmPassIssuancePayment(enrollment.id, session.store_id);
     const authStart = await startPhysicalDeviceAuth(enrollment.id);
     const issued = await completePhysicalDeviceAuth({
       enrollmentId: enrollment.id,
@@ -370,6 +390,7 @@ describe.sequential("physical flow", () => {
 
     expect(getPhysicalProcessState({ enrollment: clerkConfirmed })).toBe("verified");
 
+    await confirmPassIssuancePayment(enrollment.id, session.store_id);
     const authStart = await startPhysicalDeviceAuth(enrollment.id);
     const issued = await completePhysicalDeviceAuth({
       enrollmentId: enrollment.id,
@@ -738,6 +759,7 @@ describe.sequential("physical flow", () => {
         userCode: enrollment.physical_verification?.user_code.value ?? "",
         verifierToken
       });
+      await confirmPassIssuancePayment(enrollment.id, session.store_id);
       const authStart = await startPhysicalDeviceAuth(enrollment.id);
       await completePhysicalDeviceAuth({
         enrollmentId: enrollment.id,
@@ -761,6 +783,61 @@ describe.sequential("physical flow", () => {
 
       expect(secondClaim).toEqual(firstClaim);
       expect(thirdClaim).toEqual(firstClaim);
+    });
+
+    it("unlocks payment method selection only once the clerk looks up the code, and stamps it once", async () => {
+      const session = await createPhysicalStoreSession();
+      const enrollment = await startEnrollment({
+        application: physicalApplication(session, "2026-04-15T10:00:00.000Z"),
+        holderPublicKey,
+        applicationFingerprint: physicalFingerprint(session)
+      });
+
+      expect(enrollment.physical_verification?.clerk_lookup_at).toBeUndefined();
+
+      const looked = await lookupPhysicalStoreSessionByCode(
+        enrollment.physical_verification?.user_code.value ?? ""
+      );
+      expect(looked.clerk_lookup_at).toEqual(expect.any(String));
+
+      const synced = await getEnrollmentOrThrow(enrollment.id);
+      expect(synced.physical_verification?.clerk_lookup_at).toBe(looked.clerk_lookup_at);
+
+      // A later lookup (e.g. when the clerk confirms ID) must not move the
+      // timestamp — it is the moment of first lookup that unlocks payment.
+      const secondLookup = await lookupPhysicalStoreSessionByCode(
+        enrollment.physical_verification?.user_code.value ?? ""
+      );
+      expect(secondLookup.clerk_lookup_at).toBe(looked.clerk_lookup_at);
+    });
+
+    it("blocks issuance without a confirmed payment even once ID check and device auth are done", async () => {
+      const session = await createPhysicalStoreSession();
+      const enrollment = await startEnrollment({
+        application: physicalApplication(session, "2026-04-15T10:00:00.000Z"),
+        holderPublicKey,
+        applicationFingerprint: physicalFingerprint(session)
+      });
+
+      await verifyPhysicalIdCheck({
+        userCode: enrollment.physical_verification?.user_code.value ?? "",
+        verifierToken
+      });
+      const authStart = await startPhysicalDeviceAuth(enrollment.id);
+      await completePhysicalDeviceAuth({
+        enrollmentId: enrollment.id,
+        challengeId: authStart.challenge_id,
+        method: "demo_device_check"
+      });
+
+      await expect(issueEnrollmentCredential(enrollment.id)).rejects.toThrow(
+        /payment must be confirmed/i
+      );
+
+      await confirmPassIssuancePayment(enrollment.id, session.store_id);
+      const issued = await issueEnrollmentCredential(enrollment.id);
+
+      expect(issued.status).toBe("issued");
     });
   });
 });

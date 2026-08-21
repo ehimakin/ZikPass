@@ -83,7 +83,11 @@ export function ClerkPaymentStatus({ enrollmentId, storeId }: { enrollmentId: st
   }
 
   const statusLabel =
-    payment?.status === "confirmed" ? "Paid" : payment?.status === "pending" ? "Awaiting confirmation" : "Unpaid";
+    payment?.status === "confirmed"
+      ? "Paid"
+      : payment?.status === "pending"
+        ? `Customer selected ${METHOD_LABEL[payment.method] ?? payment.method} — awaiting your confirmation`
+        : "No payment method selected yet";
 
   return (
     <div className="rounded-[18px] border border-ink/8 bg-white px-4 py-3 text-left">
@@ -101,7 +105,7 @@ export function ClerkPaymentStatus({ enrollmentId, storeId }: { enrollmentId: st
           onClick={() => void markPaidByCash()}
           type="button"
         >
-          {isSubmitting ? "Recording…" : "Mark paid (cash)"}
+          {isSubmitting ? "Confirming…" : "Payment confirmed"}
         </button>
       ) : null}
       {error ? (

@@ -597,7 +597,8 @@ function normalizePhysicalSessions(
         attestation: candidate.attestation,
         completed_at: candidate.completed_at,
         minimized_at: candidate.minimized_at,
-        customer_last_seen_at: candidate.customer_last_seen_at
+        customer_last_seen_at: candidate.customer_last_seen_at,
+        clerk_lookup_at: candidate.clerk_lookup_at
       }
     ];
   });

@@ -333,8 +333,13 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
           ) : null}
 
           {enrollment && state === "confirmed" ? (
-            <div className="rounded-[24px] border border-ink/8 bg-[#f7faee] px-5 py-4 text-sm font-semibold text-ink/76">
-              {enrollment.last_user_message ?? "Customer verified. Their device can now receive ZikPass."}
+            <div className="grid gap-4">
+              <div className="rounded-[24px] border border-ink/8 bg-[#f7faee] px-5 py-4 text-sm font-semibold text-ink/76">
+                {enrollment.last_user_message ?? "Customer verified. Their device can now receive ZikPass."}
+              </div>
+              {session?.enrollment_id ? (
+                <ClerkPaymentStatus enrollmentId={session.enrollment_id} storeId={session.store_id} />
+              ) : null}
             </div>
           ) : null}
 

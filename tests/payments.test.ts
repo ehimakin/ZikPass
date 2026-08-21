@@ -6,8 +6,10 @@ import {
   confirmOnlineDemoPayment,
   createPaymentRecord,
   getPaymentOrThrow,
+  hasConfirmedPassIssuancePayment,
   resolveStorePlan
 } from "@/lib/server/payments";
+import { triggerIssuanceRecheck } from "@/lib/server/payment-issuance";
 import { upsertStorePlan } from "@/lib/server/storage";
 import { getIssuerKeyPath, getRuntimeStatePath } from "@/lib/server/runtime-paths";
 import { runtimeConfig } from "@/lib/shared/config";
@@ -175,5 +177,56 @@ describe.sequential("payments", () => {
 
   it("throws a clear error for an unknown payment reference", async () => {
     await expect(getPaymentOrThrow("pay_doesnotexist")).rejects.toThrow(/not found/i);
+  });
+
+  it("reports whether a pass-issuance payment has been confirmed, regardless of method", async () => {
+    expect(await hasConfirmedPassIssuancePayment("enroll_demo5")).toBe(false);
+
+    const cash = await createPaymentRecord({
+      enrollmentId: "enroll_demo5",
+      purpose: "pass_issuance",
+      method: "cash_in_store",
+      storeId: "zik-london-001"
+    });
+    expect(await hasConfirmedPassIssuancePayment("enroll_demo5")).toBe(false);
+
+    await confirmCashPayment({ paymentId: cash.payment_id, confirmedBy: "Demo clerk" });
+    expect(await hasConfirmedPassIssuancePayment("enroll_demo5")).toBe(true);
+
+    // An unrelated device_extension payment for the same enrollment must
+    // not satisfy the pass-issuance gate.
+    const extension = await createPaymentRecord({
+      enrollmentId: "enroll_demo6",
+      purpose: "device_extension",
+      method: "digital_wallet"
+    });
+    await confirmOnlineDemoPayment({ paymentId: extension.payment_id });
+    expect(await hasConfirmedPassIssuancePayment("enroll_demo6")).toBe(false);
+  });
+
+  it("only re-checks issuance for confirmed pass_issuance payments, and never throws", async () => {
+    const devicePayment = await createPaymentRecord({
+      enrollmentId: "enroll_nonexistent",
+      purpose: "device_extension",
+      method: "digital_wallet"
+    });
+    await expect(triggerIssuanceRecheck(devicePayment)).resolves.toBeUndefined();
+
+    const pendingPassPayment = await createPaymentRecord({
+      enrollmentId: "enroll_nonexistent",
+      purpose: "pass_issuance",
+      method: "cash_in_store",
+      storeId: "zik-london-001"
+    });
+    await expect(triggerIssuanceRecheck(pendingPassPayment)).resolves.toBeUndefined();
+
+    // A confirmed pass_issuance payment for an enrollment that doesn't
+    // exist would make the underlying lookup throw — this must be
+    // swallowed so a payment confirmation never fails because of it.
+    const confirmedForMissingEnrollment = await confirmCashPayment({
+      paymentId: pendingPassPayment.payment_id,
+      confirmedBy: "Demo clerk"
+    });
+    await expect(triggerIssuanceRecheck(confirmedForMissingEnrollment)).resolves.toBeUndefined();
   });
 });

@@ -148,6 +148,9 @@ export interface PhysicalVerificationState {
   device_auth: PhysicalDeviceAuthState;
   attestation?: PhysicalVerificationAttestation;
   completed_at?: string;
+  /** When the clerk first looked up this session's code — this is what
+   * unlocks payment method selection on the customer's device. */
+  clerk_lookup_at?: string;
 }
 
 export interface PhysicalStoreSessionRecord extends PhysicalStoreContext {
@@ -174,6 +177,7 @@ export interface PhysicalStoreSessionRecord extends PhysicalStoreContext {
   completed_at?: string;
   minimized_at?: string;
   customer_last_seen_at?: string;
+  clerk_lookup_at?: string;
 }
 
 export type EnrollmentStatus =

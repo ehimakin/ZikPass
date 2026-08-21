@@ -7,7 +7,7 @@ interface ApiError {
   error: string;
 }
 
-type PanelState = "loading" | "unpaid" | "paying" | "paid" | "error";
+type PanelState = "loading" | "locked" | "choosing" | "cash_pending" | "paying" | "paid" | "error";
 
 const METHOD_LABEL: Record<string, string> = {
   cash_in_store: "cash or card at the till",
@@ -20,10 +20,19 @@ const POLL_INTERVAL_MS = 3000;
 /**
  * Lets the customer pay for in-store onboarding themselves, on the phone
  * they're already holding, instead of waiting to hand over cash or card at
- * the till. Polls so a cash payment the clerk records independently still
- * shows up here without the customer needing to do anything.
+ * the till. Stays locked until the clerk has looked up the customer's code
+ * (clerkLookupAt) — that lookup is what unlocks the choice. Polls so a cash
+ * payment the clerk confirms independently still shows up here.
  */
-export function PassPaymentChoice({ enrollmentId, storeId }: { enrollmentId: string; storeId: string }) {
+export function PassPaymentChoice({
+  enrollmentId,
+  storeId,
+  clerkLookupAt
+}: {
+  enrollmentId: string;
+  storeId: string;
+  clerkLookupAt?: string;
+}) {
   const [state, setState] = useState<PanelState>("loading");
   const [payment, setPayment] = useState<PaymentRecord | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -35,24 +44,53 @@ export function PassPaymentChoice({ enrollmentId, storeId }: { enrollmentId: str
       const passPayment = data.payments.find((candidate) => candidate.purpose === "pass_issuance") ?? null;
 
       setPayment(passPayment);
-      setState((current) =>
-        current === "paying" && passPayment?.status !== "confirmed"
-          ? current
-          : passPayment?.status === "confirmed"
-            ? "paid"
-            : "unpaid"
-      );
+      setState((current) => {
+        if (current === "paying" && passPayment?.status !== "confirmed") {
+          // Don't let a poll mid-flight override the customer's own action.
+          return current;
+        }
+        if (passPayment?.status === "confirmed") {
+          return "paid";
+        }
+        if (passPayment?.status === "pending") {
+          return "cash_pending";
+        }
+        return clerkLookupAt ? "choosing" : "locked";
+      });
     } catch {
       setState((current) => (current === "paying" ? current : "error"));
       setError("Unable to check payment status right now.");
     }
-  }, [enrollmentId]);
+  }, [enrollmentId, clerkLookupAt]);
 
   useEffect(() => {
     void loadStatus();
     const interval = window.setInterval(() => void loadStatus(), POLL_INTERVAL_MS);
     return () => window.clearInterval(interval);
   }, [loadStatus]);
+
+  async function selectCash() {
+    setState("paying");
+    setError(null);
+    try {
+      const response = await fetch("/api/payments/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enrollmentId, purpose: "pass_issuance", method: "cash_in_store", storeId })
+      });
+      const created = (await response.json()) as PaymentRecord | ApiError;
+
+      if (!response.ok) {
+        throw new Error((created as ApiError).error ?? "Unable to record your choice.");
+      }
+
+      setPayment(created as PaymentRecord);
+      setState("cash_pending");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Unable to record your choice.");
+      setState("choosing");
+    }
+  }
 
   async function payWithDigitalWallet() {
     setState("paying");
@@ -84,7 +122,7 @@ export function PassPaymentChoice({ enrollmentId, storeId }: { enrollmentId: str
       setState("paid");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Unable to complete the payment.");
-      setState("unpaid");
+      setState("choosing");
     }
   }
 
@@ -93,6 +131,31 @@ export function PassPaymentChoice({ enrollmentId, storeId }: { enrollmentId: str
       <p aria-live="polite" className="text-sm font-semibold text-ink/55">
         Checking payment status…
       </p>
+    );
+  }
+
+  if (state === "locked") {
+    return (
+      <p aria-live="polite" className="text-sm font-semibold text-ink/55">
+        Once staff have looked up your code, you&apos;ll be able to choose how to pay here.
+      </p>
+    );
+  }
+
+  if (state === "error") {
+    return (
+      <div className="w-full rounded-[20px] border border-[#d27a86]/30 bg-[#fdf3f4] px-5 py-4 text-left" role="alert">
+        <p aria-live="assertive" className="text-sm font-semibold text-ink">
+          {error}
+        </p>
+        <button
+          className="mt-2 rounded-full border border-ink/15 bg-white px-4 py-2 text-xs font-semibold text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/40"
+          onClick={() => void loadStatus()}
+          type="button"
+        >
+          Try again
+        </button>
+      </div>
     );
   }
 
@@ -107,20 +170,42 @@ export function PassPaymentChoice({ enrollmentId, storeId }: { enrollmentId: str
     );
   }
 
+  if (state === "cash_pending" && payment) {
+    return (
+      <div className="w-full rounded-[20px] border border-ink/10 bg-white/76 px-5 py-4 text-left" role="status">
+        <p aria-live="polite" className="text-sm font-semibold text-ink">
+          You chose to pay staff directly with cash or card.
+        </p>
+        <p className="mt-1 text-xs text-ink/60">
+          Hand over payment now — staff will confirm it on their screen. Reference {payment.payment_id}.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid w-full gap-3 rounded-[20px] border border-ink/8 bg-white/76 px-5 py-4 text-left">
       <p className="text-sm font-semibold text-ink">How would you like to pay?</p>
-      <p className="text-sm text-ink/68">
-        Pay staff directly with cash or card, or pay now with the digital wallet on this phone.
-      </p>
-      <button
-        className="rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist disabled:opacity-55"
-        disabled={state === "paying"}
-        onClick={() => void payWithDigitalWallet()}
-        type="button"
-      >
-        {state === "paying" ? "Confirming…" : "Pay with Apple Pay / Google Pay"}
-      </button>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <button
+          className="rounded-[16px] border border-ink/12 bg-white px-4 py-3 text-left text-sm font-semibold text-ink transition hover:bg-[#f7faee] disabled:opacity-55 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/40"
+          disabled={state === "paying"}
+          onClick={() => void selectCash()}
+          type="button"
+        >
+          Cash or card
+          <span className="mt-1 block text-xs font-normal text-ink/55">Pay staff at the till</span>
+        </button>
+        <button
+          className="rounded-[16px] border border-ink/12 bg-white px-4 py-3 text-left text-sm font-semibold text-ink transition hover:bg-[#f7faee] disabled:opacity-55 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/40"
+          disabled={state === "paying"}
+          onClick={() => void payWithDigitalWallet()}
+          type="button"
+        >
+          {state === "paying" ? "Confirming…" : "Apple Pay / Google Pay"}
+          <span className="mt-1 block text-xs font-normal text-ink/55">Pay now on this phone</span>
+        </button>
+      </div>
       <p className="text-xs font-semibold uppercase tracking-wide text-[#8a6116]">
         Demo payment only — no real card details are collected or charged.
       </p>

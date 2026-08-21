@@ -25,6 +25,7 @@ import {
 import { assertNoDuplicateApplication, checkDuplicateApplication } from "@/lib/server/application-guard";
 import { issueCredential } from "@/lib/server/credential-issuer";
 import { createPrimaryDeviceBindingIfMissing } from "@/lib/server/device-bindings";
+import { hasConfirmedPassIssuancePayment } from "@/lib/server/payments";
 import { buildNotification } from "@/lib/server/notifications";
 import { authenticateRetailVerifier } from "@/lib/server/retail-verifier";
 import {
@@ -302,6 +303,9 @@ export async function issueEnrollmentCredential(enrollmentId: string): Promise<E
     if (session.clerk_verification.status !== "verified" || session.device_auth.status !== "verified") {
       throw new Error("In-person verification and device authentication must complete first.");
     }
+    if (!(await hasConfirmedPassIssuancePayment(record.id))) {
+      throw new Error("Payment must be confirmed before the pass can be issued.");
+    }
   }
 
   if (!coolingOffSatisfied(record)) {
@@ -432,7 +436,18 @@ export async function lookupPhysicalStoreSessionByCode(
     throw new Error("No in-store verification session matches that code.");
   }
 
-  return getPhysicalStoreSessionOrThrow(session.session_id);
+  const validated = await getPhysicalStoreSessionOrThrow(session.session_id);
+
+  // The clerk looking up the code is what unlocks payment method selection
+  // on the customer's device — stamp it once, on the first lookup only.
+  if (!validated.clerk_lookup_at) {
+    const now = new Date().toISOString();
+    validated.clerk_lookup_at = now;
+    validated.updated_at = now;
+    return upsertPhysicalSession(validated);
+  }
+
+  return validated;
 }
 
 export async function verifyPhysicalIdCheck(input: {
@@ -1417,6 +1432,10 @@ async function finalizeIssuanceIfReady(record: EnrollmentRecord): Promise<Enroll
     if (session.clerk_verification.status !== "verified" || session.device_auth.status !== "verified") {
       return record;
     }
+
+    if (!(await hasConfirmedPassIssuancePayment(record.id))) {
+      return record;
+    }
   }
 
   if (!coolingOffSatisfied(record)) {
@@ -1704,7 +1723,8 @@ function toPhysicalVerificationState(
     clerk_verification: session.clerk_verification,
     device_auth: session.device_auth,
     attestation: session.attestation ?? existing?.attestation,
-    completed_at: session.completed_at ?? existing?.completed_at
+    completed_at: session.completed_at ?? existing?.completed_at,
+    clerk_lookup_at: session.clerk_lookup_at ?? existing?.clerk_lookup_at
   };
 }
 
