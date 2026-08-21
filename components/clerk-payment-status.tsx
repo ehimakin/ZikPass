@@ -9,6 +9,14 @@ interface ApiError {
 
 type PanelState = "loading" | "ready" | "error";
 
+const METHOD_LABEL: Record<string, string> = {
+  cash_in_store: "cash",
+  digital_wallet: "Apple Pay / Google Pay",
+  online_demo: "online"
+};
+
+const POLL_INTERVAL_MS = 3000;
+
 export function ClerkPaymentStatus({ enrollmentId, storeId }: { enrollmentId: string; storeId: string }) {
   const [panelState, setPanelState] = useState<PanelState>("loading");
   const [payment, setPayment] = useState<PaymentRecord | null>(null);
@@ -16,7 +24,6 @@ export function ClerkPaymentStatus({ enrollmentId, storeId }: { enrollmentId: st
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const loadPayment = useCallback(async () => {
-    setPanelState("loading");
     try {
       const response = await fetch(`/api/payments/${enrollmentId}`);
       const data = (await response.json()) as { payments: PaymentRecord[] };
@@ -31,6 +38,8 @@ export function ClerkPaymentStatus({ enrollmentId, storeId }: { enrollmentId: st
 
   useEffect(() => {
     void loadPayment();
+    const interval = window.setInterval(() => void loadPayment(), POLL_INTERVAL_MS);
+    return () => window.clearInterval(interval);
   }, [loadPayment]);
 
   async function markPaidByCash() {
@@ -81,7 +90,9 @@ export function ClerkPaymentStatus({ enrollmentId, storeId }: { enrollmentId: st
       <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/45">Payment</p>
       <p aria-live="polite" className="mt-1 text-sm font-semibold text-ink">
         {statusLabel}
-        {payment?.status === "confirmed" ? ` — reference ${payment.payment_id}` : ""}
+        {payment?.status === "confirmed"
+          ? ` via ${METHOD_LABEL[payment.method] ?? payment.method} — reference ${payment.payment_id}`
+          : ""}
       </p>
       {payment?.status !== "confirmed" ? (
         <button

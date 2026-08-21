@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       throw new Error("A valid payment purpose is required.");
     }
 
-    if (body.method !== "cash_in_store" && body.method !== "online_demo") {
+    if (body.method !== "cash_in_store" && body.method !== "online_demo" && body.method !== "digital_wallet") {
       throw new Error("A valid payment method is required.");
     }
 

@@ -408,7 +408,7 @@ export type DeviceBindingAuthorization =
   | { outcome: "payment_required"; device_limit: number; active_count: number };
 
 export type PaymentPurpose = "pass_issuance" | "device_extension";
-export type PaymentMethod = "cash_in_store" | "online_demo";
+export type PaymentMethod = "cash_in_store" | "online_demo" | "digital_wallet";
 export type PaymentStatus = "pending" | "confirmed" | "failed";
 
 /**

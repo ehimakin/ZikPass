@@ -8,6 +8,7 @@ import type { InputHTMLAttributes, ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Zignature } from "@/components/zignature";
 import { PwaInstallButton } from "@/components/pwa-install-button";
+import { PassPaymentChoice } from "@/components/pass-payment-choice";
 import { SurfaceCard } from "@/components/surface-card";
 import { StatusPill } from "@/components/status-pill";
 import { ZikLogoMark } from "@/components/zik-logo";
@@ -2829,6 +2830,9 @@ function PhysicalOnboardingExperience({
           <p className="max-w-sm text-center text-sm font-semibold text-ink/64">
             Waiting for the clerk to confirm 18+
           </p>
+          {enrollment?.id ? (
+            <PassPaymentChoice enrollmentId={enrollment.id} storeId={verification.session.store_id} />
+          ) : null}
         </div>
       </PhysicalStageFrame>
     );

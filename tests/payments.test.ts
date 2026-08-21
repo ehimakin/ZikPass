@@ -114,6 +114,33 @@ describe.sequential("payments", () => {
     expect(secondConfirm.confirmed_by).toBe(firstConfirm.confirmed_by);
   });
 
+  it("lets a customer self-confirm a pass-issuance payment via digital wallet, distinct from cash", async () => {
+    const payment = await createPaymentRecord({
+      enrollmentId: "enroll_demo3b",
+      purpose: "pass_issuance",
+      method: "digital_wallet",
+      storeId: "zik-london-001"
+    });
+
+    expect(payment.method).toBe("digital_wallet");
+    expect(payment.status).toBe("pending");
+
+    const confirmed = await confirmOnlineDemoPayment({ paymentId: payment.payment_id });
+
+    expect(confirmed.status).toBe("confirmed");
+    expect(confirmed.method).toBe("digital_wallet");
+
+    // Confirming a digital-wallet payment does not interfere with an
+    // independent cash payment record for a different purpose/enrollment.
+    const cashPayment = await createPaymentRecord({
+      enrollmentId: "enroll_demo3c",
+      purpose: "pass_issuance",
+      method: "cash_in_store",
+      storeId: "zik-london-001"
+    });
+    expect(cashPayment.status).toBe("pending");
+  });
+
   it("computes platform/store settlement shares and always reports them as unsettled", async () => {
     const payment = await createPaymentRecord({
       enrollmentId: "enroll_demo4",
