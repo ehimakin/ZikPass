@@ -13,19 +13,33 @@ import {
   stringifyForAdmin,
   type IssuerSessionRecord
 } from "@/lib/shared/issuer-dashboard";
+import type { ErrorReportRecord } from "@/lib/shared/types";
 
 interface IssuerResponse {
   sessions: IssuerSessionRecord[];
   issuer_public_key: JsonWebKey;
 }
 
+interface ErrorReportsResponse {
+  reports: ErrorReportRecord[];
+}
+
 interface ApiError {
   error: string;
 }
 
+const RECOVERY_ACTION_TONE = {
+  retry: "neutral",
+  resume: "neutral",
+  restart: "warn",
+  report: "warn"
+} as const;
+
 export function IssuerDashboard() {
   const [sessions, setSessions] = useState<IssuerSessionRecord[]>([]);
   const [issuerPublicKey, setIssuerPublicKey] = useState<JsonWebKey | null>(null);
+  const [errorReports, setErrorReports] = useState<ErrorReportRecord[]>([]);
+  const [errorReportsFailure, setErrorReportsFailure] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -54,6 +68,21 @@ export function IssuerDashboard() {
       setError(null);
     } catch {
       setError("Issuer sessions are temporarily unavailable.");
+    }
+
+    try {
+      const response = await fetch("/api/errors");
+      const data = (await response.json()) as ErrorReportsResponse | ApiError;
+
+      if (!response.ok) {
+        setErrorReportsFailure((data as ApiError).error);
+        return;
+      }
+
+      setErrorReports((data as ErrorReportsResponse).reports);
+      setErrorReportsFailure(null);
+    } catch {
+      setErrorReportsFailure("Error reports are temporarily unavailable.");
     }
   }
 
@@ -330,6 +359,44 @@ export function IssuerDashboard() {
                 </article>
               );
             })}
+          </div>
+        )}
+      </SurfaceCard>
+
+      <SurfaceCard
+        title="Error reports"
+        subtitle="Reports filed via the 'Report this problem' recovery action, newest first. Context is redacted server-side before it is stored."
+      >
+        {errorReportsFailure ? <p className="mb-4 text-sm text-red-700">{errorReportsFailure}</p> : null}
+        {errorReports.length === 0 ? (
+          <p className="text-sm text-ink/65">No error reports filed yet.</p>
+        ) : (
+          <div className="grid gap-3">
+            {errorReports.map((report) => (
+              <article key={report.reference} className="rounded-[20px] border border-ink/8 bg-ink/5 p-4">
+                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p className="font-mono text-sm font-medium">{report.reference}</p>
+                    <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink/50">
+                      {formatAdminDateTime(report.created_at, "Time unavailable")}
+                    </p>
+                  </div>
+                  <StatusPill tone={RECOVERY_ACTION_TONE[report.recovery_action]}>
+                    {report.recovery_action}
+                  </StatusPill>
+                </div>
+                <p className="mt-2 text-sm text-ink/80">{report.message}</p>
+                <p className="mt-2 text-xs text-ink/55">
+                  {report.route ? `Route: ${report.route}` : "Route unavailable"}
+                  {report.operation ? ` · Operation: ${report.operation}` : ""}
+                </p>
+                {report.context && Object.keys(report.context).length > 0 ? (
+                  <pre className="mt-2 text-xs text-ink/65">
+                    {stringifyForAdmin(report.context, "Context unavailable.")}
+                  </pre>
+                ) : null}
+              </article>
+            ))}
           </div>
         )}
       </SurfaceCard>

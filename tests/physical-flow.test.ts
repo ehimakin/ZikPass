@@ -6,6 +6,7 @@ import {
   completePhysicalDeviceAuth,
   createPhysicalStoreSession,
   getEnrollmentOrThrow,
+  getIssuerSessions,
   issueEnrollmentCredential,
   lookupPhysicalStoreSessionByCode,
   rejectPhysicalIdCheck,
@@ -643,6 +644,53 @@ describe.sequential("physical flow", () => {
           verifierToken
         })
       ).rejects.toThrow(/expired/i);
+    });
+
+    it("does not let one expired physical session crash the whole issuer listing", async () => {
+      const session = await createPhysicalStoreSession({
+        storeId: "zik-london-001",
+        storeName: "Zik Oxford Street",
+        locationId: "front-desk"
+      });
+      const expiredEnrollment = await startEnrollment({
+        application: physicalApplication(session, "2026-04-15T10:00:00.000Z"),
+        holderPublicKey,
+        applicationFingerprint: physicalFingerprint(session)
+      });
+
+      const healthySession = await createPhysicalStoreSession({
+        storeId: "zik-london-001",
+        storeName: "Zik Oxford Street",
+        locationId: "front-desk"
+      });
+      const healthyEnrollment = await startEnrollment({
+        application: physicalApplication(healthySession, "2026-04-15T10:01:00.000Z"),
+        holderPublicKey: { ...holderPublicKey, x: "healthy-holder-key" },
+        applicationFingerprint: `${physicalFingerprint(healthySession)}-healthy`
+      });
+
+      const storeState = JSON.parse(await fs.readFile(runtimeStatePath, "utf8")) as {
+        physical_sessions: PhysicalStoreSessionRecord[];
+      };
+      const expiredIndex = storeState.physical_sessions.findIndex(
+        (candidate) => candidate.session_id === session.session_id
+      );
+      storeState.physical_sessions[expiredIndex].expires_at = "2020-01-01T00:00:00.000Z";
+      await fs.writeFile(runtimeStatePath, JSON.stringify(storeState, null, 2), "utf8");
+
+      // A direct getEnrollmentOrThrow on the expired one still throws (see the
+      // test above) — getIssuerSessions must not let that take the healthy
+      // record down with it.
+      const sessions = await getIssuerSessions();
+
+      expect(sessions).toHaveLength(2);
+
+      const expired = sessions.find((candidate) => candidate.id === expiredEnrollment.id);
+      const healthy = sessions.find((candidate) => candidate.id === healthyEnrollment.id);
+
+      expect(expired?.status).toBe("verification_session_expired");
+      expect(expired?.last_user_message).toMatch(/expired/i);
+      expect(healthy?.status).toBe("physical_verification_pending");
     });
 
     it("derives a rejected verification status once staff decline the in-person ID check", async () => {

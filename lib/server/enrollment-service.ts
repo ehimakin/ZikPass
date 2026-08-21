@@ -334,7 +334,23 @@ export async function getEnrollmentOrThrow(enrollmentId: string): Promise<Enroll
 
 export async function getIssuerSessions(): Promise<EnrollmentRecord[]> {
   const records = await listEnrollments();
-  return Promise.all(records.map((record) => getEnrollmentOrThrow(record.id)));
+  return Promise.all(
+    records.map(async (record) => {
+      try {
+        return await getEnrollmentOrThrow(record.id);
+      } catch (error) {
+        // A single record failing to re-sync (e.g. an expired physical
+        // session) must not take down the whole issuer listing. The sync
+        // attempt inside getEnrollmentOrThrow persists before it throws, so
+        // re-reading picks up whatever state it did manage to save.
+        const fallback = (await getEnrollment(record.id)) ?? record;
+        return {
+          ...fallback,
+          last_user_message: error instanceof Error ? error.message : fallback.last_user_message
+        };
+      }
+    })
+  );
 }
 
 export async function createPhysicalStoreSession(input?: {
