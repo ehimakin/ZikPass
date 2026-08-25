@@ -12,6 +12,7 @@ import type {
   EnrollmentRecord,
   IdentityMatchInput,
   PhysicalDeviceAuthState,
+  PhysicalEntryMode,
   PhysicalVerificationAttestation,
   PhysicalStoreSessionRecord,
   PhysicalVerificationState
@@ -25,7 +26,7 @@ import {
 import { assertNoDuplicateApplication, checkDuplicateApplication } from "@/lib/server/application-guard";
 import { issueCredential } from "@/lib/server/credential-issuer";
 import { createPrimaryDeviceBindingIfMissing } from "@/lib/server/device-bindings";
-import { hasConfirmedPassIssuancePayment } from "@/lib/server/payments";
+import { hasConfirmedPassIssuancePayment, recordRetailTillPurchase } from "@/lib/server/payments";
 import { buildNotification } from "@/lib/server/notifications";
 import { authenticateRetailVerifier } from "@/lib/server/retail-verifier";
 import {
@@ -361,6 +362,7 @@ export async function createPhysicalStoreSession(input?: {
   storeId?: string;
   storeName?: string;
   locationId?: string;
+  entryMode?: PhysicalEntryMode;
 }): Promise<PhysicalStoreSessionRecord> {
   const now = new Date();
   const nowIso = now.toISOString();
@@ -369,6 +371,7 @@ export async function createPhysicalStoreSession(input?: {
     store_id: input?.storeId?.trim() || "zik-london-001",
     store_name: input?.storeName?.trim() || "Zik Oxford Street",
     location_id: input?.locationId?.trim() || "front-desk",
+    entry_mode: input?.entryMode ?? "self_directed",
     created_at: nowIso,
     updated_at: nowIso,
     expires_at: new Date(
@@ -749,6 +752,11 @@ async function startPhysicalEnrollment(input: {
   session.updated_at = now;
 
   await upsertPhysicalSession(session);
+
+  if (session.entry_mode === "retail_card") {
+    await recordRetailTillPurchase(record.id, session.store_id);
+  }
+
   return upsertEnrollment(record);
 }
 
@@ -856,7 +864,8 @@ function createPhysicalEnrollmentRecord(input: {
         session_id: input.session.session_id,
         store_id: input.session.store_id,
         store_name: input.session.store_name,
-        location_id: input.session.location_id
+        location_id: input.session.location_id,
+        entry_mode: input.session.entry_mode
       }
     },
     proof: {
@@ -886,7 +895,8 @@ function createPhysicalEnrollmentRecord(input: {
         session_id: input.session.session_id,
         store_id: input.session.store_id,
         store_name: input.session.store_name,
-        location_id: input.session.location_id
+        location_id: input.session.location_id,
+        entry_mode: input.session.entry_mode
       },
       session_expires_at: input.session.expires_at,
       status: "awaiting_clerk_verification",
@@ -1710,7 +1720,8 @@ function toPhysicalVerificationState(
       session_id: session.session_id,
       store_id: session.store_id,
       store_name: session.store_name,
-      location_id: session.location_id
+      location_id: session.location_id,
+      entry_mode: session.entry_mode
     },
     session_expires_at: session.expires_at,
     status,

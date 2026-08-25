@@ -76,7 +76,7 @@ export function ClerkPaymentStatus({ enrollmentId, storeId }: { enrollmentId: st
 
   if (panelState === "loading") {
     return (
-      <p aria-live="polite" className="text-xs text-ink/55">
+      <p aria-live="polite" className="text-xs text-mist/50">
         Checking payment status…
       </p>
     );
@@ -90,9 +90,9 @@ export function ClerkPaymentStatus({ enrollmentId, storeId }: { enrollmentId: st
         : "No payment method selected yet";
 
   return (
-    <div className="rounded-[18px] border border-ink/8 bg-white px-4 py-3 text-left">
-      <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/45">Payment</p>
-      <p aria-live="polite" className="mt-1 text-sm font-semibold text-ink">
+    <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-3 text-left">
+      <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-mist/40">Payment</p>
+      <p aria-live="polite" className="mt-1 text-sm font-semibold text-mist">
         {statusLabel}
         {payment?.status === "confirmed"
           ? ` via ${METHOD_LABEL[payment.method] ?? payment.method} — reference ${payment.payment_id}`
@@ -100,7 +100,7 @@ export function ClerkPaymentStatus({ enrollmentId, storeId }: { enrollmentId: st
       </p>
       {payment?.status !== "confirmed" ? (
         <button
-          className="mt-2 rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-mist disabled:opacity-55 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/40"
+          className="mt-2 rounded-full bg-lime px-3 py-1.5 text-xs font-semibold text-ink disabled:opacity-55 focus:outline-none focus-visible:ring-2 focus-visible:ring-lime/40"
           disabled={isSubmitting}
           onClick={() => void markPaidByCash()}
           type="button"
@@ -109,7 +109,7 @@ export function ClerkPaymentStatus({ enrollmentId, storeId }: { enrollmentId: st
         </button>
       ) : null}
       {error ? (
-        <p className="mt-2 text-xs font-semibold text-[#B32646]" role="alert">
+        <p className="mt-2 text-xs font-semibold text-[#f8c8b4]" role="alert">
           {error}
         </p>
       ) : null}

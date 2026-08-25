@@ -7,6 +7,7 @@ import {
   createPaymentRecord,
   getPaymentOrThrow,
   hasConfirmedPassIssuancePayment,
+  recordRetailTillPurchase,
   resolveStorePlan
 } from "@/lib/server/payments";
 import { triggerIssuanceRecheck } from "@/lib/server/payment-issuance";
@@ -202,6 +203,16 @@ describe.sequential("payments", () => {
     });
     await confirmOnlineDemoPayment({ paymentId: extension.payment_id });
     expect(await hasConfirmedPassIssuancePayment("enroll_demo6")).toBe(false);
+  });
+
+  it("records a retail-till purchase as an already-confirmed pass-issuance payment", async () => {
+    expect(await hasConfirmedPassIssuancePayment("enroll_till1")).toBe(false);
+
+    const payment = await recordRetailTillPurchase("enroll_till1", "zik-london-001");
+
+    expect(payment.method).toBe("retail_till");
+    expect(payment.status).toBe("confirmed");
+    expect(await hasConfirmedPassIssuancePayment("enroll_till1")).toBe(true);
   });
 
   it("only re-checks issuance for confirmed pass_issuance payments, and never throws", async () => {

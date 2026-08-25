@@ -87,11 +87,14 @@ export interface BankVerificationState {
   };
 }
 
+export type PhysicalEntryMode = "retail_card" | "self_directed";
+
 export interface PhysicalStoreContext {
   session_id: string;
   store_id: string;
   store_name: string;
   location_id: string;
+  entry_mode: PhysicalEntryMode;
 }
 
 export interface PhysicalUserCodeState {
@@ -412,7 +415,7 @@ export type DeviceBindingAuthorization =
   | { outcome: "payment_required"; device_limit: number; active_count: number };
 
 export type PaymentPurpose = "pass_issuance" | "device_extension";
-export type PaymentMethod = "cash_in_store" | "online_demo" | "digital_wallet";
+export type PaymentMethod = "cash_in_store" | "online_demo" | "digital_wallet" | "retail_till";
 export type PaymentStatus = "pending" | "confirmed" | "failed";
 
 /**

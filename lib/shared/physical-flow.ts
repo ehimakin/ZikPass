@@ -92,6 +92,7 @@ export function parseWalletEntryContext(
   const storeId = params.get("store_id");
   const storeName = params.get("store_name");
   const locationId = params.get("location_id");
+  const entryMode = params.get("entry_mode") === "retail_card" ? "retail_card" : "self_directed";
 
   if (flow === "remote") {
     return { lane: "remote" };
@@ -103,17 +104,18 @@ export function parseWalletEntryContext(
       session_id: sessionId?.trim() || undefined,
       store_id: storeId?.trim() || undefined,
       store_name: storeName?.trim() || undefined,
-      location_id: locationId?.trim() || undefined
+      location_id: locationId?.trim() || undefined,
+      entry_mode: entryMode
     };
   }
 
-  return { lane: "physical" };
+  return { lane: "physical", entry_mode: entryMode };
 }
 
 export function buildGenericPhysicalWalletUrl(
-  context?: Partial<Omit<PhysicalStoreContext, "session_id">>
+  context?: Partial<Omit<PhysicalStoreContext, "session_id" | "entry_mode">>
 ): string {
-  const searchParams = new URLSearchParams({ flow: "physical" });
+  const searchParams = new URLSearchParams({ flow: "physical", entry_mode: "retail_card" });
 
   if (context?.store_id) {
     searchParams.set("store_id", context.store_id);

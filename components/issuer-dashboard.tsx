@@ -113,25 +113,27 @@ export function IssuerDashboard() {
   return (
     <div className="grid gap-6">
       <SurfaceCard
+        dark
         title="Issuer trust root"
         subtitle="The private signing key stays server-side; only the public key is shared with verifiers."
       >
         {issuerPublicKey ? (
-          <pre className="rounded-2xl bg-ink p-4 text-xs text-mist">
+          <pre className="rounded-2xl border border-white/10 bg-black/30 p-4 text-xs text-mist/80">
             {JSON.stringify(issuerPublicKey, null, 2)}
           </pre>
         ) : (
-          <p className="text-sm text-ink/65">Loading public key material.</p>
+          <p className="text-sm text-mist/50">Loading public key material.</p>
         )}
       </SurfaceCard>
 
       <SurfaceCard
+        dark
         title="Enrollment queue"
-        subtitle="This dashboard shows provider execution state, risk outcomes, cooling-off, operational flags, and issuance state."
+        subtitle="Provider execution state, risk outcomes, cooling-off, and issuance state."
       >
-        {error ? <p className="mb-4 text-sm text-red-700">{error}</p> : null}
+        {error ? <p className="mb-4 text-sm text-[#f8c8b4]">{error}</p> : null}
         {sessions.length === 0 ? (
-          <p className="text-sm text-ink/65">No sessions yet. Start one from the wallet flow.</p>
+          <p className="text-sm text-mist/50">No sessions yet. Start one from the wallet flow.</p>
         ) : (
           <div className="grid gap-4">
             {sessions.map((session, index) => {
@@ -150,26 +152,27 @@ export function IssuerDashboard() {
               return (
                 <article
                   key={session.id ?? `session-${index}`}
-                  className="rounded-[24px] border border-ink/8 bg-ink/5 p-5"
+                  className="rounded-[24px] border border-white/8 bg-white/[0.03] p-5"
                 >
                   <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
-                      <p className="font-heading text-lg font-medium">{sessionId}</p>
-                      <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink/50">
+                      <p className="font-heading text-lg font-medium text-mist">{sessionId}</p>
+                      <p className="font-mono text-xs uppercase tracking-[0.24em] text-mist/40">
                         {formatAdminDateTime(session.created_at, "Time unavailable")}
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <StatusPill tone={financialStatus.includes("match") ? "good" : "neutral"}>
+                      <StatusPill surface="dark" tone={financialStatus.includes("match") ? "good" : "neutral"}>
                         Financial: {financialStatus}
                       </StatusPill>
-                      <StatusPill tone={copStatus === "full_match" ? "good" : "neutral"}>
+                      <StatusPill surface="dark" tone={copStatus === "full_match" ? "good" : "neutral"}>
                         CoP: {copStatus}
                       </StatusPill>
-                      <StatusPill tone={transactionStatus === "confirmed" ? "good" : "neutral"}>
+                      <StatusPill surface="dark" tone={transactionStatus === "confirmed" ? "good" : "neutral"}>
                         Bank: {transactionStatus}
                       </StatusPill>
                       <StatusPill
+                        surface="dark"
                         tone={
                           session.status === "issued"
                             ? "good"
@@ -181,47 +184,47 @@ export function IssuerDashboard() {
                       >
                         {sessionStatusLabel}
                       </StatusPill>
-                      <StatusPill tone={duplicateFlag === "Duplicate blocked" ? "warn" : "neutral"}>
+                      <StatusPill surface="dark" tone={duplicateFlag === "Duplicate blocked" ? "warn" : "neutral"}>
                         {duplicateFlag}
                       </StatusPill>
                     </div>
                   </div>
 
                   <div className="mt-4 grid gap-4 lg:grid-cols-3">
-                    <div className="rounded-2xl bg-white/80 p-4 text-sm text-ink/75">
-                      <p className="font-medium">Provider outcomes</p>
+                    <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
+                      <p className="font-medium text-mist">Provider outcomes</p>
                       <p className="mt-2">Financial check: {financialStatus}</p>
                       <p className="mt-2">CoP: {copStatus}</p>
                       <p className="mt-2">Bank verification: {transactionStatus}</p>
                       <p className="mt-2">Risk decision: {riskStatus}</p>
                       <p className="mt-2">Stage: {session.orchestration?.stage ?? "Unavailable"}</p>
                     </div>
-                    <div className="rounded-2xl bg-white/80 p-4 text-sm text-ink/75">
-                      <p className="font-medium">Bank verification</p>
-                      <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-ink/50">
+                    <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
+                      <p className="font-medium text-mist">Bank verification</p>
+                      <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-mist/40">
                         Bank
                       </p>
                       <p className="mt-1">
                         {session.bank_verification?.bank_name ?? "Bank unavailable"}
                       </p>
-                      <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-ink/50">
+                      <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-mist/40">
                         Amount
                       </p>
                       <p className="mt-1">{formatCurrencyGbp(session.bank_verification?.amount_gbp)}</p>
-                      <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-ink/50">
+                      <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-mist/40">
                         Reference
                       </p>
                       <p className="mt-1">
                         {session.bank_verification?.reference ?? "Reference unavailable"}
                       </p>
-                      <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-ink/50">
+                      <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-mist/40">
                         Code
                       </p>
                       <p className="mt-1">{session.bank_verification?.code ?? "Code unavailable"}</p>
                       <p className="mt-2">Attempts: {session.bank_verification?.attempts ?? 0}</p>
                     </div>
-                    <div className="rounded-2xl bg-white/80 p-4 text-sm text-ink/75">
-                      <p className="font-medium">Lifecycle</p>
+                    <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
+                      <p className="font-medium text-mist">Lifecycle</p>
                       <p className="mt-2">
                         Holder key registered: {formatAdminDateTime(session.holder_key_registered_at)}
                       </p>
@@ -240,10 +243,10 @@ export function IssuerDashboard() {
                       <p className="mt-2">
                         Issuer signature: {formatAdminDateTime(session.issuer_signature_created_at)}
                       </p>
-                      <p className="mt-2 font-mono text-xs text-ink/50">{formatFingerprint(session.application_fingerprint)}</p>
+                      <p className="mt-2 font-mono text-xs text-mist/40">{formatFingerprint(session.application_fingerprint)}</p>
                     </div>
-                    <div className="rounded-2xl bg-white/80 p-4 text-sm text-ink/75">
-                      <p className="font-medium">Cooling-off</p>
+                    <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
+                      <p className="font-medium text-mist">Cooling-off</p>
                       <p className="mt-2">
                         Configured delay:{" "}
                         {typeof session.cooling_off?.duration_seconds === "number"
@@ -261,8 +264,8 @@ export function IssuerDashboard() {
                         Issuance status: {session.orchestration?.issuance_status ?? "Unavailable"}
                       </p>
                     </div>
-                    <div className="rounded-2xl bg-white/80 p-4 text-sm text-ink/75">
-                      <p className="font-medium">Decision detail</p>
+                    <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
+                      <p className="font-medium text-mist">Decision detail</p>
                       <p className="mt-2">Risk state: {riskStatus}</p>
                       <p className="mt-2">
                         Manual review: {session.risk_decision?.requires_manual_review ? "Yes" : "No"}
@@ -277,8 +280,8 @@ export function IssuerDashboard() {
                         User message: {session.last_user_message ?? "Unavailable"}
                       </p>
                     </div>
-                    <div className="rounded-2xl bg-white/80 p-4 text-sm text-ink/75">
-                      <p className="font-medium">Raw provider detail</p>
+                    <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
+                      <p className="font-medium text-mist">Raw provider detail</p>
                       <pre className="mt-2 text-xs">
                         {stringifyForAdmin(
                           {
@@ -295,21 +298,21 @@ export function IssuerDashboard() {
 
                   <div className="mt-4 flex flex-wrap gap-3">
                     <button
-                      className="rounded-full bg-ink/8 px-4 py-2 text-sm text-ink disabled:opacity-50"
+                      className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm text-mist/80 disabled:opacity-50"
                       disabled={isPending || session.status !== "approved_with_cooling_off" || !session.id}
                       onClick={() => session.id && mutate("/api/enrollment/advance-cooling-off", session.id)}
                     >
                       Advance cooling-off
                     </button>
                     <button
-                      className="rounded-full bg-ink/8 px-4 py-2 text-sm text-ink disabled:opacity-50"
+                      className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm text-mist/80 disabled:opacity-50"
                       disabled={isPending || session.status !== "retry_provider_failure" || !session.id}
                       onClick={() => session.id && mutate("/api/enrollment/retry", session.id)}
                     >
                       Retry providers
                     </button>
                     <button
-                      className="rounded-full bg-ink px-4 py-2 text-sm text-mist disabled:opacity-50"
+                      className="rounded-full bg-lime px-4 py-2 text-sm font-semibold text-ink disabled:opacity-50"
                       disabled={
                         isPending ||
                         transactionStatus !== "confirmed" ||
@@ -324,17 +327,17 @@ export function IssuerDashboard() {
                   </div>
 
                   <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                    <div className="rounded-2xl bg-white/80 p-4 text-sm text-ink/75">
-                      <p className="font-medium">Notification log</p>
+                    <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
+                      <p className="font-medium text-mist">Notification log</p>
                       {notifications.length > 0 ? (
                         <div className="mt-2 space-y-2">
                           {notifications.map((notification, notificationIndex) => (
                             <div
                               key={notification.id ?? `${sessionId}-notification-${notificationIndex}`}
-                              className="rounded-2xl bg-ink/5 p-3"
+                              className="rounded-2xl border border-white/8 bg-white/[0.04] p-3"
                             >
                               <p>{notification.message ?? "Notification content unavailable."}</p>
-                              <p className="mt-1 font-mono text-xs uppercase tracking-[0.2em] text-ink/50">
+                              <p className="mt-1 font-mono text-xs uppercase tracking-[0.2em] text-mist/40">
                                 {formatAdminDateTime(notification.created_at, "Time unavailable")}
                               </p>
                             </div>
@@ -345,8 +348,8 @@ export function IssuerDashboard() {
                       )}
                     </div>
 
-                    <div className="rounded-2xl bg-white/80 p-4 text-sm text-ink/75">
-                      <p className="font-medium">Issued credential</p>
+                    <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
+                      <p className="font-medium text-mist">Issued credential</p>
                       {session.issued_credential ? (
                         <pre className="mt-2 text-xs">
                           {stringifyForAdmin(session.issued_credential, "Credential unavailable.")}
@@ -364,34 +367,35 @@ export function IssuerDashboard() {
       </SurfaceCard>
 
       <SurfaceCard
+        dark
         title="Error reports"
-        subtitle="Reports filed via the 'Report this problem' recovery action, newest first. Context is redacted server-side before it is stored."
+        subtitle="Filed via the &lsquo;Report this problem&rsquo; recovery action, newest first."
       >
-        {errorReportsFailure ? <p className="mb-4 text-sm text-red-700">{errorReportsFailure}</p> : null}
+        {errorReportsFailure ? <p className="mb-4 text-sm text-[#f8c8b4]">{errorReportsFailure}</p> : null}
         {errorReports.length === 0 ? (
-          <p className="text-sm text-ink/65">No error reports filed yet.</p>
+          <p className="text-sm text-mist/50">No error reports filed yet.</p>
         ) : (
           <div className="grid gap-3">
             {errorReports.map((report) => (
-              <article key={report.reference} className="rounded-[20px] border border-ink/8 bg-ink/5 p-4">
+              <article key={report.reference} className="rounded-[20px] border border-white/8 bg-white/[0.03] p-4">
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                   <div>
-                    <p className="font-mono text-sm font-medium">{report.reference}</p>
-                    <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink/50">
+                    <p className="font-mono text-sm font-medium text-mist">{report.reference}</p>
+                    <p className="font-mono text-xs uppercase tracking-[0.2em] text-mist/40">
                       {formatAdminDateTime(report.created_at, "Time unavailable")}
                     </p>
                   </div>
-                  <StatusPill tone={RECOVERY_ACTION_TONE[report.recovery_action]}>
+                  <StatusPill surface="dark" tone={RECOVERY_ACTION_TONE[report.recovery_action]}>
                     {report.recovery_action}
                   </StatusPill>
                 </div>
-                <p className="mt-2 text-sm text-ink/80">{report.message}</p>
-                <p className="mt-2 text-xs text-ink/55">
+                <p className="mt-2 text-sm text-mist/75">{report.message}</p>
+                <p className="mt-2 text-xs text-mist/45">
                   {report.route ? `Route: ${report.route}` : "Route unavailable"}
                   {report.operation ? ` · Operation: ${report.operation}` : ""}
                 </p>
                 {report.context && Object.keys(report.context).length > 0 ? (
-                  <pre className="mt-2 text-xs text-ink/65">
+                  <pre className="mt-2 text-xs text-mist/55">
                     {stringifyForAdmin(report.context, "Context unavailable.")}
                   </pre>
                 ) : null}

@@ -154,13 +154,14 @@ export function StoreSessionDashboard() {
   return (
     <div className="grid gap-6">
       <SurfaceCard
+        dark
         title="Retail-card QR"
         subtitle="The printed card is generic. Scanning it starts a fresh customer session on the phone."
       >
-        {error ? <p className="mb-4 text-sm text-[#b4535f]">{error}</p> : null}
+        {error ? <p className="mb-4 text-sm text-[#f8c8b4]">{error}</p> : null}
         <div className="flex flex-wrap gap-3">
           <a
-            className="rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist"
+            className="rounded-full bg-lime px-5 py-3 text-sm font-semibold text-ink transition hover:bg-lime/90"
             href={buildGenericPhysicalWalletUrl({
               store_id: "zik-london-001",
               store_name: "Zik Oxford Street",
@@ -170,7 +171,7 @@ export function StoreSessionDashboard() {
             Open generic retail-card QR
           </a>
           <button
-            className="rounded-full border border-ink/10 bg-[#f7faee] px-5 py-3 text-sm font-medium text-ink hover:bg-[#edf3df]"
+            className="rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-medium text-mist/80 transition hover:bg-white/10"
             disabled={isPending}
             onClick={createSession}
           >
@@ -178,7 +179,7 @@ export function StoreSessionDashboard() {
           </button>
           {latestSession ? (
             <a
-              className="rounded-full border border-ink/10 bg-[#f7faee] px-5 py-3 text-sm font-medium text-ink hover:bg-[#edf3df]"
+              className="rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-medium text-mist/80 transition hover:bg-white/10"
               href={buildPhysicalWalletUrl(latestSession)}
             >
               Open customer wallet flow
@@ -187,13 +188,13 @@ export function StoreSessionDashboard() {
         </div>
 
         {latestSession ? (
-          <div className="mt-5 rounded-[26px] bg-ink/5 p-5 text-sm text-ink/76">
+          <div className="mt-5 rounded-[26px] border border-white/8 bg-white/[0.03] p-5 text-sm text-mist/70">
             <div className="flex flex-wrap items-center gap-3">
-              <StatusPill tone="good">{latestSession.store_name}</StatusPill>
-              <StatusPill tone="neutral">{latestSession.status}</StatusPill>
+              <StatusPill surface="dark" tone="good">{latestSession.store_name}</StatusPill>
+              <StatusPill surface="dark" tone="neutral">{latestSession.status}</StatusPill>
             </div>
-            <p className="mt-4 font-medium text-ink">Customer launch link</p>
-            <p className="mt-2 break-all rounded-[18px] bg-white px-4 py-3 font-mono text-xs text-ink/72">
+            <p className="mt-4 font-medium text-mist">Customer launch link</p>
+            <p className="mt-2 break-all rounded-[18px] border border-white/8 bg-white/5 px-4 py-3 font-mono text-xs text-mist/60">
               {buildPhysicalWalletUrl(latestSession)}
             </p>
           </div>
@@ -201,33 +202,34 @@ export function StoreSessionDashboard() {
       </SurfaceCard>
 
       <SurfaceCard
+        dark
         title="Clerk verification"
         subtitle="Enter the short code shown on the customer device and confirm the physical ID check."
       >
         <div className="flex flex-col gap-3 sm:flex-row">
           <input
-            className="w-full rounded-[22px] border border-ink/10 bg-ink/5 px-5 py-4 text-lg font-medium tracking-[0.28em] text-ink outline-none"
+            className="w-full rounded-[22px] border border-white/10 bg-white/5 px-5 py-4 text-lg font-medium tracking-[0.28em] text-mist outline-none placeholder:text-mist/30"
             maxLength={256}
             placeholder="ABC123"
             value={lookupCode}
             onChange={(event) => setLookupCode(parseRetailVerificationCode(event.target.value))}
           />
           <button
-            className="rounded-full border border-ink/10 bg-white px-5 py-3 text-sm font-medium text-ink"
+            className="rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-medium text-mist/80 hover:bg-white/10"
             disabled={!canLookupSession}
             onClick={lookupSession}
           >
             Find session
           </button>
           <button
-            className="rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist"
+            className="rounded-full bg-lime px-5 py-3 text-sm font-semibold text-ink transition hover:bg-lime/90"
             disabled={isPending || !isRetailVerificationCodeReady(parsedLookupCode)}
             onClick={() => submitIdCheck("confirm")}
           >
             Confirm 18+
           </button>
           <button
-            className="rounded-full border border-[#d27a86]/45 bg-[#fff6f7] px-5 py-3 text-sm font-semibold text-[#9f3748]"
+            className="rounded-full border border-[#f8c8b4]/30 bg-[#f8c8b4]/10 px-5 py-3 text-sm font-semibold text-[#f8c8b4]"
             disabled={isPending || !isRetailVerificationCodeReady(parsedLookupCode)}
             onClick={() => submitIdCheck("reject")}
           >
@@ -237,20 +239,20 @@ export function StoreSessionDashboard() {
 
         {lookupResult ? (
           <div className="mt-5 grid gap-4 lg:grid-cols-2">
-            <div className="rounded-[24px] bg-ink p-5 text-mist">
+            <div className="rounded-[24px] border border-white/10 bg-white/[0.05] p-5 text-mist">
               <div className="flex flex-wrap gap-3">
-                <StatusPill tone="good">{lookupResult.store_name}</StatusPill>
-                <StatusPill tone="neutral">{lookupResult.status}</StatusPill>
+                <StatusPill surface="dark" tone="good">{lookupResult.store_name}</StatusPill>
+                <StatusPill surface="dark" tone="neutral">{lookupResult.status}</StatusPill>
               </div>
               <p className="mt-4 font-heading text-2xl font-semibold tracking-tight">
                 Session {lookupResult.session_id}
               </p>
-              <p className="mt-2 text-sm text-mist/76">
+              <p className="mt-2 text-sm text-mist/60">
                 User code {lookupResult.user_code ?? "Not yet issued"}
               </p>
             </div>
-            <div className="rounded-[24px] bg-white p-5 text-sm text-ink/76">
-              <p className="font-medium text-ink">Verification state</p>
+            <div className="rounded-[24px] border border-white/8 bg-white/[0.03] p-5 text-sm text-mist/70">
+              <p className="font-medium text-mist">Verification state</p>
               <p className="mt-2">Clerk verification: {lookupResult.clerk_verification.status}</p>
               <p className="mt-2">Device auth: {lookupResult.device_auth.status}</p>
               <p className="mt-2">Expires: {new Date(lookupResult.expires_at).toLocaleString()}</p>
@@ -259,39 +261,34 @@ export function StoreSessionDashboard() {
         ) : null}
 
         {verificationResult?.physical_verification ? (
-          <div className="mt-5 rounded-[24px] bg-[#f7faee] p-5 text-sm text-ink/76">
-            <p className="font-medium text-ink">Verification confirmed</p>
+          <div className="mt-5 rounded-[24px] border border-lime/20 bg-lime/[0.06] p-5 text-sm text-mist/70">
+            <p className="font-medium text-mist">Verification confirmed</p>
             <p className="mt-2">{verificationResult.last_user_message}</p>
-            <p className="mt-2">
-              Next step: the user completes device authentication on the device receiving the pass.
-            </p>
+            <p className="mt-2">Next: the customer completes device authentication on their device.</p>
           </div>
         ) : null}
       </SurfaceCard>
 
-      <SurfaceCard
-        title="Recent sessions"
-        subtitle="Demo-ready view of the store sessions currently in play."
-      >
+      <SurfaceCard dark title="Recent sessions" subtitle="Store sessions currently in play.">
         {sessions.length === 0 ? (
-          <p className="text-sm text-ink/65">No store sessions yet.</p>
+          <p className="text-sm text-mist/50">No store sessions yet.</p>
         ) : (
           <div className="grid gap-3">
             {sessions.slice(0, 6).map((session) => (
               <article
                 key={session.session_id}
-                className="rounded-[22px] border border-ink/8 bg-white/88 p-4"
+                className="rounded-[22px] border border-white/8 bg-white/[0.03] p-4"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="font-medium text-ink">{session.store_name}</p>
-                    <p className="mt-1 font-mono text-xs uppercase tracking-[0.22em] text-ink/45">
+                    <p className="font-medium text-mist">{session.store_name}</p>
+                    <p className="mt-1 font-mono text-xs uppercase tracking-[0.22em] text-mist/40">
                       {session.session_id}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <StatusPill tone="neutral">{session.status}</StatusPill>
-                    {session.user_code ? <StatusPill tone="good">{session.user_code}</StatusPill> : null}
+                    <StatusPill surface="dark" tone="neutral">{session.status}</StatusPill>
+                    {session.user_code ? <StatusPill surface="dark" tone="good">{session.user_code}</StatusPill> : null}
                   </div>
                 </div>
               </article>

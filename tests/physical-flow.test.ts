@@ -16,11 +16,12 @@ import {
   verifyPhysicalIdCheck
 } from "@/lib/server/enrollment-service";
 import { claimNativeAppHandoff, createNativeAppHandoff } from "@/lib/server/mobile-handoff";
-import { confirmCashPayment, createPaymentRecord } from "@/lib/server/payments";
+import { confirmCashPayment, createPaymentRecord, hasConfirmedPassIssuancePayment } from "@/lib/server/payments";
 import { getIssuerKeyPath, getRuntimeStatePath } from "@/lib/server/runtime-paths";
 import {
   ZIK_APP_DOWNLOAD_URL,
   buildAffiliateOnboardingUrl,
+  buildGenericPhysicalWalletUrl,
   buildAppOnboardingUrl,
   buildRetailVerificationScanUrl,
   buildZikAppDeepLink,
@@ -96,7 +97,8 @@ function physicalApplication(session: PhysicalStoreSessionRecord, submittedAt: s
       session_id: session.session_id,
       store_id: session.store_id,
       store_name: session.store_name,
-      location_id: session.location_id
+      location_id: session.location_id,
+      entry_mode: session.entry_mode
     }
   };
 }
@@ -163,7 +165,8 @@ describe.sequential("physical flow", () => {
       store_id: "store_1",
       store_name: "Zik Oxford Street",
       location_id: "desk_1",
-      session_id: "store_abcd1234"
+      session_id: "store_abcd1234",
+      entry_mode: "self_directed"
     });
   });
 
@@ -172,7 +175,8 @@ describe.sequential("physical flow", () => {
       flow: "physical",
       store_id: "zik-london-001",
       store_name: "Zik Oxford Street",
-      location_id: "front-desk"
+      location_id: "front-desk",
+      entry_mode: "retail_card"
     });
 
     expect(parseWalletEntryContext(params)).toEqual({
@@ -180,7 +184,8 @@ describe.sequential("physical flow", () => {
       store_id: "zik-london-001",
       store_name: "Zik Oxford Street",
       location_id: "front-desk",
-      session_id: undefined
+      session_id: undefined,
+      entry_mode: "retail_card"
     });
   });
 
@@ -190,12 +195,27 @@ describe.sequential("physical flow", () => {
       session_id: undefined,
       store_id: undefined,
       store_name: undefined,
-      location_id: undefined
+      location_id: undefined,
+      entry_mode: "self_directed"
     });
 
     expect(parseWalletEntryContext(new URLSearchParams({ flow: "remote" }))).toEqual({
       lane: "remote"
     });
+  });
+
+  it("recognises the retail-card entry mode only when the URL says so", () => {
+    expect(
+      parseWalletEntryContext(new URLSearchParams({ flow: "physical", entry_mode: "retail_card" }))
+    ).toMatchObject({ entry_mode: "retail_card" });
+
+    expect(
+      parseWalletEntryContext(new URLSearchParams({ flow: "physical", store_id: "zik-london-001" }))
+    ).toMatchObject({ entry_mode: "self_directed" });
+
+    expect(buildGenericPhysicalWalletUrl({ store_id: "zik-london-001" })).toContain(
+      "entry_mode=retail_card"
+    );
   });
 
   it("keeps app onboarding store-unspecified and makes affiliate onboarding explicit", () => {
@@ -285,6 +305,41 @@ describe.sequential("physical flow", () => {
     expect(JSON.stringify(issued.issued_credential?.payload)).not.toMatch(
       /Morgan|1994|High Street|date_of_birth|first_name|last_name|current_home_address/i
     );
+  });
+
+  it("auto-settles payment for a retail-card session so a till purchase never blocks issuance", async () => {
+    const session = await createPhysicalStoreSession({
+      storeId: "zik-london-001",
+      storeName: "Zik Oxford Street",
+      locationId: "front-desk",
+      entryMode: "retail_card"
+    });
+
+    const enrollment = await startEnrollment({
+      application: physicalApplication(session, "2026-04-15T10:00:00.000Z"),
+      holderPublicKey,
+      applicationFingerprint: physicalFingerprint(session)
+    });
+
+    // Payment already happened at the till — no PassPaymentChoice step, and
+    // no confirmPassIssuancePayment call anywhere in this test.
+    expect(await hasConfirmedPassIssuancePayment(enrollment.id)).toBe(true);
+
+    const clerkConfirmed = await verifyPhysicalIdCheck({
+      userCode: enrollment.physical_verification?.user_code.value ?? "",
+      verifierToken
+    });
+    expect(clerkConfirmed.physical_verification?.session.entry_mode).toBe("retail_card");
+
+    const authStart = await startPhysicalDeviceAuth(enrollment.id);
+    const deviceAuthDone = await completePhysicalDeviceAuth({
+      enrollmentId: enrollment.id,
+      challengeId: authStart.challenge_id,
+      method: "demo_device_check"
+    });
+
+    expect(deviceAuthDone.status).toBe("issued");
+    expect(deviceAuthDone.issued_credential).toBeDefined();
   });
 
   it("keeps the post-clerk flow resumable after the customer code expires", async () => {

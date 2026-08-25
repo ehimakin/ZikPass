@@ -20,6 +20,7 @@ export async function POST(request: NextRequest) {
       storeId?: string;
       storeName?: string;
       locationId?: string;
+      entryMode?: "retail_card" | "self_directed";
     };
     const session = await createPhysicalStoreSession(body);
     return NextResponse.json(session);

@@ -83,6 +83,24 @@ export async function createPaymentRecord(input: {
   });
 }
 
+/**
+ * The pass was already paid for at the till as a normal retail item (the
+ * Flow 1 purchase-card journey) before the app was ever involved, so there
+ * is no in-app payment choice to make. This records that sale as an
+ * already-confirmed payment so issuance is never blocked waiting on a
+ * payment the customer already made.
+ */
+export async function recordRetailTillPurchase(enrollmentId: string, storeId: string): Promise<PaymentRecord> {
+  const record = await createPaymentRecord({
+    enrollmentId,
+    purpose: "pass_issuance",
+    method: "retail_till",
+    storeId
+  });
+
+  return confirmCashPayment({ paymentId: record.payment_id, confirmedBy: "retail-till-sale" });
+}
+
 export async function confirmCashPayment(input: {
   paymentId: string;
   confirmedBy: string;

@@ -4,13 +4,10 @@ import { IssuerDashboard } from "@/components/issuer-dashboard";
 export default function IssuerPage() {
   return (
     <AppShell currentPath="/issuer">
-      <main className="grid gap-6">
+      <main className="grid gap-6 pb-16 pt-6">
         <div>
-          <h1 className="font-heading text-4xl font-semibold tracking-tight">Issuer dashboard</h1>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-ink/70">
-            Enrollment queue, provider outcomes, issuance state, and filed error reports for this
-            environment.
-          </p>
+          <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-lime/80">Staff tool</p>
+          <h1 className="mt-3 font-heading text-4xl font-semibold tracking-tight text-mist">Issuer dashboard</h1>
         </div>
         <IssuerDashboard />
       </main>

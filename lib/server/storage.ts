@@ -678,6 +678,7 @@ function normalizePhysicalSessions(
         store_id: candidate.store_id,
         store_name: candidate.store_name,
         location_id: candidate.location_id,
+        entry_mode: candidate.entry_mode ?? "self_directed",
         created_at: candidate.created_at,
         updated_at: candidate.updated_at,
         expires_at: candidate.expires_at,

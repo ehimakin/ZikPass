@@ -238,26 +238,26 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
   }, [completionNotice]);
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(215,241,113,0.28),_transparent_42%),_#f4f7ee] px-4 py-5 text-ink sm:px-6 sm:py-7">
-      <div className="relative mx-auto flex min-h-[calc(100vh-2.5rem)] max-w-5xl flex-col overflow-hidden rounded-[40px] border border-white/80 bg-white/76 px-5 py-7 shadow-panel backdrop-blur-sm sm:min-h-[calc(100vh-3.5rem)] sm:px-8">
+    <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,_#1a2740_0%,_#0e1726_44%,_#070b12_78%,_#04060a_100%)] px-4 py-5 text-mist sm:px-6 sm:py-7">
+      <div className="relative mx-auto flex min-h-[calc(100vh-2.5rem)] max-w-5xl flex-col overflow-hidden rounded-[40px] border border-white/10 bg-white/[0.03] px-5 py-7 sm:min-h-[calc(100vh-3.5rem)] sm:px-8">
         <div
           className={`absolute inset-x-0 top-0 h-1.5 ${accentClass}`}
         />
         <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center gap-9 text-center">
           <div className="zik-stage-copy">
-          <p className="font-mono text-xs font-semibold uppercase tracking-[0.22em] text-ink/45">
+          <p className="font-mono text-xs font-semibold uppercase tracking-[0.22em] text-lime/70">
             Retail verification
           </p>
-          <h1 className="mt-4 font-heading text-6xl font-semibold leading-[0.9] text-ink sm:text-8xl">
+          <h1 className="mt-4 font-heading text-6xl font-semibold leading-[0.9] text-mist sm:text-8xl">
             {title}
           </h1>
-          <p className="mx-auto mt-5 max-w-xl text-lg font-semibold text-ink/68">{body}</p>
+          <p className="mx-auto mt-5 max-w-xl text-lg font-semibold text-mist/55">{body}</p>
           </div>
 
           <div className="zik-stage-pop grid w-full max-w-xl gap-5">
           {completionNotice ? (
             <p
-              className="rounded-[24px] border border-[#69b889]/35 bg-[#eef8e8] px-5 py-4 text-base font-semibold text-ink"
+              className="rounded-[24px] border border-lime/25 bg-lime/[0.06] px-5 py-4 text-base font-semibold text-mist"
               role="status"
             >
               {completionNotice}
@@ -265,7 +265,7 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
           ) : null}
           <input
             aria-label="Customer verification code"
-            className="h-20 w-full rounded-[8px] border border-white/18 bg-white px-5 text-center font-heading text-5xl font-semibold uppercase tracking-[0.2em] text-ink outline-none"
+            className="h-20 w-full rounded-[8px] border border-white/15 bg-white/5 px-5 text-center font-heading text-5xl font-semibold uppercase tracking-[0.2em] text-mist outline-none placeholder:text-mist/25"
             disabled={state === "confirmed" || state === "rejected"}
             maxLength={256}
             placeholder="ABC123"
@@ -289,7 +289,7 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
 
           {state === "scan" || state === "error" ? (
             <button
-              className="rounded-full bg-ink px-7 py-4 text-base font-semibold text-mist disabled:opacity-50"
+              className="rounded-full bg-lime px-7 py-4 text-base font-semibold text-ink transition hover:bg-lime/90 disabled:opacity-50"
               disabled={!canLookup}
               onClick={() => lookupSession()}
               type="button"
@@ -300,11 +300,11 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
 
           {session && state === "ready" ? (
             <div className="grid gap-4">
-              <div className="rounded-[24px] border border-ink/8 bg-[#f7faee] px-5 py-4 text-left">
-                <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink/45">
+              <div className="rounded-[24px] border border-white/8 bg-white/[0.04] px-5 py-4 text-left">
+                <p className="font-mono text-xs uppercase tracking-[0.2em] text-mist/45">
                   {session.store_name}
                 </p>
-                <p className="mt-2 text-sm font-semibold text-ink/76">
+                <p className="mt-2 text-sm font-semibold text-mist/75">
                   Your attestation: I physically checked this person&apos;s ID and confirmed they are at least 18.
                 </p>
               </div>
@@ -313,7 +313,7 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
               ) : null}
               <div className="grid gap-3 sm:grid-cols-2">
                 <button
-                  className="rounded-full bg-ink px-7 py-4 text-base font-semibold text-mist disabled:opacity-50"
+                  className="rounded-full bg-lime px-7 py-4 text-base font-semibold text-ink transition hover:bg-lime/90 disabled:opacity-50"
                   disabled={isPending}
                   onClick={() => submitIdCheck("confirm")}
                   type="button"
@@ -321,7 +321,7 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
                   Confirm 18+
                 </button>
                 <button
-                  className="rounded-full border border-ink/15 px-7 py-4 text-base font-semibold text-ink disabled:opacity-50"
+                  className="rounded-full border border-[#f8c8b4]/30 bg-[#f8c8b4]/10 px-7 py-4 text-base font-semibold text-[#f8c8b4] disabled:opacity-50"
                   disabled={isPending}
                   onClick={() => submitIdCheck("reject")}
                   type="button"
@@ -334,7 +334,7 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
 
           {enrollment && state === "confirmed" ? (
             <div className="grid gap-4">
-              <div className="rounded-[24px] border border-ink/8 bg-[#f7faee] px-5 py-4 text-sm font-semibold text-ink/76">
+              <div className="rounded-[24px] border border-white/8 bg-white/[0.04] px-5 py-4 text-sm font-semibold text-mist/75">
                 {enrollment.last_user_message ?? "Customer verified. Their device can now receive ZikPass."}
               </div>
               {session?.enrollment_id ? (
@@ -344,14 +344,14 @@ export function RetailVerificationScreen({ initialCode = "" }: { initialCode?: s
           ) : null}
 
           {error ? (
-            <p className="rounded-[8px] bg-white px-5 py-4 text-sm font-semibold text-[#B32646]">
+            <p className="rounded-2xl border border-[#f8c8b4]/25 bg-[#f8c8b4]/[0.06] px-5 py-4 text-sm font-semibold text-[#f8c8b4]">
               {error}
             </p>
           ) : null}
           </div>
         </div>
 
-        <div className="mx-auto h-1.5 w-full max-w-3xl overflow-hidden rounded-full bg-ink/10">
+        <div className="mx-auto h-1.5 w-full max-w-3xl overflow-hidden rounded-full bg-white/8">
           <div
             className={`h-full rounded-full transition-[width,background-color] duration-700 ${accentClass}`}
             style={{ width: state === "confirmed" || state === "rejected" ? "100%" : state === "ready" ? "62%" : "24%" }}

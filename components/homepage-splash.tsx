@@ -27,11 +27,11 @@ export function HomepageSplash({ enabled }: { enabled: boolean }) {
   return (
     <div
       aria-label="ZikPass"
-      className="fixed inset-0 z-[100] grid place-items-center bg-[radial-gradient(circle_at_top_left,_rgba(215,241,113,0.64),_transparent_42%),linear-gradient(180deg,_#fbfff1_0%,_#f4f7ee_48%,_#eef2e6_100%)]"
+      className="fixed inset-0 z-[100] grid place-items-center bg-[radial-gradient(ellipse_at_top,_#1a2740_0%,_#0e1726_44%,_#070b12_78%,_#04060a_100%)]"
       role="status"
     >
       <div className="animate-hero-fade px-6">
-        <ZikLogoLockup stacked subdued />
+        <ZikLogoLockup stacked tone="light" />
       </div>
     </div>
   );

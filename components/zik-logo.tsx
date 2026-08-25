@@ -1,16 +1,18 @@
 import clsx from "clsx";
 
 export function ZikLogoMark({
-  className
+  className,
+  tone = "dark"
 }: {
   className?: string;
+  tone?: "dark" | "light";
 }) {
   return (
     <svg
       viewBox="0 0 100 100"
       fill="none"
       aria-hidden="true"
-      className={clsx("text-ink", className)}
+      className={clsx(tone === "light" ? "text-mist" : "text-ink", className)}
     >
       <rect
         x="18"
@@ -49,12 +51,25 @@ export function ZikLogoMark({
 export function ZikLogoLockup({
   className,
   subdued = false,
-  stacked = false
+  stacked = false,
+  tone = "dark"
 }: {
   className?: string;
   subdued?: boolean;
   stacked?: boolean;
+  tone?: "dark" | "light";
 }) {
+  if (tone === "light") {
+    return (
+      <div className={clsx(stacked ? "flex flex-col items-center gap-4 text-center" : "flex items-center gap-2.5", className)}>
+        <ZikLogoMark tone="light" className={stacked ? "h-[15vw] max-h-16 w-[15vw] max-w-16" : "h-6 w-6"} />
+        <p className={clsx("font-heading font-semibold tracking-tight text-mist", stacked ? "text-2xl" : "text-base")}>
+          Zik Pass
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div
       className={clsx(

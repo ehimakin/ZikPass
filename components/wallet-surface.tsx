@@ -2,6 +2,7 @@
 
 import type { Route } from "next";
 import Link from "next/link";
+import clsx from "clsx";
 import { useSearchParams } from "next/navigation";
 import QRCode from "qrcode";
 import type { InputHTMLAttributes, ReactNode } from "react";
@@ -295,6 +296,7 @@ export function WalletSurface({
   const physicalEnrollmentStartRef = useRef<string | null>(null);
 
   const credential = wallet.credential;
+  const isDarkChrome = homepageMode || onboardingMode;
   const currentLane =
     enrollment?.lane ??
     wallet.enrollmentLane ??
@@ -522,7 +524,12 @@ export function WalletSurface({
           storeName:
             selectedStore?.name ?? (entryContext.lane === "physical" ? entryContext.store_name : undefined),
           locationId:
-            selectedStore ? "front-desk" : entryContext.lane === "physical" ? entryContext.location_id : undefined
+            selectedStore ? "front-desk" : entryContext.lane === "physical" ? entryContext.location_id : undefined,
+          entryMode: selectedStore
+            ? "self_directed"
+            : entryContext.lane === "physical"
+              ? entryContext.entry_mode
+              : "self_directed"
         })
       });
       const data = (await response.json()) as PhysicalStoreSessionRecord | ApiError;
@@ -1205,6 +1212,45 @@ export function WalletSurface({
     <div
       className={`${homepageMode ? "mt-[100px] " : ""}grid gap-6 pb-52 sm:pb-44 lg:pb-32`}
     >
+      {homepageMode && !onboardingMode ? (
+        <HomepageHero
+          credential={credential}
+          error={error}
+          isPending={isPending}
+          isPhysicalLane={isPhysicalLane}
+          issuedZignatureSeed={issuedZignatureSeed}
+          onboardingHref={onboardingHref}
+          onLearnMore={() => setIsLearnMoreOpen(true)}
+          onOpenFlow={openFlow}
+          pendingZignatureSeed={pendingZignatureSeed}
+          walletStatus={walletStatus}
+        />
+      ) : onboardingMode ? (
+        <OnboardingHero
+          answers={answers}
+          canStartFromHero={canStartFromHero}
+          credential={credential}
+          error={error}
+          heroDateOfBirthInvalid={heroDateOfBirthInvalid}
+          heroFirstNameInvalid={heroFirstNameInvalid}
+          heroLastNameInvalid={heroLastNameInvalid}
+          isPending={isPending}
+          isPhysicalLane={isPhysicalLane}
+          issuedZignatureSeed={issuedZignatureSeed}
+          onAnswerChange={(next) => {
+            setAnswers((current) => ({ ...current, ...next }));
+            setError(null);
+          }}
+          onBegin={startFromHero}
+          onSelectStore={setSelectedAffiliateStoreId}
+          onViewApplication={openFlow}
+          pendingZignatureSeed={pendingZignatureSeed}
+          physicalEntryExplicit={physicalEntryExplicit}
+          selectedAffiliateStoreId={selectedAffiliateStoreId}
+          walletStatus={walletStatus}
+        />
+      ) : (
+        <>
       <section className="relative overflow-hidden rounded-[40px] border border-white/80 bg-white/72 px-6 py-8 shadow-panel backdrop-blur-sm sm:px-10 sm:py-10">
         <div
           className={`relative grid gap-8 md:items-start ${
@@ -1635,20 +1681,35 @@ export function WalletSurface({
           </SurfaceCard>
         </div>
       ) : null}
+        </>
+      )}
 
       {showDevTools ? (
-        <details className="rounded-[24px] bg-white/70 p-4 text-sm text-ink/72 shadow-panel">
-          <summary className="cursor-pointer font-medium text-ink">Demo tools</summary>
+        <details
+          className={clsx(
+            "rounded-[24px] p-4 text-sm",
+            isDarkChrome ? "bg-white/[0.03] text-mist/70" : "bg-white/70 text-ink/72 shadow-panel"
+          )}
+        >
+          <summary className={clsx("cursor-pointer font-medium", isDarkChrome ? "text-mist" : "text-ink")}>
+            Demo tools
+          </summary>
           <div className="mt-4 flex flex-wrap gap-3">
             <button
-              className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-mist"
+              className={clsx(
+                "rounded-full px-4 py-2 text-sm font-medium",
+                isDarkChrome ? "bg-white/10 text-mist" : "bg-ink text-mist"
+              )}
               onClick={resetFlow}
             >
               Reset local wallet
             </button>
             {enrollment && !credential ? (
               <button
-                className="rounded-full bg-ink/10 px-4 py-2 text-sm font-medium text-ink"
+                className={clsx(
+                  "rounded-full px-4 py-2 text-sm font-medium",
+                  isDarkChrome ? "bg-white/5 text-mist/80" : "bg-ink/10 text-ink"
+                )}
                 disabled={isPending}
                 onClick={advanceCoolingOff}
               >
@@ -1661,23 +1722,38 @@ export function WalletSurface({
 
       <div
         className={`pointer-events-none fixed inset-x-0 bottom-0 z-40 flex items-end px-3 pb-10 transition-[height] duration-200 sm:px-6 lg:px-8 ${isStatusDockOpen ? "h-44" : "h-24"}`}
-        style={{
-          backgroundImage:
-            "linear-gradient(180deg, rgba(255,255,255,0.31) 0%, rgba(255,255,255,1) 50%, rgba(162,206,106,1) 100%)",
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "100% 100%"
-        }}
+        style={
+          isDarkChrome
+            ? undefined
+            : {
+                backgroundImage:
+                  "linear-gradient(180deg, rgba(255,255,255,0.31) 0%, rgba(255,255,255,1) 50%, rgba(162,206,106,1) 100%)",
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "100% 100%"
+              }
+        }
       >
         <section
           aria-live="polite"
-          className="pointer-events-auto mx-auto w-[85%] max-w-[1088px] rounded-[22px] bg-white/80 p-1.5 opacity-25 shadow-[0_-12px_36px_rgba(14,23,38,0.08)] transition-[opacity,background-image,background-color] duration-200 hover:bg-[linear-gradient(180deg,_rgba(255,255,255,0.94),_rgba(244,247,238,0.94))] hover:opacity-100 sm:p-2"
+          className={clsx(
+            "pointer-events-auto mx-auto w-[85%] max-w-[1088px] rounded-[22px] p-1.5 opacity-30 transition-[opacity,background-color] duration-200 sm:p-2",
+            isDarkChrome
+              ? "border border-white/10 bg-[#0a0f18]/90 backdrop-blur-md hover:opacity-100"
+              : "bg-white/80 shadow-[0_-12px_36px_rgba(14,23,38,0.08)] hover:bg-[linear-gradient(180deg,_rgba(255,255,255,0.94),_rgba(244,247,238,0.94))] hover:opacity-100"
+          )}
         >
           <div className="flex flex-wrap items-center gap-2 px-1 py-0.5">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-ink/45">
+              <p
+                className={clsx(
+                  "font-mono text-[11px] uppercase tracking-[0.24em]",
+                  isDarkChrome ? "text-mist/45" : "text-ink/45"
+                )}
+              >
                 Your status
               </p>
               <StatusPill
+                surface={isDarkChrome ? "dark" : "light"}
                 tone={
                   walletStatus.status === "pass_issued_and_stored_locally"
                     ? walletStatus.credential_active
@@ -1702,7 +1778,10 @@ export function WalletSurface({
               </StatusPill>
               {canDeleteLocalPass || deleteButtonState === "deleted" ? (
                 <button
-                  className="rounded-full bg-ink px-2.5 py-1 text-[11px] font-medium text-mist disabled:opacity-55"
+                  className={clsx(
+                    "rounded-full px-2.5 py-1 text-[11px] font-medium disabled:opacity-55",
+                    isDarkChrome ? "bg-white/10 text-mist" : "bg-ink text-mist"
+                  )}
                   disabled={deleteButtonState === "deleted"}
                   onClick={resetFlow}
                 >
@@ -1715,7 +1794,12 @@ export function WalletSurface({
             <button
               aria-expanded={isStatusDockOpen}
               aria-label={isStatusDockOpen ? "Collapse wallet status details" : "Expand wallet status details"}
-              className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded-full border border-ink/10 bg-white text-sm font-semibold text-ink hover:bg-[#edf3df]"
+              className={clsx(
+                "ml-auto inline-flex h-7 w-7 items-center justify-center rounded-full text-sm font-semibold",
+                isDarkChrome
+                  ? "border border-white/10 bg-white/5 text-mist hover:bg-white/10"
+                  : "border border-ink/10 bg-white text-ink hover:bg-[#edf3df]"
+              )}
               onClick={() => setIsStatusDockOpen((current) => !current)}
               title={isStatusDockOpen ? "Collapse status details" : "Expand status details"}
               type="button"
@@ -1727,7 +1811,7 @@ export function WalletSurface({
             <div className="mt-1 grid gap-1.5 sm:grid-cols-3 lg:min-w-[420px]">
               {statusMeta.map((item) => (
                 <div className={item.label === "Flow" ? "hidden sm:block" : ""} key={item.label}>
-                  <MetaTile label={item.label} value={item.value} />
+                  <MetaTile dark={isDarkChrome} label={item.label} value={item.value} />
                 </div>
               ))}
             </div>
@@ -2342,26 +2426,41 @@ export function WalletSurface({
 
       {isLearnMoreOpen ? (
         <div
-          className="fixed inset-0 z-50 bg-[radial-gradient(circle_at_top,_rgba(215,241,113,0.16),rgba(14,23,38,0.62)_56%)] backdrop-blur-sm"
+          className={clsx(
+            "fixed inset-0 z-50 backdrop-blur-md",
+            isDarkChrome
+              ? "bg-[#04060a]/85"
+              : "bg-[radial-gradient(circle_at_top,_rgba(215,241,113,0.16),rgba(14,23,38,0.62)_56%)] backdrop-blur-sm"
+          )}
           onClick={() => setIsLearnMoreOpen(false)}
         >
           <div className="flex min-h-screen items-center justify-center p-4 sm:p-6">
             <div
-              className="w-full max-w-4xl rounded-[36px] border border-white/70 bg-[linear-gradient(135deg,_rgba(255,255,255,0.98),_rgba(245,249,231,0.98))] p-6 shadow-[0_36px_120px_rgba(14,23,38,0.24)] sm:p-8"
+              className={clsx(
+                "w-full max-w-4xl rounded-[36px] p-6 sm:p-8",
+                isDarkChrome
+                  ? "border border-white/10 bg-[#0a0f18]"
+                  : "border border-white/70 bg-[linear-gradient(135deg,_rgba(255,255,255,0.98),_rgba(245,249,231,0.98))] shadow-[0_36px_120px_rgba(14,23,38,0.24)]"
+              )}
               onClick={(event) => event.stopPropagation()}
             >
               <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink/46">
-                    Learn more
-                  </p>
-                  <h3 className="mt-3 font-heading text-4xl font-semibold tracking-tight text-ink">
-                    What Zik App and Zik Pass actually do
-                  </h3>
-                </div>
+                <h3
+                  className={clsx(
+                    "font-heading text-3xl font-semibold tracking-tight sm:text-4xl",
+                    isDarkChrome ? "text-mist" : "text-ink"
+                  )}
+                >
+                  How ZikPass works
+                </h3>
                 <button
                   aria-label="Close learn more"
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-ink/10 bg-white text-xl text-ink hover:bg-[#f4f7ee]"
+                  className={clsx(
+                    "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-xl",
+                    isDarkChrome
+                      ? "border border-white/10 text-mist hover:bg-white/5"
+                      : "border border-ink/10 bg-white text-ink hover:bg-[#f4f7ee]"
+                  )}
                   onClick={() => setIsLearnMoreOpen(false)}
                 >
                   ×
@@ -2370,40 +2469,44 @@ export function WalletSurface({
 
               <div className="mt-8 grid gap-4 md:grid-cols-2">
                 <InfoBlock
-                  title="What is Zik App?"
+                  dark={isDarkChrome}
+                  title="Zik App"
                   body={
                     isPhysicalLane
-                      ? "Zik App starts a fresh in-store session, creates the holder key on this device, and receives the staff-confirmed 18+ result after the physical ID check."
-                      : "Zik App is the onboarding experience that helps a new user get set up. It collects a few matching details, guides the refundable bank step, and stores the pass on this device."
+                      ? "Starts your in-store session, creates a key on this device, and receives the staff-confirmed 18+ result."
+                      : "Guides onboarding: a few matching details, a refundable bank step, then the pass is stored on this device."
                   }
                 />
                 <InfoBlock
-                  title="What is Zik Pass?"
+                  dark={isDarkChrome}
+                  title="Zik Pass"
                   body={
                     isPhysicalLane
-                      ? "ZikPass is the signed Over-18 credential issued to this device after an authorised in-person age check."
-                      : "Zik Pass is the secure Over-18 credential created at the end of that process. Sites can verify it locally without learning your identity."
+                      ? "The signed over-18 credential issued after an authorised in-person check."
+                      : "The signed over-18 credential. Sites verify it locally without learning your identity."
                   }
                 />
                 <InfoBlock
-                  title={isPhysicalLane ? "Why staff check ID" : "Why the bank step exists"}
+                  dark={isDarkChrome}
+                  title={isPhysicalLane ? "Why staff check ID" : "The bank step"}
                   body={
                     isPhysicalLane
-                      ? "The physical ID is evidence for the human verifier. Zik only needs the authorised result that the customer was confirmed 18+."
-                      : "The refundable GBP 0.01 reference helps confirm control of a real adult-linked financial account. It is temporary and used only as a verification signal."
+                      ? "Physical ID is evidence for a human verifier. Zik only receives the confirmed result."
+                      : "A refundable £0.01 reference confirms a real adult-linked account. Used only as a signal."
                   }
                 />
                 <InfoBlock
-                  title={isPhysicalLane ? "What Zik does not store" : "Why there is a short wait"}
+                  dark={isDarkChrome}
+                  title={isPhysicalLane ? "What's never stored" : "The short wait"}
                   body={
                     isPhysicalLane
-                      ? "Zik does not store a copy of the physical ID, an ID image, name, date of birth, address, or ID number for this physical flow."
-                      : "The activation window gives you time to spot anything unexpected before the pass can be used. It is a safety feature, not a delay for delay’s sake."
+                      ? "No copy of your ID, name, date of birth, address, or ID number is stored."
+                      : "A brief activation window to catch anything unexpected before the pass can be used."
                   }
                 />
               </div>
 
-              <div className="mt-6 rounded-[28px] bg-[#0f1721] p-6 text-mist">
+              <div className={clsx("mt-6 rounded-[28px] p-6", isDarkChrome ? "bg-white/[0.04]" : "bg-[#0f1721] text-mist")}>
                 <div className="grid gap-4 md:grid-cols-3">
                   {isPhysicalLane ? (
                     <>
@@ -2428,6 +2531,280 @@ export function WalletSurface({
   );
 }
 
+function HomepageHero({
+  credential,
+  walletStatus,
+  isPhysicalLane,
+  isPending,
+  error,
+  pendingZignatureSeed,
+  issuedZignatureSeed,
+  onboardingHref,
+  onOpenFlow,
+  onLearnMore
+}: {
+  credential: WalletState["credential"];
+  walletStatus: ReturnType<typeof getWalletStatusSnapshot>;
+  isPhysicalLane: boolean;
+  isPending: boolean;
+  error: string | null;
+  pendingZignatureSeed: string | null;
+  issuedZignatureSeed: string | null;
+  onboardingHref: Route;
+  onOpenFlow: () => void;
+  onLearnMore: () => void;
+}) {
+  const isPendingIssuance = !credential && walletStatus.status === "pass_pending_issuance";
+  const cardCredentialId = credential?.payload.credential_id;
+  const cardActive = credential ? walletStatus.credential_active : false;
+  const cardSeed = credential
+    ? (issuedZignatureSeed ?? "preview")
+    : (pendingZignatureSeed ?? "landing-preview");
+
+  return (
+    <section className="relative py-6 sm:py-10">
+      <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-16">
+        <div className="space-y-7">
+          <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-lime/80">
+            Private &middot; Over 18
+          </p>
+          <h1 className="max-w-xl font-heading text-[2.75rem] font-semibold leading-[0.94] tracking-tight text-mist sm:text-6xl lg:text-[4.5rem]">
+            {isPhysicalLane ? (
+              <>Verified in person.<br />Anonymous online.</>
+            ) : (
+              <>Prove you&rsquo;re over 18.<br />Not who you are.</>
+            )}
+          </h1>
+          <p className="max-w-md text-base leading-7 text-mist/50">
+            {isPhysicalLane
+              ? "Show ID once at a store till. Reuse the signed pass everywhere else."
+              : "A signed pass for this device. No photo ID, no face scan, no account."}
+          </p>
+
+          {error ? (
+            <p className="max-w-md rounded-2xl border border-[#f8c8b4]/25 bg-[#f8c8b4]/[0.06] px-4 py-3 text-sm text-[#f8c8b4]" role="alert">
+              {error}
+            </p>
+          ) : null}
+
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            {credential ? (
+              <Link
+                className="rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-lime/90"
+                href="/wallet"
+              >
+                View pass
+              </Link>
+            ) : isPhysicalLane && !isPendingIssuance ? (
+              <Link
+                className="rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-lime/90"
+                href={onboardingHref}
+              >
+                Get ZikPass
+              </Link>
+            ) : (
+              <button
+                className="rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-lime/90 disabled:opacity-50"
+                disabled={isPending}
+                onClick={onOpenFlow}
+                type="button"
+              >
+                {isPendingIssuance ? "View application" : "Get ZikPass"}
+              </button>
+            )}
+            <button
+              className="rounded-full border border-white/15 px-6 py-3.5 text-sm font-medium text-mist/70 transition hover:border-white/30 hover:text-mist"
+              onClick={onLearnMore}
+              type="button"
+            >
+              How it works
+            </button>
+          </div>
+
+          {isPhysicalLane && !credential && !isPendingIssuance ? (
+            <Link className="block text-sm text-mist/45 underline decoration-mist/25 underline-offset-4 transition hover:text-mist/70" href="/?flow=remote">
+              Prefer not to visit a store? Verify remotely instead
+            </Link>
+          ) : null}
+        </div>
+
+        <div className="relative mx-auto w-full max-w-sm">
+          {!credential ? (
+            <span className="absolute -top-3 left-6 z-10 rounded-full bg-[#0a0f18] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-mist/45 ring-1 ring-white/10">
+              {isPendingIssuance ? "Signing in progress" : "Preview"}
+            </span>
+          ) : null}
+          <PassPreviewCard active={cardActive} credentialId={cardCredentialId} zignatureSeedInput={cardSeed} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function OnboardingHero({
+  credential,
+  walletStatus,
+  isPhysicalLane,
+  physicalEntryExplicit,
+  selectedAffiliateStoreId,
+  onSelectStore,
+  answers,
+  onAnswerChange,
+  heroFirstNameInvalid,
+  heroLastNameInvalid,
+  heroDateOfBirthInvalid,
+  canStartFromHero,
+  error,
+  isPending,
+  pendingZignatureSeed,
+  issuedZignatureSeed,
+  onBegin,
+  onViewApplication
+}: {
+  credential: WalletState["credential"];
+  walletStatus: ReturnType<typeof getWalletStatusSnapshot>;
+  isPhysicalLane: boolean;
+  physicalEntryExplicit: boolean;
+  selectedAffiliateStoreId: string | null;
+  onSelectStore: (storeId: string) => void;
+  answers: Answers;
+  onAnswerChange: (next: Partial<Answers>) => void;
+  heroFirstNameInvalid: boolean;
+  heroLastNameInvalid: boolean;
+  heroDateOfBirthInvalid: boolean;
+  canStartFromHero: boolean;
+  error: string | null;
+  isPending: boolean;
+  pendingZignatureSeed: string | null;
+  issuedZignatureSeed: string | null;
+  onBegin: () => void;
+  onViewApplication: () => void;
+}) {
+  const isPendingIssuance = !credential && walletStatus.status === "pass_pending_issuance";
+  const cardSeed = credential
+    ? (issuedZignatureSeed ?? "preview")
+    : (pendingZignatureSeed ?? "onboarding-preview");
+  const canBegin = isPhysicalLane
+    ? physicalEntryExplicit || Boolean(selectedAffiliateStoreId)
+    : canStartFromHero;
+
+  return (
+    <section className="relative pb-6 pt-[30px] sm:pb-10">
+      <div className="mx-auto max-w-xl text-center">
+        <div className="animate-float-slow mx-auto mb-[88px] flex h-[100px] w-[100px] items-center justify-center">
+          <ZikLogoMark className="h-full w-full" tone="light" />
+        </div>
+        <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-lime/80">Prove over 18 &middot; Privately</p>
+        <h1 className="mt-4 font-heading text-5xl font-semibold leading-[0.94] tracking-tight text-mist sm:text-6xl">
+          Verify in person.
+        </h1>
+      </div>
+
+      <div className="mx-auto mt-10 max-w-xl">
+        {credential ? (
+          <div className="space-y-6 text-center">
+            <p className="text-base text-mist/50">Your pass is ready.</p>
+            <div className="mx-auto max-w-sm">
+              <PassPreviewCard
+                active={walletStatus.credential_active}
+                credentialId={credential.payload.credential_id}
+                zignatureSeedInput={cardSeed}
+              />
+            </div>
+            <Link
+              className="inline-flex rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-lime/90"
+              href="/wallet"
+            >
+              View pass
+            </Link>
+          </div>
+        ) : isPendingIssuance ? (
+          <div className="space-y-6 text-center">
+            <p className="text-base text-mist/50">Zik is finishing your pass.</p>
+            <div className="relative mx-auto max-w-sm">
+              <span className="absolute -top-3 left-6 z-10 rounded-full bg-[#0a0f18] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-mist/45 ring-1 ring-white/10">
+                Signing in progress
+              </span>
+              <PassPreviewCard active={false} zignatureSeedInput={cardSeed} />
+            </div>
+            <button
+              className="rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-lime/90"
+              onClick={onViewApplication}
+              type="button"
+            >
+              View application
+            </button>
+          </div>
+        ) : isPhysicalLane ? (
+          <div className="space-y-6">
+            {physicalEntryExplicit ? (
+              <p className="text-center text-base text-mist/50">Your store session is ready.</p>
+            ) : (
+              <>
+                <p className="text-center text-base text-mist/50">Choose a nearby store to start.</p>
+                <AffiliateStoreSelector selectedStoreId={selectedAffiliateStoreId} onSelect={onSelectStore} />
+              </>
+            )}
+            {error ? (
+              <p className="rounded-2xl border border-[#f8c8b4]/25 bg-[#f8c8b4]/[0.06] px-4 py-3 text-sm text-[#f8c8b4]" role="alert">
+                {error}
+              </p>
+            ) : null}
+            <div className="flex justify-center">
+              <button
+                className="min-h-[72px] min-w-[160px] rounded-full bg-lime px-9 text-lg font-semibold text-ink transition hover:bg-lime/90 disabled:cursor-default disabled:opacity-40"
+                disabled={isPending || !canBegin}
+                onClick={onBegin}
+                type="button"
+              >
+                Begin
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-5">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FieldInput
+                invalid={heroFirstNameInvalid}
+                placeholder="First name"
+                value={answers.firstName}
+                onChange={(value) => onAnswerChange({ firstName: value })}
+              />
+              <FieldInput
+                invalid={heroLastNameInvalid}
+                placeholder="Last name"
+                value={answers.lastName}
+                onChange={(value) => onAnswerChange({ lastName: value })}
+              />
+            </div>
+            <FieldInput
+              invalid={heroDateOfBirthInvalid}
+              type="date"
+              value={answers.dateOfBirth}
+              onChange={(value) => onAnswerChange({ dateOfBirth: value })}
+            />
+            {error ? (
+              <p className="rounded-2xl border border-[#f8c8b4]/25 bg-[#f8c8b4]/[0.06] px-4 py-3 text-sm text-[#f8c8b4]" role="alert">
+                {error}
+              </p>
+            ) : null}
+            <div className="flex justify-center pt-2">
+              <button
+                className="min-h-[72px] min-w-[160px] rounded-full bg-lime px-9 text-lg font-semibold text-ink transition hover:bg-lime/90 disabled:cursor-default disabled:opacity-40"
+                disabled={isPending || !canBegin}
+                onClick={onBegin}
+                type="button"
+              >
+                Begin
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function AffiliateStoreSelector({
   selectedStoreId,
   onSelect
@@ -2436,15 +2813,15 @@ function AffiliateStoreSelector({
   onSelect: (storeId: string) => void;
 }) {
   return (
-    <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+    <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
       <div
-        className="relative min-h-[220px] overflow-hidden rounded-[24px] border border-ink/8 bg-[#dfe8d3]"
+        className="relative min-h-[220px] overflow-hidden rounded-[24px] bg-[#0e1a14]"
         style={{
           backgroundImage:
-            "linear-gradient(28deg, transparent 46%, rgba(255,255,255,0.74) 47%, rgba(255,255,255,0.74) 50%, transparent 51%), linear-gradient(112deg, transparent 44%, rgba(255,255,255,0.58) 45%, rgba(255,255,255,0.58) 48%, transparent 49%), linear-gradient(180deg, rgba(215,241,113,0.35), transparent 62%)"
+            "linear-gradient(28deg, transparent 46%, rgba(255,255,255,0.2) 47%, rgba(255,255,255,0.2) 50%, transparent 51%), linear-gradient(112deg, transparent 44%, rgba(255,255,255,0.16) 45%, rgba(255,255,255,0.16) 48%, transparent 49%), radial-gradient(circle at 30% 30%, rgba(215,241,113,0.14), transparent 55%)"
         }}
       >
-        <p className="absolute left-4 top-4 rounded-full bg-white/75 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-ink/55">
+        <p className="absolute left-4 top-4 rounded-full border border-white/10 bg-black/40 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-mist/55">
           Affiliate locations
         </p>
         {affiliateStores.map((store) => {
@@ -2455,14 +2832,14 @@ function AffiliateStoreSelector({
               key={store.id}
               aria-label={`Select ${store.name}`}
               aria-pressed={isSelected}
-              className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-4 p-1 shadow-[0_8px_18px_rgba(14,23,38,0.16)] transition-transform hover:scale-110 ${
-                isSelected ? "border-ink bg-lime" : "border-white bg-ink"
+              className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-4 p-1 transition-transform hover:scale-110 ${
+                isSelected ? "border-lime bg-lime" : "border-white/70 bg-[#0a0f18]"
               }`}
               onClick={() => onSelect(store.id)}
               style={store.mapPosition}
               type="button"
             >
-              <span className="block h-4 w-4 rounded-full bg-current" />
+              <span className={clsx("block h-4 w-4 rounded-full", isSelected ? "bg-ink" : "bg-mist")} />
             </button>
           );
         })}
@@ -2478,14 +2855,14 @@ function AffiliateStoreSelector({
               aria-pressed={isSelected}
               className={`rounded-[18px] border p-3 text-left transition ${
                 isSelected
-                  ? "border-ink bg-ink text-mist"
-                  : "border-ink/8 bg-white/75 text-ink hover:bg-white"
+                  ? "border-lime/40 bg-lime/10 text-mist"
+                  : "border-white/8 bg-white/[0.03] text-mist/80 hover:bg-white/[0.06]"
               }`}
               onClick={() => onSelect(store.id)}
               type="button"
             >
               <span className="block text-sm font-semibold">{store.name}</span>
-              <span className={isSelected ? "mt-1 block text-xs text-mist/70" : "mt-1 block text-xs text-ink/55"}>
+              <span className="mt-1 block text-xs text-mist/50">
                 {store.area} · {store.address}
               </span>
             </button>
@@ -2809,6 +3186,8 @@ function PhysicalOnboardingExperience({
   }
 
   if (processState === "awaiting_retail_verification" && verification && sessionCode) {
+    const alreadyPaid = verification.session.entry_mode === "retail_card";
+
     return (
       <PhysicalStageFrame
         accent="bg-[#69b889]"
@@ -2830,7 +3209,11 @@ function PhysicalOnboardingExperience({
           <p className="max-w-sm text-center text-sm font-semibold text-ink/64">
             Waiting for the clerk to confirm 18+
           </p>
-          {enrollment?.id ? (
+          {alreadyPaid ? (
+            <p className="w-full rounded-[20px] border border-ink/8 bg-white/76 px-5 py-4 text-sm font-semibold text-ink" role="status">
+              Paid at the till
+            </p>
+          ) : enrollment?.id ? (
             <PassPaymentChoice clerkLookupAt={verification.clerk_lookup_at} enrollmentId={enrollment.id} storeId={verification.session.store_id} />
           ) : null}
         </div>
@@ -3430,7 +3813,7 @@ export function PassPreviewCard({
   active,
   zignatureSeedInput
 }: {
-  credentialId: string;
+  credentialId?: string;
   active: boolean;
   zignatureSeedInput: string;
 }) {
@@ -3445,21 +3828,10 @@ export function PassPreviewCard({
           </div>
           <StatusPill tone={active ? "good" : "neutral"}>{active ? "Active" : "Activating"}</StatusPill>
         </div>
-        <div className="mt-7 min-w-0 rounded-[26px] border border-white/12 bg-white/8 px-3 py-4 sm:px-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[#edf9d1]/72">
-                Your Zignature
-              </p>
-              <p className="mt-1 text-sm text-mist/78">Unique to this pass</p>
-            </div>
-            <p className="break-words text-right font-mono text-[11px] uppercase tracking-[0.18em] text-[#edf9d1]/55">
-              Deterministic mark
-            </p>
-          </div>
+        <div className="mt-7 min-w-0 rounded-[26px] border border-white/12 bg-white/8 px-3 py-6 sm:px-4">
           <Zignature
             animate={active}
-            className="mt-3 h-20 w-full"
+            className="h-20 w-full"
             seedInput={zignatureSeedInput}
             stroke="#eef9c7"
             strokeWidth={3.2}
@@ -3468,11 +3840,11 @@ export function PassPreviewCard({
             height={96}
           />
         </div>
-        <div className="mt-5 grid min-w-0 gap-4 sm:grid-cols-3">
-          <BankMetaTile label="Pass ID" value={credentialId} />
-          <BankMetaTile label="Identity shared" value="No" />
-          <BankMetaTile label="Bound to device" value="Yes" />
-        </div>
+        {credentialId ? (
+          <p className="mt-4 truncate font-mono text-[11px] uppercase tracking-[0.18em] text-[#edf9d1]/55">
+            {credentialId}
+          </p>
+        ) : null}
       </div>
     </div>
   );
@@ -3838,11 +4210,19 @@ function WorkflowStage({
   );
 }
 
-function InfoBlock({ title, body }: { title: string; body: string }) {
+function InfoBlock({
+  title,
+  body,
+  dark = false
+}: {
+  title: string;
+  body: string;
+  dark?: boolean;
+}) {
   return (
-    <div className="rounded-[26px] border border-ink/8 bg-white/78 p-5">
-      <p className="font-heading text-2xl font-semibold tracking-tight text-ink">{title}</p>
-      <p className="mt-3 text-sm leading-7 text-ink/68">{body}</p>
+    <div className={clsx("rounded-[26px] p-5", dark ? "border border-white/8 bg-white/[0.03]" : "border border-ink/8 bg-white/78")}>
+      <p className={clsx("font-heading text-2xl font-semibold tracking-tight", dark ? "text-mist" : "text-ink")}>{title}</p>
+      <p className={clsx("mt-3 text-sm leading-7", dark ? "text-mist/55" : "text-ink/68")}>{body}</p>
     </div>
   );
 }
@@ -3858,11 +4238,21 @@ function InstructionRow({ number, body }: { number: string; body: string }) {
   );
 }
 
-function MetaTile({ label, value }: { label: string; value: string }) {
+function MetaTile({
+  label,
+  value,
+  dark = false
+}: {
+  label: string;
+  value: string;
+  dark?: boolean;
+}) {
   return (
-    <div className="min-w-0 rounded-[18px] bg-white px-2.5 py-1.5">
-      <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ink/45">{label}</p>
-      <p className="mt-0.5 break-words text-[11px] font-medium text-ink">{value}</p>
+    <div className={clsx("min-w-0 rounded-[18px] px-2.5 py-1.5", dark ? "bg-white/5" : "bg-white")}>
+      <p className={clsx("font-mono text-[9px] uppercase tracking-[0.16em]", dark ? "text-mist/40" : "text-ink/45")}>
+        {label}
+      </p>
+      <p className={clsx("mt-0.5 break-words text-[11px] font-medium", dark ? "text-mist" : "text-ink")}>{value}</p>
     </div>
   );
 }
