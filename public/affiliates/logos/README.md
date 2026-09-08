@@ -25,3 +25,12 @@ The original SVGs are transparent; the coloured cards exist only on the contact
 sheet. `desktop/` contains trimmed SVG viewBoxes for consistent visible sizing.
 After regenerating the source logos, run
 `node scripts/prepare-affiliate-desktop-logos.cjs` to refresh those derivatives.
+
+
+## Responsive affiliate pool (September 2026)
+
+The live pool is every SVG, PNG, WebP or AVIF file in `public/affiliates/logos/desktop/`. Add, replace or remove display-ready transparent assets there; `/api/affiliates/logos` discovers them on the next full page load. Contact sheets and standalone marks in the parent folder are excluded. For generated assets, run the existing preparation script to create the trimmed versions, and remove obsolete trimmed files when retiring an affiliate. On hosted deployments, ship the updated public assets with the application.
+
+The pool is shuffled once per document load and stays stable through client navigation and resizing. Desktop (1360px+) uses four columns per rail and caps selection to the rows fitting between the header clearance and the current offset above the bottom nav. A partial row goes at the top. Mobile/tablet uses half the pool, rounded up, as a scrolling footer, with 50px top margin and nav-safe bottom padding. The current 22 logos produce 11 mobile logos.
+
+The homepage splash is restored from the previous design: 700ms on a first visit, suppressed by the existing `zikpass-home-splash-seen` cookie and `ZIK_HOMEPAGE_SPLASH_SUPPRESS_SECONDS` setting (30 minutes production / 120 seconds development by default). It skips animation for reduced-motion preferences.

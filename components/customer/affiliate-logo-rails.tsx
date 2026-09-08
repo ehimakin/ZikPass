@@ -1,35 +1,61 @@
+"use client";
+
 import Image from "next/image";
-import brands from "@/public/affiliates/logos/manifest.json";
+import { useEffect, useRef, useState } from "react";
+import { affiliateRows, desktopAffiliateCapacity, shuffleAffiliates } from "@/lib/shared/affiliate-layout";
 
-const arrangedBrands = [14, 3, 13, 7, 11, 0, 1, 5, 16, 9, 4, 2, 19, 6, 15, 20, 21, 10, 12, 17, 8, 18].map(
-  (index) => brands[index],
-);
+// One shuffled pool per document load; client navigation and resize keep its order.
+let poolRequest: Promise<string[]> | undefined;
+function getPool() {
+  return poolRequest ??= fetch("/api/affiliates/logos", { cache: "no-store" })
+    .then(async (response) => {
+      if (!response.ok) throw new Error("Affiliate logos unavailable");
+      return shuffleAffiliates(await response.json() as string[]);
+    })
+    .catch(() => { poolRequest = undefined; return []; });
+}
 
-/** Decorative fictional affiliates: two fixed groups of 3 / 4 / 4. */
 export function AffiliateLogoRails() {
-  return (
-    <div className="zk-affiliate-rails" aria-hidden="true">
-      {[arrangedBrands.slice(0, 11), arrangedBrands.slice(11, 22)].map((group, side) => (
-        <div key={side} className={`zk-affiliate-rail zk-affiliate-rail--${side === 0 ? "left" : "right"}`}>
-          <div className="zk-affiliate-rows">
-            {[group.slice(0, 3), group.slice(3, 7), group.slice(7, 11)].map((row, index) => (
-              <div key={index} className="zk-affiliate-row">
-                {row.map((brand) => (
-                  <div key={brand.slug} className="zk-affiliate-logo">
-                    <Image
-                      src={`/affiliates/logos/desktop/${brand.slug}.svg`}
-                      alt=""
-                      fill
-                      sizes="100px"
-                      className="scale-[0.847875] object-contain"
-                    />
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
+  const [logos, setLogos] = useState<string[]>([]);
+  const [capacity, setCapacity] = useState(0);
+  const root = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void getPool().then((pool) => { if (!cancelled) setLogos(pool); });
+    const nav = root.current?.parentElement?.querySelector('nav[aria-label="Primary"]');
+    const update = () => setCapacity(desktopAffiliateCapacity(window.innerHeight, nav?.getBoundingClientRect().height ?? 64));
+    const observer = new ResizeObserver(update);
+    if (nav) observer.observe(nav);
+    window.addEventListener("resize", update);
+    update();
+    return () => { cancelled = true; observer.disconnect(); window.removeEventListener("resize", update); };
+  }, []);
+
+  const desktop = logos.slice(0, capacity);
+  const midpoint = Math.ceil(desktop.length / 2);
+  const renderRows = (group: string[]) => affiliateRows(group).map((row, index) => (
+    <div key={index} className="zk-affiliate-row">
+      {row.map((src) => (
+        <div key={src} className="zk-affiliate-logo">
+          <Image src={src} alt="" fill sizes="100px" className="scale-[0.847875] object-contain" />
         </div>
       ))}
+    </div>
+  ));
+
+  return (
+    <div ref={root} className="zk-affiliate-presentation" aria-hidden="true">
+      <div className="zk-affiliate-mobile">
+        {renderRows(logos.slice(0, Math.ceil(logos.length / 2)))}
+      </div>
+      <div className="zk-affiliate-rails">
+        {[desktop.slice(0, midpoint), desktop.slice(midpoint)].map((group, side) => (
+          <div key={side} className={`zk-affiliate-rail zk-affiliate-rail--${side === 0 ? "left" : "right"}`}>
+            <div className="zk-affiliate-rows">{renderRows(group)}</div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
