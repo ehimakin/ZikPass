@@ -48,7 +48,7 @@ export function HomeScreen({ price }: { price: string }) {
           online. Only sharing that you&rsquo;re over 18.
         </p>
         <p className="mt-5 text-[15px] leading-relaxed text-[var(--zk-text-soft)]">
-          That&apos;s minimal disclosure. That&apos;s Zik.
+          That&apos;s zero knowledge. That&apos;s Zik.
         </p>
 
         <div className="mt-10 space-y-2.5">

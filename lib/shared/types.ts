@@ -157,6 +157,14 @@ export interface PhysicalVerificationState {
 }
 
 export interface PhysicalStoreSessionRecord extends PhysicalStoreContext {
+  counter_sale?: {
+    token_hash: string;
+    amount_minor: number;
+    currency: string;
+    paid_at?: string;
+    paid_by?: string;
+    payment_method?: "cash" | "retail_till";
+  };
   created_at: string;
   updated_at: string;
   expires_at: string;

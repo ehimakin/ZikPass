@@ -32,13 +32,14 @@ type Phase =
   | "error";
 
 interface Props {
+  initialEnrollment?: EnrollmentRecord;
   price: PassPrice;
   storeId?: string;
   /** Force the retail-card (prepaid) entry mode, e.g. when reached from /card. */
   forcedEntry?: "retail_card";
 }
 
-export function OnboardingFlow({ price, storeId: storeIdProp, forcedEntry }: Props) {
+export function OnboardingFlow({ price, storeId: storeIdProp, forcedEntry, initialEnrollment }: Props) {
   const params = useSearchParams();
   const storeId =
     storeIdProp ||
@@ -51,8 +52,8 @@ export function OnboardingFlow({ price, storeId: storeIdProp, forcedEntry }: Pro
       ? "retail_card"
       : "self_directed";
 
-  const [phase, setPhase] = useState<Phase>("intro");
-  const [enrollment, setEnrollment] = useState<EnrollmentRecord | null>(null);
+  const [phase, setPhase] = useState<Phase>(initialEnrollment ? "at_store" : "intro");
+  const [enrollment, setEnrollment] = useState<EnrollmentRecord | null>(initialEnrollment ?? null);
   const [error, setError] = useState<string | null>(null);
   const [deviceAuthDone, setDeviceAuthDone] = useState(false);
   const [paidFlag, setPaidFlag] = useState(false);

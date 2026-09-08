@@ -35,7 +35,21 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={manrope.variable}>
       <body>
-        <PwaRegistration />
+        {process.env.NODE_ENV === "development" ? (
+          <script dangerouslySetInnerHTML={{ __html: `
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                return Promise.all(registrations.filter(function(r) {
+                  return r.active && new URL(r.active.scriptURL).pathname === '/sw.js';
+                }).map(function(r) { return r.unregister(); }));
+              }).then(function() {
+                return caches.keys().then(function(keys) {
+                  return Promise.all(keys.filter(function(key) { return key.startsWith('zikpass-'); }).map(function(key) { return caches.delete(key); }));
+                });
+              }).catch(function() {});
+            }
+          ` }} />
+        ) : <PwaRegistration />}
         <GlobalErrorReporter />
         {children}
       </body>

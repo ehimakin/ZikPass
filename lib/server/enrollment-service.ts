@@ -1,4 +1,5 @@
 import { runtimeConfig } from "@/lib/shared/config";
+import { PhysicalSessionError } from "@/lib/server/physical-session-error";
 import type {
   ApplicationRiskDecision,
   BankVerificationNormalizedResponse,
@@ -398,7 +399,7 @@ export async function getPhysicalStoreSessionOrThrow(
   const session = await getPhysicalSession(sessionId);
 
   if (!session) {
-    throw new Error("Store session not found.");
+    throw new PhysicalSessionError("session_not_found", "Store session not found.");
   }
 
   if (
@@ -410,7 +411,7 @@ export async function getPhysicalStoreSessionOrThrow(
     session.status = "expired";
     session.updated_at = new Date().toISOString();
     await upsertPhysicalSession(session);
-    throw new Error("This store session has expired. Ask staff to start a new one.");
+    throw new PhysicalSessionError("session_expired", "This store session has expired. Ask staff to start a new one.");
   }
 
   return session;
@@ -736,6 +737,10 @@ async function startPhysicalEnrollment(input: {
 
   const session = await getPhysicalStoreSessionOrThrow(physicalContext.session_id);
 
+  if (session.counter_sale) {
+    throw new Error("Use the private activation QR shown by the clerk to claim this paid pass.");
+  }
+
   if (session.enrollment_id) {
     const existingRecord = await getPhysicalEnrollmentForSession(session);
 
@@ -843,7 +848,7 @@ function createEnrollmentRecord(input: {
   };
 }
 
-function createPhysicalEnrollmentRecord(input: {
+export function createPhysicalEnrollmentRecord(input: {
   createdAt: string;
   application: EnrollmentApplicationInput;
   holderPublicKey: JsonWebKey;

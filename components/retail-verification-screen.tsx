@@ -13,6 +13,7 @@ import type { EnrollmentRecord, PhysicalStoreSessionRecord } from "@/lib/shared/
 
 interface ApiError {
   error: string;
+  code?: string;
 }
 
 const demoRetailVerifierToken = "demo-retail-terminal";
@@ -32,6 +33,7 @@ export function RetailVerificationScreen({
   const [state, setState] = useState<RetailState>(initialCode ? "loading" : "scan");
   const [error, setError] = useState<string | null>(null);
   const [customerPaused, setCustomerPaused] = useState(false);
+  const [statusWarning, setStatusWarning] = useState<string | null>(null);
   const [completionNotice, setCompletionNotice] = useState<string | null>(null);
   const [hasResolvedInitialCode, setHasResolvedInitialCode] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -99,6 +101,7 @@ export function RetailVerificationScreen({
     setCode(parsedCode);
     setError(null);
     setCustomerPaused(false);
+    setStatusWarning(null);
 
     startTransition(() => {
       void (async () => {
@@ -138,20 +141,32 @@ export function RetailVerificationScreen({
     const sessionId = enrollment?.physical_verification?.session.session_id;
     if (state !== "confirmed" || !sessionId) return;
     let cancelled = false;
+    let checking = false;
 
     async function checkIssuanceStatus() {
+      if (checking) return;
+      checking = true;
       try {
-        const response = await fetch(`/api/physical/sessions/${sessionId}`);
+        const response = await fetch(`/api/physical/sessions/${sessionId}`, { cache: "no-store" });
         if (!response.ok) {
+          const failure = await response.json().catch(() => null) as ApiError | null;
           if (!cancelled) {
             setCustomerPaused(false);
-            setError("This session expired before the pass was issued. Ask the customer to restart.");
-            setState("error");
+            if (response.status === 410 && failure?.code === "session_expired") {
+              setError("This session expired before the pass was issued. Ask the customer to restart.");
+              setState("error");
+            } else {
+              setStatusWarning(failure?.code === "session_not_found"
+                ? "The server cannot currently find this confirmed session. Retrying the status check; do not repeat the ID check or payment."
+                : "The ID check was confirmed, but the server status check failed. Retrying automatically; do not repeat the ID check or payment.");
+            }
           }
           return;
         }
         if (cancelled) return;
         const nextSession = (await response.json()) as PhysicalStoreSessionRecord;
+        if (cancelled) return;
+        setStatusWarning(null);
         if (nextSession.status !== "completed") {
           setCustomerPaused(
             isPhysicalCustomerPaused({ customerLastSeenAt: nextSession.customer_last_seen_at })
@@ -166,7 +181,9 @@ export function RetailVerificationScreen({
         setError(null);
         setCompletionNotice("Pass issued. Ready for the next customer.");
       } catch {
-        if (!cancelled) setCustomerPaused(true);
+        if (!cancelled) setStatusWarning("Connection interrupted while checking issuance. Retrying automatically; do not repeat the ID check or payment.");
+      } finally {
+        checking = false;
       }
     }
 
@@ -281,6 +298,7 @@ export function RetailVerificationScreen({
 
       {enrollment && state === "confirmed" ? (
         <>
+          {statusWarning ? <Alert tone="caution" title="Status temporarily unavailable">{statusWarning}</Alert> : null}
           <Alert tone="positive" title="18+ confirmed">
             {customerPaused
               ? "The customer's phone looks paused. Ask them to reopen Zik Pass - the session is waiting for their device check."

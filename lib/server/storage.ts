@@ -332,6 +332,13 @@ export async function runPaymentTransaction<T>(
   });
 }
 
+/** Commit a counter claim and its enrollment/payment together in the existing store lock. */
+export async function runCounterSaleTransaction<T>(
+  transaction: (data: Pick<StoreData, "physical_sessions" | "enrollments" | "payments">) => T
+): Promise<T> {
+  return mutateStore(transaction);
+}
+
 export async function getStorePlan(storeId: string): Promise<StorePlanRecord | undefined> {
   const store = await readStore();
   return store.store_plans.find((plan) => plan.store_id === storeId);
@@ -694,6 +701,7 @@ function normalizePhysicalSessions(
     return [
       {
         session_id: candidate.session_id,
+        counter_sale: candidate.counter_sale,
         store_id: candidate.store_id,
         store_name: candidate.store_name,
         location_id: candidate.location_id,

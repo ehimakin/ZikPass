@@ -408,3 +408,19 @@ Browser pass at 320 / 390 / 768px + keyboard.
   cannot make the fixed rails overlap the footer.
 - Verified desktop row counts and unchanged bounds on scroll, mobile hiding
   and no mobile horizontal overflow. Targeted ESLint and TypeScript passed.
+
+## Clerk-first counter sale
+
+Added `/verify/counter` and private `/card#activate=…` handoff. Clerk checks ID and records till payment before showing the QR; the customer then claims and completes device setup without selecting a store or paying again. Includes atomic claim/enrollment/payment persistence within the existing runtime store, same-device retry, second-device rejection, and expired paid QR replacement. See `docs/COUNTER_SALE_FLOW.md` for operation, recovery, validation and prototype boundaries.
+
+## Affiliate gate and returning-browser session
+
+Updated `/affiliate-demo` to **Verify with Zik** → gold **Age verified with Zik** → **Continue / Log in**. The demo affiliate backend now creates the request state, exchanges the one-time code, and issues a signed HttpOnly age session valid for at most 30 minutes (capped by pass expiry). Returning visitors reuse it, and `/affiliate-demo/continue` enforces it server-side. The continue page remains a clearly labelled placeholder for the next dummy-affiliate task. See `docs/AFFILIATE_CUSTOMER_FLOW.md` for validation and production boundaries.
+
+## JerkMeat affiliate demonstration
+
+Replaced the affiliate placeholder with a responsive food-only parody: navy, pink and cyan styling, original food photography, search, categories, saved favourites and photo-detail dialogs. Preserved the existing Zik approval, signed returning-browser session and server-protected continue route. Verified desktop/mobile layouts and the complete approval-to-gallery journey; 23 affiliate tests, TypeScript and targeted ESLint passed. Fixed stale development service-worker caching that could hydrate obsolete affiliate UI; production PWA registration remains enabled.
+
+## Independent JerkMeat repository
+
+Extracted JerkMeat to `../jerkmeat`, with its own Next.js app, assets, dependencies, configuration, tests and Git repository. Its backend calls Zik over HTTP using a separately registered `jerkmeat` client and bearer secret; JerkMeat owns state validation and signed sessions. Added exact callback registration and external-client authentication to Zik's existing authorize/token endpoints. Preserved the embedded demo. Standalone build, TypeScript and lint pass; 10 extracted integration tests and 26 Zik affiliate tests pass.

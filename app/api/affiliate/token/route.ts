@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { exchangeAffiliateAuthorizationCode } from "@/lib/server/affiliate-verifier";
 import { AFFILIATE_DENIAL_MESSAGE } from "@/lib/shared/affiliate-verifier";
+import { authenticateAffiliateClient } from "@/lib/server/affiliate-clients";
 
 /**
  * The one route a real affiliate's own backend would call server-to-server.
@@ -17,6 +18,9 @@ export async function POST(request: NextRequest) {
       state?: string;
     };
 
+    if (!authenticateAffiliateClient(body.client_id ?? "", request.headers.get("authorization"))) {
+      return NextResponse.json({ error: AFFILIATE_DENIAL_MESSAGE }, { status: 401 });
+    }
     const result = await exchangeAffiliateAuthorizationCode({
       code: body.code ?? "",
       clientId: body.client_id ?? "",
@@ -24,7 +28,7 @@ export async function POST(request: NextRequest) {
       state: body.state ?? ""
     });
 
-    return NextResponse.json(result);
+    return NextResponse.json(result, { headers: { "Cache-Control": "no-store" } });
   } catch {
     return NextResponse.json({ error: AFFILIATE_DENIAL_MESSAGE }, { status: 400 });
   }

@@ -16,7 +16,7 @@
  *  - Versioned: bump SW_VERSION to roll the caches; activate() deletes the rest.
  */
 
-const SW_VERSION = "v2";
+const SW_VERSION = "v3";
 const STATIC_CACHE = `zikpass-static-${SW_VERSION}`;
 const PAGE_CACHE = `zikpass-pages-${SW_VERSION}`;
 const KEEP = new Set([STATIC_CACHE, PAGE_CACHE]);
@@ -80,6 +80,10 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
   if (isSensitive(url)) return; // straight to network, never cached
+  // Next development chunks reuse filenames. Caching them serves stale code
+  // over fresh server HTML and causes hydration failures after an edit.
+  if (url.pathname.startsWith("/_next/") &&
+      !/[-.][a-f0-9]{8,}\.(?:js|css|woff2?)$/.test(url.pathname)) return;
 
   // Static, immutable assets: cache-first.
   if (isStaticAsset(url)) {

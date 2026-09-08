@@ -12,7 +12,7 @@ import { ShieldIcon } from "@/components/customer/icons";
 import { ZikLogoMark } from "@/components/zik-logo";
 import { environmentBadgeLabel } from "@/lib/shared/demo-environment";
 
-const CLIENT_NAME = "Nightfall";
+const CLIENT_NAME = "JerkMeat";
 
 interface ApiError {
   error: string;

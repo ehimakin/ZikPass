@@ -1,0 +1,99 @@
+.site { min-height:100vh; background:#151621; color:#f5f5fa; font-size:14px; }
+.site button,.site a,.site input { -webkit-tap-highlight-color:transparent; }
+.site button:focus-visible,.site a:focus-visible,.site input:focus-visible { outline:2px solid #68d9eb; outline-offset:4px; }
+.header { min-height:86px; display:flex; align-items:center; gap:28px; padding:18px 32px; background:#1e2030; border-bottom:1px solid #303243; position:sticky; top:0; z-index:30; }
+.brand { display:inline-flex; align-items:center; gap:10px; font-size:31px; letter-spacing:-1.5px; font-weight:800; color:#fff; }
+.brandMark { display:grid; place-items:center; width:43px; height:43px; border-radius:13px; background:linear-gradient(120deg,#67d5e6 0 48%,#f48bc2 52%); color:#222436; font-size:30px; }
+.brandAccent { color:#f48bc2; }
+.search { display:flex; align-items:center; gap:12px; flex:1; max-width:570px; margin:auto; border:1px solid #3b3d50; background:#151621; border-radius:8px; padding:11px 16px; color:#b0b1c2; }
+.search span { font-size:25px; line-height:20px; }
+.search input { width:100%; background:transparent; outline:none; font-size:13px; }
+.login { color:#e9e9f2; font-weight:700; white-space:nowrap; }
+.pinkButton { background:#ef8fc2; color:#282134; padding:12px 19px; font-weight:800; border-radius:7px; white-space:nowrap; }
+.pinkButton:hover { background:#ffafd7; }
+.layout { display:grid; grid-template-columns:204px minmax(0,1fr); }
+.sidebar { background:#1b1c29; padding:30px 16px; border-right:1px solid #2b2d3e; }
+.eyebrow { color:#9699b0; font-size:10px; font-weight:800; letter-spacing:1.8px; text-transform:uppercase; }
+.sidebar>.eyebrow { padding:0 13px; margin-bottom:18px; }
+.sidebar nav { display:grid; gap:5px; }
+.sidebar nav button { display:flex; gap:12px; align-items:center; text-align:left; padding:13px 12px; border-radius:7px; color:#b4b6c9; }
+.sidebar nav button>span { font-size:20px; width:22px; color:#8a8da8; }
+.sidebar nav small { margin-left:auto; color:#7e8198; }
+.sidebar nav button:hover,.sidebar nav .activeCategory { background:#303044; color:#f3a5d0; }
+.sidebarNote { margin:40px 8px 25px; padding:23px 15px; border:1px solid #3b3248; background:linear-gradient(130deg,#302535,#202334); border-radius:12px; }
+.sidebarNote>span { display:block; font-size:31px; margin-bottom:10px; }
+.sidebarNote strong { font-size:20px; line-height:1.25; }
+.sidebarNote p { font-size:11px; line-height:1.8; margin-top:12px; color:#a5a4b7; }
+.backToZik { color:#a6a7bd; font-size:11px; padding:12px; }
+.main { min-width:0; max-width:1720px; width:100%; margin:auto; padding:22px 30px 0; }
+.notice { display:flex; justify-content:space-between; font-size:10px; color:#85889f; margin-bottom:18px; }
+.notice>span:first-child { letter-spacing:1.7px; font-weight:800; color:#72d6d8; }
+.hero { position:relative; display:grid; grid-template-columns:1fr 45%; overflow:hidden; min-height:295px; background:linear-gradient(110deg,#302741,#25283b); border:1px solid #44384e; border-radius:12px; padding:30px 36px; }
+.hero .eyebrow { color:#f0a0cb; }
+.hero h1 { font-size:clamp(36px,3.8vw,64px); line-height:1.05; font-weight:800; letter-spacing:-2px; margin:15px 0; }
+.hero h1 em { color:#f6aed4; font-style:normal; }
+.hero p:not(.eyebrow) { font-size:12px; line-height:1.8; color:#bebad0; }
+.heroLink { display:inline-flex; align-items:center; gap:22px; font-size:12px; margin-top:22px; font-weight:800; }
+.heroLink span { color:#75d7db; font-size:21px; }
+.heroPhoto { background-image:linear-gradient(90deg,#2a283d,transparent 30%),url('/affiliates/jerkmeat/food-atlas.png'); background-size:100% 100%,300% 300%; background-position:center,0 0; position:absolute; right:0; top:0; bottom:0; width:45%; }
+.heroPhotoLabel { position:absolute; bottom:20px; right:20px; left:30px; background:#151621c9; backdrop-filter:blur(10px); border:1px solid #ffffff18; border-radius:8px; padding:12px 15px; }
+.heroPhotoLabel span { color:#75dfd9; font-size:8px; letter-spacing:2px; display:block; }
+.heroPhotoLabel strong { display:block; margin:5px 0; font-size:14px; }
+.heroPhotoLabel small { font-size:10px; color:#bcbdc9; }
+.heroStamp { position:absolute; top:22px; right:20px; border-radius:50%; width:66px; height:66px; display:grid; place-content:center; transform:rotate(13deg); color:#302134; background:#f8a7cf; text-align:center; font-size:9px; font-weight:900; letter-spacing:1px; border:4px double #302134; }
+.gate { margin-top:22px; padding:20px 24px; border:1px solid #464052; border-radius:10px; background:#242331; scroll-margin-top:110px; }
+.gateContent { display:flex; align-items:center; justify-content:space-between; gap:22px; }
+.gateContent h2 { font-weight:800; font-size:17px; }
+.gateContent p { color:#aaa8bc; font-size:12px; line-height:1.7; margin-top:5px; max-width:650px; }
+.gateActions { flex-shrink:0; display:flex; flex-direction:column; gap:10px; }
+.goldStatus { color:#d3bb53; display:flex; align-items:center; gap:8px; font-weight:800; font-size:13px; }
+.verifyButton { background:#d3bb53; color:#201c10; border-radius:7px; padding:12px 22px; font-weight:800; white-space:nowrap; }
+.verifyButton:hover { background:#e3d077; }
+.verifyButton:disabled { opacity:.6; }
+.error { color:#ffc8c0; padding-bottom:14px; }
+.unlocked { display:flex; align-items:center; justify-content:space-between; gap:15px; padding:20px 0 0; font-size:12px; }
+.unlocked span { color:#d3bb53; font-weight:800; }
+.unlocked p { color:#9598af; }
+.gallerySection { margin-top:30px; scroll-margin-top:110px; }
+.sectionHeading { display:flex; align-items:end; justify-content:space-between; }
+.sectionHeading h2 { margin-top:7px; font-size:23px; font-weight:800; letter-spacing:-.6px; }
+.sectionHeading h2 span { font-size:12px; font-weight:500; color:#7e8198; margin-left:10px; }
+.photoLabel { font-size:9px; color:#73788d; letter-spacing:1px; padding-bottom:4px; }
+.tabs { display:flex; gap:7px; margin:19px 0; overflow:auto; }
+.tabs button { border:1px solid #35384a; color:#abadc0; padding:8px 17px; border-radius:6px; font-size:11px; white-space:nowrap; }
+.tabs .activeTab { background:#454159; border-color:#77617c; color:#f5b6d9; }
+.grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px 18px; }
+.card { min-width:0; }
+.photoButton { display:block; width:100%; position:relative; overflow:hidden; border-radius:8px; }
+.foodPhoto { width:100%; aspect-ratio:1.35; background-image:url('/affiliates/jerkmeat/food-atlas.png'); background-size:300% 300%; background-repeat:no-repeat; background-color:#302737; transition:filter .2s; }
+.heat,.duration { position:absolute; top:10px; background:#14151ecf; border-radius:4px; font-size:9px; padding:4px 7px; }
+.heat { left:10px; color:#f8b6b1; }
+.duration { right:10px; color:#fff; }
+.photoHover { position:absolute; inset:auto 0 0; padding:25px 12px 12px; background:linear-gradient(transparent,#10111bd9); font-size:11px; font-weight:800; opacity:0; transition:opacity .2s; }
+.photoButton:hover .photoHover,.photoButton:focus-visible .photoHover { opacity:1; }
+.cardHeading { display:flex; align-items:center; justify-content:space-between; gap:8px; padding-top:10px; }
+.cardHeading>button:first-child { font-weight:800; text-align:left; font-size:13px; }
+.save,.saved { font-size:21px; line-height:1; }
+.save { color:#85889f; }
+.saved { color:#f5a2cb; }
+.creator { display:flex; align-items:center; gap:5px; font-size:9px; color:#9396ae; margin-top:6px; }
+.creator>span:first-child { width:5px; height:5px; border-radius:50%; background:#6dd7bf; }
+.location { margin-left:auto; color:#696d83; }
+.empty { padding:50px 0; color:#bcb9cb; }
+.footer { margin-top:45px; padding:30px 0; border-top:1px solid #303244; display:flex; flex-wrap:wrap; gap:14px 25px; align-items:center; }
+.footer .brand { font-size:22px; }
+.footer .brandMark { width:29px; height:29px; font-size:23px; border-radius:9px; }
+.footer p { color:#a3a5ba; font-size:12px; }
+.footer small { width:100%; color:#74778d; font-size:10px; line-height:1.8; }
+.dialog { padding:0; border:1px solid #484155; background:#222331; color:#f5f3fa; border-radius:14px; max-width:600px; width:calc(100% - 32px); max-height:90dvh; overflow:auto; }
+.dialog::backdrop { background:#070914d9; backdrop-filter:blur(6px); }
+.dialog .foodPhoto { aspect-ratio:1.4; }
+.close { position:absolute; right:12px; top:12px; background:#171926de; border-radius:50%; width:35px; height:35px; font-size:26px; z-index:2; }
+.dialogCopy { padding:26px; }
+.dialogCopy h2 { font-size:28px; font-weight:800; margin:10px 0; }
+.dialogCopy p:not(.eyebrow) { color:#c3c0d1; line-height:1.8; }
+.dialogCopy small { display:block; margin-top:20px; color:#9492a7; font-size:10px; }
+@media(min-width:1650px) { .grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+@media(max-width:1000px) { .layout { grid-template-columns:160px minmax(0,1fr); } .header { padding:16px 20px; gap:18px; } .main { padding:20px 20px 0; } .hero { padding:26px; } .grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .search { max-width:350px; } .gateContent { align-items:start; flex-direction:column; } .gateActions { flex-direction:row; align-items:center; flex-wrap:wrap; } }
+@media(max-width:640px) { .header { flex-wrap:wrap; gap:14px; padding:15px 16px; position:relative; } .brand { font-size:26px; } .brandMark { width:35px; height:35px; font-size:25px; } .search { order:4; max-width:none; flex-basis:100%; } .header>.pinkButton { display:none; } .login { margin-left:auto; font-size:12px; } .layout { display:block; } .sidebar { display:none; } .main { padding:15px 14px 0; } .notice { font-size:8px; gap:12px; } .hero { min-height:275px; padding:24px 19px; grid-template-columns:1fr; } .hero h1 { font-size:40px; position:relative; z-index:1; } .hero p:not(.eyebrow) { max-width:62%; font-size:11px; position:relative; z-index:1; } .heroPhoto { width:43%; opacity:.5; } .heroPhotoLabel,.heroStamp { display:none; } .heroLink { position:relative; z-index:1; } .desktopBreak { display:none; } .gate { padding:18px; } .gateContent h2 { font-size:16px; } .gateActions { width:100%; flex-direction:column; align-items:stretch; text-align:center; } .goldStatus { justify-content:center; } .sectionHeading h2 { font-size:20px; } .photoLabel { display:none; } .sectionHeading .eyebrow { font-size:8px; } .tabs button { padding:8px 12px; } .grid { gap:22px 12px; } .foodPhoto { aspect-ratio:1.05; } .cardHeading>button:first-child { font-size:11px; } .creator { font-size:8px; } .location { display:none; } .heat,.duration { font-size:8px; padding:3px 5px; top:7px; } .heat { left:6px; } .duration { right:6px; } .unlocked { align-items:start; flex-direction:column; } }
+@media(prefers-reduced-motion:reduce) { .site * { scroll-behavior:auto!important; transition:none!important; } }

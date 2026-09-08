@@ -1,11 +1,11 @@
+import { cookies } from "next/headers";
 import { AffiliateDemoLanding } from "@/components/affiliate-demo-landing";
+import { AGE_SESSION_COOKIE, readAffiliateAgeSession } from "@/lib/server/affiliate-demo-session";
 
-export default function AffiliateDemoPage() {
-  return (
-    <main className="min-h-screen bg-[#0b0710] px-4 py-10 sm:px-6 lg:py-16">
-      <div className="mx-auto max-w-4xl">
-        <AffiliateDemoLanding />
-      </div>
-    </main>
-  );
+export const metadata = { title: "JerkMeat — Only the food is spicy", description: "A food-only parody and Zik Pass affiliate demonstration." };
+
+export default async function AffiliateDemoPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const session = await readAffiliateAgeSession((await cookies()).get(AGE_SESSION_COOKIE)?.value);
+  const params = await searchParams;
+  return <AffiliateDemoLanding verifiedUntil={session?.expiresAt ?? null} denied={params.verification === "denied"} />;
 }
