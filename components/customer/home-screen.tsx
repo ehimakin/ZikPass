@@ -44,7 +44,7 @@ export function HomeScreen({ price }: { price: string }) {
           <span className="text-[#d3bb53]">Prove your age online</span> without sharing your ID*.
         </h1>
         <p className="mt-8 text-[15px] leading-relaxed text-[var(--zk-text-soft)]">
-          *Verify in person at a participating store. Then use your pass anywhere
+          *Verify in participating stores. Then use your pass anywhere
           online. Only sharing that you&rsquo;re over 18.
         </p>
         <p className="mt-5 text-[15px] leading-relaxed text-[var(--zk-text-soft)]">
