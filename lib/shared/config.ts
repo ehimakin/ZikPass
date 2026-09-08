@@ -42,7 +42,9 @@ export const runtimeConfig: RuntimeConfig = {
   deviceExtensionPriceMinor: Number(process.env.ZIK_DEVICE_EXTENSION_PRICE_MINOR ?? 299),
   deviceExtensionCurrency: process.env.ZIK_DEVICE_EXTENSION_CURRENCY ?? "GBP",
   platformSharePercent: Number(process.env.ZIK_PLATFORM_SHARE_PERCENT ?? 20),
-  passIssuancePriceMinor: Number(process.env.ZIK_PASS_ISSUANCE_PRICE_MINOR ?? 0),
+  // Nonzero GBP test price for the pass (prototype fixture, not a commercial
+  // decision). Set ZIK_PASS_ISSUANCE_PRICE_MINOR=0 to exercise the free flow.
+  passIssuancePriceMinor: Number(process.env.ZIK_PASS_ISSUANCE_PRICE_MINOR ?? 199),
   homepageSplashSuppressSeconds: Number(
     process.env.ZIK_HOMEPAGE_SPLASH_SUPPRESS_SECONDS ??
       (process.env.NODE_ENV === "production" ? 1800 : 120)

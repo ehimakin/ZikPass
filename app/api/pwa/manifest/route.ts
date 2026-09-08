@@ -3,12 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get("handoff_token")?.trim();
   const startUrl = token
-    ? `/wallet?source=pwa&handoff_token=${encodeURIComponent(token)}`
-    : "/wallet?source=pwa";
+    ? `/pass?source=pwa&handoff_token=${encodeURIComponent(token)}`
+    : "/pass?source=pwa";
 
   return NextResponse.json({
-    name: "ZikPass",
-    short_name: "ZikPass",
+    name: "Zik Pass",
+    short_name: "Zik Pass",
     description: "Your privacy-first digital age pass.",
     start_url: startUrl,
     scope: "/",

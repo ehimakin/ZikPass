@@ -4,6 +4,55 @@
 
 :root {
   color-scheme: light;
+
+  /* ---- ZikPass semantic design tokens (customer surface) ---- */
+  /* Palette anchors */
+  --zk-ink: #0e1726;
+  --zk-lime: #d7f171;
+
+  /* Surfaces */
+  --zk-canvas: #f6f6f1;        /* warm off-white app background */
+  --zk-card: #ffffff;          /* raised cards, sheets */
+  --zk-sunken: #eeeee7;        /* input wells, inset areas */
+  --zk-ink-surface: #0e1726;   /* dark surface (pass card, footers) */
+
+  /* Text */
+  --zk-text: #16202f;          /* primary text */
+  --zk-text-soft: #55606f;     /* secondary text */
+  --zk-text-faint: #8b95a1;    /* tertiary / captions */
+  --zk-text-on-ink: #f4f6f0;   /* text on dark surfaces */
+  --zk-text-on-accent: #16202f;/* text on lime */
+
+  /* Lines & focus */
+  --zk-line: #e4e4dc;          /* hairline borders on light */
+  --zk-line-strong: #d3d3c8;
+  --zk-focus: #2f6fed;
+
+  /* Accent + status */
+  --zk-accent: #c7e85c;        /* controlled lime for primary action fill */
+  --zk-accent-press: #b9dd45;
+  --zk-positive: #1f7a4d;
+  --zk-positive-bg: #e6f4ec;
+  --zk-caution: #9a6b12;
+  --zk-caution-bg: #fbf1dd;
+  --zk-critical: #b3261e;
+  --zk-critical-bg: #fbe9e8;
+  --zk-info-bg: #e9eefb;
+
+  /* Radius scale */
+  --zk-r-sm: 10px;
+  --zk-r-md: 14px;
+  --zk-r-lg: 20px;
+  --zk-r-xl: 28px;
+
+  /* Elevation */
+  --zk-shadow-card: 0 1px 2px rgba(14, 23, 38, 0.05), 0 8px 24px rgba(14, 23, 38, 0.06);
+  --zk-shadow-sheet: 0 -8px 40px rgba(14, 23, 38, 0.14);
+  --zk-shadow-nav: 0 -1px 0 rgba(14, 23, 38, 0.06), 0 -12px 30px rgba(14, 23, 38, 0.06);
+
+  /* Fonts (set by next/font on <body>, with fallbacks) */
+  --zk-font-sans: var(--font-manrope), "Avenir Next", "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+  --zk-font-mono: "IBM Plex Mono", "SFMono-Regular", "Menlo", "Consolas", monospace;
 }
 
 html {
@@ -16,6 +65,31 @@ body {
   background:
     radial-gradient(circle at top left, rgba(215, 241, 113, 0.3), transparent 24%),
     linear-gradient(180deg, #fbfff1 0%, #f4f7ee 46%, #eef2e6 100%);
+}
+
+/* Customer surface opts into the token system and the licensed font. */
+.zk-surface {
+  font-family: var(--zk-font-sans);
+  background: var(--zk-canvas);
+  color: var(--zk-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.zk-surface *,
+.zk-surface *::before,
+.zk-surface *::after {
+  box-sizing: border-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zk-surface *,
+  .zk-surface *::before,
+  .zk-surface *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
 
 .font-heading {
@@ -69,6 +143,15 @@ pre {
   animation: floatSlow 6s ease-in-out infinite;
 }
 
+@keyframes logoFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.zk-logo-float {
+  animation: logoFloat 5.45s ease-in-out infinite;
+}
+
 @keyframes zignatureDraw {
   from {
     opacity: 0.35;
@@ -103,4 +186,96 @@ pre {
 
 .zik-stage-pop {
   animation: zikStageCopy 640ms ease-out 80ms both;
+}
+
+/* The source artwork is a wide banner with the product in its right-hand
+   third. Centre that composition, not the banner's empty left half. Keep
+   its proportions intact; the shorter spacer lets the content overlap it. */
+.zk-home-surface {
+  --zk-home-hero-height: clamp(299px, 82.8vw, 391px);
+  --zk-home-hero-spacer: clamp(260px, 72vw, 340px);
+}
+
+.zk-home-hero {
+  height: var(--zk-home-hero-height);
+  background: #f6f6f1;
+}
+
+.zk-home-hero-image {
+  position: absolute;
+  top: 0;
+  margin-top: -40px;
+  left: 50%;
+  height: 100%;
+  width: auto;
+  max-width: none;
+  transform: translateX(-81%);
+  /* Blend the banner boundary into the matching full-width backdrop. */
+  mask-image: linear-gradient(to right, transparent, black 8%, black 97%, transparent);
+}
+
+/* Keep the fictional affiliate wall out of the 560px customer column.
+   Below 1360px, four 80px logos plus gaps no longer fit comfortably per side. */
+.zk-lifted-pass-button {
+  position: relative;
+  isolation: isolate;
+}
+.zk-lifted-pass-button::before {
+  content: "";
+  position: absolute;
+  inset: 2px 2.48% -16px;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgb(30 28 18 / 52%) calc(100% - 16px),
+    rgb(30 28 18 / 20%) calc(100% - 10px),
+    rgb(30 28 18 / 4%) calc(100% - 4px),
+    transparent 100%
+  );
+  border-radius: 60px / 50%;
+  filter: blur(1px);
+  mask-image: radial-gradient(ellipse 50% 14px at 50% 100%, transparent 97%, black 100%);
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  z-index: -1;
+}
+
+.zk-affiliate-rails { display: none; }
+
+@media (min-width: 1360px) {
+  .zk-affiliate-rails { display: block; pointer-events: none; }
+  .zk-affiliate-rail {
+    position: fixed;
+    bottom: calc(var(--zk-bottom-nav-height, 64px) + 130px);
+    z-index: 5;
+    width: calc((100% - 560px) / 2);
+    padding-inline: 24px;
+  }
+  .zk-affiliate-rail--left { left: 0; }
+  .zk-affiliate-rail--right { right: 0; }
+  .zk-affiliate-rows { width: 100%; max-width: 436px; margin-inline: auto; }
+  .zk-affiliate-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10.5984px;
+  }
+  .zk-affiliate-logo {
+    position: relative;
+    flex: 0 0 calc((100% - 36px) / 4);
+    max-width: 100px;
+    height: 72px;
+    filter: grayscale(1);
+    opacity: 0.4;
+    pointer-events: auto;
+    transition: opacity 180ms ease;
+  }
+  .zk-affiliate-logo:hover {
+    opacity: 1;
+  }
+  .zk-affiliate-row:first-child {
+    justify-content: space-between;
+  }
 }

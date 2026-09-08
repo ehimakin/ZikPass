@@ -18,7 +18,7 @@ export default function ZikParentalPage() {
             className="mt-8 inline-flex rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist transition hover:bg-[#24364d]"
             href="/"
           >
-            Back to ZikPass
+            Back to Zik Pass
           </Link>
         </section>
       </main>

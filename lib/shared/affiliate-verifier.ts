@@ -53,7 +53,7 @@ export function classifyAffiliateChallengeMismatch(
  * that would itself leak information about the holder's device/account.
  */
 export const AFFILIATE_DENIAL_MESSAGE =
-  "ZikPass could not confirm your age. No identity data was shared. Please try again or choose another verification method.";
+  "Zik could not confirm your age. No identity data was shared. Please try again or choose another verification method.";
 
 const CLIENT_REPORTABLE_DENIAL_REASONS: readonly AffiliateDenialReason[] = [
   "no_pass",

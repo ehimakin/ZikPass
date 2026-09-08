@@ -1,5 +1,4 @@
-import { AppShell } from "@/components/app-shell";
-import { RetailVerificationScreen } from "@/components/retail-verification-screen";
+import { ClerkVerify } from "@/components/operator/clerk-verify";
 
 export default async function VerifyPage({
   searchParams
@@ -7,11 +6,7 @@ export default async function VerifyPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
-  return (
-    <AppShell currentPath="/verify">
-      <RetailVerificationScreen initialCode={getParam(params.code)} />
-    </AppShell>
-  );
+  return <ClerkVerify initialCode={getParam(params.code)} />;
 }
 
 function getParam(value: string | string[] | undefined): string | undefined {

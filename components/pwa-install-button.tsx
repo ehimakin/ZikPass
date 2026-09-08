@@ -28,7 +28,7 @@ export function PwaRegistration() {
 
 export function PwaInstallButton({
   className = "rounded-full bg-ink px-6 py-3 text-sm font-semibold text-mist",
-  label = "Install ZikPass",
+  label = "Install Zik Pass",
   enrollmentId,
   onInstalled
 }: {
@@ -64,7 +64,7 @@ export function PwaInstallButton({
     function handleAppInstalled() {
       setInstallPrompt(null);
       setIsInstalled(true);
-      setMessage("ZikPass added to this device. Open it from your home screen.");
+      setMessage("Zik Pass added to this device. Open it from your home screen.");
       void markPwaInstalled();
       onInstalled?.();
     }
@@ -80,7 +80,7 @@ export function PwaInstallButton({
 
   async function install() {
     if (isInstalled) {
-      setMessage("ZikPass is already added to this device. Open it from your home screen.");
+      setMessage("Zik Pass is already added to this device. Open it from your home screen.");
       return;
     }
 
@@ -113,7 +113,7 @@ export function PwaInstallButton({
 
     if (!installPrompt) {
       setMessage(
-        "The wallet link is ready. Open your browser Share or menu button, choose Add to Home Screen or Install app, then launch ZikPass from the new icon."
+        "The wallet link is ready. Open your browser Share or menu button, choose Add to Home Screen or Install app, then launch Zik Pass from the new icon."
       );
       if (pwaStartUrl) {
         window.history.replaceState({}, "", pwaStartUrl);
@@ -128,8 +128,8 @@ export function PwaInstallButton({
     setMessage(
       choice.outcome === "accepted"
         ? pwaStartUrl
-          ? "ZikPass is being installed. Open it from the new home-screen icon to finish saving your pass."
-          : "ZikPass is being installed on this device."
+          ? "Zik Pass is being installed. Open it from the new home-screen icon to finish saving your pass."
+          : "Zik Pass is being installed on this device."
         : "Installation was cancelled."
     );
   }
@@ -141,7 +141,7 @@ export function PwaInstallButton({
         onClick={() => void install()}
         type="button"
       >
-        {isInstalled ? "ZikPass added to device" : label}
+        {isInstalled ? "Zik Pass added to device" : label}
       </button>
       {message ? (
         <p aria-live="polite" className="text-xs leading-5 text-ink/58">

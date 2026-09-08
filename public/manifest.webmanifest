@@ -1,8 +1,8 @@
 {
-  "name": "ZikPass",
-  "short_name": "ZikPass",
+  "name": "Zik Pass",
+  "short_name": "Zik Pass",
   "description": "Your privacy-first digital age pass.",
-  "start_url": "/wallet?source=pwa",
+  "start_url": "/pass?source=pwa",
   "scope": "/",
   "display": "standalone",
   "background_color": "#f4f7ee",

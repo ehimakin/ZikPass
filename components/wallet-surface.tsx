@@ -114,7 +114,7 @@ const heroSlides = [
     pill: "No photo ID required",
     title: "Prove with your name, not your face.",
     body:
-      "ZikPass layers a soft financial check with bank authorisation, device-bound keys, and issuer signing to prove over 18. Only the minimum pending review data is kept server-side."
+      "Zik layers a soft financial check with bank authorisation, device-bound keys, and issuer signing to prove over 18. Only the minimum pending review data is kept server-side."
   },
   {
     pill: "Onboarding",
@@ -133,7 +133,7 @@ const heroSlides = [
 const howZikPassWorksSlides = [
   {
     label: "Signals",
-    title: "ZikPass starts with adult-linked financial signals",
+    title: "Zik Pass starts with adult-linked financial signals",
     body:
       "The process begins with a soft financial check and a refundable bank authorisation, so the proof is based on trusted signals instead of photo ID or biometrics.",
     art: "signals"
@@ -149,7 +149,7 @@ const howZikPassWorksSlides = [
     label: "Verification",
     title: "Sites verify over-18 status, not your identity",
     body:
-      "When you present ZikPass, a site checks the signed credential and learns only that you are over 18. Your name, address, and bank details stay out of the exchange.",
+      "When you present Zik Pass, a site checks the signed credential and learns only that you are over 18. Your name, address, and bank details stay out of the exchange.",
     art: "verification"
   }
 ] as const;
@@ -171,7 +171,7 @@ const physicalHowZikPassWorksSlides = [
   },
   {
     label: "Pass",
-    title: "Receive an in-person verified ZikPass",
+    title: "Receive an in-person verified Zik Pass",
     body:
       "Zik signs the 18+ credential for the holder public key on this device. Your ID is not uploaded or stored by Zik.",
     art: "physical-pass"
@@ -1493,7 +1493,7 @@ export function WalletSurface({
             <div className="flex flex-wrap gap-2">
               <HeroViewTab
                 active={heroViewMode === "how_to_get"}
-                label="How to get your ZikPass"
+                label="How to get your Zik Pass"
                 onClick={() => setHeroViewMode("how_to_get")}
               />
               <HeroViewTab
@@ -1504,7 +1504,7 @@ export function WalletSurface({
               {!homepageMode ? (
                 <HeroViewTab
                   active={heroViewMode === "how_it_works"}
-                  label="How ZikPass works"
+                  label="How Zik Pass works"
                   onClick={() => setHeroViewMode("how_it_works")}
                 />
               ) : null}
@@ -1625,7 +1625,7 @@ export function WalletSurface({
       {!onboardingMode && !homepageMode ? (
         <div className="grid gap-6">
           <SurfaceCard
-            title={isPhysicalLane ? "Why physical-first ZikPass" : "Why people choose Zik Pass"}
+            title={isPhysicalLane ? "Why physical-first Zik Pass" : "Why people choose Zik Pass"}
             subtitle={
               isPhysicalLane
                 ? "Built around a normal in-person age check, then minimized into a reusable pass."
@@ -1644,7 +1644,7 @@ export function WalletSurface({
                 </p>
                 <p className="mt-1 text-sm leading-6 text-ink/68">
                   {isPhysicalLane
-                    ? "Show your physical ID to staff at a participating retailer, then keep using ZikPass online."
+                    ? "Show your physical ID to staff at a participating retailer, then keep using Zik Pass online."
                     : "You answer a few normal identity questions, confirm a temporary bank reference, and receive the pass on the same device."}
                 </p>
               </div>
@@ -1864,7 +1864,7 @@ export function WalletSurface({
                       />
                       <InlineDetail
                         title="Device rule"
-                        body="Only this device receives the signed ZikPass."
+                        body="Only this device receives the signed Zik Pass."
                       />
                     </div>
                   </FullscreenCard>
@@ -2150,7 +2150,7 @@ export function WalletSurface({
                   <QuestionCard
                     step="Device authentication"
                     title="Authenticate on this device"
-                    body="The person being verified must complete device authentication on the device receiving the ZikPass."
+                    body="The person being verified must complete device authentication on the device receiving the Zik Pass."
                     canContinue={!isPending}
                     error={error}
                     nextLabel={isPending ? "Authenticating..." : "Complete device authentication"}
@@ -2451,7 +2451,7 @@ export function WalletSurface({
                     isDarkChrome ? "text-mist" : "text-ink"
                   )}
                 >
-                  How ZikPass works
+                  How Zik Pass works
                 </h3>
                 <button
                   aria-label="Close learn more"
@@ -2600,7 +2600,7 @@ function HomepageHero({
                 className="rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-lime/90"
                 href={onboardingHref}
               >
-                Get ZikPass
+                Get Zik Pass
               </Link>
             ) : (
               <button
@@ -2609,7 +2609,7 @@ function HomepageHero({
                 onClick={onOpenFlow}
                 type="button"
               >
-                {isPendingIssuance ? "View application" : "Get ZikPass"}
+                {isPendingIssuance ? "View application" : "Get Zik Pass"}
               </button>
             )}
             <button
@@ -3066,7 +3066,7 @@ function PhysicalOnboardingExperience({
       <PhysicalStageFrame
         accent="bg-ink"
         progress={100}
-        title="ZikPass ready"
+        title="Zik Pass ready"
         body="Your in-person verified pass has been delivered to this device."
       >
         <div className="zik-stage-pop grid w-full max-w-xl gap-7">
@@ -3087,7 +3087,7 @@ function PhysicalOnboardingExperience({
           <div className="grid gap-3 sm:grid-cols-2">
             <PwaInstallButton
               className="rounded-full bg-ink px-7 py-4 text-center text-base font-semibold text-mist"
-              label="Install ZikPass"
+              label="Install Zik Pass"
             />
             <Link
               className="rounded-full border border-ink/15 px-7 py-4 text-center text-base font-semibold text-ink"
@@ -3111,7 +3111,7 @@ function PhysicalOnboardingExperience({
         accent="bg-[#69b889]"
         progress={78}
         title="You're verified."
-        body="Your ZikPass is ready to be secured on this device."
+        body="Your Zik Pass is ready to be secured on this device."
       >
         <div className="zik-stage-pop grid w-full max-w-md place-items-center gap-6 text-center">
           <div className="relative grid h-44 w-44 place-items-center rounded-full border border-[#69b889]/35 bg-[#f7faee]">
@@ -3694,7 +3694,7 @@ function PhysicalVerificationPanel({
                       <PwaInstallButton
                         className="w-full rounded-[22px] border border-ink/12 bg-[#f7faee] px-5 py-4 text-left text-sm font-semibold text-ink transition hover:bg-[#edf3df] sm:w-fit"
                         enrollmentId={enrollment?.id}
-                        label="Install ZikPass on this device"
+                        label="Install Zik Pass on this device"
                       />
                     </div>
   );
@@ -3902,7 +3902,7 @@ function WalletFlowAside({ emphasis = false }: { emphasis?: boolean }) {
         <div className="mt-5">
           <CredentialVisualPreview
             title="Your pass"
-            body="This preview represents the signed ZikPass credential that will be available on this device after activation. The final Zignature is deterministic for the credential."
+            body="This preview represents the signed Zik Pass credential that will be available on this device after activation. The final Zignature is deterministic for the credential."
             seedInput="wallet-preview"
             muted
           />

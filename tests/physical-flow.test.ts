@@ -895,4 +895,44 @@ describe.sequential("physical flow", () => {
       expect(issued.status).toBe("issued");
     });
   });
+
+  describe("multi-store operator scoping", () => {
+    it("lets a clerk confirm an ID check for a non-Oxford catalogue store", async () => {
+      const session = await createPhysicalStoreSession({ storeId: "zik-london-003" });
+      expect(session.store_name).toBe("Zik Shoreditch");
+      expect(session.location_id).toBe("front-desk");
+
+      const enrollment = await startEnrollment({
+        application: physicalApplication(session, "2026-04-15T10:00:00.000Z"),
+        holderPublicKey,
+        applicationFingerprint: physicalFingerprint(session)
+      });
+
+      const confirmed = await verifyPhysicalIdCheck({
+        userCode: enrollment.physical_verification?.user_code.value ?? "",
+        verifierToken,
+        clerkStoreId: "zik-london-003"
+      });
+
+      expect(confirmed.physical_verification?.clerk_verification.status).toBe("verified");
+      expect(confirmed.physical_verification?.attestation?.retailer_id).toBe("zik-london-003");
+    });
+
+    it("rejects a clerk bound to a different store than the session", async () => {
+      const session = await createPhysicalStoreSession({ storeId: "zik-london-002" });
+      const enrollment = await startEnrollment({
+        application: physicalApplication(session, "2026-04-15T10:00:00.000Z"),
+        holderPublicKey,
+        applicationFingerprint: physicalFingerprint(session)
+      });
+
+      await expect(
+        verifyPhysicalIdCheck({
+          userCode: enrollment.physical_verification?.user_code.value ?? "",
+          verifierToken,
+          clerkStoreId: "zik-london-005"
+        })
+      ).rejects.toThrow(/not authorised for the requested store session/i);
+    });
+  });
 });

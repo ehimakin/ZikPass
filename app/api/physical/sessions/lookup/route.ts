@@ -6,8 +6,11 @@ export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as { userCode: string };
     const verifierToken = request.headers.get("x-zik-retailer-token") ?? undefined;
-    const verifier = authenticateRetailVerifier(verifierToken);
+    const clerkStoreId = request.headers.get("x-zik-store-id") ?? undefined;
     const session = await lookupPhysicalStoreSessionByCode(body.userCode);
+    // Scope the clerk to their bound store when declared; otherwise the single
+    // shared demo terminal is treated as serving the session's own store.
+    const verifier = authenticateRetailVerifier(verifierToken, clerkStoreId ?? session.store_id);
     if (session.store_id !== verifier.retailer_id || session.location_id !== verifier.location_id) {
       throw new Error("This verifier is not authorised for the requested store session.");
     }

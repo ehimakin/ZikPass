@@ -10,10 +10,11 @@ export async function POST(request: NextRequest) {
       note?: string;
     };
     const verifierToken = request.headers.get("x-zik-retailer-token") ?? undefined;
+    const clerkStoreId = request.headers.get("x-zik-store-id") ?? undefined;
     const enrollment =
       body.decision === "reject"
-        ? await rejectPhysicalIdCheck({ ...body, verifierToken })
-        : await verifyPhysicalIdCheck({ ...body, verifierToken });
+        ? await rejectPhysicalIdCheck({ ...body, verifierToken, clerkStoreId })
+        : await verifyPhysicalIdCheck({ ...body, verifierToken, clerkStoreId });
     return NextResponse.json(enrollment);
   } catch (error) {
     return NextResponse.json(

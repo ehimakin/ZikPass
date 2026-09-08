@@ -9,7 +9,7 @@ export default function NativeHandoffFallbackPage() {
         <section className="w-full max-w-xl rounded-[34px] border border-white/10 bg-white/[0.03] p-8 text-center sm:p-10">
           <p className="font-mono text-xs uppercase tracking-[0.24em] text-lime/70">Native wallet</p>
           <h1 className="mt-4 font-heading text-4xl font-semibold tracking-tight text-mist">
-            Open ZikPass on this device
+            Open Zik Pass on this device
           </h1>
           <p className="mt-4 text-sm leading-7 text-mist/55">
             The native app isn&rsquo;t installed yet. Install the web wallet, or continue in the browser.

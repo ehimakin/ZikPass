@@ -24,12 +24,12 @@ export default function GlobalError({
           <RecoveryPanel
             message={classified.message}
             onRestart={() => {
-              window.location.href = "/wallet";
+              window.location.href = "/home";
             }}
             onRetry={reset}
             operation="app.global_error"
             recoveryAction={classified.recoveryAction}
-            title="ZikPass ran into a problem"
+            title="Zik Pass ran into a problem"
           />
         </main>
       </body>

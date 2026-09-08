@@ -20,7 +20,7 @@ export async function createNativeAppHandoff(
 }> {
   const enrollment = await getEnrollmentOrThrow(enrollmentId);
   if (!enrollment.issued_credential) {
-    throw new Error("The ZikPass must be issued before it can be opened in the native app.");
+    throw new Error("The Zik Pass must be issued before it can be opened in the native app.");
   }
 
   const token = randomBytes(32).toString("base64url");
@@ -66,7 +66,7 @@ export async function claimNativeAppHandoff(input: {
 
   const enrollment = await getEnrollmentOrThrow(handoff.enrollment_id);
   if (!enrollment.issued_credential) {
-    throw new Error("This ZikPass is not ready for native app storage.");
+    throw new Error("This Zik Pass is not ready for native app storage.");
   }
 
   // The device-binding ledger is the policy gate (device limit, payment

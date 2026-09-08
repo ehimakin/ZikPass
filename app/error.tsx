@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { RecoveryPanel } from "@/components/recovery-panel";
+import type { Route } from "next";
+import { StatusPage } from "@/components/customer/status-page";
+import { Button, ButtonLink } from "@/components/customer/ui";
 import { classifyError } from "@/lib/shared/errors";
 
 export default function RouteError({
@@ -18,17 +20,16 @@ export default function RouteError({
   }, [error]);
 
   return (
-    <main className="flex min-h-[60vh] flex-1 items-center justify-center px-4 py-16 text-ink sm:px-6">
-      <RecoveryPanel
-        message={classified.message}
-        onRestart={() => {
-          window.location.href = "/wallet";
-        }}
-        onRetry={reset}
-        operation="app.route_error"
-        recoveryAction={classified.recoveryAction}
-        title="This page ran into a problem"
-      />
-    </main>
+    <StatusPage emoji="!" title="This page ran into a problem">
+      <p>{classified.message}</p>
+      <div className="mt-5 space-y-2">
+        <Button size="lg" onClick={reset}>
+          Try again
+        </Button>
+        <ButtonLink href={"/home" as Route} variant="secondary" size="lg">
+          Go to home
+        </ButtonLink>
+      </div>
+    </StatusPage>
   );
 }

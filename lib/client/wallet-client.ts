@@ -154,7 +154,7 @@ export async function claimPwaHandoff(token: string): Promise<WalletState> {
   const data = (await response.json()) as SignedCredential | { error?: string };
 
   if (!response.ok) {
-    throw new Error((data as { error?: string }).error ?? "Unable to restore the ZikPass on this device.");
+    throw new Error((data as { error?: string }).error ?? "Unable to restore the Zik Pass on this device.");
   }
 
   return storeCredential(data as SignedCredential, wallet.enrollmentId);

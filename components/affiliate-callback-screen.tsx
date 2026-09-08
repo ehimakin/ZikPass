@@ -37,7 +37,7 @@ export function AffiliateCallbackScreen({
       if (!code || !state || !expectedState || state !== expectedState) {
         setScreenState("denied");
         setMessage(
-          "ZikPass could not confirm your age. No identity data was shared. Please try again or choose another verification method."
+          "Zik could not confirm your age. No identity data was shared. Please try again or choose another verification method."
         );
         return;
       }
@@ -59,7 +59,7 @@ export function AffiliateCallbackScreen({
           setScreenState("denied");
           setMessage(
             (data as ApiError).error ??
-              "ZikPass could not confirm your age. No identity data was shared. Please try again or choose another verification method."
+              "Zik could not confirm your age. No identity data was shared. Please try again or choose another verification method."
           );
           return;
         }
@@ -70,7 +70,7 @@ export function AffiliateCallbackScreen({
       } catch {
         setScreenState("denied");
         setMessage(
-          "ZikPass could not confirm your age. No identity data was shared. Please try again or choose another verification method."
+          "Zik could not confirm your age. No identity data was shared. Please try again or choose another verification method."
         );
       }
     })();
@@ -106,7 +106,7 @@ export function AffiliateCallbackScreen({
                 You&apos;re in.
               </h1>
               <p className="max-w-xl text-sm leading-7 text-white/70">
-                ZikPass confirmed you are over {result.threshold}. No identity information — name,
+                Zik confirmed you are over {result.threshold}. No identity information — name,
                 date of birth, ID document, or biometric data — was shared with Nightfall.
               </p>
               <div className="rounded-[24px] border border-white/10 bg-white/[0.04] p-5">

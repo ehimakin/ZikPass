@@ -63,12 +63,12 @@ export function AffiliateDemoLanding() {
         <div className="grid gap-8 px-6 py-10 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:py-14">
           <div className="space-y-6">
             <h1 className="font-heading text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-              Confirm your age privately with ZikPass.
+              Confirm your age privately with Zik Pass.
             </h1>
             <p className="max-w-xl text-sm leading-7 text-white/70 sm:text-base">
               Nightfall is a restricted member area for adults. Instead of a selfie, ID document,
               biometric scan, or date of birth, we accept a private, one-time over-18 confirmation
-              from ZikPass.
+              from Zik Pass.
             </p>
 
             {state === "error" && error ? (
@@ -87,7 +87,7 @@ export function AffiliateDemoLanding() {
                   onClick={() => void startVerification()}
                   type="button"
                 >
-                  {state === "starting" ? "Preparing…" : "Use ZikPass to confirm I am 18+"}
+                  {state === "starting" ? "Preparing…" : "Use Zik Pass to confirm I am 18+"}
                 </button>
                 <p aria-live="polite" className="mt-4 text-sm leading-6 text-white/60">
                   No selfie, ID document, biometric data, name, or date of birth is shared with this
@@ -106,7 +106,7 @@ export function AffiliateDemoLanding() {
               <dl className="mt-4 grid gap-3 text-sm">
                 <InfoRow label="Age confirmation" value="Over 18 only" />
                 <InfoRow label="Identity data" value="Not shared" />
-                <InfoRow label="Verification path" value="ZikPass-hosted, server-checked" />
+                <InfoRow label="Verification path" value="Zik-hosted, server-checked" />
               </dl>
             </div>
           </div>

@@ -18,6 +18,7 @@ import type {
   PhysicalVerificationState
 } from "@/lib/shared/types";
 import { bytesToBase64Url, randomAlphaNumericCode, randomId, randomNumericCode } from "@/lib/shared/utils";
+import { getStoreById } from "@/lib/shared/stores";
 import {
   derivePhysicalVerificationStatus,
   isPhysicalStoreSessionExpired,
@@ -366,11 +367,13 @@ export async function createPhysicalStoreSession(input?: {
 }): Promise<PhysicalStoreSessionRecord> {
   const now = new Date();
   const nowIso = now.toISOString();
+  const requestedStoreId = input?.storeId?.trim() || "zik-london-001";
+  const catalogueStore = getStoreById(requestedStoreId);
   const session: PhysicalStoreSessionRecord = {
     session_id: randomId("store"),
-    store_id: input?.storeId?.trim() || "zik-london-001",
-    store_name: input?.storeName?.trim() || "Zik Oxford Street",
-    location_id: input?.locationId?.trim() || "front-desk",
+    store_id: requestedStoreId,
+    store_name: input?.storeName?.trim() || catalogueStore?.name || "Zik Oxford Street",
+    location_id: input?.locationId?.trim() || catalogueStore?.operator.locationId || "front-desk",
     entry_mode: input?.entryMode ?? "self_directed",
     created_at: nowIso,
     updated_at: nowIso,
@@ -456,11 +459,18 @@ export async function lookupPhysicalStoreSessionByCode(
 export async function verifyPhysicalIdCheck(input: {
   userCode: string;
   verifierToken?: string;
+  /** Store the clerk terminal is bound to. When set, a session for a
+   * different store is rejected (cross-store protection). When absent, the
+   * single shared demo terminal is treated as serving the session's store. */
+  clerkStoreId?: string;
   checkedBy?: string;
   note?: string;
 }): Promise<EnrollmentRecord> {
-  const verifier = authenticateRetailVerifier(input.verifierToken);
   const session = await lookupPhysicalStoreSessionByCode(input.userCode);
+  const verifier = authenticateRetailVerifier(
+    input.verifierToken,
+    input.clerkStoreId ?? session.store_id
+  );
   const record = await getPhysicalEnrollmentForSession(session);
 
   ensurePhysicalEnrollmentUsable(record, session);
@@ -519,11 +529,15 @@ export async function verifyPhysicalIdCheck(input: {
 export async function rejectPhysicalIdCheck(input: {
   userCode: string;
   verifierToken?: string;
+  clerkStoreId?: string;
   checkedBy?: string;
   note?: string;
 }): Promise<EnrollmentRecord> {
-  const verifier = authenticateRetailVerifier(input.verifierToken);
   const session = await lookupPhysicalStoreSessionByCode(input.userCode);
+  const verifier = authenticateRetailVerifier(
+    input.verifierToken,
+    input.clerkStoreId ?? session.store_id
+  );
   const record = await getPhysicalEnrollmentForSession(session);
 
   ensurePhysicalEnrollmentUsable(record, session);

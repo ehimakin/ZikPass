@@ -1,24 +1,9 @@
-import { Suspense } from "react";
-import { cookies } from "next/headers";
-import { AppShell } from "@/components/app-shell";
-import { HomepageSplash } from "@/components/homepage-splash";
-import { WalletSurface } from "@/components/wallet-surface";
-import { runtimeConfig } from "@/lib/shared/config";
+import { redirect } from "next/navigation";
 
-export default async function HomePage() {
-  const cookieStore = await cookies();
-  const lastSeenAt = Number(cookieStore.get("zikpass-home-splash-seen")?.value);
-  const suppressWindowMs = runtimeConfig.homepageSplashSuppressSeconds * 1000;
-  const seenRecently = Number.isFinite(lastSeenAt) && Date.now() - lastSeenAt < suppressWindowMs;
-
-  return (
-    <AppShell currentPath="/">
-      <main>
-        <Suspense fallback={null}>
-          <WalletSurface homepageMode />
-        </Suspense>
-      </main>
-      <HomepageSplash enabled={!seenRecently} />
-    </AppShell>
-  );
+// The customer entry point is the new mobile-first surface at /home.
+// The previous WalletSurface homepage (with its forced splash window) is
+// retired from the primary journey; its regression paths live on under
+// /onboarding and /wallet.
+export default function RootPage() {
+  redirect("/home");
 }

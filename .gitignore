@@ -8,3 +8,13 @@ data/runtime-state.json
 .DS_Store
 *.log
 .env
+test-results
+playwright-report
+blob-report
+playwright/.cache
+
+# Scratch / reference material, not app assets
+public/Inspiration/
+public/Agent Image*
+*.zip
+tsconfig.tsbuildinfo

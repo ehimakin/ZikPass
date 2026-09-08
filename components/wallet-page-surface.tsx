@@ -260,7 +260,7 @@ const DEMO_ERROR_SCENARIOS: Array<{
   label: string;
   message: string;
 }> = [
-  { scenario: "network_failure", label: "Simulate network failure", message: "Failed to fetch the ZikPass wallet." },
+  { scenario: "network_failure", label: "Simulate network failure", message: "Failed to fetch the Zik Pass wallet." },
   {
     scenario: "storage_unavailable",
     label: "Simulate storage unavailable",
@@ -386,7 +386,7 @@ function WalletStatusDock({
         },
         {
           label: "Stored",
-          value: wallet.pwaInstalledAt ? "ZikPass home screen app" : "Browser wallet"
+          value: wallet.pwaInstalledAt ? "Zik Pass home screen app" : "Browser wallet"
         }
       ]
     : [
@@ -566,7 +566,7 @@ function SavedWalletState({
         <PwaInstallButton
           className="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-mist transition hover:bg-white/10"
           enrollmentId={enrollmentId}
-          label="Install ZikPass on this device"
+          label="Install Zik Pass on this device"
           onInstalled={onPwaInstalled}
         />
         {pwaInstalledAt ? <p>Added to this device&rsquo;s home screen.</p> : null}
@@ -584,14 +584,14 @@ function EmptyWalletState() {
           No pass yet
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-mist/50">
-          Get a signed ZikPass for this device.
+          Get a signed Zik Pass for this device.
         </p>
       </div>
       <Link
         className="relative mt-8 rounded-full bg-lime px-8 py-4 text-base font-semibold text-ink transition hover:bg-lime/90"
         href={buildAppOnboardingUrl() as Route}
       >
-        Get ZikPass
+        Get Zik Pass
       </Link>
     </section>
   );

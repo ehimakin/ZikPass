@@ -126,6 +126,25 @@ export async function listEnrollments(): Promise<EnrollmentRecord[]> {
   return store.enrollments.sort((a, b) => b.created_at.localeCompare(a.created_at));
 }
 
+/**
+ * Demo-only: clear all transient runtime records (enrollments, store
+ * sessions, payments, handoffs, device bindings, affiliate requests/codes,
+ * error reports). The issuer keypair and store plans are left intact.
+ * Callers must gate this on the demo environment.
+ */
+export async function resetDemoRuntimeState(): Promise<void> {
+  await mutateStore((store) => {
+    store.enrollments = [];
+    store.physical_sessions = [];
+    store.mobile_handoffs = [];
+    store.device_bindings = [];
+    store.payments = [];
+    store.error_reports = [];
+    store.affiliate_authorization_requests = [];
+    store.affiliate_authorization_codes = [];
+  });
+}
+
 export async function listPhysicalSessions(): Promise<PhysicalStoreSessionRecord[]> {
   const store = await readStore();
   return store.physical_sessions.sort((a, b) => b.created_at.localeCompare(a.created_at));

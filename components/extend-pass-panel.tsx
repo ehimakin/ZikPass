@@ -160,7 +160,7 @@ export function ExtendPassPanel({ enrollmentId }: { enrollmentId: string }) {
         {state.qrDataUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            alt="Scan to add ZikPass to a new device"
+            alt="Scan to add Zik Pass to a new device"
             className="mx-auto h-auto w-56 rounded-[18px] bg-white p-2"
             src={state.qrDataUrl}
           />
