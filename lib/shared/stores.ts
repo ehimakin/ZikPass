@@ -59,7 +59,7 @@ const WEEKDAY_HOURS: StoreHours[] = [
 export const ZIK_STORES: ZikStore[] = [
   {
     id: "zik-london-001",
-    name: "Zik Oxford Street",
+    name: "Tesclo Oxford Street",
     area: "Central London",
     addressLine: "128 Oxford Street",
     postcode: "W1D 1LT",
@@ -74,7 +74,7 @@ export const ZIK_STORES: ZikStore[] = [
   },
   {
     id: "zik-london-002",
-    name: "Zik Camden",
+    name: "Samesburys Camden",
     area: "North London",
     addressLine: "43 Camden High Street",
     postcode: "NW1 7JH",
@@ -88,7 +88,7 @@ export const ZIK_STORES: ZikStore[] = [
   },
   {
     id: "zik-london-003",
-    name: "Zik Shoreditch",
+    name: "Norrisoms Shoreditch",
     area: "East London",
     addressLine: "12 Old Street",
     postcode: "EC1V 9BE",
@@ -102,7 +102,7 @@ export const ZIK_STORES: ZikStore[] = [
   },
   {
     id: "zik-london-004",
-    name: "Zik Stratford",
+    name: "DASA Stratford",
     area: "East London",
     addressLine: "Montfichet Road, Westfield",
     postcode: "E20 1EJ",
@@ -116,7 +116,7 @@ export const ZIK_STORES: ZikStore[] = [
   },
   {
     id: "zik-london-005",
-    name: "Zik Brixton",
+    name: "Tesclo Brixton",
     area: "South London",
     addressLine: "7 Brixton Road",
     postcode: "SW9 6BU",

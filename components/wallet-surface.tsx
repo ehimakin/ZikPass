@@ -204,21 +204,21 @@ interface AffiliateStore {
 const affiliateStores: AffiliateStore[] = [
   {
     id: "zik-london-001",
-    name: "Zik Oxford Street",
+    name: "Tesclo Oxford Street",
     area: "Central London",
     address: "Oxford Street",
     mapPosition: { left: "28%", top: "34%" }
   },
   {
     id: "zik-london-002",
-    name: "Zik Camden",
+    name: "Samesburys Camden",
     area: "North London",
     address: "Camden High Street",
     mapPosition: { left: "62%", top: "25%" }
   },
   {
     id: "zik-london-003",
-    name: "Zik Shoreditch",
+    name: "Norrisoms Shoreditch",
     area: "East London",
     address: "Old Street",
     mapPosition: { left: "70%", top: "66%" }

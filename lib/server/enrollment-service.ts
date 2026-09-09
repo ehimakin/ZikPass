@@ -373,7 +373,7 @@ export async function createPhysicalStoreSession(input?: {
   const session: PhysicalStoreSessionRecord = {
     session_id: randomId("store"),
     store_id: requestedStoreId,
-    store_name: input?.storeName?.trim() || catalogueStore?.name || "Zik Oxford Street",
+    store_name: input?.storeName?.trim() || catalogueStore?.name || "Tesclo Oxford Street",
     location_id: input?.locationId?.trim() || catalogueStore?.operator.locationId || "front-desk",
     entry_mode: input?.entryMode ?? "self_directed",
     created_at: nowIso,

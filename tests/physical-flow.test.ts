@@ -155,7 +155,7 @@ describe.sequential("physical flow", () => {
     const params = new URLSearchParams({
       flow: "physical",
       store_id: "store_1",
-      store_name: "Zik Oxford Street",
+      store_name: "Tesclo Oxford Street",
       location_id: "desk_1",
       session_id: "store_abcd1234"
     });
@@ -163,7 +163,7 @@ describe.sequential("physical flow", () => {
     expect(parseWalletEntryContext(params)).toEqual({
       lane: "physical",
       store_id: "store_1",
-      store_name: "Zik Oxford Street",
+      store_name: "Tesclo Oxford Street",
       location_id: "desk_1",
       session_id: "store_abcd1234",
       entry_mode: "self_directed"
@@ -174,7 +174,7 @@ describe.sequential("physical flow", () => {
     const params = new URLSearchParams({
       flow: "physical",
       store_id: "zik-london-001",
-      store_name: "Zik Oxford Street",
+      store_name: "Tesclo Oxford Street",
       location_id: "front-desk",
       entry_mode: "retail_card"
     });
@@ -182,7 +182,7 @@ describe.sequential("physical flow", () => {
     expect(parseWalletEntryContext(params)).toEqual({
       lane: "physical",
       store_id: "zik-london-001",
-      store_name: "Zik Oxford Street",
+      store_name: "Tesclo Oxford Street",
       location_id: "front-desk",
       session_id: undefined,
       entry_mode: "retail_card"
@@ -231,18 +231,18 @@ describe.sequential("physical flow", () => {
     expect(
       buildAffiliateOnboardingUrl({
         store_id: "store_1",
-        store_name: "Zik Oxford Street",
+        store_name: "Tesclo Oxford Street",
         location_id: "desk_1"
       })
     ).toBe(
-      "/onboarding?source=affiliate&flow=physical&store_id=store_1&store_name=Zik+Oxford+Street&location_id=desk_1"
+      "/onboarding?source=affiliate&flow=physical&store_id=store_1&store_name=Tesclo+Oxford+Street&location_id=desk_1"
     );
   });
 
   it("issues an in-person verified credential only after clerk and device auth complete", async () => {
     const session = await createPhysicalStoreSession({
       storeId: "zik-london-001",
-      storeName: "Zik Oxford Street",
+      storeName: "Tesclo Oxford Street",
       locationId: "front-desk"
     });
 
@@ -310,7 +310,7 @@ describe.sequential("physical flow", () => {
   it("auto-settles payment for a retail-card session so a till purchase never blocks issuance", async () => {
     const session = await createPhysicalStoreSession({
       storeId: "zik-london-001",
-      storeName: "Zik Oxford Street",
+      storeName: "Tesclo Oxford Street",
       locationId: "front-desk",
       entryMode: "retail_card"
     });
@@ -424,7 +424,7 @@ describe.sequential("physical flow", () => {
   it("maps physical sessions to the Version 2.0 process states", async () => {
     const session = await createPhysicalStoreSession({
       storeId: "zik-london-001",
-      storeName: "Zik Oxford Street",
+      storeName: "Tesclo Oxford Street",
       locationId: "front-desk"
     });
 
@@ -485,7 +485,7 @@ describe.sequential("physical flow", () => {
   it("rejects replaying a physical session after store verification has already advanced", async () => {
     const session = await createPhysicalStoreSession({
       storeId: "zik-london-001",
-      storeName: "Zik Oxford Street",
+      storeName: "Tesclo Oxford Street",
       locationId: "front-desk"
     });
 
@@ -526,7 +526,7 @@ describe.sequential("physical flow", () => {
   it("allows restarting the same unverified physical session after local device state is cleared", async () => {
     const session = await createPhysicalStoreSession({
       storeId: "zik-london-001",
-      storeName: "Zik Oxford Street",
+      storeName: "Tesclo Oxford Street",
       locationId: "front-desk"
     });
 
@@ -558,7 +558,7 @@ describe.sequential("physical flow", () => {
   it("rejects an expired store session before physical enrollment starts", async () => {
     const session = await createPhysicalStoreSession({
       storeId: "zik-london-001",
-      storeName: "Zik Oxford Street",
+      storeName: "Tesclo Oxford Street",
       locationId: "front-desk"
     });
 
@@ -683,7 +683,7 @@ describe.sequential("physical flow", () => {
     it("marks a session expired mid-flow, before clerk verification ever completes", async () => {
       const session = await createPhysicalStoreSession({
         storeId: "zik-london-001",
-        storeName: "Zik Oxford Street",
+        storeName: "Tesclo Oxford Street",
         locationId: "front-desk"
       });
       const enrollment = await startEnrollment({
@@ -725,7 +725,7 @@ describe.sequential("physical flow", () => {
     it("does not let one expired physical session crash the whole issuer listing", async () => {
       const session = await createPhysicalStoreSession({
         storeId: "zik-london-001",
-        storeName: "Zik Oxford Street",
+        storeName: "Tesclo Oxford Street",
         locationId: "front-desk"
       });
       const expiredEnrollment = await startEnrollment({
@@ -736,7 +736,7 @@ describe.sequential("physical flow", () => {
 
       const healthySession = await createPhysicalStoreSession({
         storeId: "zik-london-001",
-        storeName: "Zik Oxford Street",
+        storeName: "Tesclo Oxford Street",
         locationId: "front-desk"
       });
       const healthyEnrollment = await startEnrollment({
@@ -899,7 +899,7 @@ describe.sequential("physical flow", () => {
   describe("multi-store operator scoping", () => {
     it("lets a clerk confirm an ID check for a non-Oxford catalogue store", async () => {
       const session = await createPhysicalStoreSession({ storeId: "zik-london-003" });
-      expect(session.store_name).toBe("Zik Shoreditch");
+      expect(session.store_name).toBe("Norrisoms Shoreditch");
       expect(session.location_id).toBe("front-desk");
 
       const enrollment = await startEnrollment({
