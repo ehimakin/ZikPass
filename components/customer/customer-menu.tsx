@@ -84,8 +84,8 @@ export function CustomerMenu({ items, pathname }: {
         <div className="mt-5 border-t border-[var(--zk-line)] pt-4">
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--zk-text-soft)]">For staff</p>
           <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
-            <Link href="/verify" onClick={close} className="py-2 hover:underline">Retail verify</Link>
-            <Link href="/store" onClick={close} className="py-2 hover:underline">Store demo</Link>
+            <Link href="/verify" onClick={close} className="py-2 hover:underline">Verify a customer</Link>
+            <Link href="/verify/purchase" onClick={close} className="py-2 hover:underline">Sell a Zik Pass</Link>
           </div>
           <p className="mt-4 text-xs text-[var(--zk-text-soft)]">{environmentBadgeLabel()}</p>
         </div>

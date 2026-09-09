@@ -17,9 +17,9 @@ Vitest tests use the JSON runtime store and may modify the runtime state directo
 Coverage highlights:
 
 - `tests/affiliate-verifier.test.ts` + `affiliate-demo-session.test.ts` + `affiliate-external-client.test.ts` cover the affiliate flow end to end with real signed credentials: minimal result shape, every denial path, unregistered redirect URIs, hostile `state`, cookie tampering / expiry capped by pass expiry, replay rejection, and external-client bearer auth.
-- `tests/counter-sale.test.ts` covers ID/payment ordering, wrong-store and unauthorised access, full issuance, parallel idempotent claims, second-device rejection, generic-endpoint bypass prevention, rejected sales, expired-QR rotation.
+- `tests/purchase-sale.test.ts` covers ID/payment ordering, wrong-store and unauthorised access, full issuance, parallel idempotent claims, second-device rejection, generic-endpoint bypass prevention, rejected sales, expired-QR rotation.
 - `tests/physical-flow.test.ts` covers multi-store operator scoping (a non-Oxford store completes; a cross-store clerk is rejected).
-- `e2e/`: self-directed journey, prepaid retail-card (one auto-settled payment), payment decline → retry, delete-pass → empty state, cross-store rejection, location-denied fallback, branded 404, affiliate no-pass + approve.
+- `e2e/`: self-directed journey, clerk-first purchase sale (one till payment, customer activates from the QR), payment decline → retry, delete-pass → empty state, cross-store rejection, location-denied fallback, branded 404, affiliate no-pass + approve.
 
 ## Basic local run
 
@@ -42,22 +42,18 @@ Open `http://localhost:3000` (redirects to `/home`). Use `localhost`, not a LAN 
 
 Server-side order: physical session usable → clerk lookup/verification → device authentication → confirmed `pass_issuance` payment → issuance.
 
-## Manual prepaid retail-card flow
+## Manual clerk-first purchase sale
 
-1. Open `/card` (the printed-card QR target) → **Choose your store** → pick a card-selling store.
-2. `/get-pass?entry=retail_card` shows "Card already paid for" and no payment step.
-3. Start, note the code, confirm as the clerk on `/verify`.
-4. Confirm issuance with **no second payment**. `GET /api/payments/<enrollmentId>` should show exactly one confirmed `retail_till` payment.
+The customer brings a Zik purchase card to the till with no phone interaction.
 
-## Manual clerk-first counter sale
+1. `/verify/purchase` (also linked from `/verify`). Select the terminal store → **Start sale**.
+2. **ID checked — confirm 18+** (or **Cannot verify** → stops, no payment).
+3. **Payment received — show QR** (cash or card at the till).
+4. The activation QR appears only now. Open it on the customer device (`/card#activate=…`) → **Save my Zik Pass** → the device check runs. No store pick, no repeat ID check, no in-app payment.
+5. `GET /api/payments/<enrollmentId>` should show exactly one confirmed `pass_issuance` payment (`cash_in_store` or `retail_till`).
+6. Clerk: **Check customer progress** → **Next customer**.
 
-1. `/verify/counter` (also linked from `/verify`). Select the terminal store, start a sale.
-2. Confirm 18+ (or reject → stops, no payment).
-3. Record the till payment (**Payment received**).
-4. The activation QR appears only now. Open it on the customer device → **Save my Zik Pass** → finish the device check. No store pick, no repeat ID check, no extra payment.
-5. Clerk: **Check customer progress** → **Next customer**.
-
-See [`docs/COUNTER_SALE_FLOW.md`](COUNTER_SALE_FLOW.md) for recovery/rotation details.
+See [`docs/PURCHASE_SALE_FLOW.md`](PURCHASE_SALE_FLOW.md) for recovery / QR-rotation details.
 
 ## PWA handoff and interruption recovery
 
@@ -98,7 +94,7 @@ Exercise at least one failure from each category:
 
 - malformed or unknown clerk code; wrong-store terminal
 - expired physical session or customer code
-- expired/replayed handoff token; expired paid counter-sale QR
+- expired/replayed handoff token; expired paid purchase-sale QR
 - simulated declined payment followed by retry (sheet stays open); cancellation is not treated as failure
 - device limit reached without payment
 - lost customer heartbeat during a clerk session

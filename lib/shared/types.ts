@@ -157,7 +157,7 @@ export interface PhysicalVerificationState {
 }
 
 export interface PhysicalStoreSessionRecord extends PhysicalStoreContext {
-  counter_sale?: {
+  purchase_sale?: {
     token_hash: string;
     amount_minor: number;
     currency: string;

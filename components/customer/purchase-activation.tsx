@@ -6,7 +6,7 @@ import type { PassPrice } from "@/lib/shared/payment-config";
 import { Alert, Button, ButtonLink, Card } from "@/components/customer/ui";
 import { OnboardingFlow } from "@/components/customer/onboarding/onboarding-flow";
 
-export function CounterActivation({ price }: { price: PassPrice }) {
+export function PurchaseActivation({ price }: { price: PassPrice }) {
   const [token, setToken] = useState<string | null>(null);
   const [record, setRecord] = useState<EnrollmentRecord | null>(null);
   const [busy, setBusy] = useState(false);
@@ -22,7 +22,7 @@ export function CounterActivation({ price }: { price: PassPrice }) {
     try {
       const wallet = await ensureHolderKeyPair();
       if (wallet.credential) throw new Error("This device already has a pass. Open My pass or scan this QR on the intended customer’s device.");
-      const response = await fetch("/api/counter-sale/claim", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, holderPublicKey: wallet.holderKeyPair?.publicKeyJwk }) });
+      const response = await fetch("/api/purchase-sale/claim", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, holderPublicKey: wallet.holderKeyPair?.publicKeyJwk }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       await storeEnrollmentContext({ enrollmentId: data.id, enrollmentLane: "physical", physicalSessionId: data.physical_verification.session.session_id });

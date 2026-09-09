@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import {
+  CLERK_TOKEN,
   resetDemo,
   chooseStore,
   readCustomerCode,
@@ -33,23 +34,39 @@ test("self-directed: discover a store, get verified, pay, receive a pass", async
   await expect(page.getByText(/zp_/)).toBeVisible();
 });
 
-test("prepaid retail-card: no second payment is taken", async ({ page, request }) => {
-  await page.goto("/get-pass?entry=retail_card&store_id=zik-london-001");
-  await expect(page.getByText(/Card already paid for/i)).toBeVisible();
-  await page.getByRole("button", { name: /^Start/ }).click();
-  const code = await readCustomerCode(page);
+test("clerk-first purchase sale: till payment, customer activates, one payment", async ({ page, request }) => {
+  const headers = {
+    "x-zik-retailer-token": CLERK_TOKEN,
+    "x-zik-store-id": "zik-london-001",
+    "Content-Type": "application/json"
+  };
+  const started = await request
+    .post("/api/purchase-sale", { headers, data: { action: "start" } })
+    .then((r) => r.json());
+  await request.post("/api/purchase-sale", {
+    headers,
+    data: { action: "confirm_id", sessionId: started.id }
+  });
+  const paid = await request
+    .post("/api/purchase-sale", {
+      headers,
+      data: { action: "confirm_payment", sessionId: started.id, method: "cash" }
+    })
+    .then((r) => r.json());
+  const token = paid.token ?? started.token;
 
-  await expect(page.getByText(/^Payment$/)).toHaveCount(0);
+  await page.goto(`/card#activate=${encodeURIComponent(token)}`);
+  await page.getByRole("button", { name: /Save my Zik Pass/i }).click();
 
-  await clerkConfirm(request, code, "zik-london-001");
   await expect(page.getByRole("heading", { name: /Your pass is ready/i })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole("button", { name: /Zik demo checkout/i })).toHaveCount(0);
 
   const enrollmentId = await enrollmentIdFromWallet(page);
   const { payments } = await request.get(`/api/payments/${enrollmentId}`).then((r) => r.json());
   const passPayments = payments.filter((p: { purpose: string }) => p.purpose === "pass_issuance");
   expect(passPayments).toHaveLength(1);
-  expect(passPayments[0].method).toBe("retail_till");
   expect(passPayments[0].status).toBe("confirmed");
+  expect(passPayments[0].method).toBe("cash_in_store");
 });
 
 test("payment declined, then retried successfully - no premature issuance", async ({ page, request }) => {

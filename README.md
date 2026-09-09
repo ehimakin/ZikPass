@@ -14,7 +14,7 @@ The product now has two distinct surfaces plus a small set of legacy/dev screens
 | --- | --- |
 | `/home` | Landing. One primary "Get Zik Pass" action + returning-user "Open my pass". `/` redirects here. |
 | `/find` | Store finder: postcode/area search, "Use my location", schematic map + accessible list, open/closed + distance. |
-| `/get-pass` | Onboarding. Physical-only: 6-char code + QR, live checklist, device check, payment, issuance. `?entry=retail_card` runs the prepaid path. |
+| `/get-pass` | Onboarding. Physical-only: 6-char code + QR, live checklist, device check, payment, issuance.  |
 | `/pass` | The wallet. Empty / pending / activating / active / expired, plus delete, PWA install, and PWA-launch handoff claim. `/wallet` redirects here. |
 | `/card` | Activate a physical Zik Pass card bought at a till (the printed-card QR target). |
 | `/help` | Accepted ID, common failure recoveries, "about this build", and (demo only) a **Reset demo data** button. |
@@ -26,8 +26,8 @@ The product now has two distinct surfaces plus a small set of legacy/dev screens
 | Route | Purpose |
 | --- | --- |
 | `/verify` | Clerk verification: bind the terminal to a store, look up the customer's 6-char code, confirm or reject the in-person ID check. Sends `x-zik-store-id` so a code from another store is rejected. |
-| `/verify/counter` | Clerk-first sale: the customer brings the purchase card to the till without starting on their phone. Clerk checks ID, records the till payment, then shows a private activation QR. See [`docs/COUNTER_SALE_FLOW.md`](docs/COUNTER_SALE_FLOW.md). |
-| `/store` | Demo store session dashboard (still on the older shell). |
+| `/verify/purchase` | Clerk-first sale: the customer brings the purchase card to the till without starting on their phone. Clerk checks ID, records the till payment, then shows a private activation QR. See [`docs/PURCHASE_SALE_FLOW.md`](docs/PURCHASE_SALE_FLOW.md). |
+| `/store` | Retired - redirects to `/verify`. The customer store finder + `/verify/purchase` cover its old roles. |
 | `/issuer` | Demo issuer/enrollment and error-report view (still on the older shell). |
 
 **Legacy / dev** (kept as regression paths, not in any navigation):
@@ -38,11 +38,11 @@ The product now has two distinct surfaces plus a small set of legacy/dev screens
 
 ## Customer onboarding (physical)
 
-1. Pick a store on `/find` (or come from `/card` for a prepaid card).
+1. Pick a store on `/find`. (Or, for the clerk-first sale, the customer just brings a purchase card to the till - see `/verify/purchase`.)
 2. `/get-pass` reserves a store session and starts a physical enrollment, which produces a short customer code + QR.
 3. The customer shows the code to a clerk; the clerk looks it up on `/verify` and confirms the in-person ID check. The customer's ID is inspected visually and handed back — never scanned, photographed or stored.
 4. The customer's device completes device authentication. WebAuthn is used where the browser exposes it; `demo_device_check` is the prototype fallback.
-5. Issuance is gated by a **confirmed payment record**. Options: cash/card at the till (clerk confirms), or the clearly labelled **Zik demo checkout** simulator (deterministic success / decline). The prepaid retail-card path is auto-settled server-side as one `retail_till` payment, so it is never charged again. If the configured price is `0`, a free flow replaces the payment step.
+5. Issuance is gated by a **confirmed payment record**. Options: cash/card at the till (clerk confirms), or the clearly labelled **Zik demo checkout** simulator (deterministic success / decline). In the clerk-first `/verify/purchase` flow the clerk records the till payment before showing the activation QR, so the customer is never asked to pay in-app. If the configured price is `0`, a free flow replaces the payment step.
 6. The signed pass is stored on the device and shown on `/pass`.
 
 The older non-physical enrollment pipeline (`/onboarding` remote lane) remains for regression only. It uses mocked provider responses and is not a live financial or identity integration.
@@ -83,10 +83,10 @@ The customer and operator surfaces share one token system (`app/globals.css` `--
 ```text
 app/                 Next.js App Router pages and API route handlers
 components/customer/  New customer surface: shell, screens, onboarding, UI primitives
-components/operator/  Staff surface: shell, clerk verify, counter sale
-components/           Legacy WalletSurface, affiliate/issuer/store screens, shared marks
+components/operator/  Staff surface: shell, clerk verify, purchase sale
+components/           Legacy WalletSurface, affiliate/issuer screens, shared marks
 lib/client/          Browser key, wallet, PWA, and error-reporting clients
-lib/server/          Enrollment, physical journey, counter sale, payment, binding, storage, crypto, affiliate
+lib/server/          Enrollment, physical journey, purchase sale, payment, binding, storage, crypto, affiliate
 lib/shared/          Types, config, stores catalogue, demo-environment, payment-config, crypto, journey helpers
 mobile/              Expo native-wallet scaffold, not yet the primary delivery path
 tests/               Vitest unit and integration-style service tests
@@ -139,7 +139,7 @@ All supported environment variables are documented in [`.env.example`](.env.exam
 - **Payment is test-only.** The "Zik demo checkout" is a clearly labelled deterministic simulator; a clerk "payment received" is an asserted till payment, not settlement evidence. No card details are collected or charged. **Real Apple Pay is not wired** — the Stripe Express Checkout route only appears when `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` is set, and a verified Apple Pay test additionally needs a registered HTTPS payment domain, a webhook secret, and an Apple Pay-capable device. Until then, treat Apple Pay as unverified regardless of simulator results.
 - Store plans, platform shares, and payment settlement records are shaped for demonstration and are not connected to a payment processor or accounting system.
 - The JSON store is not suitable for multi-instance production deployment or concurrent processes on separate hosts.
-- Retail verification, counter-sale, store and issuer surfaces are demo screens using one shared clerk token; production needs authenticated staff sessions, per-terminal credentials, RBAC, audit controls, rate limits, and abuse monitoring.
+- Retail verification, purchase-sale, store and issuer surfaces are demo screens using one shared clerk token; production needs authenticated staff sessions, per-terminal credentials, RBAC, audit controls, rate limits, and abuse monitoring.
 - `demo_device_check` is not equivalent to a platform biometric assertion.
 - Browser-held keys are not hardware-backed. The native scaffold is the future path for stronger key protection.
 - The cryptographic design is a prototype and has not received a production security review. It is **not** a zero-knowledge proof and must not be described as one.

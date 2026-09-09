@@ -25,9 +25,9 @@ Cryptographic helpers and domain contracts shared by browser and server code liv
 | --- | --- | --- |
 | `/home` | `HomeScreen` | Landing. `/` redirects here. Fixed scroll-over hero. |
 | `/find` | `StoreFinder` | Postcode/area search, geolocation, schematic map + list. |
-| `/get-pass` | `OnboardingFlow` | Physical-only onboarding state machine over the existing APIs. `?entry=retail_card` = prepaid path. |
+| `/get-pass` | `OnboardingFlow` | Physical-only onboarding state machine over the existing APIs. Also renders a claimed purchase-sale enrolment (`initialEnrollment`). |
 | `/pass` | `PassScreen` | Wallet states + delete, `PwaInstallButton`, PWA-launch handoff claim. `/wallet` redirects here (PWA/handoff params preserved). |
-| `/card` | `CounterActivation` | Activate a physical card bought at a till (printed-card QR target). |
+| `/card` | `PurchaseActivation` | Activate a physical card bought at a till (printed-card QR target). |
 | `/help` | `HelpScreen` | Accepted ID, FAQ, "Reset demo data" (demo only). |
 | `/about` | about page | Longer explanation for customers/stores/sites. |
 | `/offline` | `StatusPage` | Served by the service worker. `not-found.tsx` + `error.tsx` share `StatusPage`. |
@@ -39,7 +39,7 @@ Cryptographic helpers and domain contracts shared by browser and server code liv
 | Page | Main component | Notes |
 | --- | --- | --- |
 | `/verify` | `ClerkVerify` → `RetailVerificationScreen` | Terminal binds to a store; sends `x-zik-store-id`; cross-store codes rejected. |
-| `/verify/counter` | `CounterSale` | Clerk-first sale: ID → record till payment → private activation QR. |
+| `/verify/purchase` | `PurchaseSale` | Clerk-first sale: ID → record till payment → private activation QR. |
 
 `OperatorShell` owns a plain staff header + a store-terminal selector (`useOperatorStore`, persisted in `localStorage`).
 
@@ -49,7 +49,7 @@ Cryptographic helpers and domain contracts shared by browser and server code liv
 | --- | --- | --- |
 | `/onboarding` | `WalletSurface` (onboarding mode) | Original flow; app-led + affiliate context; older mocked remote/bank pipeline. |
 | `/wallet?flow=physical…` | `WalletSurface` | Legacy physical handoff link. Bare `/wallet` redirects to `/pass`. |
-| `/store` | `StoreSessionDashboard` | Demo store/session creation and monitoring. |
+| `/store` | - | Retired - `redirect("/verify")`. |
 | `/issuer` | issuer UI components | Enrollment/error inspection for development. |
 | `/verify/zik` | verifier demo component | Hosted relying-party verification demo (`postMessage`-era; not reused by the affiliate flow). |
 | `/affiliate-demo` (+ `/confirm`, `/callback`, `/continue`) | `JerkMeatSite` / `AffiliateConfirmScreen` / `AffiliateCallbackScreen` | See the affiliate protocol section. |
@@ -81,10 +81,10 @@ Cryptographic helpers and domain contracts shared by browser and server code liv
 
 The lookup and verify routes take an optional `x-zik-store-id` header. When set, `authenticateRetailVerifier(token, storeId)` derives the clerk identity from `lib/shared/stores.ts` and a session for a different store is rejected. Physical journey status is derived in `lib/shared/physical-journey.ts`; do not duplicate status rules in a page component.
 
-### Counter sale (clerk-first)
+### Purchase sale (clerk-first)
 
-- `POST /api/counter-sale` creates / advances a till sale (`lib/server/counter-sale.ts`): start, confirm ID, record payment, issue a private activation token. Withheld until ID **and** payment are confirmed. The server stores a SHA-256 hash of the token; the raw token lives only in the clerk browser and the QR fragment.
-- `POST /api/counter-sale/claim` — the customer's device exchanges the activation token + holder public key for the linked enrollment. The claim commits enrollment + confirmed payment together under the storage transaction lock. Same token + same key is idempotent; a different key is rejected. A generic enrollment cannot claim a sale by guessing its id.
+- `POST /api/purchase-sale` creates / advances a till sale (`lib/server/purchase-sale.ts`): start, confirm ID, record payment, issue a private activation token. Withheld until ID **and** payment are confirmed. The server stores a SHA-256 hash of the token; the raw token lives only in the clerk browser and the QR fragment.
+- `POST /api/purchase-sale/claim` — the customer's device exchanges the activation token + holder public key for the linked enrollment. The claim commits enrollment + confirmed payment together under the storage transaction lock. Same token + same key is idempotent; a different key is rejected. A generic enrollment cannot claim a sale by guessing its id.
 
 ### Demo tooling
 

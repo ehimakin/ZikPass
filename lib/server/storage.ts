@@ -332,8 +332,8 @@ export async function runPaymentTransaction<T>(
   });
 }
 
-/** Commit a counter claim and its enrollment/payment together in the existing store lock. */
-export async function runCounterSaleTransaction<T>(
+/** Commit a purchase claim and its enrollment/payment together in the existing store lock. */
+export async function runPurchaseSaleTransaction<T>(
   transaction: (data: Pick<StoreData, "physical_sessions" | "enrollments" | "payments">) => T
 ): Promise<T> {
   return mutateStore(transaction);
@@ -685,7 +685,9 @@ function normalizePhysicalSessions(
       return [];
     }
 
-    const candidate = value as Partial<PhysicalStoreSessionRecord>;
+    const candidate = value as Partial<PhysicalStoreSessionRecord> & {
+      counter_sale?: PhysicalStoreSessionRecord["purchase_sale"];
+    };
     if (
       !candidate.session_id ||
       !candidate.store_id ||
@@ -701,7 +703,9 @@ function normalizePhysicalSessions(
     return [
       {
         session_id: candidate.session_id,
-        counter_sale: candidate.counter_sale,
+        // `counter_sale` is the pre-rename field name; accept it from any
+        // runtime state written before the rename.
+        purchase_sale: candidate.purchase_sale ?? candidate.counter_sale,
         store_id: candidate.store_id,
         store_name: candidate.store_name,
         location_id: candidate.location_id,

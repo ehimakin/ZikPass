@@ -7,11 +7,11 @@ import { OperatorShell, useOperatorStore } from "@/components/operator/operator-
 import { Alert, Button, ButtonLink, Card } from "@/components/customer/ui";
 
 type Sale = { id: string; token?: string; storeName: string; expiresAt: string; amountMinor: number; currency: string; paid: boolean; verified: boolean; claimed: boolean; status: string };
-export function CounterSale() {
+export function PurchaseSale() {
   const [storeId, setStoreId] = useOperatorStore();
-  return <OperatorShell title="Sell a Zik Pass" storeId={storeId} onStoreChange={setStoreId}><CounterSaleForm key={storeId} storeId={storeId} /></OperatorShell>;
+  return <OperatorShell title="Sell a Zik Pass" storeId={storeId} onStoreChange={setStoreId}><PurchaseSaleForm key={storeId} storeId={storeId} /></OperatorShell>;
 }
-function CounterSaleForm({ storeId }: { storeId: string }) {
+function PurchaseSaleForm({ storeId }: { storeId: string }) {
   const [sale, setSale] = useState<Sale | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +19,7 @@ function CounterSaleForm({ storeId }: { storeId: string }) {
   const [qr, setQr] = useState("");
   const [url, setUrl] = useState("");
   const [now, setNow] = useState(Date.now());
-  const storageKey = `zik-counter-sale:${storeId}`;
+  const storageKey = `zik-purchase-sale:${storeId}`;
   useEffect(() => {
     try { const saved = sessionStorage.getItem(storageKey); if (saved) setSale(JSON.parse(saved)); } catch { /* storage optional */ }
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
@@ -37,7 +37,7 @@ function CounterSaleForm({ storeId }: { storeId: string }) {
     if (busy) return;
     setBusy(true); setError(null);
     try {
-      const response = await fetch("/api/counter-sale", { method: "POST", headers: { "Content-Type": "application/json", "x-zik-retailer-token": "demo-retail-terminal", "x-zik-store-id": storeId }, body: JSON.stringify({ action, sessionId: sale?.id, method }) });
+      const response = await fetch("/api/purchase-sale", { method: "POST", headers: { "Content-Type": "application/json", "x-zik-retailer-token": "demo-retail-terminal", "x-zik-store-id": storeId }, body: JSON.stringify({ action, sessionId: sale?.id, method }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       const next = { ...data, token: data.token ?? sale?.token } as Sale;
@@ -53,7 +53,7 @@ function CounterSaleForm({ storeId }: { storeId: string }) {
     <p className="text-sm">Purchase card → check ID → take payment → hand over activation QR.</p>
     <p className="text-xs text-[var(--zk-text-soft)]">Demo terminal. Payment records represent money taken at the till; this screen does not charge a card.</p>
     {error && <Alert tone="critical">{error}</Alert>}
-    {!sale ? <Card className="space-y-4 p-5"><p>Customer brought a Zik purchase card to the till? Start their sale here. They do not need their phone yet.</p><Button loading={busy} onClick={() => void action("start")}>Start counter sale</Button><ButtonLink href="/verify" variant="secondary">Customer already has a verification code</ButtonLink></Card>
+    {!sale ? <Card className="space-y-4 p-5"><p>Customer brought a Zik purchase card to the till? Start their sale here. They do not need their phone yet.</p><Button loading={busy} onClick={() => void action("start")}>Start sale</Button><ButtonLink href="/verify" variant="secondary">Customer already has a verification code</ButtonLink></Card>
     : sale.status === "rejected" ? <Card className="space-y-4 p-5"><p>ID not verified. Do not take payment or issue a pass.</p><Button onClick={reset}>Next customer</Button></Card>
     : sale.claimed ? <Card className="space-y-4 p-5"><p>{sale.status === "completed" ? "Pass issued to the customer’s device." : "Claimed on the customer’s device. They can finish setup on their phone."}</p><Button onClick={reset}>Next customer</Button></Card>
     : expired ? <Alert tone="caution" title="Session expired"><p>{sale.paid ? "Payment is recorded. With the same customer still at the till, replace the expired QR without charging again." : "No payment recorded. Start a fresh sale."}</p>{sale.paid ? <Button loading={busy} onClick={() => void action("renew")}>Replace activation QR — no payment</Button> : <Button onClick={reset}>Start again</Button>}</Alert>

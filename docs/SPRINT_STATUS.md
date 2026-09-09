@@ -10,9 +10,28 @@ Branch: `v2-ui-overhaul` · Baseline commit: `675a050`
 
 ## Current phase
 
-**Delivery step 7 - docs.** Steps 1-6 done and verified. README / ARCHITECTURE /
-TESTING refreshed to the current customer/operator surfaces + counter sale +
-demo env + offline shell; `.env.example` completed; `docs/DEMO_SCRIPT.md` added.
+**Post-step-7 cleanup (2026-09-09).** Steps 1-7 done. Then, per the user:
+- **`/store` retired** - `app/store/page.tsx` now `redirect("/verify")`;
+  `store-session-dashboard.tsx` deleted; "Store demo" nav links removed. It was
+  a pre-`/find` session-bootstrap tool that also duplicated `/verify`. The
+  `/api/physical/sessions` backbone is kept.
+- **`counter-sale` -> `purchase-sale` rename, everything.** Route
+  `/verify/counter` -> `/verify/purchase`; `lib/server/counter-sale.ts` ->
+  `purchase-sale.ts`; `/api/counter-sale[/claim]` -> `/api/purchase-sale[/claim]`;
+  `CounterSale`/`CounterActivation` -> `PurchaseSale`/`PurchaseActivation`;
+  `counter_sale` session field -> `purchase_sale` (storage normalisation still
+  accepts the old name); `tests/counter-sale.test.ts` -> `purchase-sale.test.ts`;
+  `COUNTER_SALE_FLOW.md` -> `PURCHASE_SALE_FLOW.md`.
+- **Orphaned `?entry=retail_card` prepaid plumbing removed** from
+  `onboarding-flow.tsx`, `store-finder.tsx`, `app/find/page.tsx`,
+  `app/get-pass/page.tsx` (nothing linked to it after `/card` became the
+  purchase-sale activation screen). Server-side `entry_mode: "retail_card"` +
+  `recordRetailTillPurchase` + its `physical-flow.test.ts` case are LEFT intact
+  (unused by any UI now; safe to remove in a later pass).
+- e2e: the "prepaid retail-card" journey replaced with a "clerk-first purchase
+  sale" journey (clerk API -> `/card#activate=` -> claim -> issued -> one
+  `cash_in_store` payment).
+
 Remaining open items are listed under "Step 4/5 still to do" below.
 
 ---
@@ -21,7 +40,7 @@ Remaining open items are listed under "Step 4/5 still to do" below.
 
 | Check | Result | Notes |
 | --- | --- | --- |
-| `npm test` (Vitest) | 127 passed / 21 files | +23 since the design-system commit (counter-sale, affiliate session/external-client, physical-session-route, multi-store scoping). |
+| `npm test` (Vitest) | 127 passed / 21 files | +23 since the design-system commit (purchase-sale, affiliate session/external-client, physical-session-route, multi-store scoping). |
 | `npm run e2e` (Playwright) | 10 passed / 2 files | customer/clerk/affiliate journeys + edge cases; affiliate specs updated for the JerkMeat flow. |
 | `npm run lint` | clean | `scripts/**` ignored. |
 | `npx tsc --noEmit` | clean | |
@@ -338,7 +357,7 @@ Browser pass at 320 / 390 / 768px + keyboard.
 ### Step 4/5 still to do
 - Full **device extension** (`ExtendPassPanel`) + **recovery panel** wiring
   into `/pass` (delete + install now done), then retire `wallet-page-surface.tsx`.
-- `/store` + `/issuer` - **left for now per user**.
+- `/store` retired (see top). `/issuer` still on the old shell - left for now.
 - Real Safari/iPhone/PWA test + SW offline test (preview browser can't).
 - `npm run build` not re-run this sprint (dev server live - build corrupts
   `.next`). Run once dev is stopped before any packaging.

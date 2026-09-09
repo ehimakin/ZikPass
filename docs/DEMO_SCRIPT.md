@@ -79,7 +79,7 @@ demo the free flow instead of the £1.99 test price.
 ## 6. Wrap (20s)
 
 - "One in-person check, a pass you own, and sites that learn only that you're
-  old enough." Mention the **clerk-first sale at the till** (`/verify/counter`)
+  old enough." Mention the **clerk-first sale at the till** (`/verify/purchase`)
   and the honest **offline** page as extras if there's time.
 
 ---
@@ -92,9 +92,9 @@ demo the free flow instead of the £1.99 test price.
 | Store finder | `/find` |
 | Onboarding | `/get-pass` |
 | Wallet | `/pass` |
-| Prepaid card | `/card` |
-| Clerk verify | `/verify` |
-| Clerk-first sale | `/verify/counter` |
+| Activate a purchase card | `/card` |
+| Clerk verify (customer has a code) | `/verify` |
+| Clerk-first purchase sale | `/verify/purchase` |
 | Affiliate demo | `/affiliate-demo` |
 | Reset demo state | `POST /api/demo/reset` |
 

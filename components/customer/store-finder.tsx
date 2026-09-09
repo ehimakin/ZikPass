@@ -25,14 +25,7 @@ function project(store: ZikStore): { x: number; y: number } {
   return { x: Math.max(4, Math.min(96, x)), y: Math.max(6, Math.min(94, y)) };
 }
 
-export function StoreFinder({
-  selectMode = false,
-  entry
-}: {
-  selectMode?: boolean;
-  /** Carried into the onboarding URL, e.g. "retail_card" for a prepaid card. */
-  entry?: "retail_card";
-}) {
+export function StoreFinder({ selectMode = false }: { selectMode?: boolean }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [origin, setOrigin] = useState<Origin>(null);
@@ -44,11 +37,7 @@ export function StoreFinder({
   const now = new Date();
 
   const stores = useMemo(() => {
-    const source =
-      entry === "retail_card"
-        ? ZIK_STORES.filter((store) => store.services.includes("retail_card"))
-        : ZIK_STORES;
-    const withMeta = source.map((store) => ({
+    const withMeta = ZIK_STORES.map((store) => ({
       store,
       open: getStoreOpenState(store, now),
       distanceKm: origin ? straightLineDistanceKm(origin, store) : null
@@ -58,7 +47,7 @@ export function StoreFinder({
     }
     return withMeta;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [origin, entry]);
+  }, [origin]);
 
   function runSearch(raw: string) {
     setQuery(raw);
@@ -114,9 +103,7 @@ export function StoreFinder({
     } catch {
       /* storage may be unavailable; selection still passes via the URL */
     }
-    const query = new URLSearchParams({ store_id: store.id });
-    if (entry) query.set("entry", entry);
-    router.push(`/get-pass?${query.toString()}` as never);
+    router.push(`/get-pass?store_id=${encodeURIComponent(store.id)}` as never);
   }
 
   const geoMessage: Record<Exclude<GeoState, "idle" | "locating">, string> = {
@@ -269,17 +256,6 @@ export function StoreFinder({
                     Bring photo ID (passport, UK/EU driving licence, or PASS-accredited card).
                     A clerk checks it in person - it is not scanned or stored.
                   </p>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {store.services.includes("physical_id_check") ? (
-                      <StatusBadge tone="info">ID check</StatusBadge>
-                    ) : null}
-                    {store.services.includes("retail_card") ? (
-                      <StatusBadge tone="info">Retail card</StatusBadge>
-                    ) : null}
-                    {store.services.includes("device_extension") ? (
-                      <StatusBadge tone="info">Device extension</StatusBadge>
-                    ) : null}
-                  </div>
                   {selectMode ? (
                     <Button
                       className="mt-3 w-full"

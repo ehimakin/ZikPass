@@ -32,14 +32,13 @@ type Phase =
   | "error";
 
 interface Props {
+  /** A pre-created enrolment (e.g. claimed from a clerk purchase-sale QR). */
   initialEnrollment?: EnrollmentRecord;
   price: PassPrice;
   storeId?: string;
-  /** Force the retail-card (prepaid) entry mode, e.g. when reached from /card. */
-  forcedEntry?: "retail_card";
 }
 
-export function OnboardingFlow({ price, storeId: storeIdProp, forcedEntry, initialEnrollment }: Props) {
+export function OnboardingFlow({ price, storeId: storeIdProp, initialEnrollment }: Props) {
   const params = useSearchParams();
   const storeId =
     storeIdProp ||
@@ -47,10 +46,6 @@ export function OnboardingFlow({ price, storeId: storeIdProp, forcedEntry, initi
     readStoredStore() ||
     undefined;
   const store = getStoreById(storeId);
-  const entryModeParam: "retail_card" | "self_directed" =
-    forcedEntry === "retail_card" || params.get("entry") === "retail_card"
-      ? "retail_card"
-      : "self_directed";
 
   const [phase, setPhase] = useState<Phase>(initialEnrollment ? "at_store" : "intro");
   const [enrollment, setEnrollment] = useState<EnrollmentRecord | null>(initialEnrollment ?? null);
@@ -62,10 +57,11 @@ export function OnboardingFlow({ price, storeId: storeIdProp, forcedEntry, initi
 
   const enrollmentId = enrollment?.id;
   const pv = enrollment?.physical_verification;
-  const entryMode = pv?.session.entry_mode ?? "self_directed";
   const clerkLookedUp = Boolean(pv?.clerk_lookup_at);
   const clerkVerified = pv?.clerk_verification.status === "verified";
-  const needsPayment = !price.free && entryMode !== "retail_card";
+  // A purchase-sale enrolment (reached via `initialEnrollment` from a clerk QR)
+  // is already paid at the till, so the customer sees no payment step.
+  const needsPayment = !price.free && !initialEnrollment;
   const paid =
     paidFlag ||
     enrollment?.status === "issued" ||
@@ -97,7 +93,7 @@ export function OnboardingFlow({ price, storeId: storeIdProp, forcedEntry, initi
       const sessionRes = await fetch("/api/physical/sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ storeId, entryMode: entryModeParam })
+        body: JSON.stringify({ storeId })
       });
       const session = await sessionRes.json();
       if (!sessionRes.ok) throw new Error(session.error ?? "Could not reserve a store session.");
@@ -132,7 +128,7 @@ export function OnboardingFlow({ price, storeId: storeIdProp, forcedEntry, initi
       setError(reason instanceof Error ? reason.message : "Something went wrong starting verification.");
       setPhase("error");
     }
-  }, [storeId, entryModeParam]);
+  }, [storeId]);
 
   /* ---- poll enrollment ---- */
   useEffect(() => {
@@ -225,18 +221,13 @@ export function OnboardingFlow({ price, storeId: storeIdProp, forcedEntry, initi
   /* ---- render ---- */
 
   if (!store) {
-    const findHref = entryModeParam === "retail_card" ? "/find?entry=retail_card" : "/find";
     return (
       <Card className="p-5">
-        <p className="text-[15px] font-bold text-[var(--zk-text)]">
-          {entryModeParam === "retail_card" ? "Which store did you buy the card at?" : "Choose a store first"}
-        </p>
+        <p className="text-[15px] font-bold text-[var(--zk-text)]">Choose a store first</p>
         <p className="mt-1.5 text-[14px] text-[var(--zk-text-soft)]">
-          {entryModeParam === "retail_card"
-            ? "Pick the store you bought your Zik Pass card at - that's where staff can check your ID."
-            : "Pick where you’ll get verified in person, then come back here."}
+          Pick where you&rsquo;ll get verified in person, then come back here.
         </p>
-        <ButtonLink href={findHref as Route} className="mt-4">
+        <ButtonLink href={"/find" as Route} className="mt-4">
           Choose a store
         </ButtonLink>
       </Card>
@@ -323,14 +314,7 @@ export function OnboardingFlow({ price, storeId: storeIdProp, forcedEntry, initi
   }
 
   if (phase === "intro") {
-    return (
-      <Intro
-        store={store}
-        price={price.display}
-        retailCard={entryModeParam === "retail_card"}
-        onStart={start}
-      />
-    );
+    return <Intro store={store} price={price.display} onStart={start} />;
   }
 
   // starting / at_store / device_check / finishing
@@ -392,31 +376,22 @@ export function OnboardingFlow({ price, storeId: storeIdProp, forcedEntry, initi
 function Intro({
   store,
   price,
-  retailCard,
   onStart
 }: {
   store: ZikStore;
   price: string;
-  retailCard: boolean;
   onStart: () => void;
 }) {
   return (
     <div className="space-y-4">
       <header>
         <h1 className="text-[22px] font-extrabold tracking-tight text-[var(--zk-text)]">
-          {retailCard ? "Activate your Zik Pass card" : "Get your Zik Pass"}
+          Get your Zik Pass
         </h1>
         <p className="mt-1 text-[14px] text-[var(--zk-text-soft)]">
           At {store.name} &middot; {store.addressLine}, {store.postcode}
         </p>
       </header>
-
-      {retailCard ? (
-        <Alert tone="positive" title="Card already paid for">
-          Your Zik Pass card was paid for at the till, so there&rsquo;s nothing more to pay
-          here. You just need the in-person ID check.
-        </Alert>
-      ) : null}
 
       <Card className="p-4">
         <p className="text-[13px] font-bold uppercase tracking-[0.06em] text-[var(--zk-text-faint)]">
@@ -441,9 +416,7 @@ function Intro({
           <li><span className="font-semibold">2.</span> A clerk checks your ID and enters the code.</li>
           <li>
             <span className="font-semibold">3.</span>{" "}
-            {retailCard
-              ? "Your pass is issued to this phone."
-              : `You pay ${price === "Free" ? "nothing" : price} and your pass is issued to this phone.`}
+            {`You pay ${price === "Free" ? "nothing" : price} and your pass is issued to this phone.`}
           </li>
         </ol>
         <p className="mt-3 text-[12px] text-[var(--zk-text-faint)]">
@@ -452,7 +425,7 @@ function Intro({
       </Card>
 
       <Button size="lg" onClick={onStart}>
-        {retailCard || price === "Free" ? "Start" : `Start - ${price}`}
+        {price === "Free" ? "Start" : `Start - ${price}`}
       </Button>
     </div>
   );

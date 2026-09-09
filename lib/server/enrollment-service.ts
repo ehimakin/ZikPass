@@ -737,7 +737,7 @@ async function startPhysicalEnrollment(input: {
 
   const session = await getPhysicalStoreSessionOrThrow(physicalContext.session_id);
 
-  if (session.counter_sale) {
+  if (session.purchase_sale) {
     throw new Error("Use the private activation QR shown by the clerk to claim this paid pass.");
   }
 

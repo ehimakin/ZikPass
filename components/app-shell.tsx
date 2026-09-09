@@ -10,8 +10,7 @@ import { ZikLogoLockup } from "@/components/zik-logo";
 const navItems: Array<{ href: Route; label: string }> = [
   { href: "/", label: "Overview" },
   { href: "/wallet", label: "Wallet" },
-  { href: "/verify", label: "Retail verify" },
-  { href: "/store", label: "Store demo" }
+  { href: "/verify", label: "Retail verify" }
 ];
 
 export function AppShell({
@@ -28,7 +27,6 @@ export function AppShell({
     currentPath === "/" ||
     currentPath === "/wallet" ||
     currentPath === "/onboarding" ||
-    currentPath === "/store" ||
     currentPath === "/verify" ||
     currentPath === "/issuer";
 
