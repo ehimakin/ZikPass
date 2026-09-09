@@ -11,16 +11,11 @@ import {
 } from "@/lib/client/wallet-client";
 import { isDemoEnvironment } from "@/lib/shared/demo-environment";
 import { getWalletStatusSnapshot } from "@/lib/shared/wallet-state";
-import { buildCredentialZignatureSeedInput } from "@/lib/shared/zignature";
 import type { EnrollmentRecord, WalletState } from "@/lib/shared/types";
-import { Zignature } from "@/components/zignature";
+import { SilverPassCard } from "@/components/customer/silver-pass-card";
 import { PwaInstallButton } from "@/components/pwa-install-button";
 import { Alert, Button, ButtonLink, Card, SectionHeading, Skeleton, StatusBadge } from "@/components/customer/ui";
 import { ShieldIcon, ClockIcon } from "@/components/customer/icons";
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-}
 
 /** Display-only synthetic credential for design review / demo rehearsal.
  *  Never stored; only rendered when ?demo=active|activating|expired in a
@@ -138,10 +133,7 @@ export function PassScreen() {
   const active = activatesAt <= now && expiresAt > now;
   const expired = expiresAt <= now;
   const secondsToActive = Math.max(0, Math.ceil((activatesAt - now) / 1000));
-  const seed = buildCredentialZignatureSeedInput({
-    credentialId: credential.payload.credential_id,
-    subjectPublicKey: credential.payload.subject_public_key
-  });
+
 
   return (
     <div className="space-y-5">
@@ -152,46 +144,8 @@ export function PassScreen() {
         </StatusBadge>
       </div>
 
-      {/* Pass card */}
-      <div className="overflow-hidden rounded-[var(--zk-r-xl)] bg-[var(--zk-ink-surface)] p-5 text-[var(--zk-text-on-ink)]">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--zk-accent)]">
-              Zik Pass
-            </p>
-            <p className="mt-1.5 text-[26px] font-extrabold leading-none">Over 18</p>
-          </div>
-          <span className="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold">
-            {expired ? "Expired" : active ? "Active" : "Activating"}
-          </span>
-        </div>
-
-        <div className="mt-5 rounded-[var(--zk-r-md)] border border-white/10 bg-white/[0.06] px-3 py-4">
-          <Zignature
-            animate={active}
-            className="h-16 w-full"
-            seedInput={seed}
-            stroke="#d7f171"
-            strokeWidth={3}
-            variant="full"
-            width={320}
-            height={72}
-          />
-        </div>
-
-        <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-[12px]">
-          <div>
-            <dt className="text-white/45">Pass ID</dt>
-            <dd className="mt-0.5 truncate font-mono text-white/80">
-              {credential.payload.credential_id}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-white/45">Valid until</dt>
-            <dd className="mt-0.5 font-semibold">{formatDate(credential.payload.expires_at)}</dd>
-          </div>
-        </dl>
-      </div>
+      {/* Share the homepage card's metallic finish and credit-card proportions. */}
+      <SilverPassCard credential={credential} />
 
       {!active && !expired ? (
         <Alert tone="info" title="Almost ready">

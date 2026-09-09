@@ -23,7 +23,7 @@ export function HomepageSplash({ suppressSeconds }: { suppressSeconds: number })
 
   if (!visible) return null;
   return (
-    <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[100] grid place-items-center bg-[radial-gradient(ellipse_at_top,_#1a2740_0%,_#0e1726_44%,_#070b12_78%,_#04060a_100%)]">
+    <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[100] grid place-items-center bg-[radial-gradient(ellipse_at_top,_#272727_0%,_#171717_44%,_#0b0b0b_78%,_#060606_100%)]">
       <div className="animate-hero-fade px-6"><ZikLogoLockup stacked tone="light" /></div>
     </div>
   );

@@ -1,39 +1,114 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import type { Route } from "next";
 import { loadWalletState } from "@/lib/client/wallet-client";
 import { ButtonLink, Card, SectionHeading } from "@/components/customer/ui";
 import { PinIcon, ShieldIcon, CheckIcon, PassIcon } from "@/components/customer/icons";
+import { HomePassOverview } from "@/components/customer/home-pass-overview";
+import type { WalletState } from "@/lib/shared/types";
 import heroImage from "@/public/hero-zikpass-warm.png";
 
-/** The fixed hero image behind /home. Passed to CustomerShell's `hero` slot. */
+/** Desktop video backdrop, with the original artwork on smaller screens. */
 export function HomeHero() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [enabled, setEnabled] = useState(false);
+  const [manuallyPaused, setManuallyPaused] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1024px) and (prefers-reduced-motion: no-preference)");
+    const update = () => setEnabled(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!enabled || !video) return;
+
+    let idleTimer: ReturnType<typeof setTimeout> | undefined;
+    let disposed = false;
+    const pauseUntilIdle = () => {
+      clearTimeout(idleTimer);
+      video.pause();
+      if (manuallyPaused || document.hidden) return;
+      idleTimer = setTimeout(() => {
+        if (!disposed && !document.hidden) void video.play().catch(() => {});
+      }, 750);
+    };
+
+    window.addEventListener("mousemove", pauseUntilIdle, { passive: true });
+    window.addEventListener("scroll", pauseUntilIdle, { passive: true, capture: true });
+    window.addEventListener("wheel", pauseUntilIdle, { passive: true });
+    document.addEventListener("visibilitychange", pauseUntilIdle);
+    pauseUntilIdle();
+
+    return () => {
+      disposed = true;
+      clearTimeout(idleTimer);
+      video.pause();
+      window.removeEventListener("mousemove", pauseUntilIdle);
+      window.removeEventListener("scroll", pauseUntilIdle, true);
+      window.removeEventListener("wheel", pauseUntilIdle);
+      document.removeEventListener("visibilitychange", pauseUntilIdle);
+    };
+  }, [enabled, manuallyPaused]);
+
   return (
-    <Image
-      src={heroImage}
-      alt=""
-      priority
-      sizes="(max-width: 361px) 709px, (max-width: 472px) 197vw, 927px"
-      className="zk-home-hero-image"
-    />
+    <>
+      <Image
+        src={heroImage}
+        alt=""
+        priority
+        sizes="(min-width: 1024px) 100vw, (max-width: 361px) 709px, (max-width: 472px) 197vw, 927px"
+        className="zk-home-hero-image"
+      />
+      {enabled && (
+        <>
+          <video
+            ref={videoRef}
+            className="zk-home-hero-video"
+            src="/13061609-hd_1920_1080_60fps.mp4"
+            muted
+            loop
+            playsInline
+            aria-hidden="true"
+          />
+          <button
+            type="button"
+            className="zk-home-video-toggle"
+            onClick={() => setManuallyPaused((paused) => !paused)}
+          >
+            {manuallyPaused ? "Play background video" : "Pause background video"}
+          </button>
+        </>
+      )}
+    </>
   );
 }
 
 export function HomeScreen({ price }: { price: string }) {
-  const [hasPass, setHasPass] = useState<boolean | null>(null);
+  const [wallet, setWallet] = useState<WalletState | null>(null);
+  const [walletFailed, setWalletFailed] = useState(false);
+  const hasPass = Boolean(wallet?.credential);
 
   useEffect(() => {
-    loadWalletState()
-      .then((state) => setHasPass(Boolean(state.credential)))
-      .catch(() => setHasPass(false));
+    let disposed = false;
+    const refresh = () => loadWalletState()
+      .then((state) => { if (!disposed) { setWallet(state); setWalletFailed(false); } })
+      .catch(() => { if (!disposed) setWalletFailed(true); });
+    void refresh();
+    window.addEventListener("focus", refresh);
+    return () => { disposed = true; window.removeEventListener("focus", refresh); };
   }, []);
 
   return (
     <>
-      {/* Keep the original section position so it slightly overlaps the enlarged hero. */}
-      <div aria-hidden="true" className="h-[var(--zk-home-hero-spacer)]" />
+      <div className="flex min-h-[var(--zk-home-hero-spacer)] items-center justify-center py-6">
+        <HomePassOverview wallet={wallet} failed={walletFailed} />
+      </div>
 
       <div className="relative -mx-4 min-h-[60vh] space-y-6 rounded-t-[var(--zk-r-xl)] bg-[var(--zk-canvas)] px-4 pb-10 pt-6 shadow-[0_-10px_30px_rgba(14,23,38,0.08)]">
       <section>
@@ -53,21 +128,17 @@ export function HomeScreen({ price }: { price: string }) {
 
         <div className="mt-10 space-y-2.5">
           <div className="zk-lifted-pass-button">
-            <ButtonLink href={"/find" as Route} size="lg">
-              Get Zik Pass &nbsp;&middot;&nbsp; <span className="text-[#d3bb53]">{price}</span>
+            <ButtonLink href={(hasPass ? "/pass" : "/find") as Route} size="lg">
+              {hasPass ? "Open My Pass" : <>Get Zik Pass &nbsp;&middot;&nbsp; <span className="text-[#d3bb53]">{price}</span></>}
             </ButtonLink>
           </div>
-          {hasPass ? (
-            <ButtonLink href={"/pass" as Route} variant="secondary" size="lg">
-              Open my pass
-            </ButtonLink>
-          ) : (
+          {!hasPass && (
             <ButtonLink href={"/pass" as Route} variant="ghost" size="lg">
               I already have a pass
             </ButtonLink>
           )}
         </div>
-        <p className="mt-3 text-center text-[13px] text-[var(--zk-text-soft)]">
+        <p className="mt-9 text-center text-[13px] text-[var(--zk-text-soft)]">
           Bought a card in store?{" "}
           <a href="/card" className="font-semibold text-[var(--zk-text)] underline">
             Activate it

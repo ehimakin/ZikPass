@@ -64,7 +64,6 @@ export function CustomerShell({
     <div ref={shellRef} className={clsx("zk-surface flex min-h-[100dvh] flex-col", hero && "zk-home-surface")}>
       {hero ? (
         <div
-          aria-hidden="true"
           className="zk-home-hero pointer-events-none fixed inset-x-0 top-14 z-0 overflow-hidden"
         >
           {hero}
@@ -93,7 +92,7 @@ export function CustomerShell({
             <Link href={"/home" as Route} className="flex items-center gap-2" aria-label="Zik Pass home">
               <ZikLogoMark className="zk-logo-float h-7 w-7 shrink-0" />
               <span className="text-[16px] font-extrabold tracking-tight text-[var(--zk-text)]">
-                Zik Pass
+                <span className="text-[#28623c]">Zik</span>{" "}Pass
               </span>
             </Link>
           )}

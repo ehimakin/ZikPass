@@ -25,21 +25,8 @@ export function ZikLogoMark({
         strokeWidth="6"
       />
       <path
-        d="M50 23V77"
-        stroke="currentColor"
-        strokeWidth="6"
-        strokeLinecap="round"
-      />
-      <path
-        d="M46 34L30 50H46"
-        stroke="currentColor"
-        strokeWidth="6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M54 50H70L54 66"
-        stroke="currentColor"
+        d="M50 23V77M46 34L30 50M70 50L54 66"
+        stroke="#d3bb53"
         strokeWidth="6"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -64,7 +51,7 @@ export function ZikLogoLockup({
       <div className={clsx(stacked ? "flex flex-col items-center gap-4 text-center" : "flex items-center gap-2.5", className)}>
         <ZikLogoMark tone="light" className={stacked ? "h-[15vw] max-h-16 w-[15vw] max-w-16" : "h-6 w-6"} />
         <p className={clsx("font-heading font-semibold tracking-tight text-mist", stacked ? "text-2xl" : "text-base")}>
-          Zik Pass
+          <span className="text-[#91b89b]">Zik</span>{" "}Pass
         </p>
       </div>
     );
@@ -90,7 +77,7 @@ export function ZikLogoLockup({
       </div>
       <div>
         <p className={clsx("font-heading font-semibold tracking-tight text-ink", stacked ? "text-4xl" : "text-xl")}>
-          Zik Pass
+          <span className="text-[#28623c]">Zik</span>{" "}Pass
         </p>
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink/50">
           Private over-18 verification

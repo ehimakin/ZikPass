@@ -214,6 +214,53 @@ pre {
   mask-image: linear-gradient(to right, transparent, black 8%, black 97%, transparent);
 }
 
+/* Desktop hero footage fills the viewport without a gradient overlay. */
+.zk-home-hero-video,
+.zk-home-video-toggle {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .zk-home-surface .zk-home-hero {
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .zk-home-hero-image {
+    inset: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: none;
+    mask-image: none;
+  }
+
+  .zk-home-hero-video {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .zk-home-video-toggle {
+    display: block;
+    position: absolute;
+    top: 72px;
+    right: 24px;
+    pointer-events: auto;
+    border-radius: 999px;
+    padding: 8px 14px;
+    background: rgb(255 255 255 / 90%);
+    color: #17202b;
+    font-size: 12px;
+    font-weight: 600;
+  }
+}
+
 /* Keep the fictional affiliate wall out of the 560px customer column.
    Below 1360px, four 80px logos plus gaps no longer fit comfortably per side. */
 .zk-lifted-pass-button {
@@ -286,4 +333,36 @@ pre {
   .zk-affiliate-rail--right { right: 0; }
   .zk-affiliate-rows { width: 100%; max-width: 436px; margin-inline: auto; }
 
+}
+
+/* Match 55% of the full-width home panel, including its negative margins. */
+.zk-home-pass-card-wrap {
+  width: calc((100% + 2rem) * 0.55);
+  container-type: inline-size;
+}
+
+.zk-home-pass-card,
+.zk-silver-pass-card {
+  aspect-ratio: 85.6 / 53.98;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 5.5cqw;
+  border: 1px solid rgb(255 255 255 / 90%);
+  border-radius: 6cqw;
+  background:
+    linear-gradient(115deg, transparent 18%, rgb(255 255 255 / 78%) 32%, transparent 46%, rgb(255 255 255 / 48%) 72%, transparent 86%),
+    linear-gradient(145deg, #fafafa 0%, #d4d5d6 24%, #f1f2f3 43%, #bfc1c3 65%, #e8e9ea 84%, #fafafa 100%);
+  color: #252525;
+  box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgb(80 80 80 / 16%), 0 8px 32px rgb(0 0 0 / 16%);
+  backdrop-filter: blur(24px);
+  font-size: 3.3cqw;
+  line-height: 1.3;
+}
+
+.zk-home-pass-card-title {
+  font-size: 5.8cqw;
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
 }
