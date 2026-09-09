@@ -20,3 +20,4 @@ public/Inspiration/
 public/Agent Image*
 *.zip
 tsconfig.tsbuildinfo
+.vercel
