@@ -5,15 +5,21 @@ Use the automated checks first, then use the manual flows below when changing cu
 ## Automated checks
 
 ```bash
-npm test
+npm test          # Vitest service tests (JSON runtime store)
 npm run lint
 npx tsc --noEmit
-npm run build
+npm run e2e        # Playwright journeys; reuses a dev server on :3000, resets demo state per test
+npm run build      # do NOT run while `npm run dev` owns .next
 ```
 
-Tests are Vitest-based and use the JSON runtime store. They may modify the runtime state directory during a run; do not point `ZIK_RUNTIME_DATA_DIR` at a directory containing data you need to preserve.
+Vitest tests use the JSON runtime store and may modify the runtime state directory during a run; do not point `ZIK_RUNTIME_DATA_DIR` at data you need to keep. Playwright (`e2e/`, `playwright.config.ts`) drives the real dev server and calls `POST /api/demo/reset` in each `beforeEach`, so keep `ZIK_ENV=demo` on the target.
 
-`tests/affiliate-verifier.test.ts` covers the affiliate demo end to end using real signed credentials (not mocks): a successful verification with the exact minimal response shape, every denial path (no pass, expired pass, invalid signature, wrong audience/nonce/state, malformed challenge, replayed challenge, replayed/expired authorization code, cancellation), unregistered redirect URIs, oversized/hostile `state` values, redaction of the returned fields, and idempotent duplicate authorization requests.
+Coverage highlights:
+
+- `tests/affiliate-verifier.test.ts` + `affiliate-demo-session.test.ts` + `affiliate-external-client.test.ts` cover the affiliate flow end to end with real signed credentials: minimal result shape, every denial path, unregistered redirect URIs, hostile `state`, cookie tampering / expiry capped by pass expiry, replay rejection, and external-client bearer auth.
+- `tests/counter-sale.test.ts` covers ID/payment ordering, wrong-store and unauthorised access, full issuance, parallel idempotent claims, second-device rejection, generic-endpoint bypass prevention, rejected sales, expired-QR rotation.
+- `tests/physical-flow.test.ts` covers multi-store operator scoping (a non-Oxford store completes; a cross-store clerk is rejected).
+- `e2e/`: self-directed journey, prepaid retail-card (one auto-settled payment), payment decline → retry, delete-pass → empty state, cross-store rejection, location-denied fallback, branded 404, affiliate no-pass + approve.
 
 ## Basic local run
 
@@ -22,72 +28,94 @@ cp .env.example .env
 npm run dev
 ```
 
-Use `http://localhost:3000` for Web Crypto/WebAuthn behavior. A LAN IP over plain HTTP is an insecure origin in many mobile browsers and can disable signing or device-auth APIs. HTTPS or localhost is required for the browser capabilities used by the prototype.
+Open `http://localhost:3000` (redirects to `/home`). Use `localhost`, not a LAN IP over plain HTTP — an insecure origin disables Web Crypto / WebAuthn in many browsers. Use the **Reset demo data** button on `/help` (or `curl -X POST localhost:3000/api/demo/reset`) between manual runs.
 
-## Manual physical flow
+## Manual physical flow (self-directed)
 
-1. Open `/store` and create a demo store session.
-2. Open the customer onboarding URL supplied by the session, or open `/onboarding` for an app-led flow.
-3. Start the physical flow and note the short customer code.
-4. Open `/verify` in a second browser window/device and enter the code.
-5. Confirm that malformed or unknown codes produce an error state and leave the form usable.
-6. Confirm the physical ID check as the clerk.
-7. Return to the customer device and complete device authentication. Use `demo_device_check` when testing without a platform authenticator; use WebAuthn where available.
-8. Choose a payment method. Cash/card remains pending until the clerk confirms it. The digital-wallet option is a clearly labelled demo confirmation.
-9. Confirm the enrollment reaches issuance and the pass appears in the wallet.
-10. Tap `Done` and verify navigation to `/wallet`.
+1. `/find` → search a postcode (e.g. `EC1`) or "Use my location" → open a store → **Choose this store**.
+2. On `/get-pass`, tap **Start**. Note the 6-character code (and QR).
+3. Open `/verify` in a second window. Set **This terminal** to the store you picked. Enter the code → **Find session**.
+   - Check: the wrong terminal store → "not authorised for the requested store session"; malformed/unknown codes leave the form usable.
+4. **Confirm 18+** as the clerk.
+5. Back on the customer device: the device check runs automatically. Then the **payment** step unlocks. Pay via **Zik demo checkout** (try **Simulate a declined card** first — the sheet stays open with a retry), or **Cash or card at the till** (the clerk confirms it on `/verify`).
+6. Confirm the flow reaches **Your pass is ready** and `/pass` shows an active pass with a `zp_…` id.
 
-The expected server-side order is: physical session usable -> clerk lookup/verification -> device authentication -> confirmed pass-issuance payment -> credential issuance.
+Server-side order: physical session usable → clerk lookup/verification → device authentication → confirmed `pass_issuance` payment → issuance.
+
+## Manual prepaid retail-card flow
+
+1. Open `/card` (the printed-card QR target) → **Choose your store** → pick a card-selling store.
+2. `/get-pass?entry=retail_card` shows "Card already paid for" and no payment step.
+3. Start, note the code, confirm as the clerk on `/verify`.
+4. Confirm issuance with **no second payment**. `GET /api/payments/<enrollmentId>` should show exactly one confirmed `retail_till` payment.
+
+## Manual clerk-first counter sale
+
+1. `/verify/counter` (also linked from `/verify`). Select the terminal store, start a sale.
+2. Confirm 18+ (or reject → stops, no payment).
+3. Record the till payment (**Payment received**).
+4. The activation QR appears only now. Open it on the customer device → **Save my Zik Pass** → finish the device check. No store pick, no repeat ID check, no extra payment.
+5. Clerk: **Check customer progress** → **Next customer**.
+
+See [`docs/COUNTER_SALE_FLOW.md`](COUNTER_SALE_FLOW.md) for recovery/rotation details.
 
 ## PWA handoff and interruption recovery
 
 1. Complete issuance in the browser wallet.
-2. Tap `Install ZikPass on this device`.
-3. On iPhone, use Share -> Add to Home Screen. On Android, use Install app/Add to Home Screen.
-4. Open the installed web app. The URL may first include `source=pwa` and a one-time `handoff_token`; the wallet should claim it and then settle on `/wallet?source=pwa`.
-5. Confirm the same logical Pass ID is visible after the handoff.
-6. To test an interrupted handoff, stop before launching the installed app or simulate a lost refresh, then reopen the PWA. `/api/pwa/handoff/recover` should recover the latest unclaimed handoff for the client address and issue a replacement token.
+2. `/pass` → **Add to another device** → **Install on this device**.
+3. On iPhone, Share → Add to Home Screen. On Android, Install app / Add to Home Screen.
+4. Open the installed app. The URL may include `source=pwa` and a one-time `handoff_token`; `/pass` should claim it and settle on `/pass?source=pwa`. Bare `/wallet?source=pwa` links are redirected across.
+5. Confirm the same logical Pass ID after the handoff.
+6. To test an interrupted handoff, stop before launching the installed app (or simulate a lost refresh), then reopen the PWA. `/api/pwa/handoff/recover` recovers the latest unclaimed handoff and issues a replacement token.
 
-The handoff is short-lived and single-use, but a repeated claim with the same holder key is idempotent. A different device key is subject to the device-binding limit and payment policy.
+The handoff is short-lived and single-use; a repeated claim with the same holder key is idempotent. A different device key is subject to the device-binding limit and payment policy.
 
 ## Device extension
 
-1. With a pass already in `/wallet`, expand the pass card.
+The self-service `ExtendPassPanel` is currently wired only into the legacy `/wallet` surface (`/wallet?flow=physical`… enters `WalletSurface`).
+
+1. With a pass already issued, open the legacy wallet and expand the pass card.
 2. Choose `Extend pass` and generate the device handoff.
-3. Claim it from another browser/device.
-4. The first two active device bindings should be authorized under the default configuration.
-5. Attempt a third device. It should show `payment_required` and offer the demo extension payment path.
-6. Confirm the demo extension payment, retry the handoff, and verify the third device is linked.
-7. Repeat the payment or claim request to verify it does not create duplicate bindings or consume the same entitlement twice.
+3. Claim it from another browser/device. The first two active bindings authorize under the default config.
+4. A third device shows `payment_required` and offers the demo extension payment path.
+5. Confirm the demo extension payment, retry the handoff, verify the third device is linked.
+6. Repeat the payment or claim to verify no duplicate bindings and no double-consumed entitlement.
 
 ## Affiliate age verification demo
 
-1. Open `/affiliate-demo` and confirm the "Demo environment" label, the restrained non-explicit copy, and that no explicit branding or copyrighted content is shown.
-2. Click `Use ZikPass to confirm I am 18+`. You should land on `/affiliate-demo/confirm`.
-3. With no pass on the device, the confirm screen should report no active pass and offer `Open Zik wallet` and `Return to Nightfall`. Choosing `Return to Nightfall` should redirect to `/affiliate-demo/callback`, which shows the single generic denial sentence — never an internal reason, stack trace, or raw token.
-4. Complete onboarding in the same browser to obtain a real pass, then repeat from step 1. Approving on the confirm screen should redirect to `/affiliate-demo/callback` with a `code` and `state` in the URL; the callback screen exchanges it server-to-server and shows only the minimal result (age over threshold, assurance, verified/expiry timestamps, verification ID) — no name, date of birth, or other identity data.
-5. Reload `/affiliate-demo/callback` with the same URL (same `code`) to confirm a replayed code is rejected with the generic denial message rather than being honored twice.
-6. Confirm `GET /api/affiliate/result/[id]` only includes the `challenge` field while the request is still pending, and that `POST /api/affiliate/token` never returns anything but the generic message on failure, regardless of the underlying reason.
+1. Open `/affiliate-demo` (the **JerkMeat** demo site). Confirm the demo label, the food-only parody content, and no explicit or real branding.
+2. Click **Verify with Zik** → you land on `/affiliate-demo/confirm`.
+3. With no pass on the device, the confirm screen reports no active pass and offers **Open my pass** and a way back. The return path shows the single generic denial sentence — never an internal reason, stack trace, or raw token.
+4. Complete onboarding in the same browser to get a real pass, then repeat from step 1. Approving redirects to `/affiliate-demo/callback` with `code` and `state`; the demo backend exchanges it server-to-server and the callback shows only the minimal result (age over threshold, assurance, verified/expiry timestamps, verification id) and sets a signed HttpOnly age-session cookie. `/affiliate-demo/continue` should now open.
+5. Reload with the same `code` → replay rejected with the generic message. Reload `/affiliate-demo` with a valid session cookie → the gate restores the verified state without visiting Zik; delete the cookie or wait past expiry → it asks again.
+6. Confirm `GET /api/affiliate/result/[id]` only includes `challenge` while `status === "pending"`, and `POST /api/affiliate/token` only ever returns the generic message on failure.
+
+The standalone JerkMeat app (`../jerkmeat`, port 3001) exercises the same protocol as a separately authenticated external client; see its own README.
 
 ## Error and recovery checks
 
 Exercise at least one failure from each category:
 
-- malformed or unknown clerk code
+- malformed or unknown clerk code; wrong-store terminal
 - expired physical session or customer code
-- expired/replayed handoff token
-- failed demo payment followed by retry
+- expired/replayed handoff token; expired paid counter-sale QR
+- simulated declined payment followed by retry (sheet stays open); cancellation is not treated as failure
 - device limit reached without payment
 - lost customer heartbeat during a clerk session
 - browser without Web Crypto/WebAuthn support
+- offline: load a previously-visited customer page (works), then `/find` or `/get-pass` (shows `/offline`); the offline banner appears
 
-The UI should preserve the latest known state, show a clear recovery action, and offer user reporting where the error cannot be recovered locally. Reports are redacted before persistence and return a reference for issuer/support inspection.
+The UI should preserve the latest known state, show a clear recovery action, and offer user reporting where the error cannot be recovered locally. Reports are redacted before persistence and return a reference.
 
-## Regression checklist for UI work
+## Responsive / a11y checklist for UI work
 
-- Homepage splash appears on first visit and is suppressed for the configured time window on refresh.
-- Header navigation remains reachable during scroll and does not overlap page content.
-- Status footer is present and collapsed by default where configured.
-- Onboarding and final-pass modal content stays within a narrow mobile viewport.
-- Payment, recovery, and handoff states announce changes to assistive technology.
-- Desktop layout does not rely on a scrollbar appearing/disappearing to align tab content.
+- Check 320 / 390 / 768 / 1440. Fixed bottom nav and header must not overlap content; content column stays centred.
+- Keyboard: skip link focusable first; logical tab order; the menu `<dialog>` traps focus and returns it to the hamburger on Escape/close.
+- Payment, recovery, handoff and clerk-lookup states announce to assistive tech (`aria-live`).
+- `prefers-reduced-motion`: the logo float, hero fade and Zignature draw stop.
+- Homepage splash appears on first visit and is suppressed for the configured window on refresh.
+- No horizontal body scroll; the schematic map and any wide content scroll inside their own container.
+
+## Physical-device testing (still required)
+
+Chromium automation and the in-app preview browser do **not** register service workers and cannot present a real Apple Pay sheet. On a physical iPhone/Safari, still verify: install to home screen, PWA launch + handoff claim, offline shell, reduced-motion, safe-area insets, and — if/when Stripe is configured — a real Apple Pay test transaction.

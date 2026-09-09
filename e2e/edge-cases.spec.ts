@@ -32,13 +32,13 @@ test("unknown route shows the branded 404", async ({ page }) => {
 
 test("affiliate: honest 'no pass' path when the device has none", async ({ page }) => {
   await page.goto("/affiliate-demo");
-  await page.getByRole("button", { name: /Use Zik Pass to confirm I am 18/i }).click();
+  await page.getByRole("button", { name: /^Verify with Zik$/i }).click();
   await expect(page).toHaveURL(/affiliate-demo\/confirm/, { timeout: 15_000 });
   await expect(page.getByRole("heading", { name: /No Zik Pass found/i })).toBeVisible();
   await expect(page.getByRole("link", { name: /Open my pass/i })).toBeVisible();
 });
 
-test("affiliate: approve with an active pass shares only the age result", async ({ page, request }) => {
+test("affiliate: approve with an active pass opens the gated site", async ({ page, request }) => {
   await page.goto("/find");
   await page.getByLabel(/postcode or area/i).fill("W1");
   await chooseStore(page, "zik-london-001");
@@ -50,9 +50,15 @@ test("affiliate: approve with an active pass shares only the age result", async 
   await expect(page.getByRole("heading", { name: /Your pass is ready/i })).toBeVisible({ timeout: 20_000 });
 
   await page.goto("/affiliate-demo");
-  await page.getByRole("button", { name: /Use Zik Pass to confirm I am 18/i }).click();
+  await page.getByRole("button", { name: /^Verify with Zik$/i }).click();
+  await expect(page).toHaveURL(/affiliate-demo\/confirm/, { timeout: 15_000 });
   await page.getByRole("button", { name: /Confirm I.?m over 18/i }).click();
-  await expect(page).toHaveURL(/affiliate-demo\/callback/, { timeout: 15_000 });
-  await expect(page.getByText(/confirmed you are over 18/i)).toBeVisible();
-  await expect(page.getByText(/No identity information .* was shared/i)).toBeVisible();
+
+  // Bounces through /callback back to /affiliate-demo, now verified.
+  await expect(page.getByText(/Age verified with Zik/i)).toBeVisible({ timeout: 20_000 });
+  await page.getByRole("link", { name: /Continue \/ Log in/i }).click();
+  await expect(page).toHaveURL(/affiliate-demo\/continue/, { timeout: 15_000 });
+
+  // The site only ever holds the age result - never identity fields.
+  await expect(page.getByText(/date of birth|passport number|document number/i)).toHaveCount(0);
 });

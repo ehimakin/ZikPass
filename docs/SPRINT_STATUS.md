@@ -10,22 +10,22 @@ Branch: `v2-ui-overhaul` · Baseline commit: `675a050`
 
 ## Current phase
 
-**Phase 2 - visual slice for review.** Design system + customer shell + store
-finder + active-pass screen built as new preview routes. Awaiting the user's
-review of visual direction before applying it across every journey (delivery
-sequence step 3).
+**Delivery step 7 - docs.** Steps 1-6 done and verified. README / ARCHITECTURE /
+TESTING refreshed to the current customer/operator surfaces + counter sale +
+demo env + offline shell; `.env.example` completed; `docs/DEMO_SCRIPT.md` added.
+Remaining open items are listed under "Step 4/5 still to do" below.
 
 ---
 
-## Baseline established (delivery step 1)
+## Checks (2026-09-09)
 
 | Check | Result | Notes |
 | --- | --- | --- |
-| `npm test` (Vitest) | 104 passed / 16 files | 102 baseline + 2 new multi-store scoping tests. |
-| `npm run e2e` (Playwright) | 10 passed / 2 files | customer/clerk/affiliate journeys + edge cases. |
-| `npm run lint` | clean | |
+| `npm test` (Vitest) | 127 passed / 21 files | +23 since the design-system commit (counter-sale, affiliate session/external-client, physical-session-route, multi-store scoping). |
+| `npm run e2e` (Playwright) | 10 passed / 2 files | customer/clerk/affiliate journeys + edge cases; affiliate specs updated for the JerkMeat flow. |
+| `npm run lint` | clean | `scripts/**` ignored. |
 | `npx tsc --noEmit` | clean | |
-| `npm run build` | not yet re-run this sprint | Avoid while `npm run dev` is live. |
+| `npm run build` | not re-run | Avoid while `npm run dev` owns `.next`. |
 
 Stack confirmed: Next.js 15.5 / React 19 / TS / Tailwind 3.4, Expo companion in
 `mobile/`. `components/wallet-surface.tsx` is 4,285 lines and still owns the
@@ -343,9 +343,29 @@ Browser pass at 320 / 390 / 768px + keyboard.
 - `npm run build` not re-run this sprint (dev server live - build corrupts
   `.next`). Run once dev is stopped before any packaging.
 
-### Step 7 - docs (next)
-- README / ARCHITECTURE / TESTING refresh, `.env.example`, 5-minute demo
-  script, before/after screenshots, known limitations.
+### Step 7 - docs (done 2026-09-09)
+- **README.md** rewritten: new "Surfaces" tables (customer / operator /
+  legacy), physical + prepaid + counter-sale flows, JerkMeat affiliate, design
+  system section, demo-environment section, expanded prototype-boundaries /
+  known-limitations list.
+- **ARCHITECTURE.md**: page-ownership split into customer / operator / legacy;
+  added counter-sale + demo-reset APIs, `x-zik-store-id` scoping, the two
+  payment adapters + `payment-config.ts`, `demo-environment.ts`, a service-
+  worker section, updated UI/a11y conventions (shells, native-dialog menu,
+  reduced motion).
+- **TESTING.md**: manual flows rewritten for `/find` -> `/get-pass` -> `/verify`
+  + prepaid + counter-sale; added `npm run e2e`, coverage highlights, offline
+  checks, a responsive/a11y checklist, and a "physical-device testing still
+  required" section.
+- **`.env.example`**: `NEXT_PUBLIC_ZIK_ENV` active; `ZIK_JERKMEAT_*` and the
+  affiliate TTLs documented; Apple Pay block clarified.
+- **`docs/DEMO_SCRIPT.md`** added: timed five-minute walkthrough (home ->
+  find -> get-pass -> clerk confirm -> decline+pay -> pass -> affiliate),
+  pre-demo reset steps, quick-reference URLs, mid-demo recovery notes.
+- e2e affiliate specs updated for the JerkMeat gate ("Verify with Zik" ->
+  confirm -> bounce back -> "Age verified with Zik" -> `/continue`).
+- Not done: before/after screenshots (after-shots exist from the polish pass;
+  a matched before-set would need the retired UI).
 
 ## Decisions (cont.)
 

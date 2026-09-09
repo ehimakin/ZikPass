@@ -19,21 +19,42 @@ Cryptographic helpers and domain contracts shared by browser and server code liv
 
 ## Page ownership
 
+### Customer surface (`components/customer/*`)
+
 | Page | Main component | Notes |
 | --- | --- | --- |
-| `/` | `WalletSurface` in homepage mode | Physical-first customer entry and splash animation |
-| `/onboarding` | `WalletSurface` in onboarding mode | Customer flow; supports app-led and affiliate context |
-| `/wallet` | `WalletPageSurface` | Saved pass and wallet actions; physical query context renders the onboarding surface |
-| `/verify` | `RetailVerificationScreen` | Clerk code lookup and physical-ID confirmation |
-| `/store` | `StoreSessionDashboard` | Demo store/session creation and monitoring |
-| `/issuer` | issuer UI components | Enrollment/error inspection for development |
-| `/verify/zik` | verifier demo component | Hosted relying-party verification demo |
-| `/affiliate-demo` | `AffiliateDemoLanding` | Demo 18+ affiliate site; starts an authorization request |
-| `/affiliate-demo/confirm` | `AffiliateConfirmScreen` | ZikPass-hosted challenge signing and redirect back to the affiliate |
-| `/affiliate-demo/callback` | `AffiliateCallbackScreen` | Simulated affiliate backend; server-to-server code exchange |
-| `/app/handoff` | `PwaInstallButton` plus fallback UI | Native deep-link fallback and web-wallet installation |
+| `/home` | `HomeScreen` | Landing. `/` redirects here. Fixed scroll-over hero. |
+| `/find` | `StoreFinder` | Postcode/area search, geolocation, schematic map + list. |
+| `/get-pass` | `OnboardingFlow` | Physical-only onboarding state machine over the existing APIs. `?entry=retail_card` = prepaid path. |
+| `/pass` | `PassScreen` | Wallet states + delete, `PwaInstallButton`, PWA-launch handoff claim. `/wallet` redirects here (PWA/handoff params preserved). |
+| `/card` | `CounterActivation` | Activate a physical card bought at a till (printed-card QR target). |
+| `/help` | `HelpScreen` | Accepted ID, FAQ, "Reset demo data" (demo only). |
+| `/about` | about page | Longer explanation for customers/stores/sites. |
+| `/offline` | `StatusPage` | Served by the service worker. `not-found.tsx` + `error.tsx` share `StatusPage`. |
 
-`AppShell` owns the shared header, navigation, fixed status footer, and page-level visual treatment. A page should use the shell unless it is deliberately rendering a direct physical flow variant.
+`CustomerShell` owns the sticky header (`ZikLogoMark`, env badge, native-dialog menu with focus return), the `OfflineBanner`, the fixed bottom tab bar (Home / Find a store / My pass / Help), and (desktop ≥1360px) `AffiliateLogoRails`.
+
+### Operator surface (`components/operator/*`)
+
+| Page | Main component | Notes |
+| --- | --- | --- |
+| `/verify` | `ClerkVerify` → `RetailVerificationScreen` | Terminal binds to a store; sends `x-zik-store-id`; cross-store codes rejected. |
+| `/verify/counter` | `CounterSale` | Clerk-first sale: ID → record till payment → private activation QR. |
+
+`OperatorShell` owns a plain staff header + a store-terminal selector (`useOperatorStore`, persisted in `localStorage`).
+
+### Legacy / dev (older `AppShell`, kept for regression)
+
+| Page | Main component | Notes |
+| --- | --- | --- |
+| `/onboarding` | `WalletSurface` (onboarding mode) | Original flow; app-led + affiliate context; older mocked remote/bank pipeline. |
+| `/wallet?flow=physical…` | `WalletSurface` | Legacy physical handoff link. Bare `/wallet` redirects to `/pass`. |
+| `/store` | `StoreSessionDashboard` | Demo store/session creation and monitoring. |
+| `/issuer` | issuer UI components | Enrollment/error inspection for development. |
+| `/verify/zik` | verifier demo component | Hosted relying-party verification demo (`postMessage`-era; not reused by the affiliate flow). |
+| `/affiliate-demo` (+ `/confirm`, `/callback`, `/continue`) | `JerkMeatSite` / `AffiliateConfirmScreen` / `AffiliateCallbackScreen` | See the affiliate protocol section. |
+| `/app/handoff` | `PwaInstallButton` + fallback | Native deep-link fallback and web-wallet installation. |
+| `/ZikParental` | placeholder | Unlinked. |
 
 ## API surface
 
@@ -58,16 +79,25 @@ Cryptographic helpers and domain contracts shared by browser and server code liv
 - `POST /api/physical/device-auth/start` creates a device-auth challenge.
 - `POST /api/physical/device-auth/complete` completes WebAuthn or the explicit demo device check.
 
-Physical journey status is derived in `lib/shared/physical-journey.ts`. Do not duplicate status rules in a page component.
+The lookup and verify routes take an optional `x-zik-store-id` header. When set, `authenticateRetailVerifier(token, storeId)` derives the clerk identity from `lib/shared/stores.ts` and a session for a different store is rejected. Physical journey status is derived in `lib/shared/physical-journey.ts`; do not duplicate status rules in a page component.
+
+### Counter sale (clerk-first)
+
+- `POST /api/counter-sale` creates / advances a till sale (`lib/server/counter-sale.ts`): start, confirm ID, record payment, issue a private activation token. Withheld until ID **and** payment are confirmed. The server stores a SHA-256 hash of the token; the raw token lives only in the clerk browser and the QR fragment.
+- `POST /api/counter-sale/claim` — the customer's device exchanges the activation token + holder public key for the linked enrollment. The claim commits enrollment + confirmed payment together under the storage transaction lock. Same token + same key is idempotent; a different key is rejected. A generic enrollment cannot claim a sale by guessing its id.
+
+### Demo tooling
+
+- `POST /api/demo/reset` — gated on `isDemoEnvironment` (`lib/shared/demo-environment.ts`, `ZIK_ENV`, never `NODE_ENV`). Clears enrolments, sessions, payments, handoffs, device bindings, affiliate requests/codes, error reports. Keeps the issuer keypair and store plans.
 
 ### Payments and plans
 
 - `POST /api/payments/create` creates or reuses a pending payment record.
 - `GET /api/payments/[enrollmentId]` returns payment state for an enrollment.
-- `POST /api/payments/confirm-cash` confirms a cash/card-at-till demo payment.
-- `POST /api/payments/confirm-online-demo` confirms the explicitly labelled online demo payment.
+- `POST /api/payments/confirm-cash` confirms a cash/card-at-till demo payment (clerk).
+- `POST /api/payments/confirm-online-demo` confirms the labelled online demo payment; `simulateFailure` produces a deterministic decline.
 
-Payment records have a purpose: `pass_issuance` or `device_extension`. The server rechecks issuance after a confirmed pass-issuance payment. Store-specific plan overrides are resolved by `lib/server/payments.ts` over global runtime defaults.
+Payment records have a purpose: `pass_issuance` or `device_extension`, and a method: `cash_in_store`, `digital_wallet`, `online_demo`, or `retail_till`. `lib/shared/payment-config.ts` computes the trusted price/currency server-side (`getPassPrice()` — £1.99 fixture, code default; free flow when `0`) and reports which provider is configured (`getServerPaymentProvider()`; `stripe` only when both Stripe keys are present, else `none`). The client never sends an amount. `components/customer/onboarding/payment-panel.tsx` has two explicit adapters — a Stripe Express Checkout route (surfaces only when `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` is set; not wired this milestone) and the labelled **Zik demo checkout** simulator — plus pay-at-till. It never shows a combined Apple/Google button, never imitates an Apple sheet, and never silently substitutes simulator success for a failed real charge. The server rechecks issuance after a confirmed pass-issuance payment. Store-specific plan overrides are resolved by `lib/server/payments.ts` over global runtime defaults.
 
 ### Affiliate age verification (demo)
 
@@ -76,7 +106,7 @@ Payment records have a purpose: `pass_issuance` or `device_extension`. The serve
 - `POST /api/affiliate/token` is the only endpoint a real affiliate backend would call server-to-server. It exchanges a one-time code for the minimal `AffiliateVerificationResult`. On any failure it returns nothing but the single generic denial message — never the specific internal reason.
 - `GET /api/affiliate/result/[id]` returns request status (and, only while `status === "pending"`, the challenge string) for the confirm screen's own UX; it is never a trust source for the affiliate's access decision.
 
-See the dedicated section below for the full protocol.
+The **embedded** JerkMeat demo backend is thin wrappers over the above: `POST /api/affiliate-demo/start` sets an HttpOnly pending-state cookie and calls `createAffiliateAuthorizationRequest`; `POST /api/affiliate-demo/complete` validates that cookie, exchanges the code, and on a successful over-18 result issues a signed HttpOnly age-session cookie (`lib/server/affiliate-demo-session.ts`, ≤30 min, capped by pass expiry). The **standalone** `../jerkmeat` app instead calls `/api/affiliate/authorize` and `/api/affiliate/token` directly with a registered `jerkmeat` client id + bearer secret (`ZIK_JERKMEAT_*`). See [`docs/AFFILIATE_CUSTOMER_FLOW.md`](AFFILIATE_CUSTOMER_FLOW.md); the protocol below is the shared substrate.
 
 ### Wallet, handoff, and errors
 
@@ -161,16 +191,20 @@ Runtime paths are resolved in `lib/server/runtime-paths.ts`:
 - Vercel/Lambda-shaped environments use a temporary `zik-pass-data` directory.
 - Local development defaults to `data/`.
 
-Configuration is centralized in `lib/shared/config.ts`; use `.env.example` as the maintained list of names and defaults.
+Configuration is centralized in `lib/shared/config.ts`; use `.env.example` as the maintained list of names and defaults. `lib/shared/demo-environment.ts` (`ZIK_ENV` / `NEXT_PUBLIC_ZIK_ENV`) is a separate switch, independent of `NODE_ENV`, that gates demo tooling and the environment badge.
+
+### Service worker
+
+`public/sw.js` is an honest offline shell. It precaches only `/offline` + icons, serves content-hashed static assets cache-first, and does navigations network-first → a previously-seen copy of that exact page → the branded `/offline`. It never caches `/api/*`, the clerk/affiliate/handoff routes, or any URL carrying a token/handoff/code/session parameter, and it skips non-hashed `/_next/` dev chunks. Bump `SW_VERSION` to roll the caches. Registration is in `PwaRegistration` (`components/pwa-install-button.tsx`).
 
 ## UI and accessibility conventions
 
-- Reuse `AppShell`, existing panel/button styles, and shared status helpers before adding a new visual language.
+- The customer/operator surfaces use `CustomerShell` / `OperatorShell`, the `--zk-*` tokens, `ZikLogoMark`, and the primitives in `components/customer/ui.tsx`. Reuse these before adding new visual language. `AppShell` remains only for the legacy/dev screens.
 - Keep recovery messages actionable: users should see whether to retry, resume, restart, or report.
-- Preserve `aria-live` announcements in asynchronous payment, handoff, and clerk lookup states.
-- Keep fixed navigation and status footer content usable at narrow mobile widths; test overflow at both 320px-class mobile and desktop sizes.
+- Preserve `aria-live` announcements in asynchronous payment, handoff, and clerk lookup states. The menu is a native `<dialog>` (focus trap + Escape) that returns focus to its trigger on close; the `Sheet` primitive traps focus manually.
+- Keep fixed navigation content usable at narrow mobile widths; check 320 / 390 / 768 / 1440. Respect `prefers-reduced-motion` (handled globally under `.zk-surface`).
 - Do not expose raw IDs, holder keys, handoff tokens, or provider payloads in customer-facing UI.
-- Treat demo payment/device-auth labels as part of the trust UX; do not imply that a demo check is a real biometric or that a demo payment has settled.
+- Treat demo payment/device-auth labels as part of the trust UX; do not imply a demo check is a real biometric, that a demo payment has settled, or that the design is a zero-knowledge proof.
 
 ## Extension guidance
 
