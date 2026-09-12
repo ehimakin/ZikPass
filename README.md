@@ -159,3 +159,14 @@ All supported environment variables are documented in [`.env.example`](.env.exam
 - Check mobile and desktop states for user-facing changes, especially recovery, modal overflow, and fixed navigation.
 
 For the system map and extension points, start with [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), then [`docs/TESTING.md`](docs/TESTING.md).
+
+## Sprint 6: local Vault and selective disclosure
+
+The controlled investor demo adds `/vault` and `/retail-demo`. Enable explicitly with
+`ZIK_DISCLOSURE_V1=true`; the default is off. Name/address/email are self-entered,
+separate from the signed age pass. Zik disclosure endpoints receive only encrypted
+profile fields; the co-hosted demo merchant is the decryption boundary.
+
+See [demo/setup/reset](docs/sprint-6/DEMO.md), [data and threat model](docs/sprint-6/SECURITY_AND_DATA.md),
+[claims](docs/sprint-6/CLAIMS.md), and [handoff/evidence](docs/sprint-6/HANDOFF.md).
+Investor-ready vertical slice; not certified or approved for public reliance.

@@ -215,3 +215,19 @@ When adding a capability:
 3. Make repeated requests safe where a user can retry after a network loss.
 4. Add a focused test for the state transition and one adverse/retry path.
 5. Keep the route handler thin and update `README.md`, this document, and `docs/TESTING.md` if the user-visible flow changes.
+
+## Sprint 6 Vault / disclosure extension
+
+`lib/shared/vault.ts` defines strict profile/envelope parsing and Web Crypto encryption;
+`lib/client/vault-adapter.ts` owns a separate `zik-local-vault` IndexedDB record and
+memory-only session. Nothing is added to WalletState or native pass handoff.
+`lib/shared/disclosure.ts` handles field selection and hybrid encryption.
+`lib/server/disclosure-service.ts` registers Harbour & Pine, delegates age verification
+to the existing affiliate service, and serializes ciphertext redemption. Only
+`lib/demo-rp/merchant.ts` unwraps/decrypts; it is server-only and banned from Zik server
+and client imports by lint. Explicit demo merchant routes call it.
+
+`middleware.ts` supplies a per-request CSP nonce and security headers; the root layout
+is dynamic to attach that nonce. Sensitive routes are no-store. New endpoints are
+strictly parsed and v1 is opt-in. See the [data inventory](sprint-6/SECURITY_AND_DATA.md)
+for the co-hosted/single-process limits and precise recipient boundaries.

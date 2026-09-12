@@ -115,3 +115,28 @@ The UI should preserve the latest known state, show a clear recovery action, and
 ## Physical-device testing (still required)
 
 Chromium automation and the in-app preview browser do **not** register service workers and cannot present a real Apple Pay sheet. On a physical iPhone/Safari, still verify: install to home screen, PWA launch + handoff claim, offline shell, reduced-motion, safe-area insets, and — if/when Stripe is configured — a real Apple Pay test transaction.
+
+## Sprint 6 gates
+
+Vault/disclosure service tests use real Web Crypto plus independent Node RSA/AES
+interop; the suite covers authenticated context, required/optional fields, provenance,
+unknown schemas, failed writes, locking/deletion, replay and concurrency. HTTP tests
+check generic errors, origin/content type and request size.
+
+`e2e/vault-disclosure.spec.ts` uses actual physical issuance, inspects IndexedDB,
+checks every captured API request for profile canaries, and intercepts the age-only
+IndexedDB adapter to fail if it opens the Vault database. It also checks optional
+email both omitted and selected, cancellation/focus and four responsive widths.
+This interception is test-only; no production data-exfiltration hook is installed.
+
+For an isolated browser run (do not reset a user's existing dev server):
+
+```sh
+ZIK_E2E_BASE_URL=http://localhost:3106 ZIK_NEXT_DIST_DIR=.next-sprint6-e2e ZIK_DISCLOSURE_V1=true ZIK_ENV=demo ZIK_RUNTIME_DATA_DIR=/tmp/zik-s6-browser npm run e2e
+```
+
+Build separately with `ZIK_NEXT_DIST_DIR=.next-sprint6-build npm run build`.
+Next may rewrite its generated TypeScript include paths when switching output directories.
+Real iPhone/PWA verification remains a manual gate; see [demo checklist](sprint-6/DEMO.md).
+
+For production browser verification, first build with the isolated output directory, then use the same directory with `ZIK_E2E_PRODUCTION=true` in the browser command (full exact invocation in the handoff).
