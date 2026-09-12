@@ -1,0 +1,97 @@
+
+> zik-pass@0.1.0 build
+> next build
+
+   ▲ Next.js 15.5.14
+   - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 3.7s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/63) ...
+   Generating static pages (15/63) 
+   Generating static pages (31/63) 
+   Generating static pages (47/63) 
+ ✓ Generating static pages (63/63)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ƒ /                                      245 B         102 kB
+├ ƒ /_not-found                            245 B         102 kB
+├ ƒ /about                                 185 B         118 kB
+├ ƒ /affiliate-demo                      1.13 kB         107 kB
+├ ƒ /affiliate-demo/callback               710 B         103 kB
+├ ƒ /affiliate-demo/confirm              3.64 kB         124 kB
+├ ƒ /affiliate-demo/continue               166 B         106 kB
+├ ƒ /affiliates                            185 B         118 kB
+├ ƒ /api/affiliate-demo/complete           245 B         102 kB
+├ ƒ /api/affiliate-demo/start              245 B         102 kB
+├ ƒ /api/affiliate/authorize               245 B         102 kB
+├ ƒ /api/affiliate/challenge/complete      245 B         102 kB
+├ ƒ /api/affiliate/result/[id]             245 B         102 kB
+├ ƒ /api/affiliate/token                   245 B         102 kB
+├ ƒ /api/affiliates/logos                  245 B         102 kB
+├ ƒ /api/config/public-key                 245 B         102 kB
+├ ƒ /api/demo-merchant/redeem              245 B         102 kB
+├ ƒ /api/demo-merchant/start               245 B         102 kB
+├ ƒ /api/demo/reset                        245 B         102 kB
+├ ƒ /api/disclosure/[id]                   245 B         102 kB
+├ ƒ /api/disclosure/approve                245 B         102 kB
+├ ƒ /api/disclosure/cancel                 245 B         102 kB
+├ ƒ /api/enrollment/[id]                   245 B         102 kB
+├ ƒ /api/enrollment/advance-cooling-off    245 B         102 kB
+├ ƒ /api/enrollment/issue                  245 B         102 kB
+├ ƒ /api/enrollment/retry                  245 B         102 kB
+├ ƒ /api/enrollment/start                  245 B         102 kB
+├ ƒ /api/enrollment/verify-possession      245 B         102 kB
+├ ƒ /api/errors                            245 B         102 kB
+├ ƒ /api/errors/report                     245 B         102 kB
+├ ƒ /api/issuer/sessions                   245 B         102 kB
+├ ƒ /api/mobile/handoff                    245 B         102 kB
+├ ƒ /api/mobile/handoff/claim              245 B         102 kB
+├ ƒ /api/payments/[enrollmentId]           245 B         102 kB
+├ ƒ /api/payments/confirm-cash             245 B         102 kB
+├ ƒ /api/payments/confirm-online-demo      245 B         102 kB
+├ ƒ /api/payments/create                   245 B         102 kB
+├ ƒ /api/physical/device-auth/complete     245 B         102 kB
+├ ƒ /api/physical/device-auth/start        245 B         102 kB
+├ ƒ /api/physical/sessions                 245 B         102 kB
+├ ƒ /api/physical/sessions/[id]            245 B         102 kB
+├ ƒ /api/physical/sessions/heartbeat       245 B         102 kB
+├ ƒ /api/physical/sessions/lookup          245 B         102 kB
+├ ƒ /api/physical/sessions/verify          245 B         102 kB
+├ ƒ /api/purchase-sale                     245 B         102 kB
+├ ƒ /api/purchase-sale/claim               245 B         102 kB
+├ ƒ /api/pwa/handoff/recover               245 B         102 kB
+├ ƒ /api/pwa/manifest                      245 B         102 kB
+├ ƒ /api/wallet/holder-key                 245 B         102 kB
+├ ƒ /app/handoff                         5.57 kB         118 kB
+├ ƒ /card                                1.44 kB         145 kB
+├ ƒ /find                                4.11 kB         122 kB
+├ ƒ /get-pass                              189 B         144 kB
+├ ƒ /help                                1.79 kB         120 kB
+├ ƒ /home                                4.67 kB         133 kB
+├ ƒ /issuer                              5.63 kB         111 kB
+├ ƒ /offline                               245 B         102 kB
+├ ƒ /onboarding                          1.75 kB         155 kB
+├ ƒ /pass                                4.82 kB         134 kB
+├ ƒ /retail-demo                         7.82 kB         133 kB
+├ ƒ /store                                 245 B         102 kB
+├ ƒ /vault                               3.62 kB         121 kB
+├ ƒ /verify                              6.45 kB         115 kB
+├ ƒ /verify/purchase                     4.36 kB         127 kB
+├ ƒ /verify/zik                          3.58 kB         120 kB
+├ ƒ /wallet                                176 B         153 kB
+└ ƒ /ZikParental                         2.28 kB         108 kB
++ First Load JS shared by all             102 kB
+  ├ chunks/1255-aadf393aa3a56bfa.js        46 kB
+  ├ chunks/4bd1b696-f785427dddbba9fb.js  54.2 kB
+  └ other shared chunks (total)          1.93 kB
+
+
+ƒ Middleware                             34.6 kB
+
+ƒ  (Dynamic)  server-rendered on demand
+

@@ -1,0 +1,57 @@
+
+> zik-pass@0.1.0 test
+> vitest run
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+ RUN  v2.1.9 /Users/ehim/dev/ZikPass
+
+ ✓ tests/physical-flow.test.ts (28 tests) 230ms
+ ✓ tests/affiliate-verifier.test.ts (17 tests) 3476ms
+   ✓ affiliate verification demo > 1. completes a successful verification and returns only the minimal fields to the affiliate 372ms
+   ✓ affiliate verification demo > 4. denies an invalid holder signature 346ms
+   ✓ affiliate verification demo > 5. denies a challenge built for the wrong audience/client 331ms
+   ✓ affiliate verification demo > 6. denies a challenge signed over the wrong nonce 330ms
+   ✓ affiliate verification demo > denies a malformed challenge that does not match the expected shape at all 336ms
+   ✓ affiliate verification demo > 7. denies a replayed challenge (already-consumed request) 342ms
+   ✓ affiliate verification demo > 8. denies a replayed authorization code 352ms
+   ✓ affiliate verification demo > 9. denies an expired authorization code 353ms
+   ✓ affiliate verification demo > 13. never returns identity, credential, or reusable-identifier fields in the affiliate result 341ms
+   ✓ affiliate verification demo > rejects a token exchange whose state does not match the original request 354ms
+ ✓ tests/payments.test.ts (10 tests) 28ms
+ ✓ tests/device-bindings.test.ts (6 tests) 2107ms
+   ✓ device binding ledger > creates exactly one primary binding at issuance, using the enrollment holder key 362ms
+   ✓ device binding ledger > authorizes a second device and treats a repeat claim with the same key as idempotent 345ms
+   ✓ device binding ledger > blocks a third device with payment_required and unblocks it once a demo payment is confirmed 359ms
+   ✓ device binding ledger > does not create duplicate bindings under concurrent claims for the same new key 352ms
+   ✓ device binding ledger > gates the native app handoff claim behind the same device-binding policy 348ms
+   ✓ device binding ledger > does not damage the existing pass when a device-extension payment fails 340ms
+ ✓ tests/disclosure.test.ts (4 tests) 107ms
+ ✓ tests/wallet-state.test.ts (3 tests) 2ms
+ ✓ tests/enrollment-service.test.ts (3 tests) 1134ms
+   ✓ enrollment service orchestration > walks a clean application through bank verification and issuance 365ms
+   ✓ enrollment service orchestration > allows retrying transient provider failures 507ms
+ ✓ tests/purchase-sale.test.ts (7 tests) 59ms
+ ✓ tests/application-risk-engine.test.ts (5 tests) 3ms
+ ✓ tests/provider-simulators.test.ts (4 tests) 566ms
+ ✓ tests/affiliate-demo-session.test.ts (6 tests) 19ms
+ ✓ tests/verifier-sdk.test.ts (4 tests) 21ms
+ ✓ tests/vault.test.ts (4 tests) 1048ms
+ ✓ tests/errors.test.ts (6 tests) 4ms
+ ✓ tests/zignature.test.ts (5 tests) 17ms
+ ✓ tests/physical-session-route.test.ts (4 tests) 6ms
+ ✓ tests/wallet-client.test.ts (2 tests) 3ms
+ ✓ tests/issuer-dashboard.test.ts (4 tests) 19ms
+ ✓ tests/affiliate-external-client.test.ts (3 tests) 2ms
+ ✓ tests/affiliate-layout.test.ts (3 tests) 13ms
+ ✓ tests/vendor-verification.test.ts (2 tests) 3ms
+ ✓ tests/proof-evaluator.test.ts (3 tests) 3ms
+ ✓ tests/application-guard.test.ts (2 tests) 2ms
+ ✓ tests/disclosure-http.test.ts (2 tests) 11ms
+ ✓ tests/age-consent.test.ts (1 test) 2ms
+
+ Test Files  25 passed (25)
+      Tests  138 passed (138)
+   Start at  23:06:57
+   Duration  13.25s (transform 334ms, setup 0ms, collect 735ms, tests 8.89s, environment 3ms, prepare 911ms)
+
