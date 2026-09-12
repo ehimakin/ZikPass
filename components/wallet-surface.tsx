@@ -1269,7 +1269,7 @@ export function WalletSurface({
                         ? "Customer Onboarding"
                         : isPhysicalLane
                           ? "Verify offline, use online. No digital footpwinx"
-                          : "Zero Knowledge age verification"}
+                          : "Signed age verification"}
                     </p>
                     {!showHeroPassPreview && !onboardingMode ? (
                       <p className="mt-2 font-mono text-xs tracking-[0.24em] text-ink/45">

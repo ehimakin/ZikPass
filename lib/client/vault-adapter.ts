@@ -44,7 +44,8 @@ export class VaultSession {
     const envelope = await encryptVault(profile, secret);
     if (epoch !== this.epoch) throw new Error('vault_locked');
     await this.storage.write(envelope);
-    if (epoch === this.epoch) this.profile = structuredClone(profile);
+    if (epoch !== this.epoch) throw new Error("vault_locked");
+    this.profile = structuredClone(profile);
   }
   async delete() { this.lock(); await this.storage.remove(); }
 }

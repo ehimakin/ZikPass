@@ -14,11 +14,11 @@ const ACCEPTED_ID = [
 const FAQ = [
   {
     q: "Why do I have to go to a store?",
-    a: "The one-time identity check happens in person so no photo of your ID is ever uploaded. After that, everything is on your device."
+    a: "The age check happens in person; the physical flow does not upload an ID photo. Your pass stays on your device, with operational issuance records on Zik servers."
   },
   {
     q: "What does a website learn about me?",
-    a: "Only that you are over 18, plus a one-time signed token for that specific check. No name, date of birth or document number is shared."
+    a: "Age-only sites receive an over-18 result and verification metadata. Retail demos also receive only the self-entered profile fields you approve. No date of birth or document number is shared."
   },
   {
     q: "How long does my pass last?",

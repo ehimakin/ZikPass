@@ -29,3 +29,9 @@ describe('device Vault', () => {
     await session.delete(); expect(stored).toBeUndefined(); expect(() => session.read()).toThrow();
   });
 });
+it('does not resurrect an in-flight unlock after lock', async () => {
+  const envelope = await encryptVault(profile, secret);
+  const session = new VaultSession({read:async()=>envelope,write:async()=>{},remove:async()=>{}});
+  const pending = session.unlock(secret); session.lock();
+  await expect(pending).rejects.toThrow('vault_locked'); expect(()=>session.read()).toThrow();
+});

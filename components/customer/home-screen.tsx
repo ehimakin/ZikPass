@@ -120,10 +120,10 @@ export function HomeScreen({ price }: { price: string }) {
         </h1>
         <p className="mt-8 text-[15px] leading-relaxed text-[var(--zk-text-soft)]">
           *Verify in participating stores. Then use your pass anywhere
-          online. Only sharing that you&rsquo;re over 18.
+          with participating demo sites. Share an age result, or approve self-entered details for retail form-fill.
         </p>
         <p className="mt-5 text-[15px] leading-relaxed text-[var(--zk-text-soft)]">
-          That&apos;s zero knowledge. That&apos;s Zik.
+          A reusable age pass. That&apos;s Zik.
         </p>
 
         <div className="mt-10 space-y-2.5">
@@ -192,9 +192,9 @@ export function HomeScreen({ price }: { price: string }) {
             <div>
               <p className="text-[14px] font-bold text-[var(--zk-text)]">What a site receives</p>
               <p className="mt-1 text-[13px] leading-relaxed text-[var(--zk-text-soft)]">
-                Only a yes/no confirmation that you are over 18, plus a one-time signed
-                token for that check. No name, date of birth, photo or document number is
-                shared. This prototype does not use biometrics or a zero-knowledge proof.
+                Age-only sites receive the over-18 result and verification metadata. Retail
+                demos also receive the self-entered fields you approve. No date of birth,
+                photo or document number is shared. This is not a zero-knowledge proof.
               </p>
             </div>
           </div>

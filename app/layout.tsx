@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
@@ -31,12 +32,13 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <html lang="en" className={manrope.variable}>
       <body>
         {process.env.NODE_ENV === "development" ? (
-          <script dangerouslySetInnerHTML={{ __html: `
+          <script nonce={nonce} dangerouslySetInnerHTML={{ __html: `
             if ('serviceWorker' in navigator) {
               navigator.serviceWorker.getRegistrations().then(function(registrations) {
                 return Promise.all(registrations.filter(function(r) {

@@ -30,7 +30,7 @@ test("self-directed: discover a store, get verified, pay, receive a pass", async
 
   await expect(page.getByRole("heading", { name: /Your pass is ready/i })).toBeVisible({ timeout: 20_000 });
   await page.getByRole("link", { name: /Open my pass/i }).click();
-  await expect(page.getByText("Over 18")).toBeVisible();
+  await expect(page.getByText("18+ verified")).toBeVisible();
   await expect(page.getByText(/zp_/)).toBeVisible();
 });
 
@@ -94,7 +94,7 @@ test("delete pass from this device returns to the empty state", async ({ page, r
   await expect(page.getByRole("heading", { name: /Your pass is ready/i })).toBeVisible({ timeout: 20_000 });
 
   await page.goto("/pass");
-  await expect(page.getByText("Over 18")).toBeVisible();
+  await expect(page.getByText("18+ verified")).toBeVisible();
   await page.getByText(/Remove this pass from this device/i).click();
   await page.getByRole("button", { name: /Delete pass from this device/i }).click();
   await page.getByRole("button", { name: /Yes, delete/i }).click();

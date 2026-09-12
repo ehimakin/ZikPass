@@ -106,7 +106,7 @@ export function CustomerShell({
             </span>
           )}
           <div className={clsx("shrink-0", !title && "ml-auto sm:ml-0")}>
-            <CustomerMenu items={NAV.map((item) => item.href === "/find" ? { href: "/about" as Route, label: "About" } : item)} pathname={pathname} />
+            <CustomerMenu items={[...NAV.map((item) => item.href === "/find" ? { href: "/about" as Route, label: "About" } : item), { href: "/vault" as Route, label: "My Vault" }, { href: "/retail-demo" as Route, label: "Retail demo" }]} pathname={pathname} />
           </div>
         </div>
         <OfflineBanner />

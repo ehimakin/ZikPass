@@ -16,7 +16,7 @@
  *  - Versioned: bump SW_VERSION to roll the caches; activate() deletes the rest.
  */
 
-const SW_VERSION = "v3";
+const SW_VERSION = "v4";
 const STATIC_CACHE = `zikpass-static-${SW_VERSION}`;
 const PAGE_CACHE = `zikpass-pages-${SW_VERSION}`;
 const KEEP = new Set([STATIC_CACHE, PAGE_CACHE]);
@@ -33,7 +33,7 @@ const PRECACHE = [
 const CACHEABLE_PAGES = ["/home", "/find", "/pass", "/help", "/about", "/card"];
 
 // Never cache or serve-from-cache these path prefixes.
-const NEVER = ["/api/", "/verify", "/affiliate-demo", "/app/handoff", "/issuer", "/store"];
+const NEVER = ["/vault", "/retail-demo", "/api/", "/verify", "/affiliate-demo", "/app/handoff", "/issuer", "/store"];
 
 const SENSITIVE_PARAMS = ["handoff_token", "token", "code", "request_id", "session_id"];
 
