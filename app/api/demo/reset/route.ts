@@ -1,3 +1,4 @@
+import { resetDisclosures } from "@/lib/server/disclosure-service";
 import { NextResponse } from "next/server";
 import { isDemoEnvironment } from "@/lib/shared/demo-environment";
 import { resetDemoRuntimeState } from "@/lib/server/storage";
@@ -12,5 +13,6 @@ export async function POST() {
     return NextResponse.json({ error: "Not available in this environment." }, { status: 403 });
   }
   await resetDemoRuntimeState();
+  await resetDisclosures();
   return NextResponse.json({ ok: true, reset_at: new Date().toISOString() });
 }

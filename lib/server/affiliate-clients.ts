@@ -14,6 +14,7 @@ export interface AffiliateClientConfig {
 }
 
 const DEMO_AFFILIATE_CLIENTS: Record<string, AffiliateClientConfig> = {
+  "harbour-demo": { client_id: "harbour-demo", display_name: "Harbour & Pine", redirect_uris: ["/retail-demo"] },
   "nightfall-demo": {
     client_id: "nightfall-demo",
     display_name: "JerkMeat",

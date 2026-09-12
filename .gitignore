@@ -21,3 +21,8 @@ public/Agent Image*
 *.zip
 tsconfig.tsbuildinfo
 .vercel
+# Sprint 6 runtime ciphertext and merchant demo key boundary
+data/demo-merchant-*.json
+data/disclosures.json
+
+.next-sprint6-*/
