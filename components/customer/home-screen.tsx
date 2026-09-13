@@ -126,10 +126,7 @@ export function HomeScreen({ price }: { price: string }) {
         </p>
         <h1 className="mt-2 text-[30px] font-extrabold leading-[1.15] tracking-tight text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-2" : undefined}>
           <span className="text-[#d3bb53]">{"Zero knowledge* Identification "}</span>{"you can use online. Without sacrificing your data."}</h1>
-        <p className="mt-8 text-[15px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-3" : undefined}>
-          *Show an ID once in person at participating stores. Then use your pass anywhere
-          online. Only sharing that you&rsquo;re over 18.
-        </p>
+        <p className="mt-8 text-[15px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-3" : undefined}>{"*Show an ID once in person at participating stores. Then use your pass anywhere online. None of your private data leaves your phone or touches our servers."}</p>
         <p className="mt-5 text-[15px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-4" : undefined}>
           Use Zik Vault to encrypt your sensitive data and control what data you share with companies
         </p>
