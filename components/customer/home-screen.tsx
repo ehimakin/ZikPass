@@ -10,11 +10,24 @@ import { HomePassOverview } from "@/components/customer/home-pass-overview";
 import type { WalletState } from "@/lib/shared/types";
 import heroImage from "@/public/hero-zikpass-warm.png";
 
+/** The lime-green phone artwork shared by fixed customer-page heroes. */
+export function PhoneHero() {
+  return (
+    <Image
+      src={heroImage}
+      alt=""
+      priority
+      sizes="(min-width: 1024px) 100vw, (max-width: 361px) 709px, (max-width: 472px) 197vw, 927px"
+      className="zk-home-hero-image"
+    />
+  );
+}
+
 /** Desktop video backdrop, with the original artwork on smaller screens. */
 export function HomeHero() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const manuallyPausedRef = useRef(false);
   const [enabled, setEnabled] = useState(false);
-  const [manuallyPaused, setManuallyPaused] = useState(false);
 
   useEffect(() => {
     const media = window.matchMedia("(min-width: 1024px) and (prefers-reduced-motion: no-preference)");
@@ -33,9 +46,9 @@ export function HomeHero() {
     const pauseUntilIdle = () => {
       clearTimeout(idleTimer);
       video.pause();
-      if (manuallyPaused || document.hidden) return;
+      if (manuallyPausedRef.current || document.hidden) return;
       idleTimer = setTimeout(() => {
-        if (!disposed && !document.hidden) void video.play().catch(() => {});
+        if (!disposed && !manuallyPausedRef.current && !document.hidden) void video.play().catch(() => {});
       }, 750);
     };
 
@@ -54,17 +67,19 @@ export function HomeHero() {
       window.removeEventListener("wheel", pauseUntilIdle);
       document.removeEventListener("visibilitychange", pauseUntilIdle);
     };
-  }, [enabled, manuallyPaused]);
+  }, [enabled]);
+
+  const toggleVideoPlayback = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    manuallyPausedRef.current = !manuallyPausedRef.current;
+    if (manuallyPausedRef.current) video.pause();
+    else void video.play().catch(() => {});
+  };
 
   return (
     <>
-      <Image
-        src={heroImage}
-        alt=""
-        priority
-        sizes="(min-width: 1024px) 100vw, (max-width: 361px) 709px, (max-width: 472px) 197vw, 927px"
-        className="zk-home-hero-image"
-      />
+      <PhoneHero />
       {enabled && (
         <>
           <video
@@ -75,14 +90,8 @@ export function HomeHero() {
             loop
             playsInline
             aria-hidden="true"
+            onClick={toggleVideoPlayback}
           />
-          <button
-            type="button"
-            className="zk-home-video-toggle"
-            onClick={() => setManuallyPaused((paused) => !paused)}
-          >
-            {manuallyPaused ? "Play background video" : "Pause background video"}
-          </button>
         </>
       )}
     </>
@@ -110,7 +119,7 @@ export function HomeScreen({ price }: { price: string }) {
         <HomePassOverview wallet={wallet} failed={walletFailed} />
       </div>
 
-      <div className="relative -mx-4 min-h-[60vh] space-y-6 bg-[var(--zk-canvas)] px-4 pb-10 pt-6 shadow-[0_-10px_30px_rgba(14,23,38,0.08)]">
+      <div className="relative -mx-4 min-h-[60vh] space-y-6 rounded-b-[32px] bg-[var(--zk-canvas)] px-4 pb-10 pt-6 shadow-[0_-10px_30px_rgba(14,23,38,0.08)]">
       <section>
         <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-1" : undefined}>
           Age verification, done once

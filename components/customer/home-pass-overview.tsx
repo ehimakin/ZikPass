@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { Route } from "next";
 import type { EnrollmentRecord, WalletState } from "@/lib/shared/types";
-import { SilverPassCard } from "@/components/customer/silver-pass-card";
+import { VerificationSeal } from "@/components/customer/verification-seal";
 import { PassIcon } from "@/components/customer/icons";
+import { ZikLogoMark } from "@/components/zik-logo";
 
 export function HomePassOverview({ wallet, failed }: { wallet: WalletState | null; failed: boolean }) {
   const [enrollment, setEnrollment] = useState<EnrollmentRecord | null>(null);
@@ -30,7 +31,7 @@ export function HomePassOverview({ wallet, failed }: { wallet: WalletState | nul
     };
   }, [wallet?.enrollmentId]);
 
-  if (wallet?.credential) return <SilverPassCard credential={wallet.credential} />;
+  if (wallet?.credential) return <VerificationSeal credential={wallet.credential} href={"/pass" as Route} />;
   let title = "Your pass will appear here";
   let detail = "No pass saved on this device yet. One check in store gets you started.";
   let badge = "No pass yet";
@@ -85,20 +86,24 @@ export function HomePassOverview({ wallet, failed }: { wallet: WalletState | nul
   }
 
   return (
-    <div className="zk-home-pass-card-wrap">
-      <section aria-label="Pass overview for this device" className="zk-home-pass-card">
-        <div className="flex items-center justify-between gap-2">
-          <span className="flex items-center gap-1.5 font-bold uppercase tracking-[0.12em] text-[#686868]"><PassIcon className="h-[1.25em] w-[1.25em]" /> My Pass</span>
-          <span className="flex items-center gap-1 rounded-full bg-black/5 px-2 py-1 font-semibold"><span className={`h-1 w-1 rounded-full bg-[#a38d36]`} />{badge}</span>
+    <div className="zk-verification-seal-wrap">
+      <section aria-label="Pass overview for this device" className="zk-verification-seal zk-verification-seal--pending">
+        <Link href={"/pass" as Route} className="zk-verification-seal-home-link" aria-label="Open My Pass" />
+        <div className="zk-verification-seal-heading">
+          <p className="flex items-center gap-1.5"><PassIcon className="h-[1.25em] w-[1.25em]" /> My Pass</p>
+          <span className="zk-verification-seal-status"><i />{badge}</span>
         </div>
-        <div>
-          <p className="mb-1 uppercase tracking-[0.12em] text-[#787878]">This device</p>
-          <h2 className="zk-home-pass-card-title">{title}</h2>
+
+        <div className="zk-verification-seal-pending-copy">
+          <ZikLogoMark className="zk-verification-seal-pending-logo" />
+          <p>This device</p>
+          <h2>{title}</h2>
           <p className="sr-only">{detail}</p>
         </div>
-        <div className="flex items-center justify-between gap-2 border-t border-black/10 pt-[3cqw]">
-          <Link href={href as Route} className="font-bold">{action} <span aria-hidden="true">↗</span></Link>
-          <Link href={"/pass" as Route} className="text-[#626262] underline underline-offset-4" aria-label={wallet?.credential ? "Device options" : "Pass on another device?"}>Devices</Link>
+
+        <div className="zk-verification-seal-actions">
+          <Link href={href as Route}>{action} <span aria-hidden="true">↗</span></Link>
+          <Link href={"/pass" as Route} aria-label={wallet?.credential ? "Device options" : "Pass on another device?"}>Devices</Link>
         </div>
       </section>
     </div>

@@ -485,9 +485,10 @@ function Checklist({
   deviceChecked: boolean;
   phase: Phase;
 }) {
-  const steps: Array<{ label: string; done: boolean; active: boolean }> = [
+  const steps: Array<{ label: string; detail?: string; done: boolean; active: boolean }> = [
     {
-      label: clerkLookedUp ? "Clerk found your code" : "Waiting for the clerk",
+      label: clerkLookedUp ? "Clerk found your code." : "Waiting for the clerk",
+      detail: clerkLookedUp && !clerkVerified ? "Now show them your ID." : undefined,
       done: clerkLookedUp,
       active: !clerkLookedUp
     },
@@ -531,7 +532,10 @@ function Checklist({
                 : "text-[var(--zk-text-faint)]")
             }
           >
-            {step.label}
+            <span className="block">{step.label}</span>
+            {step.detail ? (
+              <span className="mt-0.5 block text-[var(--zk-positive)]">{step.detail}</span>
+            ) : null}
           </span>
           {step.active ? (
             <span className="ml-auto h-2 w-2 animate-pulse rounded-full bg-[var(--zk-text)]" />

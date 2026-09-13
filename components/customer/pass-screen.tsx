@@ -12,7 +12,7 @@ import {
 import { isDemoEnvironment } from "@/lib/shared/demo-environment";
 import { getWalletStatusSnapshot } from "@/lib/shared/wallet-state";
 import type { EnrollmentRecord, WalletState } from "@/lib/shared/types";
-import { SilverPassCard } from "@/components/customer/silver-pass-card";
+import { VerificationSeal } from "@/components/customer/verification-seal";
 import { PwaInstallButton } from "@/components/pwa-install-button";
 import { Alert, Button, ButtonLink, Card, SectionHeading, Skeleton, StatusBadge } from "@/components/customer/ui";
 import { ShieldIcon, ClockIcon } from "@/components/customer/icons";
@@ -144,8 +144,7 @@ export function PassScreen() {
         </StatusBadge>
       </div>
 
-      {/* Share the homepage card's metallic finish and credit-card proportions. */}
-      <SilverPassCard credential={credential} />
+      <VerificationSeal credential={credential} detailed />
 
       {!active && !expired ? (
         <Alert tone="info" title="Almost ready">

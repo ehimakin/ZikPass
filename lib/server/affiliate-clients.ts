@@ -22,11 +22,19 @@ const DEMO_AFFILIATE_CLIENTS: Record<string, AffiliateClientConfig> = {
   }
 };
 
+/** External standalone affiliates that read their own redirect URI + secret from env, keyed by client_id. */
+const EXTERNAL_AFFILIATE_ENV: Record<string, { redirectUriEnv: string; clientSecretEnv: string; displayName: string }> = {
+  jerkmeat: { redirectUriEnv: "ZIK_JERKMEAT_REDIRECT_URI", clientSecretEnv: "ZIK_JERKMEAT_CLIENT_SECRET", displayName: "JerkMeat" },
+  pomhub: { redirectUriEnv: "ZIK_POMHUB_REDIRECT_URI", clientSecretEnv: "ZIK_POMHUB_CLIENT_SECRET", displayName: "PomHub" },
+  pomography: { redirectUriEnv: "ZIK_POMOGRAPHY_REDIRECT_URI", clientSecretEnv: "ZIK_POMOGRAPHY_CLIENT_SECRET", displayName: "Pomography" }
+};
+
 export function getAffiliateClient(clientId: string): AffiliateClientConfig | undefined {
-  if (clientId === "jerkmeat") {
-    const redirectUri = process.env.ZIK_JERKMEAT_REDIRECT_URI;
-    if (!redirectUri || !process.env.ZIK_JERKMEAT_CLIENT_SECRET) return undefined;
-    return { client_id: clientId, display_name: "JerkMeat", redirect_uris: [redirectUri] };
+  const external = EXTERNAL_AFFILIATE_ENV[clientId];
+  if (external) {
+    const redirectUri = process.env[external.redirectUriEnv];
+    if (!redirectUri || !process.env[external.clientSecretEnv]) return undefined;
+    return { client_id: clientId, display_name: external.displayName, redirect_uris: [redirectUri] };
   }
   return DEMO_AFFILIATE_CLIENTS[clientId];
 }
@@ -34,8 +42,9 @@ export function getAffiliateClient(clientId: string): AffiliateClientConfig | un
 /** External affiliates authenticate from their backend; never expose this secret to a browser. */
 export function authenticateAffiliateClient(clientId: string, authorization: string | null): boolean {
   if (clientId === "nightfall-demo") return true; // Existing embedded prototype only.
-  if (clientId !== "jerkmeat" || !getAffiliateClient(clientId)) return false;
-  const expected = Buffer.from(`Bearer ${process.env.ZIK_JERKMEAT_CLIENT_SECRET}`);
+  const external = EXTERNAL_AFFILIATE_ENV[clientId];
+  if (!external || !getAffiliateClient(clientId)) return false;
+  const expected = Buffer.from(`Bearer ${process.env[external.clientSecretEnv]}`);
   const actual = Buffer.from(authorization ?? "");
   return actual.length === expected.length && timingSafeEqual(actual, expected);
 }

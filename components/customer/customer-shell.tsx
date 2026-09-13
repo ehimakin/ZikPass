@@ -11,6 +11,7 @@ import { ZikLogoMark } from "@/components/zik-logo";
 import { CustomerMenu } from "@/components/customer/customer-menu";
 import { OfflineBanner } from "@/components/customer/offline-banner";
 import { AffiliateLogoRails } from "@/components/customer/affiliate-logo-rails";
+import { replayHomepageSplash } from "@/components/homepage-splash";
 
 interface NavItem {
   href: Route;
@@ -89,7 +90,16 @@ export function CustomerShell({
               {back.label}
             </Link>
           ) : (
-            <Link href={"/home" as Route} className="flex items-center gap-2" aria-label="Zik Pass home">
+            <Link
+              href={"/home" as Route}
+              className="flex items-center gap-2"
+              aria-label="Zik Pass home"
+              onClick={(event) => {
+                if (pathname !== "/home") return;
+                event.preventDefault();
+                replayHomepageSplash();
+              }}
+            >
               <ZikLogoMark className="zk-logo-float h-7 w-7 shrink-0" />
               <span className="text-[16px] font-extrabold tracking-tight text-[var(--zk-text)]">
                 <span className="text-[#28623c]">Zik</span>{" "}Pass

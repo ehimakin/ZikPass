@@ -215,8 +215,7 @@ pre {
 }
 
 /* Desktop hero footage fills the viewport without a gradient overlay. */
-.zk-home-hero-video,
-.zk-home-video-toggle {
+.zk-home-hero-video {
   display: none;
 }
 
@@ -244,20 +243,8 @@ pre {
     width: 100%;
     height: 100%;
     object-fit: cover;
-  }
-
-  .zk-home-video-toggle {
-    display: block;
-    position: absolute;
-    top: 72px;
-    right: 24px;
     pointer-events: auto;
-    border-radius: 999px;
-    padding: 8px 14px;
-    background: rgb(255 255 255 / 90%);
-    color: #17202b;
-    font-size: 12px;
-    font-weight: 600;
+    cursor: pointer;
   }
 }
 
@@ -335,34 +322,272 @@ pre {
 
 }
 
-/* Match 55% of the full-width home panel, including its negative margins. */
-.zk-home-pass-card-wrap {
-  width: calc((100% + 2rem) * 0.55);
+/* The age credential reads as an official seal rather than a payment card. */
+.zk-verification-seal-wrap {
+  width: min(calc((100% + 2rem) * 0.64), 340px);
   container-type: inline-size;
 }
 
-.zk-home-pass-card,
-.zk-silver-pass-card {
-  aspect-ratio: 85.6 / 53.98;
+.zk-verification-seal-wrap--details {
+  width: min(calc((100% + 2rem) * 0.544), 289px);
+}
+
+.zk-verification-seal-wrap--details .zk-verification-seal-heading {
+  padding-inline: min(50px, 17.3cqw);
+}
+
+.zk-verification-seal {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  aspect-ratio: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 5.5cqw;
-  border: 1px solid rgb(255 255 255 / 90%);
-  border-radius: 6cqw;
+  overflow: hidden;
+  padding: 18cqw 11cqw 10cqw;
+  border: 1px solid rgb(211 187 83 / 92%);
+  border-radius: 50%;
   background:
-    linear-gradient(115deg, transparent 18%, rgb(255 255 255 / 78%) 32%, transparent 46%, rgb(255 255 255 / 48%) 72%, transparent 86%),
-    linear-gradient(145deg, #fafafa 0%, #d4d5d6 24%, #f1f2f3 43%, #bfc1c3 65%, #e8e9ea 84%, #fafafa 100%);
-  color: #252525;
-  box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgb(80 80 80 / 16%), 0 8px 32px rgb(0 0 0 / 16%);
-  backdrop-filter: blur(24px);
+    radial-gradient(circle at 50% 42%, rgb(255 255 255 / 98%) 0 36%, rgb(248 243 224 / 98%) 72%, rgb(235 224 186 / 98%) 100%);
+  color: #201c10;
+  box-shadow: 0 15px 42px rgb(22 25 19 / 20%), inset 0 0 0 3cqw rgb(255 255 255 / 55%), inset 0 0 0 calc(3cqw + 1px) rgb(40 98 60 / 26%);
   font-size: 3.3cqw;
   line-height: 1.3;
 }
 
-.zk-home-pass-card-title {
-  font-size: 5.8cqw;
+.zk-verification-seal::before,
+.zk-verification-seal::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.zk-verification-seal::before {
+  inset: 5.2cqw;
+  border: 1px solid rgb(211 187 83 / 72%);
+}
+
+.zk-verification-seal::after {
+  inset: 8cqw;
+  border: 1px dashed rgb(40 98 60 / 24%);
+}
+
+.zk-verification-seal-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2cqw;
+  font-size: 2.8cqw;
   font-weight: 800;
-  line-height: 1.12;
-  letter-spacing: -0.025em;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.zk-verification-seal-heading p span {
+  color: #28623c;
+}
+
+.zk-verification-seal-status {
+  display: flex;
+  align-items: center;
+  gap: 1.4cqw;
+  border-radius: 999px;
+  background: rgb(32 28 16 / 8%);
+  padding: 1.1cqw 2.2cqw;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.zk-verification-seal-status i {
+  width: 1.4cqw;
+  height: 1.4cqw;
+  border-radius: 50%;
+  background: #28623c;
+  box-shadow: 0 0 0 1.2cqw rgb(40 98 60 / 10%);
+}
+
+.zk-verification-seal-proof {
+  display: grid;
+  place-items: center;
+  margin-top: 0;
+  text-align: center;
+}
+
+.zk-verification-seal-proof strong {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 20cqw;
+  font-weight: 400;
+  line-height: 0.82;
+  letter-spacing: -0.08em;
+}
+
+.zk-verification-seal-proof span {
+  margin-top: 2.5cqw;
+  color: #28623c;
+  font-size: 4.3cqw;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.zk-verification-seal-signature {
+  height: 11cqw;
+  margin: -1cqw 5cqw 0;
+}
+
+.zk-verification-seal-device {
+  text-align: center;
+  font-size: 3.2cqw;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.zk-verification-seal-wrap--details .zk-verification-seal-device {
+  transform: translateY(-2.6em);
+}
+
+.zk-verification-seal--interactive {
+  cursor: pointer;
+  transition: box-shadow 180ms ease, transform 180ms ease;
+}
+
+.zk-verification-seal--interactive:hover {
+  box-shadow: 0 18px 48px rgb(22 25 19 / 25%), inset 0 0 0 3cqw rgb(255 255 255 / 55%), inset 0 0 0 calc(3cqw + 1px) rgb(40 98 60 / 34%);
+  transform: translateY(-2px);
+}
+
+.zk-verification-seal--interactive:focus-visible {
+  outline: 3px solid #28623c;
+  outline-offset: 5px;
+}
+
+.zk-verification-seal-drawer {
+  position: relative;
+  z-index: 0;
+  display: grid;
+  grid-template-rows: 0fr;
+  width: 82%;
+  margin: -10cqw auto 0;
+  opacity: 0;
+  transform: translateY(-5cqw);
+  transition: grid-template-rows 360ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease, transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.zk-verification-seal-drawer--open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.zk-verification-seal-drawer-clip {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.zk-verification-seal-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  border: 1px solid rgb(211 187 83 / 55%);
+  border-radius: 0 0 20px 20px;
+  background: #fffdf5;
+  padding: calc(10cqw + 16px) 18px 18px;
+  box-shadow: 0 14px 28px rgb(22 25 19 / 14%);
+  font-size: 12px;
+}
+
+.zk-verification-seal-details dt {
+  color: var(--zk-text-faint);
+}
+
+.zk-verification-seal-details dd {
+  margin-top: 2px;
+  font-weight: 700;
+}
+
+.zk-verification-seal-details div:first-child {
+  min-width: 0;
+}
+
+.zk-verification-seal-details div:first-child dd {
+  overflow: hidden;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zk-verification-seal--pending {
+  background: radial-gradient(circle at 50% 42%, rgb(255 255 255 / 96%), rgb(245 241 226 / 96%));
+}
+
+.zk-verification-seal-home-link {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  border-radius: 50%;
+}
+
+.zk-verification-seal-home-link:focus-visible {
+  outline: 3px solid #28623c;
+  outline-offset: -7px;
+}
+
+.zk-verification-seal--pending .zk-verification-seal-heading {
+  padding-inline: min(55px, 16cqw);
+}
+
+.zk-verification-seal--pending .zk-verification-seal-status i {
+  background: #a38d36;
+  box-shadow: 0 0 0 1.2cqw rgb(163 141 54 / 10%);
+}
+
+.zk-verification-seal-pending-copy {
+  padding-inline: 4cqw;
+  text-align: center;
+}
+
+.zk-verification-seal-pending-logo {
+  width: 14.4cqw;
+  height: 14.4cqw;
+  margin: 0 auto 2.5cqw;
+}
+
+.zk-verification-seal-pending-copy > p:first-child {
+  margin-bottom: 2cqw;
+  color: #6c674f;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.zk-verification-seal-pending-copy h2 {
+  font-size: 6.6cqw;
+  font-weight: 850;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+.zk-verification-seal-actions {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4cqw;
+  font-weight: 800;
+  transform: translateY(-2.6em);
+}
+
+.zk-verification-seal-actions a:first-child {
+  color: #28623c;
+}
+
+.zk-verification-seal-actions a:last-child {
+  color: #625e4a;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
