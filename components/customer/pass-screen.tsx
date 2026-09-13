@@ -146,6 +146,8 @@ export function PassScreen() {
 
       <VerificationSeal credential={credential} detailed />
 
+      {active ? <ButtonLink href={"/id" as Route} size="lg">Present Zik ID in person</ButtonLink> : null}
+
       {!active && !expired ? (
         <Alert tone="info" title="Almost ready">
           Your pass activates in {secondsToActive}s. This short hold is a cooling-off

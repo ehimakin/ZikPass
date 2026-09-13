@@ -125,8 +125,7 @@ export function HomeScreen({ price }: { price: string }) {
           Age verification, done once
         </p>
         <h1 className="mt-2 text-[30px] font-extrabold leading-[1.15] tracking-tight text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-2" : undefined}>
-          <span className="text-[#d3bb53]">Prove your age online</span> without sharing your ID*.
-        </h1>
+          <span className="text-[#d3bb53]">{"Zero knowledge* Identification "}</span>{"you can use online. Without sacrificing your data."}</h1>
         <p className="mt-8 text-[15px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-3" : undefined}>
           *Show an ID once in person at participating stores. Then use your pass anywhere
           online. Only sharing that you&rsquo;re over 18.

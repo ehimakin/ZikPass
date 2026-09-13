@@ -11,6 +11,12 @@ describe('device Vault', () => {
     expect(a.salt).not.toBe(b.salt); expect(a.iv).not.toBe(b.iv); expect(a.ciphertext).not.toBe(b.ciphertext);
     expect(JSON.stringify(a)).not.toContain(field.value);
   });
+  it('keeps a designated selfie encrypted and device-local', async () => {
+    const withSelfie: VaultProfileV1 = {...profile,selfie:{data_url:`data:image/jpeg;base64,${btoa('device-only-face')}`,provenance:'device_selfie',captured_at:'2026-09-12T00:00:00Z'}};
+    const encrypted = await encryptVault(withSelfie, secret);
+    expect(JSON.stringify(encrypted)).not.toContain('device-only-face');
+    expect(await decryptVault(encrypted, secret)).toEqual(withSelfie);
+  });
   it('fails closed for wrong secret, tamper, parameters and versions', async () => {
     const a = await encryptVault(profile, secret);
     await expect(decryptVault(a, 'wrong secret long enough')).rejects.toThrow();

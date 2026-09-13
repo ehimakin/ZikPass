@@ -8,7 +8,7 @@ export function middleware(request: NextRequest) {
   response.headers.set('Content-Security-Policy',csp);
   response.headers.set('X-Content-Type-Options','nosniff');response.headers.set('Referrer-Policy','no-referrer');response.headers.set('X-Frame-Options','DENY');response.headers.set('Permissions-Policy','camera=(), microphone=(), geolocation=(self)');
   if(request.nextUrl.protocol==='https:')response.headers.set('Strict-Transport-Security','max-age=31536000');
-  if(['/vault','/retail-demo','/api/disclosure','/api/demo-merchant'].some(p=>request.nextUrl.pathname.startsWith(p)))response.headers.set('Cache-Control','no-store');
+  if(['/vault','/id','/verify/id','/retail-demo','/api/disclosure','/api/demo-merchant','/api/zik-id'].some(p=>request.nextUrl.pathname.startsWith(p)))response.headers.set('Cache-Control','no-store');
   return response;
 }
 export const config = {matcher:['/((?!_next/static|_next/image|favicon.ico|icons/|sw.js).*)']};

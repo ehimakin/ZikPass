@@ -101,9 +101,7 @@ export function CustomerShell({
               }}
             >
               <ZikLogoMark className="zk-logo-float h-7 w-7 shrink-0" />
-              <span className="text-[16px] font-extrabold tracking-tight text-[var(--zk-text)]">
-                <span className="text-[#28623c]">Zik</span>{" "}Pass
-              </span>
+              <span className="text-[16px] font-extrabold tracking-tight text-[#28623c]">Zik</span>
             </Link>
           )}
           {title ? (
@@ -116,7 +114,7 @@ export function CustomerShell({
             </span>
           )}
           <div className={clsx("shrink-0", !title && "ml-auto sm:ml-0")}>
-            <CustomerMenu items={[...NAV.map((item) => item.href === "/find" ? { href: "/about" as Route, label: "About" } : item), { href: "/vault" as Route, label: "My Vault" }, { href: "/retail-demo" as Route, label: "Retail demo" }]} pathname={pathname} />
+            <CustomerMenu items={[...NAV.map((item) => item.href === "/find" ? { href: "/about" as Route, label: "About" } : item), { href: "/vault" as Route, label: "My Vault" }, { href: "/id" as Route, label: "Present Zik ID" }, { href: "/retail-demo" as Route, label: "Retail demo" }]} pathname={pathname} />
           </div>
         </div>
         <OfflineBanner />

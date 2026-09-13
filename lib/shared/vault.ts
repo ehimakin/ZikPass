@@ -1,6 +1,7 @@
 /** Device-only profile contract. Never add this to WalletState or enrollment types. */
 export type SelfEntered = { value: string; provenance: 'self_entered'; updated_at: string };
-export type VaultProfileV1 = { version: 1; legal_name: SelfEntered; delivery_address: SelfEntered; email?: SelfEntered };
+export type DeviceSelfie = { data_url: string; provenance: 'device_selfie'; captured_at: string };
+export type VaultProfileV1 = { version: 1; legal_name: SelfEntered; delivery_address: SelfEntered; email?: SelfEntered; selfie?: DeviceSelfie };
 export const PROFILE_FIELDS = ['legal_name', 'delivery_address', 'email'] as const;
 export type ProfileField = typeof PROFILE_FIELDS[number];
 export function strictObject(value: unknown, required: readonly string[], optional: readonly string[] = []): Record<string, unknown> {
@@ -18,10 +19,16 @@ export function selfEntered(value: unknown): SelfEntered {
   if (r.provenance !== 'self_entered' || typeof r.updated_at !== 'string' || !Number.isFinite(Date.parse(r.updated_at))) throw new Error('invalid_schema');
   return { value: boundedString(r.value), provenance: 'self_entered', updated_at: r.updated_at };
 }
+export function deviceSelfie(value: unknown): DeviceSelfie {
+  const r = strictObject(value, ['data_url', 'provenance', 'captured_at']);
+  const dataUrl = boundedString(r.data_url, 250000);
+  if (r.provenance !== 'device_selfie' || typeof r.captured_at !== 'string' || !Number.isFinite(Date.parse(r.captured_at)) || !/^data:image\/(?:jpeg|webp);base64,[A-Za-z0-9+/]+=*$/.test(dataUrl)) throw new Error('invalid_schema');
+  return { data_url: dataUrl, provenance: 'device_selfie', captured_at: r.captured_at };
+}
 export function parseProfile(value: unknown): VaultProfileV1 {
-  const r = strictObject(value, ['version', 'legal_name', 'delivery_address'], ['email']);
+  const r = strictObject(value, ['version', 'legal_name', 'delivery_address'], ['email', 'selfie']);
   if (r.version !== 1) throw new Error('unsupported_version');
-  return { version: 1, legal_name: selfEntered(r.legal_name), delivery_address: selfEntered(r.delivery_address), ...(r.email === undefined ? {} : { email: selfEntered(r.email) }) };
+  return { version: 1, legal_name: selfEntered(r.legal_name), delivery_address: selfEntered(r.delivery_address), ...(r.email === undefined ? {} : { email: selfEntered(r.email) }), ...(r.selfie === undefined ? {} : { selfie: deviceSelfie(r.selfie) }) };
 }
 export function encode(bytes: Uint8Array): string { return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
 export function decode(value: unknown, min: number, max = min): Uint8Array<ArrayBuffer> {
@@ -36,7 +43,7 @@ export type VaultEnvelopeV1 = { version: 1; kdf: 'PBKDF2-SHA256'; iterations: 60
 export function parseVaultEnvelope(value: unknown): VaultEnvelopeV1 {
   const r = strictObject(value, ['version', 'kdf', 'iterations', 'salt', 'iv', 'ciphertext']);
   if (r.version !== 1 || r.kdf !== 'PBKDF2-SHA256' || r.iterations !== 600000) throw new Error('unsupported_version');
-  decode(r.salt, 16); decode(r.iv, 12); decode(r.ciphertext, 16, 8192);
+  decode(r.salt, 16); decode(r.iv, 12); decode(r.ciphertext, 16, 400000);
   return r as VaultEnvelopeV1;
 }
 function context(e: Omit<VaultEnvelopeV1, 'ciphertext'>): Uint8Array<ArrayBuffer> {
@@ -60,6 +67,6 @@ export async function encryptVault(profile: unknown, secret: string): Promise<Va
 export async function decryptVault(value: unknown, secret: string): Promise<VaultProfileV1> {
   const e = parseVaultEnvelope(value);
   const key = await derive(secret, e.salt);
-  const bytes = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: decode(e.iv, 12), additionalData: context(e), tagLength: 128 }, key, decode(e.ciphertext, 16, 8192)));
+  const bytes = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: decode(e.iv, 12), additionalData: context(e), tagLength: 128 }, key, decode(e.ciphertext, 16, 400000)));
   try { return parseProfile(JSON.parse(new TextDecoder().decode(bytes))); } finally { bytes.fill(0); }
 }
