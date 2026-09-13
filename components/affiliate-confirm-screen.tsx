@@ -244,9 +244,11 @@ export function AffiliateConfirmScreen({ requestId }: { requestId: string }) {
 
               {flowState === "missing" || flowState === "expired" || flowState === "unavailable" ? (
                 <>
-                  <ButtonLink href={"/pass" as Route} size="lg">
-                    Open my pass
-                  </ButtonLink>
+                  <div className={flowState === "missing" ? "zk-lifted-pass-button" : undefined}>
+                    <ButtonLink href={(flowState === "missing" ? "/find" : "/pass") as Route} size="lg">
+                      {flowState === "missing" ? "Get Zik Pass" : "Open my pass"}
+                    </ButtonLink>
+                  </div>
                   <Button size="lg" variant="ghost" disabled={busy} onClick={returnMissingState}>
                     Back to {clientName}
                   </Button>

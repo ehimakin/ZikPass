@@ -110,20 +110,23 @@ export function HomeScreen({ price }: { price: string }) {
         <HomePassOverview wallet={wallet} failed={walletFailed} />
       </div>
 
-      <div className="relative -mx-4 min-h-[60vh] space-y-6 rounded-t-[var(--zk-r-xl)] bg-[var(--zk-canvas)] px-4 pb-10 pt-6 shadow-[0_-10px_30px_rgba(14,23,38,0.08)]">
+      <div className="relative -mx-4 min-h-[60vh] space-y-6 bg-[var(--zk-canvas)] px-4 pb-10 pt-6 shadow-[0_-10px_30px_rgba(14,23,38,0.08)]">
       <section>
-        <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[var(--zk-text-faint)]">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-1" : undefined}>
           Age verification, done once
         </p>
-        <h1 className="mt-2 text-[30px] font-extrabold leading-[1.15] tracking-tight text-[var(--zk-text)]">
+        <h1 className="mt-2 text-[30px] font-extrabold leading-[1.15] tracking-tight text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-2" : undefined}>
           <span className="text-[#d3bb53]">Prove your age online</span> without sharing your ID*.
         </h1>
-        <p className="mt-8 text-[15px] leading-relaxed text-[var(--zk-text-soft)]">
-          *Verify in participating stores. Then use your pass anywhere
-          with participating demo sites. Share an age result, or approve self-entered details for retail form-fill.
+        <p className="mt-8 text-[15px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-3" : undefined}>
+          *Show an ID once in person at participating stores. Then use your pass anywhere
+          online. Only sharing that you&rsquo;re over 18.
         </p>
-        <p className="mt-5 text-[15px] leading-relaxed text-[var(--zk-text-soft)]">
-          A reusable age pass. That&apos;s Zik.
+        <p className="mt-5 text-[15px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-4" : undefined}>
+          Use Zik Vault to encrypt your sensitive data and control what data you share with companies
+        </p>
+        <p className="mt-5 text-[15px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-5" : undefined}>
+          That&apos;s zero knowledge. That&apos;s Zik.
         </p>
 
         <div className="mt-10 space-y-2.5">
@@ -140,7 +143,7 @@ export function HomeScreen({ price }: { price: string }) {
         </div>
         <p className="mt-9 text-center text-[13px] text-[var(--zk-text-soft)]">
           Bought a card in store?{" "}
-          <a href="/card" className="font-semibold text-[var(--zk-text)] underline">
+          <a href="/card" className="font-semibold text-[var(--zk-text)] underline" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-6" : undefined}>
             Activate it
           </a>
         </p>
@@ -190,8 +193,8 @@ export function HomeScreen({ price }: { price: string }) {
           <div className="flex items-start gap-3">
             <ShieldIcon className="mt-0.5 h-5 w-5 shrink-0 text-[var(--zk-positive)]" />
             <div>
-              <p className="text-[14px] font-bold text-[var(--zk-text)]">What a site receives</p>
-              <p className="mt-1 text-[13px] leading-relaxed text-[var(--zk-text-soft)]">
+              <p className="text-[14px] font-bold text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-7" : undefined}>What a site receives</p>
+              <p className="mt-1 text-[13px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-8" : undefined}>
                 Age-only sites receive the over-18 result and verification metadata. Retail
                 demos also receive the self-entered fields you approve. No date of birth,
                 photo or document number is shared. This is not a zero-knowledge proof.

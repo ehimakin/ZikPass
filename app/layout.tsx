@@ -1,3 +1,4 @@
+import { LocalVisualEditor } from "@/devtools/visual-editor/local-visual-editor";
 import { headers } from "next/headers";
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
@@ -54,6 +55,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         ) : <PwaRegistration />}
         <GlobalErrorReporter />
         {children}
+        {process.env.NODE_ENV === "development" && <LocalVisualEditor />}
       </body>
     </html>
   );
