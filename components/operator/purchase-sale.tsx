@@ -3,13 +3,12 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import QRCode from "qrcode";
-import { OperatorShell, useOperatorStore } from "@/components/operator/operator-shell";
+import { OperatorShell } from "@/components/operator/operator-shell";
 import { Alert, Button, ButtonLink, Card } from "@/components/customer/ui";
 
 type Sale = { id: string; token?: string; storeName: string; expiresAt: string; amountMinor: number; currency: string; paid: boolean; verified: boolean; claimed: boolean; status: string };
-export function PurchaseSale() {
-  const [storeId, setStoreId] = useOperatorStore();
-  return <OperatorShell title="Sell a Zik Pass" storeId={storeId} onStoreChange={setStoreId}><PurchaseSaleForm key={storeId} storeId={storeId} /></OperatorShell>;
+export function PurchaseSale({ storeId }: { storeId: string }) {
+  return <OperatorShell title="Sell a Zik Pass" storeId={storeId}><PurchaseSaleForm storeId={storeId} /></OperatorShell>;
 }
 function PurchaseSaleForm({ storeId }: { storeId: string }) {
   const [sale, setSale] = useState<Sale | null>(null);

@@ -1,8 +1,26 @@
-import { redirect } from "next/navigation";
+import { StoreLogin } from "@/components/operator/store-login";
 
-// The store-session dashboard was the pre-/find way to bootstrap a physical
-// session and duplicated /verify's code lookup. Both are now covered by the
-// customer store finder and the clerk purchase-sale flow.
-export default function StorePage() {
-  redirect("/verify");
+export const metadata = {
+  title: "Store login · Zik Pass",
+  description: "Select a store and sign in to the Zik Pass clerk tools."
+};
+
+export default async function StorePage({
+  searchParams
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const requested = getParam(params.next);
+  const customerCode = getParam(params.code);
+  const nextPath = requested === "/verify/purchase"
+    ? requested
+    : customerCode
+      ? `/verify?code=${encodeURIComponent(customerCode)}`
+      : "/verify";
+  return <StoreLogin nextPath={nextPath} />;
+}
+
+function getParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
 }

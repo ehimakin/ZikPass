@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { ZIK_STORES } from "@/lib/shared/stores";
+import Link from "next/link";
+import { getStoreById, ZIK_STORES } from "@/lib/shared/stores";
 import { environmentBadgeLabel } from "@/lib/shared/demo-environment";
 import { ZikLogoMark } from "@/components/zik-logo";
 
@@ -32,6 +33,7 @@ export function OperatorShell({
   storeId?: string;
   onStoreChange?: (id: string) => void;
 }) {
+  const boundStore = getStoreById(storeId);
   return (
     <div className="zk-surface flex min-h-[100dvh] flex-col bg-[var(--zk-canvas)]">
       <header className="border-b border-[var(--zk-line)] bg-[var(--zk-card)]">
@@ -63,6 +65,16 @@ export function OperatorShell({
                 ))}
               </select>
             </label>
+          ) : boundStore ? (
+            <div className="flex w-full items-center gap-3 rounded-[var(--zk-r-sm)] bg-[var(--zk-sunken)] px-3 py-2 text-[12px]">
+              <span className="min-w-0 flex-1">
+                <span className="block text-[10px] font-bold uppercase tracking-wide text-[var(--zk-text-faint)]">This terminal</span>
+                <span className="block truncate font-bold text-[var(--zk-text)]">{boundStore.name}</span>
+              </span>
+              <Link href="/store?change=1" className="shrink-0 font-semibold text-[var(--zk-text-soft)] underline underline-offset-2">
+                Change store
+              </Link>
+            </div>
           ) : null}
         </div>
       </header>
