@@ -336,6 +336,10 @@ pre {
   padding-inline: min(50px, 17.3cqw);
 }
 
+.zk-verification-seal-wrap--home-active .zk-verification-seal-heading {
+  padding-inline: min(50px, 14.7cqw);
+}
+
 .zk-verification-seal {
   position: relative;
   z-index: 1;
@@ -447,6 +451,10 @@ pre {
 }
 
 .zk-verification-seal-wrap--details .zk-verification-seal-device {
+  transform: translateY(-2.6em);
+}
+
+.zk-verification-seal-wrap--home-active .zk-verification-seal-device {
   transform: translateY(-2.6em);
 }
 

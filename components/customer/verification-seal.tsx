@@ -71,7 +71,7 @@ export function VerificationSeal({ credential, detailed = false, href }: { crede
   );
 
   return (
-    <div className={`zk-verification-seal-wrap mx-auto ${detailed ? "zk-verification-seal-wrap--details" : ""}`}>
+    <div className={`zk-verification-seal-wrap mx-auto ${detailed ? "zk-verification-seal-wrap--details" : href ? "zk-verification-seal-wrap--home-active" : ""}`}>
       {href ? <Link href={href} className="block rounded-full">{seal}</Link> : seal}
 
       {detailed ? (
