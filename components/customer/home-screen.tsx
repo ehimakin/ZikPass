@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import type { Route } from "next";
 import { loadWalletState } from "@/lib/client/wallet-client";
-import { ButtonLink, Card, SectionHeading } from "@/components/customer/ui";
-import { PinIcon, ShieldIcon, CheckIcon, PassIcon } from "@/components/customer/icons";
 import { HomePassOverview } from "@/components/customer/home-pass-overview";
 import type { WalletState } from "@/lib/shared/types";
 import heroImage from "@/public/hero-zikpass-warm.png";
@@ -101,6 +100,8 @@ export function HomeHero() {
 export function HomeScreen({ price }: { price: string }) {
   const [wallet, setWallet] = useState<WalletState | null>(null);
   const [walletFailed, setWalletFailed] = useState(false);
+  const [privacyRevealed, setPrivacyRevealed] = useState(false);
+  const privacyRef = useRef<HTMLElement>(null);
   const hasPass = Boolean(wallet?.credential);
 
   useEffect(() => {
@@ -113,102 +114,64 @@ export function HomeScreen({ price }: { price: string }) {
     return () => { disposed = true; window.removeEventListener("focus", refresh); };
   }, []);
 
+  useEffect(() => {
+    const scene = privacyRef.current;
+    if (!scene) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) setPrivacyRevealed(true);
+    }, { threshold: 0.45 });
+    observer.observe(scene);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <>
-      <div className="flex min-h-[var(--zk-home-hero-spacer)] items-center justify-center py-6">
-        <HomePassOverview wallet={wallet} failed={walletFailed} />
-      </div>
-
-      <div className="relative -mx-4 min-h-[60vh] space-y-6 rounded-b-[32px] bg-[var(--zk-canvas)] px-4 pb-10 pt-6 shadow-[0_-10px_30px_rgba(14,23,38,0.08)]">
-      <section>
-        <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-1" : undefined}>
-          Age verification, done once
-        </p>
-        <h1 className="mt-2 text-[30px] font-extrabold leading-[1.15] tracking-tight text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-2" : undefined}>
-          <span className="text-[#d3bb53]">{"Zero knowledge* Identification "}</span>{"you can use online. Without sacrificing your data."}</h1>
-        <p className="mt-8 text-[15px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-3" : undefined}>{"*Show an ID once in person at participating stores. Then use your pass anywhere online. None of your private data leaves your phone or touches our servers."}</p>
-        <p className="mt-5 text-[15px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-4" : undefined}>
-          Use Zik Vault to encrypt your sensitive data and control what data you share with companies
-        </p>
-        <p className="mt-5 text-[15px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-5" : undefined}>
-          That&apos;s zero knowledge. That&apos;s Zik.
-        </p>
-
-        <div className="mt-10 space-y-2.5">
-          <div className="zk-lifted-pass-button">
-            <ButtonLink href={(hasPass ? "/pass" : "/find") as Route} size="lg">
-              {hasPass ? "Open My Pass" : <>Get Zik Pass &nbsp;&middot;&nbsp; <span className="text-[#d3bb53]">{price}</span></>}
-            </ButtonLink>
+    <div className="zk-cinematic-home">
+      <section className="zk-scene zk-scene-hero" aria-labelledby="zik-hero-title">
+        <div className="zk-scene-inner zk-hero-copy">
+          <p className="zk-scene-kicker">Zik Pass</p>
+          <h1 id="zik-hero-title">Prove your age.<br/><em>Not your identity.</em></h1>
+          <p className="zk-hero-support">Verify that you&rsquo;re over 18 without repeatedly handing sensitive websites your personal identity.</p>
+          <div className="zk-hero-actions">
+            <Link className="zk-editorial-cta zk-editorial-cta--primary" href={(hasPass ? "/pass" : "/find") as Route}>{hasPass ? "Open my pass" : <>Get ZikPass <span>{price}</span></>}</Link>
+            <a className="zk-editorial-cta zk-editorial-cta--text" href="#how-it-works">How it works <span aria-hidden="true">→</span></a>
           </div>
-          {!hasPass && (
-            <ButtonLink href={"/pass" as Route} variant="ghost" size="lg">
-              I already have a pass
-            </ButtonLink>
-          )}
         </div>
-        <p className="mt-9 text-center text-[13px] text-[var(--zk-text-soft)]">
-          Bought a card in store?{" "}
-          <a href="/card" className="font-semibold text-[var(--zk-text)] underline" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-6" : undefined}>
-            Activate it
-          </a>
-        </p>
+        <p className="zk-interaction-note">The interface responds only when you do.</p>
       </section>
 
-      <section>
-        <SectionHeading>How it works</SectionHeading>
-        <ol className="space-y-2.5">
-          {[
-            {
-              Icon: PinIcon,
-              title: "Visit a Zik store",
-              body: "Find your nearest store and bring photo ID."
-            },
-            {
-              Icon: CheckIcon,
-              title: "Show ID to a clerk",
-              body: "A quick in-person check. Your ID is not scanned or kept."
-            },
-            {
-              Icon: PassIcon,
-              title: "Get your pass",
-              body: "A signed pass is saved to this device. Reuse it online for a year."
-            }
-          ].map((step, index) => (
-            <li key={step.title}>
-              <Card className="flex items-start gap-3.5 p-4">
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink text-[13px] font-bold text-[var(--zk-accent)]">
-                  {index + 1}
-                </span>
-                <span>
-                  <span className="block text-[15px] font-bold text-[var(--zk-text)]">
-                    {step.title}
-                  </span>
-                  <span className="mt-0.5 block text-[13px] leading-snug text-[var(--zk-text-soft)]">
-                    {step.body}
-                  </span>
-                </span>
-              </Card>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <section>
-        <Card className="p-4">
-          <div className="flex items-start gap-3">
-            <ShieldIcon className="mt-0.5 h-5 w-5 shrink-0 text-[var(--zk-positive)]" />
-            <div>
-              <p className="text-[14px] font-bold text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-7" : undefined}>What a site receives</p>
-              <p className="mt-1 text-[13px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-8" : undefined}>
-                Age-only sites receive the over-18 result and verification metadata. Retail
-                demos also receive the self-entered fields you approve. No date of birth,
-                photo or document number is shared. This is not a zero-knowledge proof.
-              </p>
-            </div>
+      <section ref={privacyRef} id="how-it-works" className={`zk-scene zk-scene-privacy ${privacyRevealed ? "is-revealed" : ""}`} aria-labelledby="privacy-title">
+        <div className="zk-scene-inner zk-privacy-layout">
+          <div><p className="zk-scene-kicker">The privacy problem</p><h2 id="privacy-title">They ask for<br/>your identity.</h2></div>
+          <div className="zk-identity-stack" aria-label="Identity details Zik does not need to share">
+            {["Name", "Date of birth", "Passport", "Selfie"].map((label, index)=><span key={label} style={{"--token-index":index} as CSSProperties}>{label}</span>)}
           </div>
-        </Card>
+          <div className="zk-answer-lockup"><p>Zik answers</p><strong>Over 18 <i>✓</i></strong><span>Nothing else leaves your pass.</span></div>
+        </div>
       </section>
-      </div>
-    </>
+
+      <section className="zk-scene zk-scene-physical" aria-labelledby="physical-title">
+        <Image src={heroImage} alt="Zik Pass on a phone after real-world verification" className="zk-scene-device-image" sizes="100vw" priority />
+        <div className="zk-scene-inner zk-physical-copy">
+          <p className="zk-scene-kicker">Physical verification</p>
+          <h2 id="physical-title">Verified in the real world.<br/><em>Anonymous online.</em></h2>
+          <ol className="zk-editorial-steps"><li><span>01</span><p>Show ID once<br/><small>Checked by a participating store. Not retained.</small></p></li><li><span>02</span><p>Bind your device<br/><small>Your private holder key stays with you.</small></p></li><li><span>03</span><p>Use it for a year<br/><small>Sites receive the answer, not your evidence.</small></p></li></ol>
+        </div>
+      </section>
+
+      <section className="zk-scene zk-scene-pass" aria-labelledby="pass-title">
+        <div className="zk-scene-inner zk-pass-layout">
+          <div className="zk-pass-copy"><p className="zk-scene-kicker">The pass</p><h2 id="pass-title">Proof you own.<br/><em>Not data you surrender.</em></h2><p>Signed. Device-bound. Reusable.</p></div>
+          <div className="zk-pass-object"><HomePassOverview wallet={wallet} failed={walletFailed}/></div>
+        </div>
+      </section>
+
+      <section className="zk-scene zk-scene-control" aria-labelledby="control-title">
+        <div className="zk-scene-inner zk-control-layout">
+          <div><p className="zk-scene-kicker">You stay in control</p><h2 id="control-title">Share the answer.<br/><em>Not the evidence.</em></h2></div>
+          <div className="zk-disclosure-demo"><div><span>Website asks</span><strong>Are you over 18?</strong></div><div className="zk-disclosure-line"/><div className="zk-disclosure-result"><span>Zik returns</span><strong>Yes <i>✓</i></strong></div><p>Name · date of birth · photo ID remain private</p></div>
+          <div className="zk-final-action"><Link className="zk-editorial-cta zk-editorial-cta--lime" href={(hasPass ? "/pass" : "/find") as Route}>{hasPass ? "Open my pass" : "Get ZikPass"} <span aria-hidden="true">→</span></Link>{!hasPass?<Link href={"/pass" as Route}>I already have a pass</Link>:null}</div>
+        </div>
+      </section>
+    </div>
   );
 }

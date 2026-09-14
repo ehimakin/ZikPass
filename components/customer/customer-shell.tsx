@@ -31,7 +31,8 @@ export function CustomerShell({
   active,
   title,
   back,
-  hero
+  hero,
+  immersive = false
 }: {
   children: ReactNode;
   active: "home" | "find" | "pass" | "help" | "about";
@@ -46,6 +47,8 @@ export function CustomerShell({
    * --zk-home-hero-spacer creates an intentional initial overlap.
    */
   hero?: ReactNode;
+  /** Allows cinematic pages to use the full viewport beneath the existing chrome. */
+  immersive?: boolean;
 }) {
   const pathname = usePathname();
   const shellRef = useRef<HTMLDivElement>(null);
@@ -62,7 +65,7 @@ export function CustomerShell({
   }, []);
 
   return (
-    <div ref={shellRef} className={clsx("zk-surface flex min-h-[100dvh] flex-col", hero && "zk-home-surface")}>
+    <div ref={shellRef} className={clsx("zk-surface flex min-h-[100dvh] flex-col", hero && "zk-home-surface", immersive && "zk-immersive-surface")}>
       {hero ? (
         <div
           className="zk-home-hero pointer-events-none fixed inset-x-0 top-14 z-0 overflow-hidden"
@@ -114,7 +117,13 @@ export function CustomerShell({
             </span>
           )}
           <div className={clsx("shrink-0", !title && "ml-auto sm:ml-0")}>
-            <CustomerMenu items={[...NAV.map((item) => item.href === "/find" ? { href: "/about" as Route, label: "About" } : item), { href: "/vault" as Route, label: "My Vault" }, { href: "/id" as Route, label: "Present Zik ID" }, { href: "/retail-demo" as Route, label: "Retail demo" }]} pathname={pathname} />
+            <CustomerMenu items={[
+              { href: "/find" as Route, label: "Get ZikPass" },
+              { href: "/home#how-it-works" as Route, label: "How it works" },
+              { href: "/about" as Route, label: "Why Zik?" },
+              { href: "/ZikParental" as Route, label: "For parents" },
+              { href: "/affiliates" as Route, label: "For businesses" }
+            ]} pathname={pathname} />
           </div>
         </div>
         <OfflineBanner />
@@ -123,8 +132,9 @@ export function CustomerShell({
       <main
         id="zk-main"
         className={clsx(
-          "relative z-10 mx-auto w-full max-w-[560px] flex-1 px-4 pb-28",
-          hero ? "pt-0" : "pt-4"
+          "relative z-10 mx-auto w-full flex-1",
+          immersive ? "max-w-none px-0 pb-0 pt-0" : "max-w-[560px] px-4 pb-28",
+          !immersive && (hero ? "pt-0" : "pt-4")
         )}
       >
         {children}

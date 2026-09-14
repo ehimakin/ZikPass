@@ -13,6 +13,7 @@ export function CustomerMenu({ items, pathname }: {
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
+  const [hovered, setHovered] = useState<number | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -63,31 +64,41 @@ export function CustomerMenu({ items, pathname }: {
             close();
           }
         }}
-        className="m-auto max-h-[calc(100dvh-32px)] w-[calc(100%_-_32px)] max-w-[400px] overflow-y-auto rounded-[var(--zk-r-xl)] border border-[var(--zk-line)] bg-[var(--zk-canvas)] p-5 text-[var(--zk-text)] shadow-[var(--zk-shadow-sheet)] backdrop:bg-[rgba(14,23,38,0.45)] backdrop:backdrop-blur-sm"
+        className="zk-fullscreen-menu"
+        data-tone={hovered ?? "idle"}
       >
-        <div className="mb-6 flex items-center gap-2.5">
-          <ZikLogoMark className="zk-logo-float h-8 w-8 shrink-0" />
-          <h2 id="customer-menu-title" className="text-lg font-extrabold tracking-tight">Zik Pass menu</h2>
+        <div className="zk-menu-header">
+          <div className="zk-menu-brand">
+            <ZikLogoMark className="h-8 w-8 shrink-0" />
+            <h2 id="customer-menu-title">Zik</h2>
+          </div>
           <button type="button" onClick={close} aria-label="Close menu"
-            className="ml-auto inline-flex h-11 w-11 items-center justify-center rounded-full bg-[var(--zk-sunken)] text-[var(--zk-text-soft)] hover:text-[var(--zk-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--zk-focus)]">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+            className="zk-menu-close">
+            <span>Close</span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
           </button>
         </div>
-        <nav aria-label="Site menu" className="grid gap-2">
-          {items.map((item) => (
+        <nav aria-label="Site menu" className="zk-menu-nav">
+          {items.map((item, index) => (
             <Link key={item.href} href={item.href} onClick={close} aria-current={pathname === item.href ? "page" : undefined}
-              className={`flex min-h-12 items-center justify-between rounded-[var(--zk-r-md)] px-4 py-3 text-[15px] font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--zk-focus)] ${pathname === item.href ? "bg-[var(--zk-accent)] text-[var(--zk-text-on-accent)]" : "bg-[var(--zk-card)] hover:bg-[var(--zk-sunken)]"}`}>
-              {item.label}<span aria-hidden="true">↗</span>
+              onMouseEnter={() => setHovered(index)} onMouseLeave={() => setHovered(null)} onFocus={() => setHovered(index)}
+              className="zk-menu-link">
+              <span className="zk-menu-index">0{index + 1}</span><span>{item.label}</span><span className="zk-menu-arrow" aria-hidden="true">↗</span>
             </Link>
           ))}
         </nav>
-        <div className="mt-5 border-t border-[var(--zk-line)] pt-4">
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--zk-text-soft)]">For staff</p>
-          <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
-            <Link href="/verify" onClick={close} className="py-2 hover:underline">Verify a customer</Link>
-            <Link href="/verify/purchase" onClick={close} className="py-2 hover:underline">Sell a Zik Pass</Link>
+        <div className="zk-menu-footer">
+          <div className="zk-menu-utility">
+            <Link href="/pass" onClick={close}>My pass</Link>
+            <Link href="/vault" onClick={close}>Vault</Link>
+            <Link href="/id" onClick={close}>Zik ID</Link>
+            <Link href="/help" onClick={close}>Help</Link>
           </div>
-          <p className="mt-4 text-xs text-[var(--zk-text-soft)]">{environmentBadgeLabel()}</p>
+          <div className="zk-menu-staff">
+            <span>For staff</span>
+            <Link href="/verify" onClick={close}>Verify a customer</Link>
+            <Link href="/verify/purchase" onClick={close}>Sell a Zik Pass</Link>
+          </div>
+          <p>{environmentBadgeLabel()}</p>
         </div>
       </dialog>
     </>

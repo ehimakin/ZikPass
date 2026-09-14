@@ -146,7 +146,7 @@ export function PassScreen() {
 
       <VerificationSeal credential={credential} detailed />
 
-      {active ? <ButtonLink href={"/id" as Route} size="lg">Present Zik ID in person</ButtonLink> : null}
+      {active ? <ButtonLink href={"/id" as Route} size="lg" className="!mt-20">Present Zik ID in person</ButtonLink> : null}
 
       {!active && !expired ? (
         <Alert tone="info" title="Almost ready">
