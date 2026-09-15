@@ -24,7 +24,10 @@ describe("operator store login", () => {
   test("rejects tampered, expired, and invalid-store sessions", async () => {
     const now = Date.now();
     const created = await createOperatorSession("zik-london-001", now);
-    expect(await readOperatorSession(`${created.token.slice(0, -1)}x`, now + 1)).toBeNull();
+    const [payload, signature] = created.token.split(".");
+    // Change significant signature bits, not the final base64 padding bits.
+    const tamperedSignature = `${signature[0] === "A" ? "B" : "A"}${signature.slice(1)}`;
+    expect(await readOperatorSession(`${payload}.${tamperedSignature}`, now + 1)).toBeNull();
     expect(await readOperatorSession(created.token, now + OPERATOR_SESSION_TTL_MS)).toBeNull();
     await expect(createOperatorSession("not-a-store", now)).rejects.toThrow("valid store");
   });

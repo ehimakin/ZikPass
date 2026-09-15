@@ -140,3 +140,28 @@ Next may rewrite its generated TypeScript include paths when switching output di
 Real iPhone/PWA verification remains a manual gate; see [demo checklist](sprint-6/DEMO.md).
 
 For production browser verification, first build with the isolated output directory, then use the same directory with `ZIK_E2E_PRODUCTION=true` in the browser command (full exact invocation in the handoff).
+
+## Product-positioning manual checks
+
+At 320, 390, 768 and 1440px, review `/home`, `/ecosystem`, `/about`, the full-screen menu
+and `/pass` with an active credential (the existing `?demo=active` preview may be used
+only for visual review). Check the empty and expired Pass states too.
+
+- First viewport still explains Pass and 18+ with its existing hero behavior and primary
+  acquisition action. No Vault/ID promotion appears in the hero.
+- Family appears below the Pass explanation/how-it-works. Pass says Available now;
+  ZikVault says Coming next and planned/not available; Zik ID says Planned/not available.
+- Prices agree on home/ecosystem; Pass reflects server configuration, including free demo
+  configuration. Planned £0.99/month and £2.99 one-off cannot be charged.
+- Only Pass has an acquisition CTA. No planned-product element initiates setup, upload,
+  payment or issuance. Follow ecosystem links from home, menu, About and active Pass.
+- Car-hire example has plain Shared/Not shared labels and no checkboxes or form controls.
+- Active-pass promotion is below pass, status, usage, install and removal controls; it is
+  absent in empty/pending/activating/expired states. Bottom navigation retains four tabs.
+- Check no horizontal overflow, readable wrapping, header/footer clearance, centred
+  product column, keyboard focus, menu Escape/focus return and reduced motion.
+- Rerun self-directed purchase, payment decline/retry, clerk-first physical-card activation,
+  wallet deletion and affiliate approval/denial journeys above. Their logic is unchanged.
+
+Preserved `/vault` and `/id` experiments are outside the new product links. Their existence
+must not be confused with availability of the planned proof-backed products.

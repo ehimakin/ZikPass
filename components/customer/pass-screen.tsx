@@ -146,8 +146,6 @@ export function PassScreen() {
 
       <VerificationSeal credential={credential} detailed />
 
-      {active ? <ButtonLink href={"/id" as Route} size="lg" className="!mt-20">Present Zik ID in person</ButtonLink> : null}
-
       {!active && !expired ? (
         <Alert tone="info" title="Almost ready">
           Your pass activates in {secondsToActive}s. This short hold is a cooling-off
@@ -206,6 +204,15 @@ export function PassScreen() {
           setWallet({});
         }}
       />
+      {active ? (
+        <Card as="section" className="p-5">
+          <StatusBadge>Coming next</StatusBadge>
+          <h2 className="mt-3 text-lg font-bold">Build your ZikVault</h2>
+          <p className="mt-2 text-sm leading-relaxed text-[var(--zk-text-soft)]">Planned verified credentials, designed to live on your device and be selectively shared. Sufficient verified information could eventually be assembled into Zik ID.</p>
+          <p className="mt-2 text-xs text-[var(--zk-text-soft)]">ZikVault and Zik ID are not available in this prototype.</p>
+          <ButtonLink href="/ecosystem" variant="ghost" className="mt-3">Explore the Zik ecosystem</ButtonLink>
+        </Card>
+      ) : null}
     </div>
   );
 }

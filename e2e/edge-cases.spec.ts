@@ -35,7 +35,7 @@ test("affiliate: honest 'no pass' path when the device has none", async ({ page 
   await page.getByRole("button", { name: /^Verify with Zik$/i }).click();
   await expect(page).toHaveURL(/affiliate-demo\/confirm/, { timeout: 15_000 });
   await expect(page.getByRole("heading", { name: /No Zik Pass found/i })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Open my pass/i })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Get Zik Pass/i })).toHaveAttribute("href", "/find");
 });
 
 test("affiliate: approve with an active pass opens the gated site", async ({ page, request }) => {

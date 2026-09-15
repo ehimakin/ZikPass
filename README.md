@@ -4,6 +4,18 @@ ZikPass ("Zik Pass" in the UI) is a privacy-first age-assurance prototype. It de
 
 Active branch: `v2-ui-overhaul` (aligned with `origin/v2-ui-overhaul`). `main` and `dev` are older parallel branches and are intentionally not merged for routine local setup.
 
+## Product direction
+
+This repository implements **Zik Pass**, the first product in the wider **Zik** platform:
+£1.99 one-off, with no Vault or subscription requirement. **ZikVault** (planned £0.99/month)
+and **Zik ID** (planned £2.99 one-off) are future products. See the
+[product source of truth](docs/PRODUCT_DIRECTION.md).
+
+Existing experimental Vault/disclosure and Zik ID code is preserved, but does not implement
+the agreed proof-backed products. It would be inaccurate to say no such logic exists in
+this checkout. New customer product links lead to a read-only explanation; no planned-product
+setup, upload, payment or issuance is added by this milestone.
+
 ## Surfaces
 
 The product now has two distinct surfaces plus a small set of legacy/dev screens.
@@ -18,6 +30,7 @@ The product now has two distinct surfaces plus a small set of legacy/dev screens
 | `/pass` | The wallet. Empty / pending / activating / active / expired, plus delete, PWA install, and PWA-launch handoff claim. `/wallet` redirects here. |
 | `/card` | Activate a physical Zik Pass card bought at a till (the printed-card QR target). |
 | `/help` | Accepted ID, common failure recoveries, "about this build", and (demo only) a **Reset demo data** button. |
+| `/ecosystem` | Read-only Zik product ladder, planned local-first credentials and illustrative selective sharing. |
 | `/about` | Longer explanation for customers, stores and participating sites. |
 | `/offline` | Branded offline page served by the service worker. Branded `404` and error pages also exist. |
 
@@ -160,7 +173,7 @@ All supported environment variables are documented in [`.env.example`](.env.exam
 
 For the system map and extension points, start with [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), then [`docs/TESTING.md`](docs/TESTING.md).
 
-## Sprint 6: local Vault and selective disclosure
+## Preserved experiments: Sprint 6 local Vault and selective disclosure
 
 The controlled investor demo adds `/vault` and `/retail-demo`. Enable explicitly with
 `ZIK_DISCLOSURE_V1=true`; the default is off. Name/address/email are self-entered,
@@ -170,3 +183,5 @@ profile fields; the co-hosted demo merchant is the decryption boundary.
 See [demo/setup/reset](docs/sprint-6/DEMO.md), [data and threat model](docs/sprint-6/SECURITY_AND_DATA.md),
 [claims](docs/sprint-6/CLAIMS.md), and [handoff/evidence](docs/sprint-6/HANDOFF.md).
 Investor-ready vertical slice; not certified or approved for public reliance.
+
+The preserved `/id` and `/verify/id` experiment also contains session and peer-presentation logic. These direct demo routes are outside the new product navigation and are not the planned verified Zik ID product.

@@ -29,6 +29,7 @@ Cryptographic helpers and domain contracts shared by browser and server code liv
 | `/pass` | `PassScreen` | Wallet states + delete, `PwaInstallButton`, PWA-launch handoff claim. `/wallet` redirects here (PWA/handoff params preserved). |
 | `/card` | `PurchaseActivation` | Activate a physical card bought at a till (printed-card QR target). |
 | `/help` | `HelpScreen` | Accepted ID, FAQ, "Reset demo data" (demo only). |
+| `/ecosystem` | `ProductFamily` | Read-only planned-product explanation; uses the shared display catalogue. |
 | `/about` | about page | Longer explanation for customers/stores/sites. |
 | `/offline` | `StatusPage` | Served by the service worker. `not-found.tsx` + `error.tsx` share `StatusPage`. |
 
@@ -231,3 +232,29 @@ and client imports by lint. Explicit demo merchant routes call it.
 is dynamic to attach that nonce. Sensitive routes are no-store. New endpoints are
 strictly parsed and v1 is opt-in. See the [data inventory](sprint-6/SECURITY_AND_DATA.md)
 for the co-hosted/single-process limits and precise recipient boundaries.
+
+## Future product boundary
+
+[PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md) defines Zik as the umbrella and Pass as its
+first standalone product. ZikVault must be local-first: underlying proof-backed credentials
+and documents belong on the device, not in a central Zik identity-document database.
+Zik ID must derive from Vault claims as a predefined presentation rather than create a
+duplicate identity store. Pass must never require Vault or a subscription.
+
+Operational server data may still include public keys, revocation/status data, issuer
+metadata, fraud signals and audit events. “Local-first” must never become “Zik stores no
+data”. A separate security/data architecture decision is required before implementation
+of the agreed Vault begins. Do not add speculative Vault types, APIs or schemas for this
+positioning milestone.
+
+`lib/shared/product-catalogue.ts` is display-only; `ProductFamily` reuses it on `/home` and
+`/ecosystem`. The Pass display amount comes from server `getPassPrice()`; planned prices
+have no payment, entitlement, credential or persistence integration. `/ecosystem` has no
+forms or mutation handlers. Existing customer header, bottom tabs and hero behavior remain.
+
+Preserved experiments already exist: `/vault`, `/retail-demo`, `/id`, `/verify/id`,
+`lib/client/vault-adapter.ts`, `lib/shared/vault.ts`, `lib/shared/zik-id.ts`,
+`lib/client/zik-id-peer.ts`, `/api/zik-id/sessions` and the disclosure services above.
+They are not the agreed proof-backed Vault/ID products. No assertion that this repository
+contains no Vault/ID logic is accurate. Customer menu and active-pass promotions now point
+to the read-only ecosystem explanation; direct experimental routes and their logic remain.

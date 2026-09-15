@@ -89,8 +89,9 @@ export function CustomerMenu({ items, pathname }: {
         <div className="zk-menu-footer">
           <div className="zk-menu-utility">
             <Link href="/pass" onClick={close}>My pass</Link>
-            <Link href="/vault" onClick={close}>Vault</Link>
-            <Link href="/id" onClick={close}>Zik ID</Link>
+            <Link href="/vault" onClick={close} aria-current={pathname === "/vault" ? "page" : undefined}>Vault</Link>
+            <Link href="/id" onClick={close} aria-current={pathname === "/id" ? "page" : undefined}>Zik ID</Link>
+            <Link href={"/ecosystem" as Route} onClick={close} aria-current={pathname === "/ecosystem" ? "page" : undefined}>The Zik ecosystem</Link>
             <Link href="/help" onClick={close}>Help</Link>
           </div>
           <div className="zk-menu-staff">

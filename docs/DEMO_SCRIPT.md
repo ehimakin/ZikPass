@@ -84,10 +84,19 @@ demo the free flow instead of the £1.99 test price.
 
 ---
 
+## Optional closing: the wider Zik platform
+
+After completing the working Zik Pass demonstration: “What you’ve seen is Zik Pass—the
+first Zik product. The same privacy principle later expands into ZikVault and Zik ID.”
+Optionally open `/ecosystem`. Vault and ID are planned concepts with planned prices; the
+car-hire sharing example is illustrative. Keep the actual demo focused on Pass. Preserved
+experimental direct routes are not part of this product demonstration.
+
 ## Quick-reference URLs
 
 | Purpose | URL |
 | --- | --- |
+| Read-only product direction (optional) | `/ecosystem` |
 | Customer home | `/home` |
 | Store finder | `/find` |
 | Onboarding | `/get-pass` |

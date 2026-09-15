@@ -60,6 +60,12 @@ export default function AboutPage() {
             <ButtonLink href="/affiliate-demo" variant="secondary">Try the affiliate demo</ButtonLink>
           </div>
         </section>
+        <Card as="section" className="p-5">
+          <h2 className="text-xl font-bold tracking-tight">Zik Pass is just the start.</h2>
+          <p className="mt-3 text-sm leading-relaxed text-[var(--zk-text-soft)]">Zik separates verifying information from disclosing it. Zik Pass is the first product: prove you’re 18+ without giving participating sites your identity. ZikVault and Zik ID extend that principle to broader identity use.</p>
+          <p className="mt-3 text-sm text-[var(--zk-text-soft)]">ZikVault and Zik ID are planned products and are not available in this prototype.</p>
+          <ButtonLink href="/ecosystem" variant="secondary" className="mt-4">The Zik ecosystem</ButtonLink>
+        </Card>
         <p className="px-1 text-xs leading-relaxed text-[var(--zk-text-soft)]">You’re exploring a prototype. Store locations and payments in this demo are simulated; live partner onboarding requires separate setup.</p>
       </div>
     </CustomerShell>

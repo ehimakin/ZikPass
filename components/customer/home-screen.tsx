@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Route } from "next";
 import { loadWalletState } from "@/lib/client/wallet-client";
+import { ProductFamily } from "@/components/customer/product-family";
 import { HomePassOverview } from "@/components/customer/home-pass-overview";
 import type { WalletState } from "@/lib/shared/types";
 import heroImage from "@/public/hero-zikpass-warm.png";
@@ -130,9 +131,9 @@ export function HomeScreen({ price }: { price: string }) {
         <div className="zk-scene-inner zk-hero-copy">
           <p className="zk-scene-kicker">Zik Pass</p>
           <h1 id="zik-hero-title">Prove your age.<br/><em>Not your identity.</em></h1>
-          <p className="zk-hero-support">Verify that you&rsquo;re over 18 without repeatedly handing sensitive websites your personal identity.</p>
+          <p className="zk-hero-support">Verify that you&rsquo;re over 18 without repeatedly handing participating sites your personal identity.</p>
           <div className="zk-hero-actions">
-            <Link className="zk-editorial-cta zk-editorial-cta--primary" href={(hasPass ? "/pass" : "/find") as Route}>{hasPass ? "Open my pass" : <>Get ZikPass <span>{price}</span></>}</Link>
+            <Link className="zk-editorial-cta zk-editorial-cta--primary" href={(hasPass ? "/pass" : "/find") as Route}>{hasPass ? "Open my pass" : <>Get Zik Pass <span>· {price}</span></>}</Link>
             <a className="zk-editorial-cta zk-editorial-cta--text" href="#how-it-works">How it works <span aria-hidden="true">→</span></a>
           </div>
         </div>
@@ -145,7 +146,7 @@ export function HomeScreen({ price }: { price: string }) {
           <div className="zk-identity-stack" aria-label="Identity details Zik does not need to share">
             {["Name", "Date of birth", "Passport", "Selfie"].map((label, index)=><span key={label} style={{"--token-index":index} as CSSProperties}>{label}</span>)}
           </div>
-          <div className="zk-answer-lockup"><p>Zik answers</p><strong>Over 18 <i>✓</i></strong><span>Nothing else leaves your pass.</span></div>
+          <div className="zk-answer-lockup"><p>Zik answers</p><strong>Over 18 <i>✓</i></strong><span>Plus verification metadata.</span></div>
         </div>
       </section>
 
@@ -169,7 +170,17 @@ export function HomeScreen({ price }: { price: string }) {
         <div className="zk-scene-inner zk-control-layout">
           <div><p className="zk-scene-kicker">You stay in control</p><h2 id="control-title">Share the answer.<br/><em>Not the evidence.</em></h2></div>
           <div className="zk-disclosure-demo"><div><span>Website asks</span><strong>Are you over 18?</strong></div><div className="zk-disclosure-line"/><div className="zk-disclosure-result"><span>Zik returns</span><strong>Yes <i>✓</i></strong></div><p>Name · date of birth · photo ID remain private</p></div>
-          <div className="zk-final-action"><Link className="zk-editorial-cta zk-editorial-cta--lime" href={(hasPass ? "/pass" : "/find") as Route}>{hasPass ? "Open my pass" : "Get ZikPass"} <span aria-hidden="true">→</span></Link>{!hasPass?<Link href={"/pass" as Route}>I already have a pass</Link>:null}</div>
+          <div className="zk-final-action"><Link className="zk-editorial-cta zk-editorial-cta--lime" href={(hasPass ? "/pass" : "/find") as Route}>{hasPass ? "Open my pass" : "Get Zik Pass"} <span aria-hidden="true">→</span></Link>{!hasPass?<Link href={"/pass" as Route}>I already have a pass</Link>:null}</div>
+        </div>
+      </section>
+
+      <section className="relative bg-[var(--zk-canvas)] px-4 py-16 pb-32" aria-labelledby="product-family-title">
+        <div className="mx-auto max-w-[528px]">
+          <p className="text-xs font-bold uppercase tracking-widest text-[var(--zk-text-soft)]">The wider Zik platform</p>
+          <h2 id="product-family-title" className="mt-3 text-[30px] font-extrabold leading-tight tracking-tight">Zik starts with Zik Pass.</h2>
+          <p className="mb-6 mt-4 text-[15px] leading-relaxed text-[var(--zk-text-soft)]">Start by proving your age. Later, keep more verified information on your device and share only what a situation actually requires.</p>
+          <ProductFamily price={price} />
+          <Link href={"/ecosystem" as Route} className="mt-6 inline-flex min-h-[44px] items-center gap-2 rounded-full text-sm font-bold underline underline-offset-4">Explore the Zik ecosystem <span aria-hidden="true">→</span></Link>
         </div>
       </section>
     </div>
