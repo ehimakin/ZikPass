@@ -129,58 +129,58 @@ export function HomeScreen({ price }: { price: string }) {
     <div className="zk-cinematic-home">
       <section className="zk-scene zk-scene-hero" aria-labelledby="zik-hero-title">
         <div className="zk-scene-inner zk-hero-copy">
-          <p className="zk-scene-kicker">Zik Pass</p>
-          <h1 id="zik-hero-title">Prove your age.<br/><em>Not your identity.</em></h1>
-          <p className="zk-hero-support">Verify that you&rsquo;re over 18 without repeatedly handing participating sites your personal identity.</p>
+          <p className="zk-scene-kicker" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-1" : undefined}>{"Privacy-prioritising ID solutions"}</p>
+          <h1 id="zik-hero-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-2" : undefined}>{"Zik "}<br/><em>{"*zero knowledge"}</em></h1>
+          <p className="zk-hero-support" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-3" : undefined}>{"Online 18+ Verification ● Secure Sensitive Docs ● Own and control what sites see about you..."}</p>
           <div className="zk-hero-actions">
             <Link className="zk-editorial-cta zk-editorial-cta--primary" href={(hasPass ? "/pass" : "/find") as Route}>{hasPass ? "Open my pass" : <>Get Zik Pass <span>· {price}</span></>}</Link>
-            <a className="zk-editorial-cta zk-editorial-cta--text" href="#how-it-works">How it works <span aria-hidden="true">→</span></a>
+            <a className="zk-editorial-cta zk-editorial-cta--text" href="#how-it-works" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-4" : undefined}>How it works <span aria-hidden="true">→</span></a>
           </div>
         </div>
-        <p className="zk-interaction-note">The interface responds only when you do.</p>
+        <p className="zk-interaction-note" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-5" : undefined}>The interface responds only when you do.</p>
       </section>
 
       <section ref={privacyRef} id="how-it-works" className={`zk-scene zk-scene-privacy ${privacyRevealed ? "is-revealed" : ""}`} aria-labelledby="privacy-title">
         <div className="zk-scene-inner zk-privacy-layout">
-          <div><p className="zk-scene-kicker">The privacy problem</p><h2 id="privacy-title">They ask for<br/>your identity.</h2></div>
+          <div><p className="zk-scene-kicker" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-6" : undefined}>{"Why do sites ask for your whole id..."}</p><h2 id="privacy-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-7" : undefined}>{"When they only need"}<br/>{"your age?"}</h2></div>
           <div className="zk-identity-stack" aria-label="Identity details Zik does not need to share">
             {["Name", "Date of birth", "Passport", "Selfie"].map((label, index)=><span key={label} style={{"--token-index":index} as CSSProperties}>{label}</span>)}
           </div>
-          <div className="zk-answer-lockup"><p>Zik answers</p><strong>Over 18 <i>✓</i></strong><span>Plus verification metadata.</span></div>
+          <div className="zk-answer-lockup"><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-8" : undefined}>{"Zik answers this with"}</p><strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-9" : undefined}>Over 18 <i>✓</i></strong><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-10" : undefined}>{"cryptographically backed, device tethered 18 plus certificates."}</span></div>
         </div>
       </section>
 
       <section className="zk-scene zk-scene-physical" aria-labelledby="physical-title">
         <Image src={heroImage} alt="Zik Pass on a phone after real-world verification" className="zk-scene-device-image" sizes="100vw" priority />
         <div className="zk-scene-inner zk-physical-copy">
-          <p className="zk-scene-kicker">Physical verification</p>
-          <h2 id="physical-title">Verified in the real world.<br/><em>Anonymous online.</em></h2>
-          <ol className="zk-editorial-steps"><li><span>01</span><p>Show ID once<br/><small>Checked by a participating store. Not retained.</small></p></li><li><span>02</span><p>Bind your device<br/><small>Your private holder key stays with you.</small></p></li><li><span>03</span><p>Use it for a year<br/><small>Sites receive the answer, not your evidence.</small></p></li></ol>
+          <p className="zk-scene-kicker" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-11" : undefined}>{"Ok, ok, get to the gimmick already!"}</p>
+          <h2 id="physical-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-12" : undefined} style={{"fontSize":66}}>{"Zik verifies your age once, physically. In the real world."}<br/><em>{"By keeping your identity offline, we help you stay anonymous online."}</em></h2>
+          <ol className="zk-editorial-steps"><li><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-13" : undefined}>01</span><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-14" : undefined}>Show ID once<br/><small>Checked by a participating store. Not retained.</small></p></li><li><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-15" : undefined}>02</span><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-16" : undefined}>Bind your device<br/><small>Your private holder key stays with you.</small></p></li><li><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-17" : undefined}>03</span><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-18" : undefined}>Use it for a year<br/><small>Sites receive the answer, not your evidence.</small></p></li></ol>
         </div>
       </section>
 
       <section className="zk-scene zk-scene-pass" aria-labelledby="pass-title">
         <div className="zk-scene-inner zk-pass-layout">
-          <div className="zk-pass-copy"><p className="zk-scene-kicker">The pass</p><h2 id="pass-title">Proof you own.<br/><em>Not data you surrender.</em></h2><p>Signed. Device-bound. Reusable.</p></div>
+          <div className="zk-pass-copy"><p className="zk-scene-kicker" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-19" : undefined}>The pass</p><h2 id="pass-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-20" : undefined}>Proof you own.<br/><em>Not data you surrender.</em></h2><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-21" : undefined}>Signed. Device-bound. Reusable.</p></div>
           <div className="zk-pass-object"><HomePassOverview wallet={wallet} failed={walletFailed}/></div>
         </div>
       </section>
 
       <section className="zk-scene zk-scene-control" aria-labelledby="control-title">
         <div className="zk-scene-inner zk-control-layout">
-          <div><p className="zk-scene-kicker">You stay in control</p><h2 id="control-title">Share the answer.<br/><em>Not the evidence.</em></h2></div>
-          <div className="zk-disclosure-demo"><div><span>Website asks</span><strong>Are you over 18?</strong></div><div className="zk-disclosure-line"/><div className="zk-disclosure-result"><span>Zik returns</span><strong>Yes <i>✓</i></strong></div><p>Name · date of birth · photo ID remain private</p></div>
-          <div className="zk-final-action"><Link className="zk-editorial-cta zk-editorial-cta--lime" href={(hasPass ? "/pass" : "/find") as Route}>{hasPass ? "Open my pass" : "Get Zik Pass"} <span aria-hidden="true">→</span></Link>{!hasPass?<Link href={"/pass" as Route}>I already have a pass</Link>:null}</div>
+          <div><p className="zk-scene-kicker" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-22" : undefined}>You stay in control</p><h2 id="control-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-23" : undefined}>Share the answer.<br/><em>Not the evidence.</em></h2></div>
+          <div className="zk-disclosure-demo"><div><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-24" : undefined}>Website asks</span><strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-25" : undefined}>Are you over 18?</strong></div><div className="zk-disclosure-line"/><div className="zk-disclosure-result"><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-26" : undefined}>Zik returns</span><strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-27" : undefined}>Yes <i>✓</i></strong></div><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-28" : undefined}>Name · date of birth · photo ID remain private</p></div>
+          <div className="zk-final-action"><Link className="zk-editorial-cta zk-editorial-cta--lime" href={(hasPass ? "/pass" : "/find") as Route}>{hasPass ? "Open my pass" : "Get Zik Pass"} <span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-29" : undefined}>→</span></Link>{!hasPass?<Link href={"/pass" as Route}>I already have a pass</Link>:null}</div>
         </div>
       </section>
 
       <section className="relative bg-[var(--zk-canvas)] px-4 py-16 pb-32" aria-labelledby="product-family-title">
         <div className="mx-auto max-w-[528px]">
-          <p className="text-xs font-bold uppercase tracking-widest text-[var(--zk-text-soft)]">The wider Zik platform</p>
-          <h2 id="product-family-title" className="mt-3 text-[30px] font-extrabold leading-tight tracking-tight">Zik starts with Zik Pass.</h2>
-          <p className="mb-6 mt-4 text-[15px] leading-relaxed text-[var(--zk-text-soft)]">Start by proving your age. Later, keep more verified information on your device and share only what a situation actually requires.</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-30" : undefined}>The wider Zik platform</p>
+          <h2 id="product-family-title" className="mt-3 text-[30px] font-extrabold leading-tight tracking-tight" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-31" : undefined}>Zik starts with Zik Pass.</h2>
+          <p className="mb-6 mt-4 text-[15px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-32" : undefined}>Start by proving your age. Later, keep more verified information on your device and share only what a situation actually requires.</p>
           <ProductFamily price={price} />
-          <Link href={"/ecosystem" as Route} className="mt-6 inline-flex min-h-[44px] items-center gap-2 rounded-full text-sm font-bold underline underline-offset-4">Explore the Zik ecosystem <span aria-hidden="true">→</span></Link>
+          <Link href={"/ecosystem" as Route} className="mt-6 inline-flex min-h-[44px] items-center gap-2 rounded-full text-sm font-bold underline underline-offset-4">Explore the Zik ecosystem <span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-33" : undefined}>→</span></Link>
         </div>
       </section>
     </div>
