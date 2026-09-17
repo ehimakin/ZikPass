@@ -141,7 +141,7 @@ export function PaymentPanel({
 
   if (state === "loading") {
     return (
-      <p className="text-[13px] text-[var(--zk-text-soft)]" aria-live="polite">
+      <p className="text-[13px] text-[var(--zk-text-soft)]" aria-live="polite" data-local-edit={process.env.NODE_ENV === "development" ? "ve-4b80c27ad530-1" : undefined}>
         Checking payment&hellip;
       </p>
     );
@@ -150,8 +150,8 @@ export function PaymentPanel({
   if (state === "locked") {
     return (
       <Card className="p-4">
-        <p className="text-[14px] font-bold text-[var(--zk-text)]">Payment</p>
-        <p className="mt-1 text-[13px] text-[var(--zk-text-soft)]" aria-live="polite">
+        <p className="text-[14px] font-bold text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-4b80c27ad530-2" : undefined}>Payment</p>
+        <p className="mt-1 text-[13px] text-[var(--zk-text-soft)]" aria-live="polite" data-local-edit={process.env.NODE_ENV === "development" ? "ve-4b80c27ad530-3" : undefined}>
           Once the clerk finds your code you can choose how to pay here.
         </p>
       </Card>
@@ -190,7 +190,7 @@ export function PaymentPanel({
           disabled={state === "confirming"}
           className="flex w-full items-center justify-between rounded-[var(--zk-r-md)] border border-[var(--zk-line-strong)] bg-[var(--zk-card)] px-4 py-3.5 text-left hover:bg-[var(--zk-sunken)] disabled:opacity-55"
         >
-          <span>
+          <span data-local-edit={process.env.NODE_ENV === "development" ? "ve-4b80c27ad530-4" : undefined}>
             <span className="block text-[14px] font-semibold text-[var(--zk-text)]">
               Zik demo checkout
             </span>
@@ -206,7 +206,7 @@ export function PaymentPanel({
           disabled={state === "confirming"}
           className="flex w-full items-center justify-between rounded-[var(--zk-r-md)] border border-[var(--zk-line-strong)] bg-[var(--zk-card)] px-4 py-3.5 text-left hover:bg-[var(--zk-sunken)] disabled:opacity-55"
         >
-          <span>
+          <span data-local-edit={process.env.NODE_ENV === "development" ? "ve-4b80c27ad530-5" : undefined}>
             <span className="block text-[14px] font-semibold text-[var(--zk-text)]">
               Cash or card at the till
             </span>
@@ -219,7 +219,7 @@ export function PaymentPanel({
       </div>
 
       {!stripeAvailable ? (
-        <p className="mt-3 text-[12px] leading-relaxed text-[var(--zk-text-faint)]">
+        <p className="mt-3 text-[12px] leading-relaxed text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-4b80c27ad530-6" : undefined}>
           Apple Pay / Google Pay isn&rsquo;t available in this build - the payment provider
           isn&rsquo;t connected yet. The demo checkout above is clearly a simulation.
         </p>
@@ -234,12 +234,12 @@ export function PaymentPanel({
       <Sheet open={sheetOpen} onClose={() => setSheetOpen(false)} title="Zik demo checkout">
         <div className="rounded-[var(--zk-r-md)] bg-[var(--zk-sunken)] p-3.5">
           <div className="flex items-center justify-between text-[13px]">
-            <span className="text-[var(--zk-text-soft)]">Zik Pass</span>
+            <span className="text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-4b80c27ad530-7" : undefined}>Zik Pass</span>
             <span className="font-bold text-[var(--zk-text)]">
               {formatMoney(price.minor, price.currency)}
             </span>
           </div>
-          <p className="mt-1 text-[12px] text-[var(--zk-text-faint)]">
+          <p className="mt-1 text-[12px] text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-4b80c27ad530-8" : undefined}>
             Simulated payment. No card details are collected and nothing is charged.
           </p>
         </div>

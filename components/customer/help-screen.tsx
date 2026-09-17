@@ -39,7 +39,7 @@ function DemoResetRow() {
   if (!isDemoEnvironment) return null;
   return (
     <div className="mt-3 border-t border-[var(--zk-line)] pt-3">
-      <p className="text-[13px] text-[var(--zk-text-soft)]">
+      <p className="text-[13px] text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-77c96c1e782b-1" : undefined}>
         Reset the demo to a clean slate before a walkthrough. Clears all in-progress
         enrolments, store sessions and test payments on the server. Delete this
         device&rsquo;s pass separately from the My pass tab.
@@ -68,8 +68,8 @@ export function HelpScreen() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[22px] font-extrabold tracking-tight text-[var(--zk-text)]">Help</h1>
-        <p className="mt-1 text-[14px] text-[var(--zk-text-soft)]">
+        <h1 className="text-[22px] font-extrabold tracking-tight text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-77c96c1e782b-2" : undefined}>Help</h1>
+        <p className="mt-1 text-[14px] text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-77c96c1e782b-3" : undefined}>
           How Zik Pass works and what to do when something goes wrong.
         </p>
       </div>
@@ -85,7 +85,7 @@ export function HelpScreen() {
               </li>
             ))}
           </ul>
-          <p className="mt-3 text-[12px] leading-relaxed text-[var(--zk-text-faint)]">
+          <p className="mt-3 text-[12px] leading-relaxed text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-77c96c1e782b-4" : undefined}>
             Prototype guidance only. A production service would publish a definitive
             accepted-ID policy per region.
           </p>

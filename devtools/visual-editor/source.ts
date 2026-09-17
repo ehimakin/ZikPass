@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 export type EditStyle = { fontSize?: number; color?: string; backgroundColor?: string; borderRadius?: number };
 export type Editable = { id: string; tag: string; texts: string[]; style: EditStyle; styleEditable: boolean };
 export const sourceHash = (s: string) => createHash('sha256').update(s).digest('hex');
-const tags = new Set(['h1','h2','h3','p','a','button','strong','small','span','em']);
+const tags = new Set(['h1','h2','h3','p','a','button','strong','small','span','em','h4','h5','h6','label','li','dt','dd','figcaption']);
 export function parse(source: string) { return ts.createSourceFile('component.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX); }
 function idOf(node: ts.JsxElement): string | undefined {
   const attribute = node.openingElement.attributes.properties.find(p=>ts.isJsxAttribute(p)&&p.name.getText()==='data-local-edit');
@@ -13,10 +13,12 @@ function idOf(node: ts.JsxElement): string | undefined {
   if(value&&ts.isJsxExpression(value)&&value.expression&&ts.isConditionalExpression(value.expression)&&ts.isStringLiteral(value.expression.whenTrue))return value.expression.whenTrue.text;
 }
 type Segment = {start:number;end:number;text:string};
+const renderedTextCache=new Map<string,string>();
 function renderedJsxText(text:string):string {
+  const cached=renderedTextCache.get(text);if(cached!==undefined)return cached;
   const output=ts.transpileModule(`const value=<span>${text}</span>`,{compilerOptions:{jsx:ts.JsxEmit.React,target:ts.ScriptTarget.ES2022}}).outputText;
   const ast=ts.createSourceFile('text.js',output,ts.ScriptTarget.Latest,true);let value='';
-  function visit(node:ts.Node){if(ts.isCallExpression(node)&&node.arguments.length===3&&ts.isStringLiteral(node.arguments[2]))value=node.arguments[2].text;ts.forEachChild(node,visit);}visit(ast);return value;
+  function visit(node:ts.Node){if(ts.isCallExpression(node)&&node.arguments.length===3&&ts.isStringLiteral(node.arguments[2]))value=node.arguments[2].text;ts.forEachChild(node,visit);}visit(ast);if(renderedTextCache.size>=2048)renderedTextCache.clear();renderedTextCache.set(text,value);return value;
 }
 
 function segments(node: ts.JsxElement, sourceFile: ts.SourceFile): Segment[] | undefined {
@@ -78,7 +80,8 @@ export function editSource(source:string,id:string,texts:unknown,style:unknown):
 }
 /** Repeatable setup instrumentation. Existing behaviour/markup is retained. */
 export function instrumentSource(source:string,prefix:string):string{
-  const file=parse(source),patches:{at:number;text:string}[]=[];let count=0;const used=new Set(inspectSource(source).map(item=>item.id));
+  const file=parse(source),patches:{at:number;text:string}[]=[];let count=0;const used=new Set<string>();
+  function collectIds(node:ts.Node){if(ts.isJsxElement(node)){const id=idOf(node);if(id)used.add(id);}ts.forEachChild(node,collectIds);}collectIds(file);
   function nextId(){let id;do{id=`${prefix}-${++count}`;}while(used.has(id));used.add(id);return id;}
   function visit(n:ts.Node){
     if(ts.isJsxElement(n)&&tags.has(n.openingElement.tagName.getText(file))&&segments(n,file)){

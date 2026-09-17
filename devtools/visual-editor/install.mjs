@@ -19,14 +19,13 @@ function visit(n){if(ts.isJsxElement(n)&&n.openingElement.tagName.getText(ast)==
 if(bodies.length!==1)throw Error('Expected one literal <body> in layout. No files changed.');
 const destination=path.join(root,'devtools/visual-editor');
 const configPath=path.join(root,'visual-editor.config.json');
-const componentDir=app.startsWith('src/')?'src/components':'components';
-function components(dir){if(!fs.existsSync(dir))return [];return fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?components(path.join(dir,entry.name)):entry.name.endsWith('.tsx')?[path.relative(root,path.join(dir,entry.name)).split(path.sep).join('/')]:[]);}
-const files=fs.existsSync(configPath)?JSON.parse(fs.readFileSync(configPath,'utf8')).files:components(path.join(root,componentDir));
-if(!Array.isArray(files)||!files.length||files.some(f=>typeof f!=='string'||!/^(src\/)?components\/[a-zA-Z0-9_./-]+\.tsx$/.test(f)||f.split('/').includes('..')))throw Error('No supported component files or invalid config. No files changed.');
+const config=fs.existsSync(configPath)?JSON.parse(fs.readFileSync(configPath,'utf8')):{directories:app.startsWith('src/')?['src/components','src/app']:['components','app']};
+const validFile=f=>typeof f==='string'&&/^(src\/)?(components|app)\/.+\.tsx$/.test(f)&&!f.includes('\\')&&!f.split('/').some(p=>p==='..'||p==='.'||!p);
+if(!config||Object.keys(config).length!==1||('files' in config?(!Array.isArray(config.files)||!config.files.length||config.files.some(f=>!validFile(f))):(!Array.isArray(config.directories)||!config.directories.length||config.directories.some(d=>!['components','app','src/components','src/app'].includes(d)))))throw Error('Invalid editor config. No files changed.');
 const relative=(from,to)=>{const p=path.relative(from,to).split(path.sep).join('/');return p.startsWith('.')?p:'./'+p;};
 const routeDir=path.join(root,app,'api/local-editor');
 const routePath=path.join(routeDir,'route.ts');
-const route=`// Installed by local-visual-editor\nimport { createEditorHandlers } from ${JSON.stringify(relative(routeDir,path.join(destination,'route')))};\nimport config from ${JSON.stringify(relative(routeDir,configPath))};\nexport const runtime = "nodejs";\nexport const dynamic = "force-dynamic";\nexport const { GET, POST, DELETE } = createEditorHandlers(config.files);\n`;
+const route=`// Installed by local-visual-editor\nimport { createEditorHandlers } from ${JSON.stringify(relative(routeDir,path.join(destination,'route')))};\nimport config from ${JSON.stringify(relative(routeDir,configPath))};\nexport const runtime = "nodejs";\nexport const dynamic = "force-dynamic";\nexport const { GET, POST, DELETE, PUT } = createEditorHandlers(config);\n`;
 if(fs.existsSync(routePath)&&!fs.readFileSync(routePath,'utf8').includes('createEditorHandlers'))throw Error('An unrelated local-editor route exists. No files changed.');
 let after=before;
 if(!before.includes('<LocalVisualEditor')){
@@ -40,7 +39,7 @@ if(source!==destination){
 }
 fs.mkdirSync(routeDir,{recursive:true});
 fs.writeFileSync(routePath,route);
-if(!fs.existsSync(configPath))fs.writeFileSync(configPath,JSON.stringify({files},null,2)+'\n');
+if(!fs.existsSync(configPath))fs.writeFileSync(configPath,JSON.stringify(config,null,2)+'\n');
 if(after!==before)fs.writeFileSync(layoutPath,after);
 execFileSync(process.execPath,[path.join(destination,'setup.mjs')],{cwd:root,stdio:'inherit'});
 console.log('Installed. Start/restart your development server, open localhost, and click Edit page. Review the source diff before committing.');

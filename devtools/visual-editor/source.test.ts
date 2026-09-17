@@ -28,3 +28,8 @@ it('instrumentation is repeatable and assigns fresh IDs to new text',()=>{
  const ids=inspectSource(added).map(item=>item.id);
  expect(new Set(ids).size).toBe(2);
 });
+
+it('reserves IDs even when previously static elements become dynamic',()=>{
+ const output=instrumentSource('<><p data-local-edit="page-1">{count}</p><h2>New heading</h2></>','page');
+ expect(inspectSource(output)[0].id).toBe('page-2');
+});

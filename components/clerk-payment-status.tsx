@@ -92,7 +92,7 @@ export function ClerkPaymentStatus({
 
   if (panelState === "loading") {
     return (
-      <p aria-live="polite" className="text-[12px] text-[var(--zk-text-faint)]">
+      <p aria-live="polite" className="text-[12px] text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ac9855083888-1" : undefined}>
         Checking payment&hellip;
       </p>
     );
@@ -108,7 +108,7 @@ export function ClerkPaymentStatus({
 
   return (
     <div className="rounded-[var(--zk-r-md)] border border-[var(--zk-line)] bg-[var(--zk-sunken)] px-3.5 py-3">
-      <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--zk-text-faint)]">
+      <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ac9855083888-2" : undefined}>
         Payment
       </p>
       <p aria-live="polite" className="mt-1 text-[13px] font-semibold text-[var(--zk-text)]">

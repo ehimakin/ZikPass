@@ -76,7 +76,7 @@ export function CustomerShell({
       <a
         href="#zk-main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-[var(--zk-text-on-ink)]"
-      >
+       data-local-edit={process.env.NODE_ENV === "development" ? "ve-58a0b92fcc86-1" : undefined}>
         Skip to content
       </a>
 
@@ -104,7 +104,7 @@ export function CustomerShell({
               }}
             >
               <ZikLogoMark className="zk-logo-float h-7 w-7 shrink-0" />
-              <span className="text-[16px] font-extrabold tracking-tight text-[#28623c]">Zik</span>
+              <span className="text-[16px] font-extrabold tracking-tight text-[#28623c]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-58a0b92fcc86-2" : undefined}>Zik</span>
             </Link>
           )}
           {title ? (

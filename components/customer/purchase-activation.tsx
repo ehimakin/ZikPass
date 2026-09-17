@@ -31,10 +31,10 @@ export function PurchaseActivation({ price }: { price: PassPrice }) {
     finally { setBusy(false); }
   }
   if (record) return <OnboardingFlow price={price} initialEnrollment={record} storeId={record.physical_verification?.session.store_id} />;
-  if (token === null) return <p>Preparing activation…</p>;
-  return <div className="space-y-5"><h1 className="text-2xl font-extrabold">Activate your Zik Pass</h1>
+  if (token === null) return <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-de7db1afb88b-1" : undefined}>Preparing activation…</p>;
+  return <div className="space-y-5"><h1 className="text-2xl font-extrabold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-de7db1afb88b-2" : undefined}>Activate your Zik Pass</h1>
     {error && <Alert tone="critical">{error}</Alert>}
-    {token ? <Card className="space-y-4 p-5"><p>Use the QR your clerk showed after checking your ID and taking payment. Save the pass to this phone and complete the device setup.</p><p className="font-semibold">No further payment is needed.</p><Button loading={busy} onClick={() => void claim()}>Save my Zik Pass</Button><p className="text-xs text-[var(--zk-text-soft)]">This prototype uses a demo device check. Keep the activation link private.</p></Card>
-    : <Card className="space-y-4 p-5"><p>Bring your purchase card to the till. The clerk will check your photo ID, take payment, and show a private activation QR for your phone.</p><p>Already paid? Scan the QR on the clerk’s screen. The printed purchase card alone does not activate a pass.</p><ButtonLink href="/find" variant="secondary">Find a participating store</ButtonLink></Card>}
+    {token ? <Card className="space-y-4 p-5"><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-de7db1afb88b-3" : undefined}>Use the QR your clerk showed after checking your ID and taking payment. Save the pass to this phone and complete the device setup.</p><p className="font-semibold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-de7db1afb88b-4" : undefined}>No further payment is needed.</p><Button loading={busy} onClick={() => void claim()}>Save my Zik Pass</Button><p className="text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-de7db1afb88b-5" : undefined}>This prototype uses a demo device check. Keep the activation link private.</p></Card>
+    : <Card className="space-y-4 p-5"><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-de7db1afb88b-6" : undefined}>Bring your purchase card to the till. The clerk will check your photo ID, take payment, and show a private activation QR for your phone.</p><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-de7db1afb88b-7" : undefined}>Already paid? Scan the QR on the clerk’s screen. The printed purchase card alone does not activate a pass.</p><ButtonLink href="/find" variant="secondary">Find a participating store</ButtonLink></Card>}
   </div>;
 }

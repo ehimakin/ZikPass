@@ -152,8 +152,8 @@ export function ExtendPassPanel({ enrollmentId }: { enrollmentId: string }) {
   if (state.step === "handoff_ready") {
     return (
       <div className="grid gap-4">
-        <h3 className="font-heading text-lg font-semibold text-ink">Add this pass to another device</h3>
-        <p className="text-sm leading-6 text-ink/68">
+        <h3 className="font-heading text-lg font-semibold text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b03a7fea95b7-1" : undefined}>Add this pass to another device</h3>
+        <p className="text-sm leading-6 text-ink/68" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b03a7fea95b7-2" : undefined}>
           On the new device, open this link or scan the code. It expires in 10 minutes and can only be used
           once.
         </p>
@@ -165,7 +165,7 @@ export function ExtendPassPanel({ enrollmentId }: { enrollmentId: string }) {
             src={state.qrDataUrl}
           />
         ) : (
-          <p role="status">Preparing the code…</p>
+          <p role="status" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b03a7fea95b7-3" : undefined}>Preparing the code…</p>
         )}
         <div className="flex flex-wrap items-center gap-2 rounded-[16px] border border-ink/10 bg-white px-3 py-2">
           <code className="flex-1 truncate text-xs text-ink/72">{state.url}</code>
@@ -174,7 +174,7 @@ export function ExtendPassPanel({ enrollmentId }: { enrollmentId: string }) {
           className="justify-self-start rounded-full border border-ink/15 bg-white px-4 py-2 text-sm font-semibold text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/40"
           onClick={() => void loadStatus()}
           type="button"
-        >
+         data-local-edit={process.env.NODE_ENV === "development" ? "ve-b03a7fea95b7-4" : undefined}>
           Done
         </button>
       </div>
@@ -185,7 +185,7 @@ export function ExtendPassPanel({ enrollmentId }: { enrollmentId: string }) {
     const { payment } = state;
     return (
       <div className="grid gap-4">
-        <h3 className="font-heading text-lg font-semibold text-ink">
+        <h3 className="font-heading text-lg font-semibold text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b03a7fea95b7-5" : undefined}>
           Extend to a third device — demo payment
         </h3>
         <p aria-live="polite" className="text-sm leading-6 text-ink/68">
@@ -193,7 +193,7 @@ export function ExtendPassPanel({ enrollmentId }: { enrollmentId: string }) {
             ? `Payment ${payment.payment_id} did not go through. No device was added and nothing was charged twice.`
             : `Payment ${payment.payment_id} — ${(payment.amount_minor / 100).toFixed(2)} ${payment.currency}, awaiting confirmation.`}
         </p>
-        <p className="rounded-[16px] bg-[#fff7e6] px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[#8a6116]">
+        <p className="rounded-[16px] bg-[#fff7e6] px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[#8a6116]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b03a7fea95b7-6" : undefined}>
           Demo payment only — no real card details are collected or charged.
         </p>
         <div className="flex flex-wrap gap-3">
@@ -201,14 +201,14 @@ export function ExtendPassPanel({ enrollmentId }: { enrollmentId: string }) {
             className="rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-mist focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/40"
             onClick={() => void confirmDemoPayment(payment.payment_id, false)}
             type="button"
-          >
+           data-local-edit={process.env.NODE_ENV === "development" ? "ve-b03a7fea95b7-7" : undefined}>
             Simulate successful payment
           </button>
           <button
             className="rounded-full border border-ink/15 bg-white px-5 py-2.5 text-sm font-semibold text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/40"
             onClick={() => void confirmDemoPayment(payment.payment_id, true)}
             type="button"
-          >
+           data-local-edit={process.env.NODE_ENV === "development" ? "ve-b03a7fea95b7-8" : undefined}>
             Simulate failed payment
           </button>
         </div>
@@ -224,8 +224,8 @@ export function ExtendPassPanel({ enrollmentId }: { enrollmentId: string }) {
 
   return (
     <div className="grid gap-4">
-      <h3 className="font-heading text-lg font-semibold text-ink">Extend pass to another device</h3>
-      <p className="text-sm leading-6 text-ink/68">
+      <h3 className="font-heading text-lg font-semibold text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b03a7fea95b7-9" : undefined}>Extend pass to another device</h3>
+      <p className="text-sm leading-6 text-ink/68" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b03a7fea95b7-10" : undefined}>
         This adds an authorised device to your existing pass — it does not delete or move the pass off this
         device.
       </p>
@@ -235,7 +235,7 @@ export function ExtendPassPanel({ enrollmentId }: { enrollmentId: string }) {
       </p>
       {atLimit ? (
         <>
-          <p className="text-sm leading-6 text-ink/68">
+          <p className="text-sm leading-6 text-ink/68" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b03a7fea95b7-11" : undefined}>
             You have used both devices included with your pass. Extending to a third device uses the demo
             payment flow below.
           </p>
@@ -243,7 +243,7 @@ export function ExtendPassPanel({ enrollmentId }: { enrollmentId: string }) {
             className="justify-self-start rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-mist focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/40"
             onClick={() => void startExtensionPayment()}
             type="button"
-          >
+           data-local-edit={process.env.NODE_ENV === "development" ? "ve-b03a7fea95b7-12" : undefined}>
             Pay to extend to a third device
           </button>
         </>
@@ -252,7 +252,7 @@ export function ExtendPassPanel({ enrollmentId }: { enrollmentId: string }) {
           className="justify-self-start rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-mist focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/40"
           onClick={() => void generateHandoffLink()}
           type="button"
-        >
+         data-local-edit={process.env.NODE_ENV === "development" ? "ve-b03a7fea95b7-13" : undefined}>
           Get a link for a new device
         </button>
       )}

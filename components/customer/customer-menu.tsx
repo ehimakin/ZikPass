@@ -70,11 +70,11 @@ export function CustomerMenu({ items, pathname }: {
         <div className="zk-menu-header">
           <div className="zk-menu-brand">
             <ZikLogoMark className="h-8 w-8 shrink-0" />
-            <h2 id="customer-menu-title">Zik</h2>
+            <h2 id="customer-menu-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-8319931b3b11-1" : undefined}>Zik</h2>
           </div>
           <button type="button" onClick={close} aria-label="Close menu"
             className="zk-menu-close">
-            <span>Close</span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+            <span data-local-edit={process.env.NODE_ENV === "development" ? "ve-8319931b3b11-2" : undefined}>Close</span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
           </button>
         </div>
         <nav aria-label="Site menu" className="zk-menu-nav">
@@ -82,7 +82,7 @@ export function CustomerMenu({ items, pathname }: {
             <Link key={item.href} href={item.href} onClick={close} aria-current={pathname === item.href ? "page" : undefined}
               onMouseEnter={() => setHovered(index)} onMouseLeave={() => setHovered(null)} onFocus={() => setHovered(index)}
               className="zk-menu-link">
-              <span className="zk-menu-index">0{index + 1}</span><span>{item.label}</span><span className="zk-menu-arrow" aria-hidden="true">↗</span>
+              <span className="zk-menu-index">0{index + 1}</span><span>{item.label}</span><span className="zk-menu-arrow" aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-8319931b3b11-3" : undefined}>↗</span>
             </Link>
           ))}
         </nav>
@@ -95,7 +95,7 @@ export function CustomerMenu({ items, pathname }: {
             <Link href="/help" onClick={close}>Help</Link>
           </div>
           <div className="zk-menu-staff">
-            <span>For staff</span>
+            <span data-local-edit={process.env.NODE_ENV === "development" ? "ve-8319931b3b11-4" : undefined}>For staff</span>
             <Link href="/verify" onClick={close}>Verify a customer</Link>
             <Link href="/verify/purchase" onClick={close}>Sell a Zik Pass</Link>
           </div>

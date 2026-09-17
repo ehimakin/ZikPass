@@ -1286,7 +1286,7 @@ export function WalletSurface({
 
                 {credential ? (
                   <div className="rounded-[28px] border border-ink/8 bg-[#f7faee] p-5">
-                    <p className="font-heading text-2xl font-semibold tracking-tight text-ink">Your pass</p>
+                    <p className="font-heading text-2xl font-semibold tracking-tight text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-1" : undefined}>Your pass</p>
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">
                       <MetaTile
                         label="Status"
@@ -1342,7 +1342,7 @@ export function WalletSurface({
                       <button
                         className="rounded-full bg-ink px-6 py-3 text-sm font-semibold text-mist"
                         onClick={openFlow}
-                      >
+                       data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-2" : undefined}>
                         View application
                       </button>
                     </div>
@@ -1352,7 +1352,7 @@ export function WalletSurface({
                     {isPhysicalLane ? (
                       onboardingMode && !physicalEntryExplicit ? (
                         <div className="rounded-[26px] bg-[#f7faee] p-5 text-sm text-ink/76">
-                          <p className="font-medium text-ink">Select a store</p>
+                          <p className="font-medium text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-3" : undefined}>Select a store</p>
                           <AffiliateStoreSelector
                             selectedStoreId={selectedAffiliateStoreId}
                             onSelect={setSelectedAffiliateStoreId}
@@ -1360,8 +1360,8 @@ export function WalletSurface({
                         </div>
                       ) : (
                         <div className="rounded-[26px] bg-[#f7faee] p-5 text-sm text-ink/76">
-                          <p className="font-medium text-ink">This store session is ready</p>
-                          <p className="mt-2 leading-6">
+                          <p className="font-medium text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-4" : undefined}>This store session is ready</p>
+                          <p className="mt-2 leading-6" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-5" : undefined}>
                             Create a local holder key, then show your temporary customer QR to a staff
                             member with your physical ID. Zik receives the age-check result, not your
                             identity details.
@@ -1451,7 +1451,7 @@ export function WalletSurface({
                         </button>
                       )}
                       {onboardingMode ? (
-                        <p className="mb-[50px] max-w-sm text-xs leading-5 text-ink/55">
+                        <p className="mb-[50px] max-w-sm text-xs leading-5 text-ink/55" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-6" : undefined}>
                           A physical check of your ID will be made by the affiliate verifier
                         </p>
                       ) : null}
@@ -1459,7 +1459,7 @@ export function WalletSurface({
                         <button
                           className="rounded-full border border-ink/10 bg-[#f7faee] px-6 py-3 text-sm font-medium text-ink hover:bg-[#edf3df]"
                           onClick={() => setIsLearnMoreOpen(true)}
-                        >
+                         data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-7" : undefined}>
                           Learn more
                         </button>
                       ) : null}
@@ -1542,7 +1542,7 @@ export function WalletSurface({
                         className="rounded-full bg-ink px-4 py-[10px] text-[12px] font-semibold text-mist transition hover:bg-[#24364d]"
                         onClick={() => setIsLearnMoreOpen(true)}
                         type="button"
-                      >
+                       data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-8" : undefined}>
                         Learn more
                       </button>
                     ) : (
@@ -1559,7 +1559,7 @@ export function WalletSurface({
                 </>
               ) : heroViewMode === "parental_controls" ? (
                 <div className="-mt-[10px] min-h-[248px] space-y-4 sm:min-h-[272px]">
-                  <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-ink/44">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-ink/44" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-9" : undefined}>
                     Coming soon
                   </p>
                   <h2 className="max-w-3xl font-heading text-5xl font-semibold leading-[0.92] tracking-tight text-ink sm:text-6xl">
@@ -1635,7 +1635,7 @@ export function WalletSurface({
           >
           <ul className="grid gap-4">
             <li className="flex items-start gap-3">
-              <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#eef6df] text-sm font-semibold text-ink">
+              <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#eef6df] text-sm font-semibold text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-10" : undefined}>
                 ✓
               </span>
               <div>
@@ -1650,11 +1650,11 @@ export function WalletSurface({
               </div>
             </li>
             <li className="flex items-start gap-3">
-              <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#eef6df] text-sm font-semibold text-ink">
+              <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#eef6df] text-sm font-semibold text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-11" : undefined}>
                 ✓
               </span>
               <div>
-                <p className="text-sm font-medium text-ink">Private by design</p>
+                <p className="text-sm font-medium text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-12" : undefined}>Private by design</p>
                 <p className="mt-1 text-sm leading-6 text-ink/68">
                   {isPhysicalLane
                     ? "Zik receives the staff-confirmed 18+ result, not your name, date of birth, address, ID number, or ID image."
@@ -1663,7 +1663,7 @@ export function WalletSurface({
               </div>
             </li>
             <li className="flex items-start gap-3">
-              <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#eef6df] text-sm font-semibold text-ink">
+              <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#eef6df] text-sm font-semibold text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-13" : undefined}>
                 ✓
               </span>
               <div>
@@ -1701,7 +1701,7 @@ export function WalletSurface({
                 isDarkChrome ? "bg-white/10 text-mist" : "bg-ink text-mist"
               )}
               onClick={resetFlow}
-            >
+             data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-14" : undefined}>
               Reset local wallet
             </button>
             {enrollment && !credential ? (
@@ -1712,7 +1712,7 @@ export function WalletSurface({
                 )}
                 disabled={isPending}
                 onClick={advanceCoolingOff}
-              >
+               data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-15" : undefined}>
                 Complete cooling-off
               </button>
             ) : null}
@@ -1749,7 +1749,7 @@ export function WalletSurface({
                   "font-mono text-[11px] uppercase tracking-[0.24em]",
                   isDarkChrome ? "text-mist/45" : "text-ink/45"
                 )}
-              >
+               data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-16" : undefined}>
                 Your status
               </p>
               <StatusPill
@@ -1833,7 +1833,7 @@ export function WalletSurface({
                 aria-label="Close Zik Pass form"
                 className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full border border-ink/10 bg-white text-lg text-ink hover:bg-[#f4f7ee] sm:right-4 sm:top-4 sm:h-11 sm:w-11 sm:text-xl"
                 onClick={closeFlow}
-              >
+               data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-17" : undefined}>
                 ×
               </button>
 
@@ -2057,8 +2057,8 @@ export function WalletSurface({
                     onNext={() => setStep("device-security")}
                   >
                     <div className="rounded-[28px] bg-[linear-gradient(135deg,_rgba(215,241,113,0.18),_rgba(105,225,200,0.12))] p-5 text-sm text-ink/78">
-                      <p className="font-medium text-ink">Why we ask for this</p>
-                      <p className="mt-2 leading-6">
+                      <p className="font-medium text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-18" : undefined}>Why we ask for this</p>
+                      <p className="mt-2 leading-6" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-19" : undefined}>
                         We send a temporary refundable GBP 0.01 verification reference so you can
                         confirm you control a real adult-linked bank account.
                       </p>
@@ -2105,7 +2105,7 @@ export function WalletSurface({
                     onNext={startEnrollmentSubmission}
                   >
                     <div className="rounded-[28px] bg-ink/5 p-5 text-sm text-ink/78">
-                      <p className="font-medium text-ink">What happens next</p>
+                      <p className="font-medium text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-20" : undefined}>What happens next</p>
                       <div className="mt-3 grid gap-3 sm:grid-cols-3">
                         <InlineDetail title="Local key" body="Created on this device and kept private." />
                         <InlineDetail
@@ -2169,10 +2169,10 @@ export function WalletSurface({
                               : "Waiting for staff"}
                           </StatusPill>
                         </div>
-                        <p className="mt-5 font-heading text-2xl font-semibold tracking-tight">
+                        <p className="mt-5 font-heading text-2xl font-semibold tracking-tight" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-21" : undefined}>
                           Choose the strongest device authentication available.
                         </p>
-                        <p className="mt-2 text-sm leading-6 text-mist/76">
+                        <p className="mt-2 text-sm leading-6 text-mist/76" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-22" : undefined}>
                           WebAuthn will use your platform authenticator when available. The demo
                           device check keeps the architecture explicit when a full authenticator
                           prompt is not available in this browser.
@@ -2184,7 +2184,7 @@ export function WalletSurface({
                         ) : null}
                       </div>
                       <div className="rounded-[28px] bg-white p-5">
-                        <p className="font-medium text-ink">Authentication method</p>
+                        <p className="font-medium text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-23" : undefined}>Authentication method</p>
                         <div className="mt-4 grid gap-3">
                           <AnswerButton
                             active={deviceAuthMethod === "webauthn"}
@@ -2284,7 +2284,7 @@ export function WalletSurface({
                                   ? "Waiting for issuer signature"
                                   : "Waiting for issuer signature"}
                             </p>
-                            <p className="mt-1 text-sm text-ink/68">
+                            <p className="mt-1 text-sm text-ink/68" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-24" : undefined}>
                               You can come back at any time. No account is required, and your
                               identity details are not included in the pass that will be stored on
                               this device.
@@ -2450,7 +2450,7 @@ export function WalletSurface({
                     "font-heading text-3xl font-semibold tracking-tight sm:text-4xl",
                     isDarkChrome ? "text-mist" : "text-ink"
                   )}
-                >
+                 data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-25" : undefined}>
                   How Zik Pass works
                 </h3>
                 <button
@@ -2462,7 +2462,7 @@ export function WalletSurface({
                       : "border border-ink/10 bg-white text-ink hover:bg-[#f4f7ee]"
                   )}
                   onClick={() => setIsLearnMoreOpen(false)}
-                >
+                 data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-26" : undefined}>
                   ×
                 </button>
               </div>
@@ -2565,7 +2565,7 @@ function HomepageHero({
     <section className="relative py-6 sm:py-10">
       <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-16">
         <div className="space-y-7">
-          <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-lime/80">
+          <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-lime/80" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-27" : undefined}>
             Private &middot; Over 18
           </p>
           <h1 className="max-w-xl font-heading text-[2.75rem] font-semibold leading-[0.94] tracking-tight text-mist sm:text-6xl lg:text-[4.5rem]">
@@ -2616,7 +2616,7 @@ function HomepageHero({
               className="rounded-full border border-white/15 px-6 py-3.5 text-sm font-medium text-mist/70 transition hover:border-white/30 hover:text-mist"
               onClick={onLearnMore}
               type="button"
-            >
+             data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-28" : undefined}>
               How it works
             </button>
           </div>
@@ -2694,8 +2694,8 @@ function OnboardingHero({
         <div className="animate-float-slow mx-auto mb-[88px] flex h-[100px] w-[100px] items-center justify-center">
           <ZikLogoMark className="h-full w-full" tone="light" />
         </div>
-        <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-lime/80">Prove over 18 &middot; Privately</p>
-        <h1 className="mt-4 font-heading text-5xl font-semibold leading-[0.94] tracking-tight text-mist sm:text-6xl">
+        <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-lime/80" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-29" : undefined}>Prove over 18 &middot; Privately</p>
+        <h1 className="mt-4 font-heading text-5xl font-semibold leading-[0.94] tracking-tight text-mist sm:text-6xl" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-30" : undefined}>
           Verify in person.
         </h1>
       </div>
@@ -2703,7 +2703,7 @@ function OnboardingHero({
       <div className="mx-auto mt-10 max-w-xl">
         {credential ? (
           <div className="space-y-6 text-center">
-            <p className="text-base text-mist/50">Your pass is ready.</p>
+            <p className="text-base text-mist/50" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-31" : undefined}>Your pass is ready.</p>
             <div className="mx-auto max-w-sm">
               <PassPreviewCard
                 active={walletStatus.credential_active}
@@ -2720,9 +2720,9 @@ function OnboardingHero({
           </div>
         ) : isPendingIssuance ? (
           <div className="space-y-6 text-center">
-            <p className="text-base text-mist/50">Zik is finishing your pass.</p>
+            <p className="text-base text-mist/50" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-32" : undefined}>Zik is finishing your pass.</p>
             <div className="relative mx-auto max-w-sm">
-              <span className="absolute -top-3 left-6 z-10 rounded-full bg-[#0a0f18] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-mist/45 ring-1 ring-white/10">
+              <span className="absolute -top-3 left-6 z-10 rounded-full bg-[#0a0f18] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-mist/45 ring-1 ring-white/10" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-33" : undefined}>
                 Signing in progress
               </span>
               <PassPreviewCard active={false} zignatureSeedInput={cardSeed} />
@@ -2731,17 +2731,17 @@ function OnboardingHero({
               className="rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-lime/90"
               onClick={onViewApplication}
               type="button"
-            >
+             data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-34" : undefined}>
               View application
             </button>
           </div>
         ) : isPhysicalLane ? (
           <div className="space-y-6">
             {physicalEntryExplicit ? (
-              <p className="text-center text-base text-mist/50">Your store session is ready.</p>
+              <p className="text-center text-base text-mist/50" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-35" : undefined}>Your store session is ready.</p>
             ) : (
               <>
-                <p className="text-center text-base text-mist/50">Choose a nearby store to start.</p>
+                <p className="text-center text-base text-mist/50" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-36" : undefined}>Choose a nearby store to start.</p>
                 <AffiliateStoreSelector selectedStoreId={selectedAffiliateStoreId} onSelect={onSelectStore} />
               </>
             )}
@@ -2756,7 +2756,7 @@ function OnboardingHero({
                 disabled={isPending || !canBegin}
                 onClick={onBegin}
                 type="button"
-              >
+               data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-37" : undefined}>
                 Begin
               </button>
             </div>
@@ -2794,7 +2794,7 @@ function OnboardingHero({
                 disabled={isPending || !canBegin}
                 onClick={onBegin}
                 type="button"
-              >
+               data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-38" : undefined}>
                 Begin
               </button>
             </div>
@@ -2821,7 +2821,7 @@ function AffiliateStoreSelector({
             "linear-gradient(28deg, transparent 46%, rgba(255,255,255,0.2) 47%, rgba(255,255,255,0.2) 50%, transparent 51%), linear-gradient(112deg, transparent 44%, rgba(255,255,255,0.16) 45%, rgba(255,255,255,0.16) 48%, transparent 49%), radial-gradient(circle at 30% 30%, rgba(215,241,113,0.14), transparent 55%)"
         }}
       >
-        <p className="absolute left-4 top-4 rounded-full border border-white/10 bg-black/40 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-mist/55">
+        <p className="absolute left-4 top-4 rounded-full border border-white/10 bg-black/40 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-mist/55" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-39" : undefined}>
           Affiliate locations
         </p>
         {affiliateStores.map((store) => {
@@ -2917,7 +2917,7 @@ function WalletStatusFooter({
       >
         <div className="flex flex-wrap items-center gap-2 px-1 py-0.5">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-ink/45">Your status</p>
+            <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-ink/45" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-40" : undefined}>Your status</p>
             <StatusPill tone={statusLabel === "Active" ? "good" : statusLabel === "Expired" ? "warn" : "neutral"}>
               {statusLabel}
             </StatusPill>
@@ -3029,7 +3029,7 @@ function PhysicalOnboardingExperience({
             className="rounded-full bg-ink px-7 py-4 text-base font-semibold text-mist"
             onClick={onReset}
             type="button"
-          >
+           data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-41" : undefined}>
             Start again
           </button>
         </div>
@@ -3053,7 +3053,7 @@ function PhysicalOnboardingExperience({
             className="rounded-full bg-ink px-7 py-4 text-base font-semibold text-mist"
             onClick={onReset}
             type="button"
-          >
+           data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-42" : undefined}>
             Start again
           </button>
         </div>
@@ -3071,8 +3071,8 @@ function PhysicalOnboardingExperience({
       >
         <div className="zik-stage-pop grid w-full max-w-xl gap-7">
           <div className="rounded-[30px] border border-ink/8 bg-[#f7faee] p-5 text-ink ring-1 ring-ink/4">
-            <p className="font-mono text-xs uppercase text-ink/48">Over 18</p>
-            <p className="mt-2 font-heading text-5xl font-semibold">In-person verified</p>
+            <p className="font-mono text-xs uppercase text-ink/48" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-43" : undefined}>Over 18</p>
+            <p className="mt-2 font-heading text-5xl font-semibold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-44" : undefined}>In-person verified</p>
             <Zignature
               animate
               className="mt-6 h-24 w-full"
@@ -3132,7 +3132,7 @@ function PhysicalOnboardingExperience({
             <a
               className="rounded-full border border-ink/15 px-7 py-4 text-center text-base font-semibold text-ink"
               href={appHref}
-            >
+             data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-45" : undefined}>
               Open Zik
             </a>
             <button
@@ -3206,11 +3206,11 @@ function PhysicalOnboardingExperience({
           <p className="font-heading text-6xl font-semibold tracking-[0.18em] text-ink sm:text-7xl">
             {sessionCode}
           </p>
-          <p className="max-w-sm text-center text-sm font-semibold text-ink/64">
+          <p className="max-w-sm text-center text-sm font-semibold text-ink/64" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-46" : undefined}>
             Waiting for the clerk to confirm 18+
           </p>
           {alreadyPaid ? (
-            <p className="w-full rounded-[20px] border border-ink/8 bg-white/76 px-5 py-4 text-sm font-semibold text-ink" role="status">
+            <p className="w-full rounded-[20px] border border-ink/8 bg-white/76 px-5 py-4 text-sm font-semibold text-ink" role="status" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-47" : undefined}>
               Paid at the till
             </p>
           ) : enrollment?.id ? (
@@ -3256,7 +3256,7 @@ function PhysicalStageFrame({
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(215,241,113,0.28),_transparent_42%),_#f4f7ee] px-4 py-5 text-ink sm:px-6 sm:py-7">
       <div className="relative mx-auto flex min-h-[calc(100vh-2.5rem)] max-w-6xl flex-col overflow-hidden rounded-[40px] border border-white/80 bg-white/76 px-5 py-7 shadow-panel backdrop-blur-sm sm:min-h-[calc(100vh-3.5rem)] sm:px-8">
         <div className={`absolute inset-x-0 top-0 h-1.5 ${accent}`} />
-        <p className="hidden text-center text-sm font-semibold text-ink/45 lg:block">Continue on your phone</p>
+        <p className="hidden text-center text-sm font-semibold text-ink/45 lg:block" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-48" : undefined}>Continue on your phone</p>
         <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center gap-10 text-center">
           <div className="zik-stage-copy">
             <h1 className="font-heading text-6xl font-semibold leading-[0.9] text-ink sm:text-8xl">{title}</h1>
@@ -3482,7 +3482,7 @@ function QuestionCard({
             <button
               className="rounded-full border border-ink/10 bg-white px-5 py-3 text-sm font-medium text-ink"
               onClick={onBack}
-            >
+             data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-49" : undefined}>
               Back
             </button>
           ) : null}
@@ -3616,13 +3616,13 @@ function IdentityCheckIntro({
       <div className="mt-3 space-y-1.5 text-sm text-ink/68">
         {lane === "physical" ? (
           <>
-            <p>Staff will verify your ID in person before the pass is issued.</p>
-            <p>This device must complete device authentication before the pass can be delivered.</p>
+            <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-50" : undefined}>Staff will verify your ID in person before the pass is issued.</p>
+            <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-51" : undefined}>This device must complete device authentication before the pass can be delivered.</p>
           </>
         ) : (
           <>
-            <p>This is a soft check and won&apos;t affect your credit score.</p>
-            <p>We don&apos;t see your transactions or store your personal data after this step.</p>
+            <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-52" : undefined}>This is a soft check and won&apos;t affect your credit score.</p>
+            <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-53" : undefined}>We don&apos;t see your transactions or store your personal data after this step.</p>
           </>
         )}
       </div>
@@ -3658,7 +3658,7 @@ function PhysicalVerificationPanel({
         <p className="mt-5 text-center font-heading text-5xl font-semibold tracking-[0.18em]">
           {verification.user_code.value}
         </p>
-        <p className="mt-3 text-sm leading-6 text-mist/76">
+        <p className="mt-3 text-sm leading-6 text-mist/76" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-54" : undefined}>
           This short-lived QR/code identifies only this verification session. It does not contain
           your name, date of birth, address, ID number, or ID image.
         </p>
@@ -3773,7 +3773,7 @@ function BankVerificationPanel({ enrollment }: { enrollment: EnrollmentRecord })
           <BankMetaTile label="Reference" value={enrollment.bank_verification.reference} />
           <BankMetaTile label="Refund" value="Automatic" />
         </div>
-        <p className="mt-5 text-sm leading-6 text-mist/78">
+        <p className="mt-5 text-sm leading-6 text-mist/78" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-55" : undefined}>
           This temporary refundable authorisation helps confirm you control a real adult-linked
           account. Zik does not see your balance or transaction history.
         </p>
@@ -3783,7 +3783,7 @@ function BankVerificationPanel({ enrollment }: { enrollment: EnrollmentRecord })
       </div>
 
       <div className="rounded-[28px] bg-white p-5 text-sm text-ink/76">
-        <p className="font-medium text-ink">What to do</p>
+        <p className="font-medium text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-56" : undefined}>What to do</p>
         <div className="mt-3 space-y-3">
           <InstructionRow
             number="1"
@@ -3823,8 +3823,8 @@ export function PassPreviewCard({
       <div className="relative min-w-0">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.24em] text-[#edf9d1]">Zik Pass</p>
-            <p className="mt-2 font-heading text-3xl font-semibold tracking-tight">Over 18</p>
+            <p className="font-mono text-xs uppercase tracking-[0.24em] text-[#edf9d1]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-57" : undefined}>Zik Pass</p>
+            <p className="mt-2 font-heading text-3xl font-semibold tracking-tight" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-58" : undefined}>Over 18</p>
           </div>
           <StatusPill tone={active ? "good" : "neutral"}>{active ? "Active" : "Activating"}</StatusPill>
         </div>
@@ -3868,7 +3868,7 @@ function CredentialVisualPreview({
       <div className="rounded-[24px] bg-[#f7faee] p-5">
         <div className="rounded-[22px] border border-ink/8 bg-white/75 px-4 py-4">
           <div className="flex items-center justify-between gap-3">
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink/46">
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink/46" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-59" : undefined}>
               Your Zignature
             </p>
             <p className="text-xs text-ink/52">
@@ -4017,8 +4017,8 @@ function HowItWorksGraphic({
       <div className="rounded-[26px] bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
         <div className="space-y-4">
           <div className="rounded-[22px] border border-ink/8 bg-white p-4">
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/42">Wallet shows</p>
-            <p className="mt-2 font-heading text-2xl font-semibold tracking-tight text-ink">
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/42" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-60" : undefined}>Wallet shows</p>
+            <p className="mt-2 font-heading text-2xl font-semibold tracking-tight text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-61" : undefined}>
               18+ · In-person verified
             </p>
           </div>
@@ -4059,8 +4059,8 @@ function HowItWorksGraphic({
     <div className="rounded-[26px] bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
       <div className="space-y-4">
         <div className="rounded-[22px] border border-ink/8 bg-white p-4">
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/42">Site sees</p>
-          <p className="mt-2 font-heading text-2xl font-semibold tracking-tight text-ink">Over 18</p>
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/42" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-62" : undefined}>Site sees</p>
+          <p className="mt-2 font-heading text-2xl font-semibold tracking-tight text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-63" : undefined}>Over 18</p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <InlineDetail title="Shared" body="Only the signed over-18 result." />
@@ -4116,7 +4116,7 @@ function BankOptionCard({
       onClick={onClick}
     >
       <p className="font-heading text-xl font-semibold tracking-tight">{label}</p>
-      <p className={`mt-2 text-sm ${active ? "text-mist/76" : "text-ink/58"}`}>
+      <p className={`mt-2 text-sm ${active ? "text-mist/76" : "text-ink/58"}`} data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-64" : undefined}>
         Use this account for the refundable verification.
       </p>
     </button>

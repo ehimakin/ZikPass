@@ -43,7 +43,7 @@ export function StoreLogin({ nextPath = "/verify" }: { nextPath?: string }) {
         <header className="mb-8 flex items-center justify-between gap-4">
           <span className="flex items-center gap-3">
             <ZikLogoMark className="h-10 w-10" />
-            <span>
+            <span data-local-edit={process.env.NODE_ENV === "development" ? "ve-782b43252e3b-1" : undefined}>
               <span className="block text-[18px] font-extrabold tracking-tight">Zik Pass</span>
               <span className="block text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--zk-text-soft)]">Store portal</span>
             </span>
@@ -55,9 +55,9 @@ export function StoreLogin({ nextPath = "/verify" }: { nextPath?: string }) {
 
         <section className="overflow-hidden rounded-[28px] border border-[var(--zk-line)] bg-[var(--zk-card)] shadow-[var(--zk-shadow-card)]">
           <div className="bg-[var(--zk-ink-surface)] px-6 py-7 text-[var(--zk-text-on-ink)] sm:px-8">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#d7f171]">Clerk access</p>
-            <h1 className="mt-3 text-[30px] font-extrabold leading-tight tracking-[-0.035em]">Set up this store terminal.</h1>
-            <p className="mt-3 max-w-[390px] text-[14px] leading-relaxed text-[#b9c0cb]">Choose your location and enter the staff login code before helping customers.</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#d7f171]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-782b43252e3b-2" : undefined}>Clerk access</p>
+            <h1 className="mt-3 text-[30px] font-extrabold leading-tight tracking-[-0.035em]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-782b43252e3b-3" : undefined}>Set up this store terminal.</h1>
+            <p className="mt-3 max-w-[390px] text-[14px] leading-relaxed text-[#b9c0cb]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-782b43252e3b-4" : undefined}>Choose your location and enter the staff login code before helping customers.</p>
           </div>
 
           <form onSubmit={submit} className="space-y-6 p-6 sm:p-8">
@@ -80,7 +80,7 @@ export function StoreLogin({ nextPath = "/verify" }: { nextPath?: string }) {
             </fieldset>
 
             <label className="block">
-              <span className="text-[13px] font-bold text-[var(--zk-text)]">2. Enter staff login code</span>
+              <span className="text-[13px] font-bold text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-782b43252e3b-5" : undefined}>2. Enter staff login code</span>
               <input
                 autoComplete="one-time-code"
                 autoFocus
@@ -99,7 +99,7 @@ export function StoreLogin({ nextPath = "/verify" }: { nextPath?: string }) {
             </label>
 
             <div className="rounded-[14px] bg-[var(--zk-sunken)] p-4">
-              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--zk-text-faint)]">Signing in to</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-782b43252e3b-6" : undefined}>Signing in to</p>
               <p className="mt-1 text-[14px] font-bold">{selectedStore.name}</p>
               <p className="mt-1 text-[12px] text-[var(--zk-text-soft)]">{selectedStore.addressLine}, {selectedStore.postcode}</p>
             </div>
@@ -107,7 +107,7 @@ export function StoreLogin({ nextPath = "/verify" }: { nextPath?: string }) {
             <Button type="submit" size="lg" loading={busy} disabled={code.length !== 4}>
               Open clerk tools
             </Button>
-            <p className="text-center text-[10px] leading-relaxed text-[var(--zk-text-faint)]">This development login protects the clerk interface only. Do not reuse the shared demonstration code in a live environment.</p>
+            <p className="text-center text-[10px] leading-relaxed text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-782b43252e3b-7" : undefined}>This development login protects the clerk interface only. Do not reuse the shared demonstration code in a live environment.</p>
           </form>
         </section>
       </main>

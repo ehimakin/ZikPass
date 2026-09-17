@@ -116,7 +116,7 @@ export function StoreFinder({ selectMode = false }: { selectMode?: boolean }) {
   return (
     <div className="space-y-4">
       <div className="space-y-2.5">
-        <label htmlFor="store-search" className="sr-only">
+        <label htmlFor="store-search" className="sr-only" data-local-edit={process.env.NODE_ENV === "development" ? "ve-4a0f3c6e1731-1" : undefined}>
           Search by postcode or area
         </label>
         <div className="flex items-center gap-2 rounded-[var(--zk-r-md)] border border-[var(--zk-line-strong)] bg-[var(--zk-card)] px-3.5 focus-within:border-[var(--zk-focus)]">
@@ -150,7 +150,7 @@ export function StoreFinder({ selectMode = false }: { selectMode?: boolean }) {
       {/* Schematic map: coordinate-plotted pins, not real map tiles. */}
       <Card className="overflow-hidden">
         <div className="flex items-center justify-between gap-2 border-b border-[var(--zk-line)] px-3.5 py-2">
-          <span className="text-[12px] font-semibold text-[var(--zk-text-faint)]">Schematic map</span>
+          <span className="text-[12px] font-semibold text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-4a0f3c6e1731-2" : undefined}>Schematic map</span>
           <StatusBadge tone="neutral">Demo locations</StatusBadge>
         </div>
         <div
@@ -252,7 +252,7 @@ export function StoreFinder({ selectMode = false }: { selectMode?: boolean }) {
 
               {selectedId === store.id ? (
                 <div className="mt-3 border-t border-[var(--zk-line)] pt-3">
-                  <p className="text-[13px] text-[var(--zk-text-soft)]">
+                  <p className="text-[13px] text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-4a0f3c6e1731-3" : undefined}>
                     Bring photo ID (passport, UK/EU driving licence, or PASS-accredited card).
                     A clerk checks it in person - it is not scanned or stored.
                   </p>
@@ -280,7 +280,7 @@ export function StoreFinder({ selectMode = false }: { selectMode?: boolean }) {
         ))}
       </ul>
 
-      <p className="px-1 pb-2 text-[12px] leading-relaxed text-[var(--zk-text-faint)]">
+      <p className="px-1 pb-2 text-[12px] leading-relaxed text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-4a0f3c6e1731-4" : undefined}>
         All locations shown are fictional demo sites for this prototype and are not real
         retail partners. Distances are straight-line estimates, not walking times.
       </p>

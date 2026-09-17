@@ -84,7 +84,7 @@ export function AppShell({
                 )}
                 onClick={() => setMenuOpen(true)}
               >
-                <span className="font-mono text-[11px] uppercase tracking-[0.22em]">Menu</span>
+                <span className="font-mono text-[11px] uppercase tracking-[0.22em]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-701d1569037d-1" : undefined}>Menu</span>
                 <span className="flex flex-col gap-1">
                   <span className={clsx("block h-[1.5px] w-4 rounded-full", showHeroBackground ? "bg-mist/70" : "bg-ink")} />
                   <span className={clsx("block h-[1.5px] w-4 rounded-full", showHeroBackground ? "bg-mist/70" : "bg-ink")} />
@@ -133,7 +133,7 @@ export function AppShell({
                     showHeroBackground ? "text-mist/70 hover:text-mist" : "border border-ink/10 bg-[#f4f7ee] text-ink"
                   )}
                   onClick={() => setMenuOpen(false)}
-                >
+                 data-local-edit={process.env.NODE_ENV === "development" ? "ve-701d1569037d-2" : undefined}>
                   ×
                 </button>
               </div>

@@ -6,11 +6,11 @@ export default function ZikParentalPage() {
     <AppShell currentPath="/ZikParental">
       <main className="flex flex-1 items-center px-4 pb-16 pt-8 sm:px-6 lg:px-8">
         <section className="mx-auto w-full max-w-4xl rounded-[40px] border border-white/80 bg-white/72 p-8 shadow-panel backdrop-blur-sm sm:p-12">
-          <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink/45">Zik Parental Controls</p>
-          <h1 className="mt-4 max-w-3xl font-heading text-5xl font-semibold leading-[0.94] tracking-tight text-ink sm:text-7xl">
+          <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink/45" data-local-edit={process.env.NODE_ENV === "development" ? "ve-7f4cfa4b0b0d-1" : undefined}>Zik Parental Controls</p>
+          <h1 className="mt-4 max-w-3xl font-heading text-5xl font-semibold leading-[0.94] tracking-tight text-ink sm:text-7xl" data-local-edit={process.env.NODE_ENV === "development" ? "ve-7f4cfa4b0b0d-2" : undefined}>
             More control around trusted devices and pass use.
           </h1>
-          <p className="mt-6 max-w-2xl text-base leading-8 text-ink/68">
+          <p className="mt-6 max-w-2xl text-base leading-8 text-ink/68" data-local-edit={process.env.NODE_ENV === "development" ? "ve-7f4cfa4b0b0d-3" : undefined}>
             This placeholder will become the home for pass transfer reviews, trusted-device settings,
             and additional safeguards for families.
           </p>

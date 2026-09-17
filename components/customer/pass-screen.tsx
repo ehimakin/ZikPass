@@ -138,7 +138,7 @@ export function PassScreen() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h1 className="text-[22px] font-extrabold tracking-tight text-[var(--zk-text)]">My pass</h1>
+        <h1 className="text-[22px] font-extrabold tracking-tight text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-1" : undefined}>My pass</h1>
         <StatusBadge tone={expired ? "critical" : active ? "positive" : "caution"} dot>
           {expired ? "Expired" : active ? "Active" : "Activating"}
         </StatusBadge>
@@ -186,7 +186,7 @@ export function PassScreen() {
       <section>
         <SectionHeading>Add to another device</SectionHeading>
         <Card className="p-4">
-          <p className="text-[13px] leading-relaxed text-[var(--zk-text-soft)]">
+          <p className="text-[13px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-2" : undefined}>
             Install Zik Pass on this phone&rsquo;s home screen, then use the one-time
             transfer link to move this pass to it.
           </p>
@@ -207,9 +207,9 @@ export function PassScreen() {
       {active ? (
         <Card as="section" className="p-5">
           <StatusBadge>Coming next</StatusBadge>
-          <h2 className="mt-3 text-lg font-bold">Build your ZikVault</h2>
-          <p className="mt-2 text-sm leading-relaxed text-[var(--zk-text-soft)]">Planned verified credentials, designed to live on your device and be selectively shared. Sufficient verified information could eventually be assembled into Zik ID.</p>
-          <p className="mt-2 text-xs text-[var(--zk-text-soft)]">ZikVault and Zik ID are not available in this prototype.</p>
+          <h2 className="mt-3 text-lg font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-3" : undefined}>Build your ZikVault</h2>
+          <p className="mt-2 text-sm leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-4" : undefined}>Planned verified credentials, designed to live on your device and be selectively shared. Sufficient verified information could eventually be assembled into Zik ID.</p>
+          <p className="mt-2 text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-5" : undefined}>ZikVault and Zik ID are not available in this prototype.</p>
           <ButtonLink href="/ecosystem" variant="ghost" className="mt-3">Explore the Zik ecosystem</ButtonLink>
         </Card>
       ) : null}
@@ -225,7 +225,7 @@ function DeletePassRow({ onDeleted }: { onDeleted: () => Promise<void> }) {
       <summary className="cursor-pointer font-semibold text-[var(--zk-text)]">
         Remove this pass from this device
       </summary>
-      <p className="mt-2">
+      <p className="mt-2" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-6" : undefined}>
         Deleting removes the pass and its device key here. You can move it back from
         another device you added, or get a new pass at a store.
       </p>
@@ -235,7 +235,7 @@ function DeletePassRow({ onDeleted }: { onDeleted: () => Promise<void> }) {
         </Button>
       ) : (
         <div className="mt-3 space-y-2">
-          <p className="font-semibold text-[var(--zk-critical)]">
+          <p className="font-semibold text-[var(--zk-critical)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-7" : undefined}>
             Delete the pass from this device? This can&rsquo;t be undone here.
           </p>
           <div className="flex gap-2">
@@ -275,7 +275,7 @@ function Row({ icon, title, body }: { icon: React.ReactNode; title: string; body
 function EmptyPass({ pending }: { pending: boolean }) {
   return (
     <div className="space-y-5">
-      <h1 className="text-[22px] font-extrabold tracking-tight text-[var(--zk-text)]">My pass</h1>
+      <h1 className="text-[22px] font-extrabold tracking-tight text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-8" : undefined}>My pass</h1>
 
       <Card className="flex flex-col items-center px-6 py-10 text-center">
         <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[var(--zk-sunken)]">
@@ -300,7 +300,7 @@ function EmptyPass({ pending }: { pending: boolean }) {
       </Card>
 
       {!pending ? (
-        <p className="px-1 text-[13px] leading-relaxed text-[var(--zk-text-soft)]">
+        <p className="px-1 text-[13px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-9" : undefined}>
           Already have Zik Pass on another device? Open its{" "}
           <span className="font-semibold text-[var(--zk-text)]">My pass</span> screen and use
           the transfer link to move it here.

@@ -180,7 +180,7 @@ export function AffiliateConfirmScreen({ requestId }: { requestId: string }) {
         <div className="mb-4 flex items-center justify-between">
           <span className="flex items-center gap-2">
             <ZikLogoMark className="h-7 w-7 shrink-0" />
-            <span className="text-[15px] font-extrabold tracking-tight text-[var(--zk-text)]">Zik Pass</span>
+            <span className="text-[15px] font-extrabold tracking-tight text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fadb2050857d-1" : undefined}>Zik Pass</span>
           </span>
           <span className="rounded-full bg-[var(--zk-sunken)] px-2.5 py-1 text-[11px] font-semibold text-[var(--zk-text-soft)]">
             {environmentBadgeLabel()}
@@ -189,10 +189,10 @@ export function AffiliateConfirmScreen({ requestId }: { requestId: string }) {
 
         <Card className="overflow-hidden">
           <div className="border-b border-[var(--zk-line)] p-5">
-            <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--zk-text-faint)]">
+            <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fadb2050857d-2" : undefined}>
               Age check requested by
             </p>
-            <p className="text-xs">Consent v1 · Required: age over 18 · Zik verified</p>
+            <p className="text-xs" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fadb2050857d-3" : undefined}>Consent v1 · Required: age over 18 · Zik verified</p>
             <p className="mt-1 text-[18px] font-extrabold text-[var(--zk-text)]">{clientName}</p>
             <div className="mt-4 space-y-2">
               <ShareRow label="Shared" value="Over 18 result and verification metadata" tone="share" />
@@ -215,7 +215,7 @@ export function AffiliateConfirmScreen({ requestId }: { requestId: string }) {
 
             {wallet.credential ? (
               <div className="mt-4 rounded-[var(--zk-r-md)] bg-[var(--zk-sunken)] px-3 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--zk-text-faint)]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fadb2050857d-4" : undefined}>
                   Your pass &middot; visual only
                 </p>
                 <Zignature

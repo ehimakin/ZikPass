@@ -96,13 +96,13 @@ export function HomePassOverview({ wallet, failed }: { wallet: WalletState | nul
 
         <div className="zk-verification-seal-pending-copy">
           <ZikLogoMark className="zk-verification-seal-pending-logo" />
-          <p>This device</p>
+          <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-a8c9db26cf17-1" : undefined}>This device</p>
           <h2>{title}</h2>
           <p className="sr-only">{detail}</p>
         </div>
 
         <div className="zk-verification-seal-actions">
-          <Link href={href as Route}>{action} <span aria-hidden="true">↗</span></Link>
+          <Link href={href as Route}>{action} <span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-a8c9db26cf17-2" : undefined}>↗</span></Link>
           <Link href={"/pass" as Route} aria-label={wallet?.credential ? "Device options" : "Pass on another device?"}>Devices</Link>
         </div>
       </section>

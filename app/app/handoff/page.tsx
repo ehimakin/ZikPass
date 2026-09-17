@@ -7,11 +7,11 @@ export default function NativeHandoffFallbackPage() {
     <AppShell currentPath="/">
       <main className="flex flex-1 items-center justify-center px-4 pb-16 pt-8 sm:px-6 lg:px-8">
         <section className="w-full max-w-xl rounded-[34px] border border-white/10 bg-white/[0.03] p-8 text-center sm:p-10">
-          <p className="font-mono text-xs uppercase tracking-[0.24em] text-lime/70">Native wallet</p>
-          <h1 className="mt-4 font-heading text-4xl font-semibold tracking-tight text-mist">
+          <p className="font-mono text-xs uppercase tracking-[0.24em] text-lime/70" data-local-edit={process.env.NODE_ENV === "development" ? "ve-36781634e4b7-1" : undefined}>Native wallet</p>
+          <h1 className="mt-4 font-heading text-4xl font-semibold tracking-tight text-mist" data-local-edit={process.env.NODE_ENV === "development" ? "ve-36781634e4b7-2" : undefined}>
             Open Zik Pass on this device
           </h1>
-          <p className="mt-4 text-sm leading-7 text-mist/55">
+          <p className="mt-4 text-sm leading-7 text-mist/55" data-local-edit={process.env.NODE_ENV === "development" ? "ve-36781634e4b7-3" : undefined}>
             The native app isn&rsquo;t installed yet. Install the web wallet, or continue in the browser.
           </p>
           <div className="mt-8 grid gap-3 sm:grid-cols-2">

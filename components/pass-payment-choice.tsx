@@ -128,7 +128,7 @@ export function PassPaymentChoice({
 
   if (state === "loading") {
     return (
-      <p aria-live="polite" className="text-sm font-semibold text-ink/55">
+      <p aria-live="polite" className="text-sm font-semibold text-ink/55" data-local-edit={process.env.NODE_ENV === "development" ? "ve-a0699ac2d368-1" : undefined}>
         Checking payment status…
       </p>
     );
@@ -136,7 +136,7 @@ export function PassPaymentChoice({
 
   if (state === "locked") {
     return (
-      <p aria-live="polite" className="text-sm font-semibold text-ink/55">
+      <p aria-live="polite" className="text-sm font-semibold text-ink/55" data-local-edit={process.env.NODE_ENV === "development" ? "ve-a0699ac2d368-2" : undefined}>
         Once staff have looked up your code, you&apos;ll be able to choose how to pay here.
       </p>
     );
@@ -152,7 +152,7 @@ export function PassPaymentChoice({
           className="mt-2 rounded-full border border-ink/15 bg-white px-4 py-2 text-xs font-semibold text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/40"
           onClick={() => void loadStatus()}
           type="button"
-        >
+         data-local-edit={process.env.NODE_ENV === "development" ? "ve-a0699ac2d368-3" : undefined}>
           Try again
         </button>
       </div>
@@ -173,7 +173,7 @@ export function PassPaymentChoice({
   if (state === "cash_pending" && payment) {
     return (
       <div className="w-full rounded-[20px] border border-ink/10 bg-white/76 px-5 py-4 text-left" role="status">
-        <p aria-live="polite" className="text-sm font-semibold text-ink">
+        <p aria-live="polite" className="text-sm font-semibold text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-a0699ac2d368-4" : undefined}>
           You chose to pay staff directly with cash or card.
         </p>
         <p className="mt-1 text-xs text-ink/60">
@@ -185,14 +185,14 @@ export function PassPaymentChoice({
 
   return (
     <div className="grid w-full gap-3 rounded-[20px] border border-ink/8 bg-white/76 px-5 py-4 text-left">
-      <p className="text-sm font-semibold text-ink">How would you like to pay?</p>
+      <p className="text-sm font-semibold text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-a0699ac2d368-5" : undefined}>How would you like to pay?</p>
       <div className="grid gap-2 sm:grid-cols-2">
         <button
           className="rounded-[16px] border border-ink/12 bg-white px-4 py-3 text-left text-sm font-semibold text-ink transition hover:bg-[#f7faee] disabled:opacity-55 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/40"
           disabled={state === "paying"}
           onClick={() => void selectCash()}
           type="button"
-        >
+         data-local-edit={process.env.NODE_ENV === "development" ? "ve-a0699ac2d368-6" : undefined}>
           Cash or card
           <span className="mt-1 block text-xs font-normal text-ink/55">Pay staff at the till</span>
         </button>
@@ -203,10 +203,10 @@ export function PassPaymentChoice({
           type="button"
         >
           {state === "paying" ? "Confirming…" : "Apple Pay / Google Pay"}
-          <span className="mt-1 block text-xs font-normal text-ink/55">Pay now on this phone</span>
+          <span className="mt-1 block text-xs font-normal text-ink/55" data-local-edit={process.env.NODE_ENV === "development" ? "ve-a0699ac2d368-7" : undefined}>Pay now on this phone</span>
         </button>
       </div>
-      <p className="text-xs font-semibold uppercase tracking-wide text-[#8a6116]">
+      <p className="text-xs font-semibold uppercase tracking-wide text-[#8a6116]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-a0699ac2d368-8" : undefined}>
         Demo payment only — no real card details are collected or charged.
       </p>
       {error ? (

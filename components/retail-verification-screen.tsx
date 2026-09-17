@@ -214,10 +214,10 @@ export function RetailVerificationScreen({
           <label
             htmlFor="clerk-code"
             className="text-[13px] font-bold uppercase tracking-[0.06em] text-[var(--zk-text-faint)]"
-          >
+           data-local-edit={process.env.NODE_ENV === "development" ? "ve-3d364c1d6192-1" : undefined}>
             Customer code
           </label>
-          <p className="mt-1 text-[13px] text-[var(--zk-text-soft)]">
+          <p className="mt-1 text-[13px] text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-3d364c1d6192-2" : undefined}>
             Type the six characters on the customer&rsquo;s phone, or open their QR link.
           </p>
           <input
@@ -274,7 +274,7 @@ export function RetailVerificationScreen({
             </div>
           ) : null}
 
-          <p className="mt-3 text-[14px] leading-snug text-[var(--zk-text-soft)]">
+          <p className="mt-3 text-[14px] leading-snug text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-3d364c1d6192-3" : undefined}>
             Check the customer&rsquo;s photo ID in person. Confirm only if it shows they are
             at least 18. The ID is not scanned or kept.
           </p>

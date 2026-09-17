@@ -44,13 +44,13 @@ export function VerificationSeal({ credential, detailed = false, href }: { crede
         } : undefined}
       >
         <div className="zk-verification-seal-heading">
-          <p><span>Zik</span> Pass</p>
+          <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-75e593ee0863-1" : undefined}><span>Zik</span> Pass</p>
           <span className="zk-verification-seal-status"><i />{status}</span>
         </div>
 
         <div className="zk-verification-seal-proof">
-          <strong>18+</strong>
-          <span>Age verified</span>
+          <strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-75e593ee0863-2" : undefined}>18+</strong>
+          <span data-local-edit={process.env.NODE_ENV === "development" ? "ve-75e593ee0863-3" : undefined}>Age verified</span>
         </div>
 
         <div className="zk-verification-seal-signature" aria-hidden="true">
@@ -66,7 +66,7 @@ export function VerificationSeal({ credential, detailed = false, href }: { crede
           />
         </div>
 
-        <p className="zk-verification-seal-device">Verified on this device</p>
+        <p className="zk-verification-seal-device" data-local-edit={process.env.NODE_ENV === "development" ? "ve-75e593ee0863-4" : undefined}>Verified on this device</p>
       </section>
   );
 
@@ -79,11 +79,11 @@ export function VerificationSeal({ credential, detailed = false, href }: { crede
           <div className="zk-verification-seal-drawer-clip">
             <dl className="zk-verification-seal-details">
               <div>
-                <dt>Pass ID</dt>
+                <dt data-local-edit={process.env.NODE_ENV === "development" ? "ve-75e593ee0863-5" : undefined}>Pass ID</dt>
                 <dd title={credential.payload.credential_id}>{credential.payload.credential_id}</dd>
               </div>
               <div>
-                <dt>Valid until</dt>
+                <dt data-local-edit={process.env.NODE_ENV === "development" ? "ve-75e593ee0863-6" : undefined}>Valid until</dt>
                 <dd>{formatDate(credential.payload.expires_at)}</dd>
               </div>
             </dl>

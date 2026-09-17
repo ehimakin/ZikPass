@@ -40,10 +40,10 @@ export function OperatorShell({
         <div className="mx-auto flex w-full max-w-[720px] flex-wrap items-center gap-3 px-4 py-3">
           <span className="flex items-center gap-2">
             <ZikLogoMark className="zk-logo-float h-7 w-7 shrink-0" />
-            <span className="text-[15px] font-extrabold tracking-tight text-[var(--zk-text)]">
+            <span className="text-[15px] font-extrabold tracking-tight text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d22c3571f16f-1" : undefined}>
               Zik Pass
             </span>
-            <span className="rounded-full bg-[var(--zk-sunken)] px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-[var(--zk-text-soft)]">
+            <span className="rounded-full bg-[var(--zk-sunken)] px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d22c3571f16f-2" : undefined}>
               Staff
             </span>
           </span>
@@ -52,7 +52,7 @@ export function OperatorShell({
           </span>
           {storeId && onStoreChange ? (
             <label className="flex w-full items-center gap-2 text-[13px]">
-              <span className="text-[var(--zk-text-soft)]">This terminal:</span>
+              <span className="text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d22c3571f16f-3" : undefined}>This terminal:</span>
               <select
                 value={storeId}
                 onChange={(e) => onStoreChange(e.target.value)}
@@ -68,7 +68,7 @@ export function OperatorShell({
           ) : boundStore ? (
             <div className="flex w-full items-center gap-3 rounded-[var(--zk-r-sm)] bg-[var(--zk-sunken)] px-3 py-2 text-[12px]">
               <span className="min-w-0 flex-1">
-                <span className="block text-[10px] font-bold uppercase tracking-wide text-[var(--zk-text-faint)]">This terminal</span>
+                <span className="block text-[10px] font-bold uppercase tracking-wide text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d22c3571f16f-4" : undefined}>This terminal</span>
                 <span className="block truncate font-bold text-[var(--zk-text)]">{boundStore.name}</span>
               </span>
               <Link href="/store?change=1" className="shrink-0 font-semibold text-[var(--zk-text-soft)] underline underline-offset-2">

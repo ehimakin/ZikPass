@@ -10,6 +10,59 @@ import { HomePassOverview } from "@/components/customer/home-pass-overview";
 import type { WalletState } from "@/lib/shared/types";
 import heroImage from "@/public/hero-zikpass-warm.png";
 
+const HERO_SLIDES = [
+  {
+    word: "",
+    support: "Online 18+ Verification ● Secure Sensitive Docs ● Own and control what sites see about you...",
+  },
+  {
+    word: "Pass",
+    support: "Prove you're an adult without surrendering a digital scan of your face. One physical check, one centralised pass reusable everywhere.",
+  },
+  {
+    word: "Vault",
+    support: "Keep your verified documents encrypted on your own device, never on our servers.",
+  },
+  {
+    word: "ID",
+    support: "Forget forgetting ID! Use your mobile Zik ID at multiple venues, gigs and vendors.",
+  },
+] as const;
+
+const HERO_ROULETTE_TRANSITION_MS = 490;
+
+/**
+ * Vertically wipes between words in place, odometer-style, for the hero header.
+ * A duplicate of the first word is appended so the loop can keep wiping in one
+ * direction; the caller snaps back to index 0 without a transition once that
+ * duplicate row is reached.
+ */
+function HeroRouletteWord({
+  words,
+  rouletteIndex,
+  transitionEnabled,
+}: {
+  words: readonly string[];
+  rouletteIndex: number;
+  transitionEnabled: boolean;
+}) {
+  const loopWords = [...words, words[0]];
+  return (
+    <span className="zk-roulette">
+      <span
+        className="zk-roulette-track"
+        style={{ transform: `translateY(-${rouletteIndex}em)`, transition: transitionEnabled ? undefined : "none" }}
+      >
+        {loopWords.map((word, index) => (
+          <span className="zk-roulette-row" key={index} aria-hidden={index === rouletteIndex ? undefined : true}>
+            {word}
+          </span>
+        ))}
+      </span>
+    </span>
+  );
+}
+
 /** The lime-green phone artwork shared by fixed customer-page heroes. */
 export function PhoneHero() {
   return (
@@ -105,6 +158,84 @@ export function HomeScreen({ price }: { price: string }) {
   const privacyRef = useRef<HTMLElement>(null);
   const hasPass = Boolean(wallet?.credential);
 
+  const [rouletteIndex, setRouletteIndex] = useState(0);
+  const [rouletteTransition, setRouletteTransition] = useState(true);
+  const [heroAutoplay, setHeroAutoplay] = useState(true);
+  const [heroManualNonce, setHeroManualNonce] = useState(0);
+  const heroSlide = rouletteIndex % HERO_SLIDES.length;
+  const isVaultSlide = HERO_SLIDES[heroSlide].word === "Vault";
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setHeroAutoplay(!media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (!heroAutoplay) return;
+    let slideTimer: ReturnType<typeof setTimeout> | undefined;
+    let idleTimer: ReturnType<typeof setTimeout> | undefined;
+    let remaining = 8000;
+    let deadline = 0;
+    let disposed = false;
+    const resume = () => {
+      if (disposed || document.hidden) return;
+      deadline = performance.now() + remaining;
+      slideTimer = setTimeout(() => {
+        slideTimer = undefined;
+        setRouletteIndex((current) => current + 1);
+        remaining = 8000;
+        resume();
+      }, remaining);
+    };
+    const pauseUntilIdle = () => {
+      clearTimeout(idleTimer);
+      if (slideTimer !== undefined) {
+        remaining = Math.max(0, deadline - performance.now());
+        clearTimeout(slideTimer);
+        slideTimer = undefined;
+      }
+      if (!document.hidden) idleTimer = setTimeout(resume, 750);
+    };
+    window.addEventListener("mousemove", pauseUntilIdle, { passive: true });
+    window.addEventListener("scroll", pauseUntilIdle, { passive: true, capture: true });
+    window.addEventListener("wheel", pauseUntilIdle, { passive: true });
+    document.addEventListener("visibilitychange", pauseUntilIdle);
+    pauseUntilIdle();
+    return () => {
+      disposed = true;
+      clearTimeout(slideTimer);
+      clearTimeout(idleTimer);
+      window.removeEventListener("mousemove", pauseUntilIdle);
+      window.removeEventListener("scroll", pauseUntilIdle, true);
+      window.removeEventListener("wheel", pauseUntilIdle);
+      document.removeEventListener("visibilitychange", pauseUntilIdle);
+    };
+  }, [heroAutoplay, heroManualNonce]);
+
+  useEffect(() => {
+    if (rouletteIndex !== HERO_SLIDES.length) return;
+    const timer = setTimeout(() => {
+      setRouletteTransition(false);
+      setRouletteIndex(0);
+    }, HERO_ROULETTE_TRANSITION_MS);
+    return () => clearTimeout(timer);
+  }, [rouletteIndex]);
+
+  useEffect(() => {
+    if (rouletteTransition) return;
+    const raf = requestAnimationFrame(() => setRouletteTransition(true));
+    return () => cancelAnimationFrame(raf);
+  }, [rouletteTransition]);
+
+  const goToHeroSlide = (index: number) => {
+    setRouletteTransition(true);
+    setRouletteIndex(index);
+    setHeroManualNonce((n) => n + 1);
+  };
+
   useEffect(() => {
     let disposed = false;
     const refresh = () => loadWalletState()
@@ -130,11 +261,35 @@ export function HomeScreen({ price }: { price: string }) {
       <section className="zk-scene zk-scene-hero" aria-labelledby="zik-hero-title">
         <div className="zk-scene-inner zk-hero-copy">
           <p className="zk-scene-kicker" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-1" : undefined}>{"Privacy-prioritising ID solutions"}</p>
-          <h1 id="zik-hero-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-2" : undefined}>{"Zik "}<br/><em>{"*zero knowledge"}</em></h1>
-          <p className="zk-hero-support" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-3" : undefined}>{"Online 18+ Verification ● Secure Sensitive Docs ● Own and control what sites see about you..."}</p>
+          <h1 id="zik-hero-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-2" : undefined}>{"Zik "}<HeroRouletteWord words={HERO_SLIDES.map((slide) => slide.word)} rouletteIndex={rouletteIndex} transitionEnabled={rouletteTransition} /><br/><em data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-2" : undefined}>{"*zero knowledge"}</em></h1>
+          <div className="zk-hero-support-stack">
+            {HERO_SLIDES.map((slide, index) => (
+              <p
+                key={slide.word || "blank"}
+                className={`zk-hero-support ${index === heroSlide ? "is-active" : ""}`}
+                aria-hidden={index === heroSlide ? undefined : true}
+                data-local-edit={index === 0 && process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-3" : undefined}
+              >
+                {slide.support}
+              </p>
+            ))}
+          </div>
           <div className="zk-hero-actions">
-            <Link className="zk-editorial-cta zk-editorial-cta--primary" href={(hasPass ? "/pass" : "/find") as Route}>{hasPass ? "Open my pass" : <>Get Zik Pass <span>· {price}</span></>}</Link>
-            <a className="zk-editorial-cta zk-editorial-cta--text" href="#how-it-works" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-4" : undefined}>How it works <span aria-hidden="true">→</span></a>
+            <Link className="zk-editorial-cta zk-editorial-cta--primary" href={(isVaultSlide ? "/vault" : hasPass ? "/pass" : "/find") as Route}>{isVaultSlide ? (hasPass ? "Go to Vault" : "Get a Vault") : hasPass ? "Open my pass" : <>Get Zik Pass <span>· {price}</span></>}</Link>
+            <Link className="zk-editorial-cta zk-editorial-cta--text" href={(isVaultSlide ? "/vault/how-it-works" : "#how-it-works") as Route}>{isVaultSlide ? "How Vault works" : "How it works"} <span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-4" : undefined}>→</span></Link>
+          </div>
+          <div className="zk-hero-dots" role="tablist" aria-label="Hero slides">
+            {HERO_SLIDES.map((slide, index) => (
+              <button
+                key={slide.word || "blank"}
+                type="button"
+                role="tab"
+                aria-selected={index === heroSlide}
+                aria-label={`Show slide ${index + 1}`}
+                className={`zk-hero-dot ${index === heroSlide ? "is-active" : ""}`}
+                onClick={() => goToHeroSlide(index)}
+              />
+            ))}
           </div>
         </div>
         <p className="zk-interaction-note" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-5" : undefined}>The interface responds only when you do.</p>
@@ -142,7 +297,7 @@ export function HomeScreen({ price }: { price: string }) {
 
       <section ref={privacyRef} id="how-it-works" className={`zk-scene zk-scene-privacy ${privacyRevealed ? "is-revealed" : ""}`} aria-labelledby="privacy-title">
         <div className="zk-scene-inner zk-privacy-layout">
-          <div><p className="zk-scene-kicker" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-6" : undefined}>{"Why do sites ask for your whole id..."}</p><h2 id="privacy-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-7" : undefined}>{"When they only need"}<br/>{"your age?"}</h2></div>
+          <div><p className="zk-scene-kicker" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-6" : undefined}>{"Why do sites ask for your name..."}</p><h2 id="privacy-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-7" : undefined}>{"When they only need"}<br/>{"your age?"}</h2></div>
           <div className="zk-identity-stack" aria-label="Identity details Zik does not need to share">
             {["Name", "Date of birth", "Passport", "Selfie"].map((label, index)=><span key={label} style={{"--token-index":index} as CSSProperties}>{label}</span>)}
           </div>
@@ -153,7 +308,7 @@ export function HomeScreen({ price }: { price: string }) {
       <section className="zk-scene zk-scene-physical" aria-labelledby="physical-title">
         <Image src={heroImage} alt="Zik Pass on a phone after real-world verification" className="zk-scene-device-image" sizes="100vw" priority />
         <div className="zk-scene-inner zk-physical-copy">
-          <p className="zk-scene-kicker" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-11" : undefined}>{"Ok, ok, get to the gimmick already!"}</p>
+          <p className="zk-scene-kicker" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-11" : undefined}>{"Ok, GTTP already!"}</p>
           <h2 id="physical-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-12" : undefined} style={{"fontSize":66}}>{"Zik verifies your age once, physically. In the real world."}<br/><em>{"By keeping your identity offline, we help you stay anonymous online."}</em></h2>
           <ol className="zk-editorial-steps"><li><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-13" : undefined}>01</span><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-14" : undefined}>Show ID once<br/><small>Checked by a participating store. Not retained.</small></p></li><li><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-15" : undefined}>02</span><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-16" : undefined}>Bind your device<br/><small>Your private holder key stays with you.</small></p></li><li><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-17" : undefined}>03</span><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-18" : undefined}>Use it for a year<br/><small>Sites receive the answer, not your evidence.</small></p></li></ol>
         </div>
