@@ -1,5 +1,12 @@
 import clsx from "clsx";
 
+/** Original supplied artwork, cropped by its viewBox without altering the file. */
+export function ZikGlyph() {
+  return <svg x="29" y="22" width="42" height="56" viewBox="151 20 639 843" preserveAspectRatio="xMidYMid meet">
+    <image href="/Z.png" width="888" height="888" />
+  </svg>;
+}
+
 export function ZikLogoMark({
   className,
   tone = "dark"
@@ -24,13 +31,7 @@ export function ZikLogoMark({
         stroke="currentColor"
         strokeWidth="6"
       />
-      <path
-        d="M50 23V77M46 34L30 50M70 50L54 66"
-        stroke="#d3bb53"
-        strokeWidth="6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <ZikGlyph />
     </svg>
   );
 }
@@ -68,8 +69,8 @@ export function ZikLogoLockup({
         className={clsx(
           "inline-flex items-center justify-center border",
           stacked
-            ? "h-[min(70vw,16rem)] w-[min(70vw,16rem)] rounded-[4rem]"
-            : "h-11 w-11 rounded-2xl",
+            ? "h-[min(70vw,16rem)] w-[min(70vw,16rem)] rounded-none"
+            : "h-11 w-11 rounded-none",
           subdued ? "border-ink/10 bg-white/80" : "border-white/60 bg-white/82"
         )}
       >

@@ -23,7 +23,7 @@ export default function AffiliatesPage() {
             <li data-local-edit={process.env.NODE_ENV === "development" ? "ve-3297fff285d2-7" : undefined}><strong className="text-[var(--zk-text)]">Test the complete journey.</strong> Walk through successful checks, cancellations, expired passes and retries before discussing launch.</li>
           </ol>
         </Card>
-        <section className="rounded-[var(--zk-r-lg)] bg-ink p-5 text-[var(--zk-text-on-ink)]">
+        <section className="rounded-none bg-ink p-5 text-[var(--zk-text-on-ink)]">
           <h2 className="text-xl font-bold tracking-tight" data-local-edit={process.env.NODE_ENV === "development" ? "ve-3297fff285d2-8" : undefined}>See the customer experience</h2>
           <p className="mb-5 mt-3 text-sm leading-relaxed" data-local-edit={process.env.NODE_ENV === "development" ? "ve-3297fff285d2-9" : undefined}>Our affiliate demo shows how a site requests an age check and how the customer approves it with Zik Pass.</p>
           <ButtonLink href="/affiliate-demo" variant="secondary">Try the affiliate demo</ButtonLink>

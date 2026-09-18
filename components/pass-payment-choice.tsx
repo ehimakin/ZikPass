@@ -144,7 +144,7 @@ export function PassPaymentChoice({
 
   if (state === "error") {
     return (
-      <div className="w-full rounded-[20px] border border-[#d27a86]/30 bg-[#fdf3f4] px-5 py-4 text-left" role="alert">
+      <div className="w-full rounded-none border border-[#d27a86]/30 bg-[#fdf3f4] px-5 py-4 text-left" role="alert">
         <p aria-live="assertive" className="text-sm font-semibold text-ink">
           {error}
         </p>
@@ -161,7 +161,7 @@ export function PassPaymentChoice({
 
   if (state === "paid" && payment) {
     return (
-      <div className="w-full rounded-[20px] border border-[#69b889]/30 bg-[#eef8e8] px-5 py-4 text-left" role="status">
+      <div className="w-full rounded-none border border-[#69b889]/30 bg-[#eef8e8] px-5 py-4 text-left" role="status">
         <p className="text-sm font-semibold text-ink">
           Paid via {METHOD_LABEL[payment.method] ?? payment.method}
         </p>
@@ -172,7 +172,7 @@ export function PassPaymentChoice({
 
   if (state === "cash_pending" && payment) {
     return (
-      <div className="w-full rounded-[20px] border border-ink/10 bg-white/76 px-5 py-4 text-left" role="status">
+      <div className="w-full rounded-none border border-ink/10 bg-white/76 px-5 py-4 text-left" role="status">
         <p aria-live="polite" className="text-sm font-semibold text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-a0699ac2d368-4" : undefined}>
           You chose to pay staff directly with cash or card.
         </p>
@@ -184,7 +184,7 @@ export function PassPaymentChoice({
   }
 
   return (
-    <div className="grid w-full gap-3 rounded-[20px] border border-ink/8 bg-white/76 px-5 py-4 text-left">
+    <div className="grid w-full gap-3 rounded-none border border-ink/8 bg-white/76 px-5 py-4 text-left">
       <p className="text-sm font-semibold text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-a0699ac2d368-5" : undefined}>How would you like to pay?</p>
       <div className="grid gap-2 sm:grid-cols-2">
         <button

@@ -90,12 +90,12 @@
 .demoHeader h1:focus { outline: none; }
 .demoHeader .eyebrow { margin-bottom: 16px; }
 .demoNotice { max-width: 1160px; margin: 26px auto; font-size: 13px; line-height: 1.7; color: #626258; }
-.emptyVault { max-width: 1160px; margin: 36px auto; padding: 32px 20px; text-align: center; background: #faf8ed; border-radius: 20px; }
+.emptyVault { max-width: 1160px; margin: 36px auto; padding: 32px 20px; text-align: center; background: #faf8ed; border-radius: 0; }
 .addDocumentButton { display: grid; place-items: center; margin: 0 auto 16px; width: 64px; height: 64px; border-radius: 50%; background: var(--vault-gold); font-size: 32px; }
 .emptyVault h2 { font-size: 24px; font-weight: 700; letter-spacing: -.03em; }
 .emptyVault p { margin-top: 12px; font-size: 14px; line-height: 1.6; }
 .proofGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; max-width: 1160px; margin: auto; }
-.proofCard { border: 1px solid #e4dfc8; border-radius: 16px; padding: 24px; }
+.proofCard { border: 1px solid #e4dfc8; border-radius: 0; padding: 24px; }
 .proofLabel { font-size: 10px; letter-spacing: .1em; font-weight: 800; color: #65604c; }
 .proofCard h3 { margin-top: 22px; font-size: 21px; font-weight: 700; }
 .proofCard p { min-height: 54px; margin-block: 10px 22px; font-size: 14px; color: #626258; }
@@ -113,8 +113,8 @@
 .searchHeader h2 { font-size: clamp(26px, 5vw, 36px); font-weight: 800; letter-spacing: -.045em; line-height: 1.1; }
 .searchClose { flex: 0 0 44px; width: 44px; height: 44px; border-radius: 50%; background: #faf8ed; font-size: 26px; }
 .searchIntro { margin-top: 20px; font-size: 14px; line-height: 1.65; }
-.searchPreview { margin-top: 16px; padding: 14px; background: #faf8ed; border-radius: 10px; font-size: 12px; line-height: 1.6; }
-.directDocumentChoice { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 20px; border: 1px solid #e4dfc8; border-radius: 12px; padding: 14px; }
+.searchPreview { margin-top: 16px; padding: 14px; background: #faf8ed; border-radius: 0; font-size: 12px; line-height: 1.6; }
+.directDocumentChoice { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 20px; border: 1px solid #e4dfc8; border-radius: 0; padding: 14px; }
 .directDocumentChoice strong { display: block; font-size: 14px; }
 .directDocumentChoice p { margin-top: 4px; color: #626258; font-size: 12px; line-height: 1.45; }
 .directDocumentButton { display: inline-flex; min-height: 42px; flex: 0 0 auto; cursor: pointer; align-items: center; justify-content: center; border-radius: 999px; background: #16202f; padding: 0 18px; color: white; font-size: 13px; font-weight: 700; }
@@ -136,7 +136,7 @@
 .searchResultStatus { margin-top: 24px; font-size: 14px; }
 .searchResultStatus h3 { font-weight: 800; margin-bottom: 8px; }
 .searchResults { display: grid; gap: 10px; margin-top: 20px; list-style: none; padding: 0; }
-.searchResults li { border: 1px solid #e4dfc8; padding: 14px; border-radius: 10px; overflow-wrap: anywhere; }
+.searchResults li { border: 1px solid #e4dfc8; padding: 14px; border-radius: 0; overflow-wrap: anywhere; }
 .searchResults span { display: block; font-size: 12px; color: #626258; margin-top: 5px; }
 @media (max-width: 400px) { .searchOptions { grid-template-columns: minmax(0, 1fr); } .searchActions > button { width: 100%; } .directDocumentChoice { align-items: stretch; flex-direction: column; } }
 
@@ -168,7 +168,7 @@
 @media (max-width: 760px) { .vaultWorkspace { grid-template-columns: minmax(0, 1fr); } }
 
 .documentColumn { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; gap: 24px; min-width: 0; }
-.personaExplainer { padding: 28px; background: #faf8ed; border-radius: 20px; }
+.personaExplainer { padding: 28px; background: #faf8ed; border-radius: 0; }
 .personaExplainer h2 { font-size: 24px; font-weight: 700; letter-spacing: -.03em; }
 .personaExplainer p { margin-top: 16px; font-size: 14px; line-height: 1.7; color: #45483e; }
 .personaConcept { display: block; margin-top: 20px; padding-top: 16px; border-top: 1px solid #e4dfc8; color: #626258; font-size: 11px; line-height: 1.6; }
@@ -196,19 +196,19 @@
 .workspaceAction strong, .workspaceAction small { display: block; }
 .workspaceAction strong { font-size: 16px; }
 .workspaceAction small { margin-top: 5px; color: #626258; font-size: 12px; line-height: 1.45; }
-.designationForm { max-width: 1160px; margin: 18px auto 0; border: 1px solid #e4dfc8; border-radius: 16px; padding: 18px; }
+.designationForm { max-width: 1160px; margin: 18px auto 0; border: 1px solid #e4dfc8; border-radius: 0; padding: 18px; }
 .designationForm label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 800; }
 .designationForm > div { display: flex; gap: 10px; }
 .designationForm input { min-width: 0; flex: 1; border: 1px solid #777362; border-radius: 8px; padding: 12px; font-size: 16px; }
 .workspaceGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; max-width: 1160px; margin: 18px auto 0; }
-.workspacePanel { min-width: 0; border: 1px solid #e4dfc8; border-radius: 16px; padding: 22px; }
+.workspacePanel { min-width: 0; border: 1px solid #e4dfc8; border-radius: 0; padding: 22px; }
 .workspacePanelHeader { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
 .workspacePanelHeader h2 { font-size: 20px; font-weight: 800; letter-spacing: -.03em; }
 .workspacePanel dl > div { border-top: 1px solid #eee9d3; padding: 12px 0; }
 .workspacePanel dt { color: #626258; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; }
 .workspacePanel dd { margin-top: 5px; overflow-wrap: anywhere; font-size: 14px; }
 .workspaceList { display: grid; gap: 8px; }
-.workspaceList li { border-radius: 9px; background: #faf8ed; padding: 12px; overflow-wrap: anywhere; font-size: 14px; }
+.workspaceList li { border-radius: 0; background: #faf8ed; padding: 12px; overflow-wrap: anywhere; font-size: 14px; }
 .workspaceEmpty { color: #626258; font-size: 14px; line-height: 1.6; }
 @media (max-width: 680px) { .workspaceActions, .workspaceGrid { grid-template-columns: minmax(0, 1fr); } .designationForm > div { align-items: stretch; flex-direction: column; } }
 

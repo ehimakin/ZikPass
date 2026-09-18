@@ -81,7 +81,7 @@ export function VaultSignup({ onCreated }: { onCreated: (profile: VaultProfileV1
   }
 
   return <>
-    <div className="mt-7 rounded-2xl border border-[#e4dfc8] bg-[#faf8ed] p-5 sm:p-6">
+    <div className="mt-7 rounded-none border border-[#e4dfc8] bg-[#faf8ed] p-5 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-[360px]">
           <p className="text-[12px] font-extrabold tracking-[0.16em] text-[#65604c]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-1" : undefined}>NO VAULT ON THIS DEVICE</p>
@@ -105,9 +105,9 @@ function Welcome({ onContinue }: { onContinue: () => void }) {
   return <div>
     <p className="text-[14px] leading-6 text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-4" : undefined}>Your Vault keeps the details you add encrypted in this browser. Zik does not receive your profile or passphrase.</p>
     <ul className="mt-4 space-y-3 text-[14px]">
-      <li className="rounded-xl bg-[var(--zk-sunken)] p-3" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-5" : undefined}><strong>Private by design.</strong> Your encrypted Vault stays on this device.</li>
-      <li className="rounded-xl bg-[var(--zk-sunken)] p-3" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-6" : undefined}><strong>You hold the key.</strong> Your passphrase cannot be recovered by Zik.</li>
-      <li className="rounded-xl bg-[var(--zk-sunken)] p-3" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-7" : undefined}><strong>Choose what leaves.</strong> Nothing is shared without your approval.</li>
+      <li className="rounded-none bg-[var(--zk-sunken)] p-3" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-5" : undefined}><strong>Private by design.</strong> Your encrypted Vault stays on this device.</li>
+      <li className="rounded-none bg-[var(--zk-sunken)] p-3" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-6" : undefined}><strong>You hold the key.</strong> Your passphrase cannot be recovered by Zik.</li>
+      <li className="rounded-none bg-[var(--zk-sunken)] p-3" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-7" : undefined}><strong>Choose what leaves.</strong> Nothing is shared without your approval.</li>
     </ul>
     <Button type="button" size="lg" className="mt-5" onClick={onContinue}>Continue to payment</Button>
   </div>;
@@ -115,7 +115,7 @@ function Welcome({ onContinue }: { onContinue: () => void }) {
 
 function Payment({ paying, onBack, onPay }: { paying: boolean; onBack: () => void; onPay: () => void }) {
   return <div>
-    <div className="flex items-start justify-between gap-4 rounded-xl bg-[var(--zk-sunken)] p-4">
+    <div className="flex items-start justify-between gap-4 rounded-none bg-[var(--zk-sunken)] p-4">
       <div><p className="font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-8" : undefined}>Zik Vault</p><p className="mt-1 text-[13px] text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-9" : undefined}>Planned monthly membership</p></div>
       <p className="text-[18px] font-extrabold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-10" : undefined}>£0.99<span className="text-[12px] font-medium">/month</span></p>
     </div>

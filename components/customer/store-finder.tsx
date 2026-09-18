@@ -119,7 +119,7 @@ export function StoreFinder({ selectMode = false }: { selectMode?: boolean }) {
         <label htmlFor="store-search" className="sr-only" data-local-edit={process.env.NODE_ENV === "development" ? "ve-4a0f3c6e1731-1" : undefined}>
           Search by postcode or area
         </label>
-        <div className="flex items-center gap-2 rounded-[var(--zk-r-md)] border border-[var(--zk-line-strong)] bg-[var(--zk-card)] px-3.5 focus-within:border-[var(--zk-focus)]">
+        <div className="flex items-center gap-2 rounded-none border border-[var(--zk-line-strong)] bg-[var(--zk-card)] px-3.5 focus-within:border-[var(--zk-focus)]">
           <SearchIcon className="h-[18px] w-[18px] text-[var(--zk-text-faint)]" />
           <input
             id="store-search"
@@ -182,16 +182,11 @@ export function StoreFinder({ selectMode = false }: { selectMode?: boolean }) {
                   className={
                     "flex h-7 w-7 items-center justify-center rounded-full border-2 transition " +
                     (selectedId === store.id
-                      ? "border-ink bg-[var(--zk-accent)] scale-110"
+                      ? "border-[#d3bb53] bg-ink scale-110"
                       : "border-[var(--zk-card)] bg-ink")
                   }
                 >
-                  <PinIcon
-                    className={
-                      "h-4 w-4 " +
-                      (selectedId === store.id ? "text-ink" : "text-[var(--zk-accent)]")
-                    }
-                  />
+                  <PinIcon className="h-4 w-4 text-[#d3bb53]" />
                 </span>
               </button>
             );

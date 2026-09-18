@@ -53,7 +53,7 @@ export function StoreLogin({ nextPath = "/verify" }: { nextPath?: string }) {
           </span>
         </header>
 
-        <section className="overflow-hidden rounded-[28px] border border-[var(--zk-line)] bg-[var(--zk-card)] shadow-[var(--zk-shadow-card)]">
+        <section className="overflow-hidden rounded-none border border-[var(--zk-line)] bg-[var(--zk-card)] shadow-[var(--zk-shadow-card)]">
           <div className="bg-[var(--zk-ink-surface)] px-6 py-7 text-[var(--zk-text-on-ink)] sm:px-8">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#d7f171]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-782b43252e3b-2" : undefined}>Clerk access</p>
             <h1 className="mt-3 text-[30px] font-extrabold leading-tight tracking-[-0.035em]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-782b43252e3b-3" : undefined}>Set up this store terminal.</h1>
@@ -98,7 +98,7 @@ export function StoreLogin({ nextPath = "/verify" }: { nextPath?: string }) {
               </span>
             </label>
 
-            <div className="rounded-[14px] bg-[var(--zk-sunken)] p-4">
+            <div className="rounded-none bg-[var(--zk-sunken)] p-4">
               <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-782b43252e3b-6" : undefined}>Signing in to</p>
               <p className="mt-1 text-[14px] font-bold">{selectedStore.name}</p>
               <p className="mt-1 text-[12px] text-[var(--zk-text-soft)]">{selectedStore.addressLine}, {selectedStore.postcode}</p>

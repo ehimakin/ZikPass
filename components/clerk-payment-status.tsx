@@ -107,7 +107,7 @@ export function ClerkPaymentStatus({
         : "No payment yet";
 
   return (
-    <div className="rounded-[var(--zk-r-md)] border border-[var(--zk-line)] bg-[var(--zk-sunken)] px-3.5 py-3">
+    <div className="rounded-none border border-[var(--zk-line)] bg-[var(--zk-sunken)] px-3.5 py-3">
       <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ac9855083888-2" : undefined}>
         Payment
       </p>

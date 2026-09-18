@@ -131,7 +131,7 @@ export function ExtendPassPanel({ enrollmentId }: { enrollmentId: string }) {
 
   if (state.step === "loading") {
     return (
-      <div aria-live="polite" className="rounded-[18px] bg-white px-4 py-3 text-sm text-ink/68">
+      <div aria-live="polite" className="rounded-none bg-white px-4 py-3 text-sm text-ink/68">
         Checking your devices…
       </div>
     );
@@ -161,13 +161,13 @@ export function ExtendPassPanel({ enrollmentId }: { enrollmentId: string }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img
             alt="Scan to add Zik Pass to a new device"
-            className="mx-auto h-auto w-56 rounded-[18px] bg-white p-2"
+            className="mx-auto h-auto w-56 rounded-none bg-white p-2"
             src={state.qrDataUrl}
           />
         ) : (
           <p role="status" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b03a7fea95b7-3" : undefined}>Preparing the code…</p>
         )}
-        <div className="flex flex-wrap items-center gap-2 rounded-[16px] border border-ink/10 bg-white px-3 py-2">
+        <div className="flex flex-wrap items-center gap-2 rounded-none border border-ink/10 bg-white px-3 py-2">
           <code className="flex-1 truncate text-xs text-ink/72">{state.url}</code>
         </div>
         <button
@@ -193,7 +193,7 @@ export function ExtendPassPanel({ enrollmentId }: { enrollmentId: string }) {
             ? `Payment ${payment.payment_id} did not go through. No device was added and nothing was charged twice.`
             : `Payment ${payment.payment_id} — ${(payment.amount_minor / 100).toFixed(2)} ${payment.currency}, awaiting confirmation.`}
         </p>
-        <p className="rounded-[16px] bg-[#fff7e6] px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[#8a6116]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b03a7fea95b7-6" : undefined}>
+        <p className="rounded-none bg-[#fff7e6] px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[#8a6116]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b03a7fea95b7-6" : undefined}>
           Demo payment only — no real card details are collected or charged.
         </p>
         <div className="flex flex-wrap gap-3">
@@ -229,7 +229,7 @@ export function ExtendPassPanel({ enrollmentId }: { enrollmentId: string }) {
         This adds an authorised device to your existing pass — it does not delete or move the pass off this
         device.
       </p>
-      <p aria-live="polite" className="rounded-[16px] bg-[#f7faee] px-4 py-3 text-sm font-semibold text-ink">
+      <p aria-live="polite" className="rounded-none bg-[#f7faee] px-4 py-3 text-sm font-semibold text-ink">
         {bindings.length} of {deviceLimit} included devices linked
         {hasUnusedEntitlement ? " (plus one paid extension ready to use)" : ""}.
       </p>

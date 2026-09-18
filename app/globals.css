@@ -1078,3 +1078,11 @@ pre {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* The gold logo mark and diamond chevron invite exploration below the hero. */
+.zk-hero-scroll-cue { position: absolute; bottom: 8px; left: 50%; z-index: 3; display: grid; place-items: center; width: 158.4px; height: 86.4px; transform: translateX(-50%); color: #d3bb53; border-radius: 999px; }
+.zk-hero-scroll-cue svg { animation: zk-scroll-cue-hover 2.8s ease-in-out infinite; filter: drop-shadow(0 1px 2px rgb(90 68 8 / 16%)); }
+.zk-hero-scroll-cue:hover { color: #b89a35; }
+.zk-hero-scroll-cue:focus-visible { outline: 2px solid #d3bb53; outline-offset: 3px; }
+@keyframes zk-scroll-cue-hover { 0%, 100% { transform: translateY(-3px); } 50% { transform: translateY(3px); } }
+@media (prefers-reduced-motion: reduce) { .zk-hero-scroll-cue svg { animation: none; } }

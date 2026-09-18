@@ -8,6 +8,7 @@ import { loadWalletState } from "@/lib/client/wallet-client";
 import { ProductFamily } from "@/components/customer/product-family";
 import { HomePassOverview } from "@/components/customer/home-pass-overview";
 import type { WalletState } from "@/lib/shared/types";
+import { ZikGlyph } from "@/components/zik-logo";
 import heroImage from "@/public/hero-zikpass-warm.png";
 
 const HERO_SLIDES = [
@@ -292,10 +293,24 @@ export function HomeScreen({ price }: { price: string }) {
             ))}
           </div>
         </div>
+        <a href="#how-it-works" className="zk-hero-scroll-cue" aria-label="Explore more about Zik" onClick={event => {
+          event.preventDefault();
+          const section = privacyRef.current;
+          if (!section) return;
+          section.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+          section.focus({ preventScroll: true });
+        }}>
+          <svg viewBox="0 0 100 100" width="79.2" height="79.2" fill="none" aria-hidden="true" focusable="false">
+            <g stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
+              <ZikGlyph />
+              <path d="M30 75.25L40.1 85.35Q50 95.25 59.9 85.35L70 75.25" />
+            </g>
+          </svg>
+        </a>
         <p className="zk-interaction-note" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-5" : undefined}>The interface responds only when you do.</p>
       </section>
 
-      <section ref={privacyRef} id="how-it-works" className={`zk-scene zk-scene-privacy ${privacyRevealed ? "is-revealed" : ""}`} aria-labelledby="privacy-title">
+      <section ref={privacyRef} id="how-it-works" tabIndex={-1} className={`zk-scene zk-scene-privacy ${privacyRevealed ? "is-revealed" : ""}`} aria-labelledby="privacy-title">
         <div className="zk-scene-inner zk-privacy-layout">
           <div><p className="zk-scene-kicker" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-6" : undefined}>{"Why do sites ask for your name..."}</p><h2 id="privacy-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-7" : undefined}>{"When they only need"}<br/>{"your age?"}</h2></div>
           <div className="zk-identity-stack" aria-label="Identity details Zik does not need to share">

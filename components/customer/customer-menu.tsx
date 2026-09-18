@@ -68,10 +68,10 @@ export function CustomerMenu({ items, pathname }: {
         data-tone={hovered ?? "idle"}
       >
         <div className="zk-menu-header">
-          <div className="zk-menu-brand">
+          <Link href="/home" onClick={close} aria-label="Zik home" className="zk-menu-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--zk-focus)]">
             <ZikLogoMark className="h-8 w-8 shrink-0" />
             <h2 id="customer-menu-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-8319931b3b11-1" : undefined}>Zik</h2>
-          </div>
+          </Link>
           <button type="button" onClick={close} aria-label="Close menu"
             className="zk-menu-close">
             <span data-local-edit={process.env.NODE_ENV === "development" ? "ve-8319931b3b11-2" : undefined}>Close</span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
@@ -88,7 +88,7 @@ export function CustomerMenu({ items, pathname }: {
         </nav>
         <div className="zk-menu-footer">
           <div className="zk-menu-utility">
-            <Link href="/pass" onClick={close}>My pass</Link>
+            <Link href="/wallet" onClick={close}>Wallet</Link>
             <Link href="/vault" onClick={close} aria-current={pathname === "/vault" ? "page" : undefined}>Vault</Link>
             <Link href="/id" onClick={close} aria-current={pathname === "/id" ? "page" : undefined}>Zik ID</Link>
             <Link href={"/ecosystem" as Route} onClick={close} aria-current={pathname === "/ecosystem" ? "page" : undefined}>The Zik ecosystem</Link>

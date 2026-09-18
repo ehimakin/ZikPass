@@ -118,7 +118,7 @@ export function AppShell({
           <div className="flex min-h-screen items-start justify-center px-4 pb-4 pt-[210px] sm:px-6 sm:pb-6 sm:pt-[210px]">
             <div
               className={clsx(
-                "mt-[40px] w-full max-w-sm rounded-[28px] p-2",
+                "mt-[40px] w-full max-w-sm rounded-none p-2",
                 showHeroBackground
                   ? "border border-white/10 bg-white/[0.03]"
                   : "border border-white/70 bg-white/96 shadow-[0_30px_90px_rgba(14,23,38,0.22)]"

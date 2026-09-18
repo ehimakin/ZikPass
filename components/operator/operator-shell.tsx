@@ -66,7 +66,7 @@ export function OperatorShell({
               </select>
             </label>
           ) : boundStore ? (
-            <div className="flex w-full items-center gap-3 rounded-[var(--zk-r-sm)] bg-[var(--zk-sunken)] px-3 py-2 text-[12px]">
+            <div className="flex w-full items-center gap-3 rounded-none bg-[var(--zk-sunken)] px-3 py-2 text-[12px]">
               <span className="min-w-0 flex-1">
                 <span className="block text-[10px] font-bold uppercase tracking-wide text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d22c3571f16f-4" : undefined}>This terminal</span>
                 <span className="block truncate font-bold text-[var(--zk-text)]">{boundStore.name}</span>

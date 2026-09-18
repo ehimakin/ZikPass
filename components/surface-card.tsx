@@ -17,7 +17,7 @@ export function SurfaceCard({
   return (
     <section
       className={clsx(
-        "rounded-[28px] p-6",
+        "rounded-none p-6",
         dark ? "border border-white/8 bg-white/[0.03]" : "border border-white/80 bg-white/85 shadow-panel",
         className
       )}

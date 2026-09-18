@@ -3,7 +3,7 @@
 .site button:focus-visible,.site a:focus-visible,.site input:focus-visible { outline:2px solid #68d9eb; outline-offset:4px; }
 .header { min-height:86px; display:flex; align-items:center; gap:28px; padding:18px 32px; background:#1e2030; border-bottom:1px solid #303243; position:sticky; top:0; z-index:30; }
 .brand { display:inline-flex; align-items:center; gap:10px; font-size:31px; letter-spacing:-1.5px; font-weight:800; color:#fff; }
-.brandMark { display:grid; place-items:center; width:43px; height:43px; border-radius:13px; background:linear-gradient(120deg,#67d5e6 0 48%,#f48bc2 52%); color:#222436; font-size:30px; }
+.brandMark { display:grid; place-items:center; width:43px; height:43px; border-radius: 0; background:linear-gradient(120deg,#67d5e6 0 48%,#f48bc2 52%); color:#222436; font-size:30px; }
 .brandAccent { color:#f48bc2; }
 .search { display:flex; align-items:center; gap:12px; flex:1; max-width:570px; margin:auto; border:1px solid #3b3d50; background:#151621; border-radius:8px; padding:11px 16px; color:#b0b1c2; }
 .search span { font-size:25px; line-height:20px; }
@@ -20,7 +20,7 @@
 .sidebar nav button>span { font-size:20px; width:22px; color:#8a8da8; }
 .sidebar nav small { margin-left:auto; color:#7e8198; }
 .sidebar nav button:hover,.sidebar nav .activeCategory { background:#303044; color:#f3a5d0; }
-.sidebarNote { margin:40px 8px 25px; padding:23px 15px; border:1px solid #3b3248; background:linear-gradient(130deg,#302535,#202334); border-radius:12px; }
+.sidebarNote { margin:40px 8px 25px; padding:23px 15px; border:1px solid #3b3248; background:linear-gradient(130deg,#302535,#202334); border-radius: 0; }
 .sidebarNote>span { display:block; font-size:31px; margin-bottom:10px; }
 .sidebarNote strong { font-size:20px; line-height:1.25; }
 .sidebarNote p { font-size:11px; line-height:1.8; margin-top:12px; color:#a5a4b7; }
@@ -28,7 +28,7 @@
 .main { min-width:0; max-width:1720px; width:100%; margin:auto; padding:22px 30px 0; }
 .notice { display:flex; justify-content:space-between; font-size:10px; color:#85889f; margin-bottom:18px; }
 .notice>span:first-child { letter-spacing:1.7px; font-weight:800; color:#72d6d8; }
-.hero { position:relative; display:grid; grid-template-columns:1fr 45%; overflow:hidden; min-height:295px; background:linear-gradient(110deg,#302741,#25283b); border:1px solid #44384e; border-radius:12px; padding:30px 36px; }
+.hero { position:relative; display:grid; grid-template-columns:1fr 45%; overflow:hidden; min-height:295px; background:linear-gradient(110deg,#302741,#25283b); border:1px solid #44384e; border-radius: 0; padding:30px 36px; }
 .hero .eyebrow { color:#f0a0cb; }
 .hero h1 { font-size:clamp(36px,3.8vw,64px); line-height:1.05; font-weight:800; letter-spacing:-2px; margin:15px 0; }
 .hero h1 em { color:#f6aed4; font-style:normal; }
@@ -36,12 +36,12 @@
 .heroLink { display:inline-flex; align-items:center; gap:22px; font-size:12px; margin-top:22px; font-weight:800; }
 .heroLink span { color:#75d7db; font-size:21px; }
 .heroPhoto { background-image:linear-gradient(90deg,#2a283d,transparent 30%),url('/affiliates/jerkmeat/food-atlas.png'); background-size:100% 100%,300% 300%; background-position:center,0 0; position:absolute; right:0; top:0; bottom:0; width:45%; }
-.heroPhotoLabel { position:absolute; bottom:20px; right:20px; left:30px; background:#151621c9; backdrop-filter:blur(10px); border:1px solid #ffffff18; border-radius:8px; padding:12px 15px; }
+.heroPhotoLabel { position:absolute; bottom:20px; right:20px; left:30px; background:#151621c9; backdrop-filter:blur(10px); border:1px solid #ffffff18; border-radius: 0; padding:12px 15px; }
 .heroPhotoLabel span { color:#75dfd9; font-size:8px; letter-spacing:2px; display:block; }
 .heroPhotoLabel strong { display:block; margin:5px 0; font-size:14px; }
 .heroPhotoLabel small { font-size:10px; color:#bcbdc9; }
 .heroStamp { position:absolute; top:22px; right:20px; border-radius:50%; width:66px; height:66px; display:grid; place-content:center; transform:rotate(13deg); color:#302134; background:#f8a7cf; text-align:center; font-size:9px; font-weight:900; letter-spacing:1px; border:4px double #302134; }
-.gate { margin-top:22px; padding:20px 24px; border:1px solid #464052; border-radius:10px; background:#242331; scroll-margin-top:110px; }
+.gate { margin-top:22px; padding:20px 24px; border:1px solid #464052; border-radius: 0; background:#242331; scroll-margin-top:110px; }
 .gateContent { display:flex; align-items:center; justify-content:space-between; gap:22px; }
 .gateContent h2 { font-weight:800; font-size:17px; }
 .gateContent p { color:#aaa8bc; font-size:12px; line-height:1.7; margin-top:5px; max-width:650px; }
@@ -66,7 +66,7 @@
 .card { min-width:0; }
 .photoButton { display:block; width:100%; position:relative; overflow:hidden; border-radius:8px; }
 .foodPhoto { width:100%; aspect-ratio:1.35; background-image:url('/affiliates/jerkmeat/food-atlas.png'); background-size:300% 300%; background-repeat:no-repeat; background-color:#302737; transition:filter .2s; }
-.heat,.duration { position:absolute; top:10px; background:#14151ecf; border-radius:4px; font-size:9px; padding:4px 7px; }
+.heat,.duration { position:absolute; top:10px; background:#14151ecf; border-radius: 0; font-size:9px; padding:4px 7px; }
 .heat { left:10px; color:#f8b6b1; }
 .duration { right:10px; color:#fff; }
 .photoHover { position:absolute; inset:auto 0 0; padding:25px 12px 12px; background:linear-gradient(transparent,#10111bd9); font-size:11px; font-weight:800; opacity:0; transition:opacity .2s; }
@@ -82,10 +82,10 @@
 .empty { padding:50px 0; color:#bcb9cb; }
 .footer { margin-top:45px; padding:30px 0; border-top:1px solid #303244; display:flex; flex-wrap:wrap; gap:14px 25px; align-items:center; }
 .footer .brand { font-size:22px; }
-.footer .brandMark { width:29px; height:29px; font-size:23px; border-radius:9px; }
+.footer .brandMark { width:29px; height:29px; font-size:23px; border-radius: 0; }
 .footer p { color:#a3a5ba; font-size:12px; }
 .footer small { width:100%; color:#74778d; font-size:10px; line-height:1.8; }
-.dialog { padding:0; border:1px solid #484155; background:#222331; color:#f5f3fa; border-radius:14px; max-width:600px; width:calc(100% - 32px); max-height:90dvh; overflow:auto; }
+.dialog { padding:0; border:1px solid #484155; background:#222331; color:#f5f3fa; border-radius: 0; max-width:600px; width:calc(100% - 32px); max-height:90dvh; overflow:auto; }
 .dialog::backdrop { background:#070914d9; backdrop-filter:blur(6px); }
 .dialog .foodPhoto { aspect-ratio:1.4; }
 .close { position:absolute; right:12px; top:12px; background:#171926de; border-radius:50%; width:35px; height:35px; font-size:26px; z-index:2; }

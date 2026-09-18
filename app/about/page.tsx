@@ -50,7 +50,7 @@ export default function AboutPage() {
           </details>
         </Card>
 
-        <section className="rounded-[var(--zk-r-lg)] bg-ink p-5 text-[var(--zk-text-on-ink)]">
+        <section className="rounded-none bg-ink p-5 text-[var(--zk-text-on-ink)]">
           <p className="text-xs font-semibold uppercase tracking-widest text-[var(--zk-accent)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-06f49e315854-18" : undefined}>For affiliate sites</p>
           <h2 className="mt-2 text-xl font-bold tracking-tight" data-local-edit={process.env.NODE_ENV === "development" ? "ve-06f49e315854-19" : undefined}>Let customers bring their age check.</h2>
           <p className="mt-3 text-sm leading-relaxed" data-local-edit={process.env.NODE_ENV === "development" ? "ve-06f49e315854-20" : undefined}>Add Zik Pass to your website so customers can approve an age check using their existing pass.</p>

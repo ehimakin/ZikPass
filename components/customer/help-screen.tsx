@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Card, SectionHeading } from "@/components/customer/ui";
+import { Alert, Button, Card, SectionHeading } from "@/components/customer/ui";
 import { environmentBadgeLabel, isDemoEnvironment } from "@/lib/shared/demo-environment";
+
+import { resetDemoData } from "@/lib/client/demo-reset";
 
 const ACCEPTED_ID = [
   "UK or EU passport",
@@ -30,38 +32,31 @@ const FAQ = [
   },
   {
     q: "The clerk could not find my code.",
-    a: "Codes expire after a few minutes. Start the in-store step again from My pass and show the clerk the fresh code."
+    a: "Codes expire after a few minutes. Start the in-store step again from Zik Pass in your Wallet and show the clerk the fresh code."
   }
 ];
 
 function DemoResetRow() {
-  const [state, setState] = useState<"idle" | "working" | "done">("idle");
+  const [state, setState] = useState<"idle" | "confirm" | "working" | "done">("idle");
+  const [error, setError] = useState("");
   if (!isDemoEnvironment) return null;
-  return (
-    <div className="mt-3 border-t border-[var(--zk-line)] pt-3">
-      <p className="text-[13px] text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-77c96c1e782b-1" : undefined}>
-        Reset the demo to a clean slate before a walkthrough. Clears all in-progress
-        enrolments, store sessions and test payments on the server. Delete this
-        device&rsquo;s pass separately from the My pass tab.
-      </p>
-      <Button
-        variant="secondary"
-        className="mt-2.5"
-        loading={state === "working"}
-        onClick={async () => {
-          setState("working");
-          try {
-            await fetch("/api/demo/reset", { method: "POST" });
-            setState("done");
-          } catch {
-            setState("idle");
-          }
-        }}
-      >
-        {state === "done" ? "Demo reset" : "Reset demo data"}
-      </Button>
-    </div>
-  );
+  async function reset() {
+    setState("working"); setError("");
+    try { await resetDemoData(); setState("done"); }
+    catch (reason) { setError(reason instanceof Error ? reason.message : "Reset failed. Please try again."); setState("confirm"); }
+  }
+  return <div className="mt-3 space-y-3 border-t border-[var(--zk-line)] pt-3">
+    <p className="text-[13px] text-[var(--zk-text-soft)]">Start a fresh walkthrough. Reset server demo records and this browser’s saved Pass, device keys, encrypted Vault, onboarding progress and demo sessions. This also signs you out of the clerk demo.</p>
+    {state === "confirm" || state === "working" ? <>
+      <Alert tone="caution" title="Delete demo data?">Your saved Vault details will be permanently deleted from this browser. Server demo records are shared, so this also resets other ongoing walkthroughs. Close other Zik tabs before continuing. Data saved in other browsers or devices is not erased.</Alert>
+      <div className="flex flex-wrap gap-2">
+        <Button variant="danger" loading={state === "working"} onClick={() => void reset()}>Delete and reset demo</Button>
+        <Button variant="secondary" disabled={state === "working"} onClick={() => { setState("idle"); setError(""); }}>Cancel</Button>
+      </div>
+    </> : <Button variant="secondary" onClick={() => { setState("confirm"); setError(""); }}>Reset demo data</Button>}
+    {error ? <p role="alert" className="text-sm text-[var(--zk-critical)]">{error}</p> : null}
+    {state === "done" ? <p role="status" className="text-sm">Demo reset complete. This browser’s Wallet and Vault are empty. You can start again from Home.</p> : null}
+  </div>;
 }
 
 export function HelpScreen() {

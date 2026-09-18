@@ -16,7 +16,7 @@ export function StatusPage({
   return (
     <main className="zk-surface flex min-h-[100dvh] flex-col items-center justify-center bg-[var(--zk-canvas)] px-6 py-10 text-center">
       <div className="w-full max-w-[380px]">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-ink text-[22px] text-[var(--zk-accent)]">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-none bg-ink text-[22px] text-[var(--zk-accent)]">
           <span aria-hidden="true">{emoji}</span>
         </div>
         <h1 className="mt-5 text-[22px] font-extrabold tracking-tight text-[var(--zk-text)]">

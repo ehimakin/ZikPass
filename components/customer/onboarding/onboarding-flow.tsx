@@ -241,7 +241,7 @@ export function OnboardingFlow({ price, storeId: storeIdProp, initialEnrollment 
         <div className="text-center">
           <h1 className="text-[22px] font-extrabold text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-faf71124d2d2-3" : undefined}>Your pass is ready</h1>
           <p className="mx-auto mt-1.5 max-w-[34ch] text-[14px] text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-faf71124d2d2-4" : undefined}>
-            It&rsquo;s saved on this device. Open it any time from the My pass tab.
+            It&rsquo;s saved on this device. Open it any time from the Wallet tab.
           </p>
         </div>
         <ButtonLink href={"/pass" as Route} size="lg">
@@ -447,7 +447,7 @@ function CodeCard({ code, sessionId }: { code: string; sessionId: string }) {
   }, [code, sessionId]);
 
   return (
-    <div className="overflow-hidden rounded-[var(--zk-r-xl)] bg-[var(--zk-ink-surface)] p-5 text-center text-[var(--zk-text-on-ink)]">
+    <div className="overflow-hidden rounded-none bg-[var(--zk-ink-surface)] p-5 text-center text-[var(--zk-text-on-ink)]">
       <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--zk-accent)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-faf71124d2d2-12" : undefined}>
         Show this to the clerk
       </p>
@@ -457,10 +457,10 @@ function CodeCard({ code, sessionId }: { code: string; sessionId: string }) {
         <img
           src={qr}
           alt={`QR code for verification code ${code}`}
-          className="mx-auto mt-4 h-40 w-40 rounded-[var(--zk-r-md)] bg-white p-2"
+          className="mx-auto mt-4 h-40 w-40 rounded-none bg-white p-2"
         />
       ) : (
-        <div className="mx-auto mt-4 h-40 w-40 rounded-[var(--zk-r-md)] bg-white/10" />
+        <div className="mx-auto mt-4 h-40 w-40 rounded-none bg-white/10" />
       )}
       <p className="mt-4 flex items-center justify-center gap-1.5 text-[12px] text-white/55">
         <ClockIcon className="h-3.5 w-3.5" />

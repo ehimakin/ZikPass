@@ -214,7 +214,7 @@ export function AffiliateConfirmScreen({ requestId }: { requestId: string }) {
             </div>
 
             {wallet.credential ? (
-              <div className="mt-4 rounded-[var(--zk-r-md)] bg-[var(--zk-sunken)] px-3 py-3">
+              <div className="mt-4 rounded-none bg-[var(--zk-sunken)] px-3 py-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fadb2050857d-4" : undefined}>
                   Your pass &middot; visual only
                 </p>

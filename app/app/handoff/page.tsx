@@ -6,7 +6,7 @@ export default function NativeHandoffFallbackPage() {
   return (
     <AppShell currentPath="/">
       <main className="flex flex-1 items-center justify-center px-4 pb-16 pt-8 sm:px-6 lg:px-8">
-        <section className="w-full max-w-xl rounded-[34px] border border-white/10 bg-white/[0.03] p-8 text-center sm:p-10">
+        <section className="w-full max-w-xl rounded-none border border-white/10 bg-white/[0.03] p-8 text-center sm:p-10">
           <p className="font-mono text-xs uppercase tracking-[0.24em] text-lime/70" data-local-edit={process.env.NODE_ENV === "development" ? "ve-36781634e4b7-1" : undefined}>Native wallet</p>
           <h1 className="mt-4 font-heading text-4xl font-semibold tracking-tight text-mist" data-local-edit={process.env.NODE_ENV === "development" ? "ve-36781634e4b7-2" : undefined}>
             Open Zik Pass on this device

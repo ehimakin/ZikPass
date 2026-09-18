@@ -109,7 +109,7 @@ export function Card({
   return (
     <Tag
       className={clsx(
-        "rounded-[var(--zk-r-lg)] border border-[var(--zk-line)] bg-[var(--zk-card)] shadow-[var(--zk-shadow-card)]",
+        "rounded-none border border-[var(--zk-line)] bg-[var(--zk-card)] shadow-[var(--zk-shadow-card)]",
         className
       )}
     >
@@ -179,7 +179,7 @@ export function Alert({
   return (
     <div
       role={tone === "critical" ? "alert" : "status"}
-      className={clsx("flex gap-3 rounded-[var(--zk-r-md)] p-3.5 text-[14px]", toneClass)}
+      className={clsx("flex gap-3 rounded-none p-3.5 text-[14px]", toneClass)}
     >
       <Icon className="mt-0.5 h-[18px] w-[18px] shrink-0" />
       <div className="min-w-0 flex-1">
@@ -198,7 +198,7 @@ export function Alert({
 export function Skeleton({ className }: { className?: string }) {
   return (
     <div
-      className={clsx("animate-pulse rounded-[var(--zk-r-sm)] bg-[var(--zk-sunken)]", className)}
+      className={clsx("animate-pulse rounded-none bg-[var(--zk-sunken)]", className)}
       aria-hidden="true"
     />
   );
@@ -272,7 +272,7 @@ export function Sheet({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="relative max-h-[calc(100dvh-16px)] w-full max-w-[460px] overflow-y-auto rounded-t-[var(--zk-r-xl)] bg-[var(--zk-card)] p-5 pb-[calc(20px+env(safe-area-inset-bottom))] shadow-[var(--zk-shadow-sheet)] sm:max-h-[calc(100dvh-32px)] sm:rounded-[var(--zk-r-xl)] sm:pb-5"
+        className="relative max-h-[calc(100dvh-16px)] w-full max-w-[460px] overflow-y-auto rounded-none bg-[var(--zk-card)] p-5 pb-[calc(20px+env(safe-area-inset-bottom))] shadow-[var(--zk-shadow-sheet)] sm:max-h-[calc(100dvh-32px)] sm:rounded-none sm:pb-5"
       >
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-[17px] font-bold text-[var(--zk-text)]">{title}</h2>

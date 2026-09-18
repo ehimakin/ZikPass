@@ -17,7 +17,7 @@ export default function EcosystemPage() {
           <h1 className="mt-3 text-[32px] font-extrabold leading-tight tracking-tight" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-2" : undefined}>The Zik ecosystem</h1>
           <p className="mt-4 text-[15px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-3" : undefined}>Zik separates verifying information from disclosing it. Start by proving your age. Later, keep more verified information on your device and share only what a situation actually requires.</p>
         </section>
-        <p className="rounded-[var(--zk-r-md)] bg-[var(--zk-sunken)] p-4 text-sm font-semibold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-4" : undefined}>ZikVault and Zik ID are planned products and are not available in this prototype.</p>
+        <p className="rounded-none bg-[var(--zk-sunken)] p-4 text-sm font-semibold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-4" : undefined}>ZikVault and Zik ID are planned products and are not available in this prototype.</p>
         <section aria-labelledby="products-title">
           <h2 id="products-title" className="mb-4 text-xl font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-5" : undefined}>Zik starts with Zik Pass.</h2>
           <ProductFamily price={getPassPrice().display} />

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Route } from "next";
 import clsx from "clsx";
-import { HomeIcon, PinIcon, PassIcon, HelpIcon } from "@/components/customer/icons";
+import { HomeIcon, PinIcon, PassIcon, VaultIcon } from "@/components/customer/icons";
 import { environmentBadgeLabel } from "@/lib/shared/demo-environment";
 import { ZikLogoMark } from "@/components/zik-logo";
 import { CustomerMenu } from "@/components/customer/customer-menu";
@@ -22,8 +22,8 @@ interface NavItem {
 const NAV: NavItem[] = [
   { href: "/home" as Route, label: "Home", Icon: HomeIcon },
   { href: "/find" as Route, label: "Find a store", Icon: PinIcon },
-  { href: "/pass" as Route, label: "My pass", Icon: PassIcon },
-  { href: "/help" as Route, label: "Help", Icon: HelpIcon }
+  { href: "/wallet" as Route, label: "Wallet", Icon: PassIcon },
+  { href: "/vault" as Route, label: "Vault", Icon: VaultIcon }
 ];
 
 export function CustomerShell({
@@ -35,7 +35,7 @@ export function CustomerShell({
   immersive = false
 }: {
   children: ReactNode;
-  active: "home" | "find" | "pass" | "help" | "about";
+  active: "home" | "find" | "wallet" | "pass" | "help" | "vault" | "about";
   /** Optional page title shown in the compact header. */
   title?: string;
   /** Optional back link target. */
@@ -153,8 +153,8 @@ export function CustomerShell({
               pathname === item.href ||
               (item.href === ("/home" as Route) && active === "home") ||
               (item.href === ("/find" as Route) && active === "find") ||
-              (item.href === ("/pass" as Route) && active === "pass") ||
-              (item.href === ("/help" as Route) && active === "help");
+              (item.href === ("/wallet" as Route) && (active === "wallet" || active === "pass")) ||
+              (item.href === ("/vault" as Route) && active === "vault");
             return (
               <li key={item.href} className="flex-1">
                 <Link

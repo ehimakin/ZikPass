@@ -195,7 +195,7 @@ export function ZikHostedVerification({
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(215,241,113,0.22),_rgba(8,16,13,0.96)_48%)] px-4 py-6 text-mist sm:px-6">
       <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-5xl items-center justify-center">
-        <section className="grid w-full overflow-hidden rounded-[36px] border border-white/10 bg-[linear-gradient(160deg,_rgba(10,22,17,0.98),_rgba(15,35,27,0.96))] shadow-[0_40px_120px_rgba(6,12,10,0.46)] lg:grid-cols-[0.95fr_1.05fr]">
+        <section className="grid w-full overflow-hidden rounded-none border border-white/10 bg-[linear-gradient(160deg,_rgba(10,22,17,0.98),_rgba(15,35,27,0.96))] shadow-[0_40px_120px_rgba(6,12,10,0.46)] lg:grid-cols-[0.95fr_1.05fr]">
           <div className="border-b border-white/8 p-8 lg:border-b-0 lg:border-r">
             <p className="font-mono text-xs uppercase tracking-[0.28em] text-lime/78" data-local-edit={process.env.NODE_ENV === "development" ? "ve-14f413efbce1-1" : undefined}>Hosted by Zik</p>
             <h1 className="mt-4 font-heading text-4xl font-semibold tracking-tight">
@@ -206,7 +206,7 @@ export function ZikHostedVerification({
               minimal verification result and will not share your identity.
             </p>
 
-            <div className="mt-8 rounded-[28px] border border-white/10 bg-white/5 p-5">
+            <div className="mt-8 rounded-none border border-white/10 bg-white/5 p-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-mist/48" data-local-edit={process.env.NODE_ENV === "development" ? "ve-14f413efbce1-3" : undefined}>
@@ -220,7 +220,7 @@ export function ZikHostedVerification({
                 </span>
               </div>
 
-              <div className="mt-5 rounded-[22px] border border-white/8 bg-[#0f1d17] px-4 py-4">
+              <div className="mt-5 rounded-none border border-white/8 bg-[#0f1d17] px-4 py-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-mist/50" data-local-edit={process.env.NODE_ENV === "development" ? "ve-14f413efbce1-5" : undefined}>
@@ -243,7 +243,7 @@ export function ZikHostedVerification({
           </div>
 
           <div className="p-8">
-            <div className="rounded-[30px] border border-white/8 bg-white/[0.04] p-6">
+            <div className="rounded-none border border-white/8 bg-white/[0.04] p-6">
               <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-mist/50" data-local-edit={process.env.NODE_ENV === "development" ? "ve-14f413efbce1-7" : undefined}>
                 Zik decision
               </p>
@@ -252,7 +252,7 @@ export function ZikHostedVerification({
               </h2>
               <p className="mt-3 text-sm leading-7 text-mist/72">{message}</p>
 
-              <div className="mt-6 grid gap-3 rounded-[24px] bg-ink/35 p-4">
+              <div className="mt-6 grid gap-3 rounded-none bg-ink/35 p-4">
                 <DetailRow label="Vendor" value={session.vendor_name} />
                 <DetailRow label="Request" value="Confirm over 18" />
                 <DetailRow

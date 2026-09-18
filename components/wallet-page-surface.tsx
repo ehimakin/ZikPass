@@ -114,9 +114,9 @@ export function WalletPageSurface() {
   if (!wallet) {
     return (
       <main className="flex min-h-[calc(100vh-168px)] flex-1 items-center justify-center px-4 py-8 text-mist sm:px-6 lg:px-8">
-        <section className="w-full max-w-5xl rounded-[40px] border border-white/8 bg-white/[0.03] p-10">
+        <section className="w-full max-w-5xl rounded-none border border-white/8 bg-white/[0.03] p-10">
           <div className="h-3 w-40 animate-pulse rounded-full bg-white/8" />
-          <div className="mt-5 h-16 max-w-2xl animate-pulse rounded-[20px] bg-white/8" />
+          <div className="mt-5 h-16 max-w-2xl animate-pulse rounded-none bg-white/8" />
         </section>
       </main>
     );
@@ -401,7 +401,7 @@ function WalletStatusDock({
     >
       <section
         aria-live="polite"
-        className="pointer-events-auto mx-auto w-[85%] max-w-[1088px] rounded-[22px] border border-white/10 bg-[#0a0f18]/90 p-1.5 opacity-30 backdrop-blur-md transition-opacity duration-200 hover:opacity-100 sm:p-2"
+        className="pointer-events-auto mx-auto w-[85%] max-w-[1088px] rounded-none border border-white/10 bg-[#0a0f18]/90 p-1.5 opacity-30 backdrop-blur-md transition-opacity duration-200 hover:opacity-100 sm:p-2"
       >
         <div className="flex flex-wrap items-center gap-2 px-1 py-0.5">
           <div className="flex flex-wrap items-center gap-2">
@@ -436,7 +436,7 @@ function WalletStatusDock({
         {isOpen ? (
           <div className="mt-1 grid gap-1.5 sm:grid-cols-3 lg:min-w-[420px]">
             {statusMeta.map((item) => (
-              <div key={item.label} className="rounded-[18px] bg-white/5 px-2.5 py-1.5">
+              <div key={item.label} className="rounded-none bg-white/5 px-2.5 py-1.5">
                 <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-mist/40">{item.label}</p>
                 <p className="mt-0.5 text-[11px] font-medium text-mist">{item.value}</p>
               </div>
@@ -505,7 +505,7 @@ function SavedWalletState({
       </button>
 
       {isActionsOpen ? (
-        <div className="relative mx-auto mt-6 w-full max-w-2xl rounded-[28px] border border-ink/8 bg-[#f7faee] p-5 text-ink sm:p-6">
+        <div className="relative mx-auto mt-6 w-full max-w-2xl rounded-none border border-ink/8 bg-[#f7faee] p-5 text-ink sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="font-mono text-xs uppercase tracking-[0.24em] text-ink/45" data-local-edit={process.env.NODE_ENV === "development" ? "ve-97c388163324-8" : undefined}>Pass actions</p>
@@ -546,12 +546,12 @@ function SavedWalletState({
             </button>
           </div>
           {actionMessage ? (
-            <p className="mt-4 rounded-[18px] bg-white px-4 py-3 text-sm text-ink/68" role="status">
+            <p className="mt-4 rounded-none bg-white px-4 py-3 text-sm text-ink/68" role="status">
               {actionMessage}
             </p>
           ) : null}
           {isExtendOpen ? (
-            <div className="mt-4 rounded-[22px] border border-ink/8 bg-white px-5 py-5">
+            <div className="mt-4 rounded-none border border-ink/8 bg-white px-5 py-5">
               {enrollmentId ? (
                 <ExtendPassPanel enrollmentId={enrollmentId} />
               ) : (
@@ -604,7 +604,7 @@ function WalletAffiliateFooter() {
         {affiliateMarks.map((mark) => (
           <span
             key={mark}
-            className="inline-flex h-11 min-w-28 items-center justify-center rounded-[8px] border border-white/8 bg-white/[0.03] px-4 text-sm font-semibold text-mist/70"
+            className="inline-flex h-11 min-w-28 items-center justify-center rounded-none border border-white/8 bg-white/[0.03] px-4 text-sm font-semibold text-mist/70"
           >
             {mark}
           </span>

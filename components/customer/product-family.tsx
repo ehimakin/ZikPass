@@ -7,7 +7,7 @@ export function ProductFamily({ price }: { price: string }) {
       {getProductCatalogue(price).map((product, index) => (
         <li key={product.name}>
           {index > 0 ? <p aria-hidden="true" className="mb-3 pl-6 text-xl text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-292792b74590-1" : undefined}>↓</p> : null}
-          <Card as="article" className={`p-5 ${product.available ? "border-[var(--zk-accent)] border-l-4" : ""}`}>
+          <Card as="article" className={`!rounded-[var(--zk-r-lg)] p-5 ${product.available ? "border-[var(--zk-accent)] border-l-4" : ""}`}>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h3 className="text-xl font-extrabold tracking-tight">{product.name}</h3>
               <StatusBadge tone={product.available ? "positive" : "neutral"}>{product.status}</StatusBadge>

@@ -1251,15 +1251,15 @@ export function WalletSurface({
         />
       ) : (
         <>
-      <section className="relative overflow-hidden rounded-[40px] border border-white/80 bg-white/72 px-6 py-8 shadow-panel backdrop-blur-sm sm:px-10 sm:py-10">
+      <section className="relative overflow-hidden rounded-none border border-white/80 bg-white/72 px-6 py-8 shadow-panel backdrop-blur-sm sm:px-10 sm:py-10">
         <div
           className={`relative grid gap-8 md:items-start ${
             onboardingMode ? "md:grid-cols-1" : "md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]"
           }`}
         >
           <div className="relative md:order-1">
-            <div className="absolute inset-0 translate-x-5 translate-y-5 rounded-[34px] bg-lime/35" />
-            <div className="relative overflow-hidden rounded-[34px] border border-ink/8 bg-white p-6 shadow-[0_30px_80px_rgba(14,23,38,0.18)]">
+            <div className="absolute inset-0 translate-x-5 translate-y-5 rounded-none bg-lime/35" />
+            <div className="relative overflow-hidden rounded-none border border-ink/8 bg-white p-6 shadow-[0_30px_80px_rgba(14,23,38,0.18)]">
               <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top_right,_rgba(215,241,113,0.3),_transparent_45%)]" />
               <div className="relative space-y-6">
                 <div className="mb-8 flex items-center justify-between gap-4">
@@ -1279,13 +1279,13 @@ export function WalletSurface({
                       </p>
                     ) : null}
                   </div>
-                  <div className="animate-float-slow rounded-[24px] border border-ink/8 bg-[#f6faea] p-3">
+                  <div className="animate-float-slow rounded-none border border-ink/8 bg-[#f6faea] p-3">
                     <ZikLogoMark className="h-10 w-10 text-ink" />
                   </div>
                 </div>
 
                 {credential ? (
-                  <div className="rounded-[28px] border border-ink/8 bg-[#f7faee] p-5">
+                  <div className="rounded-none border border-ink/8 bg-[#f7faee] p-5">
                     <p className="font-heading text-2xl font-semibold tracking-tight text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-1" : undefined}>Your pass</p>
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">
                       <MetaTile
@@ -1351,7 +1351,7 @@ export function WalletSurface({
                   <>
                     {isPhysicalLane ? (
                       onboardingMode && !physicalEntryExplicit ? (
-                        <div className="rounded-[26px] bg-[#f7faee] p-5 text-sm text-ink/76">
+                        <div className="rounded-none bg-[#f7faee] p-5 text-sm text-ink/76">
                           <p className="font-medium text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-3" : undefined}>Select a store</p>
                           <AffiliateStoreSelector
                             selectedStoreId={selectedAffiliateStoreId}
@@ -1359,7 +1359,7 @@ export function WalletSurface({
                           />
                         </div>
                       ) : (
-                        <div className="rounded-[26px] bg-[#f7faee] p-5 text-sm text-ink/76">
+                        <div className="rounded-none bg-[#f7faee] p-5 text-sm text-ink/76">
                           <p className="font-medium text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-4" : undefined}>This store session is ready</p>
                           <p className="mt-2 leading-6" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-5" : undefined}>
                             Create a local holder key, then show your temporary customer QR to a staff
@@ -1466,7 +1466,7 @@ export function WalletSurface({
                     </div>
 
                     {!onboardingMode && !homepageMode ? (
-                      <div className="grid gap-4 rounded-[26px] bg-[#f7faee] p-5 sm:grid-cols-3">
+                      <div className="grid gap-4 rounded-none bg-[#f7faee] p-5 sm:grid-cols-3">
                         {isPhysicalLane ? (
                           <>
                             <HeroMetric label="Assurance" value="In-person verified" dark />
@@ -1489,7 +1489,7 @@ export function WalletSurface({
           </div>
 
           {!onboardingMode ? (
-            <div className="space-y-6 rounded-[32px] py-6 pl-[25px] md:order-2 md:flex md:self-stretch md:flex-col md:space-y-0 md:py-8">
+            <div className="space-y-6 rounded-none py-6 pl-[25px] md:order-2 md:flex md:self-stretch md:flex-col md:space-y-0 md:py-8">
             <div className="flex flex-wrap gap-2">
               <HeroViewTab
                 active={heroViewMode === "how_to_get"}
@@ -1577,7 +1577,7 @@ export function WalletSurface({
                 </div>
               ) : (
                 <>
-                  <div className="min-h-[248px] overflow-hidden rounded-[28px] border border-ink/10 bg-white/74 shadow-[0_18px_40px_rgba(14,23,38,0.06)] sm:min-h-[272px]">
+                  <div className="min-h-[248px] overflow-hidden rounded-none border border-ink/10 bg-white/74 shadow-[0_18px_40px_rgba(14,23,38,0.06)] sm:min-h-[272px]">
                     <div
                       className="flex h-full w-full transition-transform duration-500 ease-out"
                       style={{
@@ -1736,7 +1736,7 @@ export function WalletSurface({
         <section
           aria-live="polite"
           className={clsx(
-            "pointer-events-auto mx-auto w-[85%] max-w-[1088px] rounded-[22px] p-1.5 opacity-30 transition-[opacity,background-color] duration-200 sm:p-2",
+            "pointer-events-auto mx-auto w-[85%] max-w-[1088px] rounded-none p-1.5 opacity-30 transition-[opacity,background-color] duration-200 sm:p-2",
             isDarkChrome
               ? "border border-white/10 bg-[#0a0f18]/90 backdrop-blur-md hover:opacity-100"
               : "bg-white/80 shadow-[0_-12px_36px_rgba(14,23,38,0.08)] hover:bg-[linear-gradient(180deg,_rgba(255,255,255,0.94),_rgba(244,247,238,0.94))] hover:opacity-100"
@@ -1826,7 +1826,7 @@ export function WalletSurface({
         >
           <div className="flex h-full w-full flex-col items-stretch justify-center p-2 sm:p-6">
             <div
-              className="relative mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col overflow-hidden rounded-[30px] border border-white/65 bg-[linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(244,247,238,0.97))] p-2 shadow-[0_36px_120px_rgba(14,23,38,0.28)] sm:rounded-[40px] sm:p-6"
+              className="relative mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col overflow-hidden rounded-none border border-white/65 bg-[linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(244,247,238,0.97))] p-2 shadow-[0_36px_120px_rgba(14,23,38,0.28)] sm:rounded-none sm:p-6"
               onClick={(event) => event.stopPropagation()}
             >
               <button
@@ -2056,7 +2056,7 @@ export function WalletSurface({
                     }
                     onNext={() => setStep("device-security")}
                   >
-                    <div className="rounded-[28px] bg-[linear-gradient(135deg,_rgba(215,241,113,0.18),_rgba(105,225,200,0.12))] p-5 text-sm text-ink/78">
+                    <div className="rounded-none bg-[linear-gradient(135deg,_rgba(215,241,113,0.18),_rgba(105,225,200,0.12))] p-5 text-sm text-ink/78">
                       <p className="font-medium text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-18" : undefined}>Why we ask for this</p>
                       <p className="mt-2 leading-6" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-19" : undefined}>
                         We send a temporary refundable GBP 0.01 verification reference so you can
@@ -2104,7 +2104,7 @@ export function WalletSurface({
                     }
                     onNext={startEnrollmentSubmission}
                   >
-                    <div className="rounded-[28px] bg-ink/5 p-5 text-sm text-ink/78">
+                    <div className="rounded-none bg-ink/5 p-5 text-sm text-ink/78">
                       <p className="font-medium text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-20" : undefined}>What happens next</p>
                       <div className="mt-3 grid gap-3 sm:grid-cols-3">
                         <InlineDetail title="Local key" body="Created on this device and kept private." />
@@ -2158,7 +2158,7 @@ export function WalletSurface({
                     onNext={startDeviceAuthentication}
                   >
                     <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-                      <div className="rounded-[28px] bg-ink p-5 text-mist">
+                      <div className="rounded-none bg-ink p-5 text-mist">
                         <div className="flex flex-wrap items-center gap-3">
                           <StatusPill tone="good">
                             {enrollment.physical_verification.session.store_name}
@@ -2178,12 +2178,12 @@ export function WalletSurface({
                           prompt is not available in this browser.
                         </p>
                         {deviceAuthSummary ? (
-                          <p className="mt-4 rounded-[20px] bg-white/10 px-4 py-3 text-sm text-mist/82">
+                          <p className="mt-4 rounded-none bg-white/10 px-4 py-3 text-sm text-mist/82">
                             {deviceAuthSummary}
                           </p>
                         ) : null}
                       </div>
-                      <div className="rounded-[28px] bg-white p-5">
+                      <div className="rounded-none bg-white p-5">
                         <p className="font-medium text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-23" : undefined}>Authentication method</p>
                         <div className="mt-4 grid gap-3">
                           <AnswerButton
@@ -2274,7 +2274,7 @@ export function WalletSurface({
                           issuedZignatureSeed ?? pendingZignatureSeed ?? enrollment.id
                         }
                       />
-                      <div className="rounded-[28px] bg-white p-5">
+                      <div className="rounded-none bg-white p-5">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div>
                             <p className="font-heading text-2xl font-semibold tracking-tight text-ink">
@@ -2345,7 +2345,7 @@ export function WalletSurface({
                           value={formatIssuanceChannel(credential.payload.issuance_channel)}
                         />
                       </div>
-                      <div className="rounded-[28px] bg-white p-5 text-sm text-ink/76">
+                      <div className="rounded-none bg-white p-5 text-sm text-ink/76">
                         <div className="grid gap-3 sm:grid-cols-3">
                           <InlineDetail
                             title="What sites see"
@@ -2401,7 +2401,7 @@ export function WalletSurface({
                       setError(null);
                     }}
                   >
-                    <div className="rounded-[28px] bg-blush/35 p-5 text-sm text-ink/80">
+                    <div className="rounded-none bg-blush/35 p-5 text-sm text-ink/80">
                       <ul className="space-y-2">
                         {(enrollment.risk_decision.reasons.length > 0
                           ? enrollment.risk_decision.reasons
@@ -2437,7 +2437,7 @@ export function WalletSurface({
           <div className="flex min-h-screen items-center justify-center p-4 sm:p-6">
             <div
               className={clsx(
-                "w-full max-w-4xl rounded-[36px] p-6 sm:p-8",
+                "w-full max-w-4xl rounded-none p-6 sm:p-8",
                 isDarkChrome
                   ? "border border-white/10 bg-[#0a0f18]"
                   : "border border-white/70 bg-[linear-gradient(135deg,_rgba(255,255,255,0.98),_rgba(245,249,231,0.98))] shadow-[0_36px_120px_rgba(14,23,38,0.24)]"
@@ -2506,7 +2506,7 @@ export function WalletSurface({
                 />
               </div>
 
-              <div className={clsx("mt-6 rounded-[28px] p-6", isDarkChrome ? "bg-white/[0.04]" : "bg-[#0f1721] text-mist")}>
+              <div className={clsx("mt-6 rounded-none p-6", isDarkChrome ? "bg-white/[0.04]" : "bg-[#0f1721] text-mist")}>
                 <div className="grid gap-4 md:grid-cols-3">
                   {isPhysicalLane ? (
                     <>
@@ -2582,7 +2582,7 @@ function HomepageHero({
           </p>
 
           {error ? (
-            <p className="max-w-md rounded-2xl border border-[#f8c8b4]/25 bg-[#f8c8b4]/[0.06] px-4 py-3 text-sm text-[#f8c8b4]" role="alert">
+            <p className="max-w-md rounded-none border border-[#f8c8b4]/25 bg-[#f8c8b4]/[0.06] px-4 py-3 text-sm text-[#f8c8b4]" role="alert">
               {error}
             </p>
           ) : null}
@@ -2746,7 +2746,7 @@ function OnboardingHero({
               </>
             )}
             {error ? (
-              <p className="rounded-2xl border border-[#f8c8b4]/25 bg-[#f8c8b4]/[0.06] px-4 py-3 text-sm text-[#f8c8b4]" role="alert">
+              <p className="rounded-none border border-[#f8c8b4]/25 bg-[#f8c8b4]/[0.06] px-4 py-3 text-sm text-[#f8c8b4]" role="alert">
                 {error}
               </p>
             ) : null}
@@ -2784,7 +2784,7 @@ function OnboardingHero({
               onChange={(value) => onAnswerChange({ dateOfBirth: value })}
             />
             {error ? (
-              <p className="rounded-2xl border border-[#f8c8b4]/25 bg-[#f8c8b4]/[0.06] px-4 py-3 text-sm text-[#f8c8b4]" role="alert">
+              <p className="rounded-none border border-[#f8c8b4]/25 bg-[#f8c8b4]/[0.06] px-4 py-3 text-sm text-[#f8c8b4]" role="alert">
                 {error}
               </p>
             ) : null}
@@ -2815,7 +2815,7 @@ function AffiliateStoreSelector({
   return (
     <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
       <div
-        className="relative min-h-[220px] overflow-hidden rounded-[24px] bg-[#0e1a14]"
+        className="relative min-h-[220px] overflow-hidden rounded-none bg-[#0e1a14]"
         style={{
           backgroundImage:
             "linear-gradient(28deg, transparent 46%, rgba(255,255,255,0.2) 47%, rgba(255,255,255,0.2) 50%, transparent 51%), linear-gradient(112deg, transparent 44%, rgba(255,255,255,0.16) 45%, rgba(255,255,255,0.16) 48%, transparent 49%), radial-gradient(circle at 30% 30%, rgba(215,241,113,0.14), transparent 55%)"
@@ -2913,7 +2913,7 @@ function WalletStatusFooter({
     >
       <section
         aria-live="polite"
-        className="pointer-events-auto mx-auto w-[85%] max-w-[1088px] rounded-[22px] bg-white/80 p-1.5 opacity-25 shadow-[0_-12px_36px_rgba(14,23,38,0.08)] transition-[opacity,background-image,background-color] duration-200 hover:bg-[linear-gradient(180deg,_rgba(255,255,255,0.94),_rgba(244,247,238,0.94))] hover:opacity-100 sm:p-2"
+        className="pointer-events-auto mx-auto w-[85%] max-w-[1088px] rounded-none bg-white/80 p-1.5 opacity-25 shadow-[0_-12px_36px_rgba(14,23,38,0.08)] transition-[opacity,background-image,background-color] duration-200 hover:bg-[linear-gradient(180deg,_rgba(255,255,255,0.94),_rgba(244,247,238,0.94))] hover:opacity-100 sm:p-2"
       >
         <div className="flex flex-wrap items-center gap-2 px-1 py-0.5">
           <div className="flex flex-wrap items-center gap-2">
@@ -3070,7 +3070,7 @@ function PhysicalOnboardingExperience({
         body="Your in-person verified pass has been delivered to this device."
       >
         <div className="zik-stage-pop grid w-full max-w-xl gap-7">
-          <div className="rounded-[30px] border border-ink/8 bg-[#f7faee] p-5 text-ink ring-1 ring-ink/4">
+          <div className="rounded-none border border-ink/8 bg-[#f7faee] p-5 text-ink ring-1 ring-ink/4">
             <p className="font-mono text-xs uppercase text-ink/48" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-43" : undefined}>Over 18</p>
             <p className="mt-2 font-heading text-5xl font-semibold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-44" : undefined}>In-person verified</p>
             <Zignature
@@ -3210,7 +3210,7 @@ function PhysicalOnboardingExperience({
             Waiting for the clerk to confirm 18+
           </p>
           {alreadyPaid ? (
-            <p className="w-full rounded-[20px] border border-ink/8 bg-white/76 px-5 py-4 text-sm font-semibold text-ink" role="status" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-47" : undefined}>
+            <p className="w-full rounded-none border border-ink/8 bg-white/76 px-5 py-4 text-sm font-semibold text-ink" role="status" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-47" : undefined}>
               Paid at the till
             </p>
           ) : enrollment?.id ? (
@@ -3254,7 +3254,7 @@ function PhysicalStageFrame({
 }) {
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(215,241,113,0.28),_transparent_42%),_#f4f7ee] px-4 py-5 text-ink sm:px-6 sm:py-7">
-      <div className="relative mx-auto flex min-h-[calc(100vh-2.5rem)] max-w-6xl flex-col overflow-hidden rounded-[40px] border border-white/80 bg-white/76 px-5 py-7 shadow-panel backdrop-blur-sm sm:min-h-[calc(100vh-3.5rem)] sm:px-8">
+      <div className="relative mx-auto flex min-h-[calc(100vh-2.5rem)] max-w-6xl flex-col overflow-hidden rounded-none border border-white/80 bg-white/76 px-5 py-7 shadow-panel backdrop-blur-sm sm:min-h-[calc(100vh-3.5rem)] sm:px-8">
         <div className={`absolute inset-x-0 top-0 h-1.5 ${accent}`} />
         <p className="hidden text-center text-sm font-semibold text-ink/45 lg:block" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-48" : undefined}>Continue on your phone</p>
         <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center gap-10 text-center">
@@ -3306,17 +3306,17 @@ function PhysicalChallengeQr({ value }: { value: string }) {
   return (
     <div
       aria-label="Temporary customer verification QR"
-      className="grid w-full max-w-[430px] place-items-center rounded-[34px] bg-white p-5 shadow-[0_28px_90px_rgba(0,0,0,0.22)]"
+      className="grid w-full max-w-[430px] place-items-center rounded-none bg-white p-5 shadow-[0_28px_90px_rgba(0,0,0,0.22)]"
     >
       {qrDataUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           alt="Temporary customer verification QR"
-          className="h-auto w-full rounded-[18px]"
+          className="h-auto w-full rounded-none"
           src={qrDataUrl}
         />
       ) : (
-        <div className="h-[320px] w-full animate-pulse rounded-[18px] bg-ink/10" />
+        <div className="h-[320px] w-full animate-pulse rounded-none bg-ink/10" />
       )}
     </div>
   );
@@ -3373,7 +3373,7 @@ function JourneyTracker({
   const activeIndex = steps.findIndex((step) => step.states.includes(state));
 
   return (
-    <div className="rounded-[22px] border border-[#c6e29e]/55 bg-[linear-gradient(180deg,_rgba(255,255,255,0.92),_rgba(237,247,219,0.96))] px-2.5 py-2.5 sm:rounded-[28px] sm:px-4 sm:py-4">
+    <div className="rounded-none border border-[#c6e29e]/55 bg-[linear-gradient(180deg,_rgba(255,255,255,0.92),_rgba(237,247,219,0.96))] px-2.5 py-2.5 sm:rounded-none sm:px-4 sm:py-4">
       <div className="-mx-0.5 flex gap-2 overflow-x-auto px-0.5 pb-0.5 sm:hidden">
         {steps.map((step, index) => {
           const complete = activeIndex > index || state === "pass_issued";
@@ -3382,7 +3382,7 @@ function JourneyTracker({
           return (
             <div
               key={step.label}
-              className={`min-w-[118px] shrink-0 rounded-[16px] px-2.5 py-2 ${
+              className={`min-w-[118px] shrink-0 rounded-none px-2.5 py-2 ${
                 complete
                   ? "bg-[linear-gradient(135deg,_#7cb56b,_#a2ce6a)] text-ink shadow-[0_10px_24px_rgba(124,181,107,0.22)]"
                   : active
@@ -3417,7 +3417,7 @@ function JourneyTracker({
           return (
             <div
               key={step.label}
-              className={`rounded-[22px] px-4 py-3 ${
+              className={`rounded-none px-4 py-3 ${
                 complete
                   ? "bg-[linear-gradient(135deg,_#7cb56b,_#a2ce6a)] text-ink shadow-[0_14px_32px_rgba(124,181,107,0.24)]"
                   : active
@@ -3457,7 +3457,7 @@ function QuestionCard({
   onNext: () => void;
 }) {
   return (
-    <div className="grid min-h-[60vh] overflow-hidden rounded-[28px] border border-ink/8 bg-transparent sm:min-h-[68vh] sm:rounded-[34px]">
+    <div className="grid min-h-[60vh] overflow-hidden rounded-none border border-ink/8 bg-transparent sm:min-h-[68vh] sm:rounded-none">
       <div className="flex flex-col justify-between p-4 sm:p-8">
         <div className="space-y-4 sm:space-y-5">
           <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/45 sm:text-xs sm:tracking-[0.24em]">
@@ -3528,7 +3528,7 @@ function FullscreenCard({
 
   return (
     <div
-      className={`grid min-h-[68vh] min-w-0 w-full max-w-full overflow-hidden rounded-[34px] border border-ink/8 bg-transparent ${
+      className={`grid min-h-[68vh] min-w-0 w-full max-w-full overflow-hidden rounded-none border border-ink/8 bg-transparent ${
         showPassPreview ? "lg:grid-cols-[1.12fr_0.88fr]" : ""
       }`}
     >
@@ -3604,7 +3604,7 @@ function IdentityCheckIntro({
   lane?: "remote" | "physical";
 }) {
   return (
-    <div className={`mb-6 rounded-[28px] bg-ink/5 px-5 py-3.5 text-ink/78 ${compact ? "mt-4" : ""}`}>
+    <div className={`mb-6 rounded-none bg-ink/5 px-5 py-3.5 text-ink/78 ${compact ? "mt-4" : ""}`}>
       <p className="font-heading text-xl font-semibold tracking-tight text-ink">
         {lane === "physical" ? "Prepare your in-store verification" : "Help us find your financial record"}
       </p>
@@ -3645,7 +3645,7 @@ function PhysicalVerificationPanel({
 
   return (
     <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-      <div className="rounded-[28px] bg-ink p-5 text-mist">
+      <div className="rounded-none bg-ink p-5 text-mist">
         <div className="flex flex-wrap items-center gap-3">
           <StatusPill tone="good">{verification.session.store_name}</StatusPill>
           <StatusPill tone="neutral">
@@ -3672,7 +3672,7 @@ function PhysicalVerificationPanel({
         </div>
       </div>
 
-                      <div className="rounded-[28px] bg-white p-5 text-sm text-ink/76">
+                      <div className="rounded-none bg-white p-5 text-sm text-ink/76">
         <div className="space-y-3">
           <InstructionRow number="1" body="Show this code to the staff member assisting you." />
           <InstructionRow number="2" body="When prompted, show your ID." />
@@ -3681,7 +3681,7 @@ function PhysicalVerificationPanel({
             body="Complete device authentication in person for stronger proof."
           />
         </div>
-        <div className="mt-5 rounded-[20px] bg-ink/5 px-4 py-3 text-sm text-ink/72">
+        <div className="mt-5 rounded-none bg-ink/5 px-4 py-3 text-sm text-ink/72">
           {physicalSession?.status === "awaiting_device_auth" ||
           verification.clerk_verification.status === "verified"
             ? "ID check confirmed. Device authentication is next."
@@ -3728,12 +3728,12 @@ function CustomerSessionQr({ value }: { value: string }) {
   return (
     <div
       aria-label="Temporary customer verification QR"
-      className="mx-auto mt-6 grid w-full max-w-[260px] grid-cols-[repeat(13,minmax(0,1fr))] gap-1 rounded-[24px] bg-white p-4"
+      className="mx-auto mt-6 grid w-full max-w-[260px] grid-cols-[repeat(13,minmax(0,1fr))] gap-1 rounded-none bg-white p-4"
     >
       {cells.map((filled, index) => (
         <span
           key={index}
-          className={`aspect-square rounded-[3px] ${filled ? "bg-ink" : "bg-[#edf6d7]"}`}
+          className={`aspect-square rounded-none ${filled ? "bg-ink" : "bg-[#edf6d7]"}`}
         />
       ))}
     </div>
@@ -3753,7 +3753,7 @@ function BankVerificationPanel({ enrollment }: { enrollment: EnrollmentRecord })
 
   return (
     <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-      <div className="rounded-[28px] bg-ink p-5 text-mist">
+      <div className="rounded-none bg-ink p-5 text-mist">
         <div className="flex flex-wrap items-center gap-3">
           <StatusPill tone="good">{enrollment.bank_verification.bank_name}</StatusPill>
           <StatusPill
@@ -3782,7 +3782,7 @@ function BankVerificationPanel({ enrollment }: { enrollment: EnrollmentRecord })
         </p>
       </div>
 
-      <div className="rounded-[28px] bg-white p-5 text-sm text-ink/76">
+      <div className="rounded-none bg-white p-5 text-sm text-ink/76">
         <p className="font-medium text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-56" : undefined}>What to do</p>
         <div className="mt-3 space-y-3">
           <InstructionRow
@@ -3799,7 +3799,7 @@ function BankVerificationPanel({ enrollment }: { enrollment: EnrollmentRecord })
           />
         </div>
         {enrollment.last_user_message ? (
-          <p className="mt-5 rounded-[20px] bg-ink/5 px-4 py-3 text-sm text-ink/72">
+          <p className="mt-5 rounded-none bg-ink/5 px-4 py-3 text-sm text-ink/72">
             {enrollment.last_user_message}
           </p>
         ) : null}
@@ -3818,7 +3818,7 @@ export function PassPreviewCard({
   zignatureSeedInput: string;
 }) {
   return (
-    <div className="relative min-w-0 w-full max-w-full overflow-hidden rounded-[32px] bg-[linear-gradient(135deg,_#243818_0%,_#557f33_48%,_#a2ce6a_100%)] p-4 text-mist sm:p-6">
+    <div className="relative min-w-0 w-full max-w-full overflow-hidden rounded-none bg-[linear-gradient(135deg,_#243818_0%,_#557f33_48%,_#a2ce6a_100%)] p-4 text-mist sm:p-6">
       <div className="absolute -right-10 top-0 h-40 w-40 rounded-full bg-[#e9f8c9]/20 blur-3xl" />
       <div className="relative min-w-0">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -3828,7 +3828,7 @@ export function PassPreviewCard({
           </div>
           <StatusPill tone={active ? "good" : "neutral"}>{active ? "Active" : "Activating"}</StatusPill>
         </div>
-        <div className="mt-7 min-w-0 rounded-[26px] border border-white/12 bg-white/8 px-3 py-6 sm:px-4">
+        <div className="mt-7 min-w-0 rounded-none border border-white/12 bg-white/8 px-3 py-6 sm:px-4">
           <Zignature
             animate={active}
             className="h-20 w-full"
@@ -3864,9 +3864,9 @@ function CredentialVisualPreview({
   muted?: boolean;
 }) {
   return (
-    <div className="rounded-[28px] border border-ink/10 bg-white/88 p-5 shadow-[0_18px_40px_rgba(14,23,38,0.08)]">
-      <div className="rounded-[24px] bg-[#f7faee] p-5">
-        <div className="rounded-[22px] border border-ink/8 bg-white/75 px-4 py-4">
+    <div className="rounded-none border border-ink/10 bg-white/88 p-5 shadow-[0_18px_40px_rgba(14,23,38,0.08)]">
+      <div className="rounded-none bg-[#f7faee] p-5">
+        <div className="rounded-none border border-ink/8 bg-white/75 px-4 py-4">
           <div className="flex items-center justify-between gap-3">
             <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink/46" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-59" : undefined}>
               Your Zignature
@@ -3895,7 +3895,7 @@ function CredentialVisualPreview({
 function WalletFlowAside({ emphasis = false }: { emphasis?: boolean }) {
   return (
     <aside className="relative hidden overflow-hidden border-l border-ink/10 bg-transparent lg:flex lg:flex-col lg:justify-between lg:p-8">
-      <section className="relative my-auto rounded-[32px] border border-ink/10 bg-white/88 p-6 text-ink shadow-[0_22px_60px_rgba(14,23,38,0.14)] backdrop-blur-sm">
+      <section className="relative my-auto rounded-none border border-ink/10 bg-white/88 p-6 text-ink shadow-[0_22px_60px_rgba(14,23,38,0.14)] backdrop-blur-sm">
         <div className="inline-flex items-center rounded-full border border-ink/10 bg-[#eef6df] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.2em] text-ink/68">
           {emphasis ? "Signed preview" : "Credential preview"}
         </div>
@@ -3990,7 +3990,7 @@ function HowItWorksGraphic({
 }) {
   if (art === "physical-session") {
     return (
-      <div className="rounded-[26px] bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
+      <div className="rounded-none bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
         <div className="grid gap-3">
           <WorkflowStage label="1" title="Generic card" body="One printed QR can start many fresh sessions." />
           <WorkflowStage label="2" title="New session" body="Zik creates a short-lived opaque session." />
@@ -4002,7 +4002,7 @@ function HowItWorksGraphic({
 
   if (art === "staff-check") {
     return (
-      <div className="rounded-[26px] bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
+      <div className="rounded-none bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
         <div className="grid gap-3 sm:grid-cols-3">
           <InlineDetail title="Staff sees" body="The customer and their physical ID." />
           <InlineDetail title="Zik receives" body="An authorised 18+ attestation." />
@@ -4014,9 +4014,9 @@ function HowItWorksGraphic({
 
   if (art === "physical-pass") {
     return (
-      <div className="rounded-[26px] bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
+      <div className="rounded-none bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
         <div className="space-y-4">
-          <div className="rounded-[22px] border border-ink/8 bg-white p-4">
+          <div className="rounded-none border border-ink/8 bg-white p-4">
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/42" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-60" : undefined}>Wallet shows</p>
             <p className="mt-2 font-heading text-2xl font-semibold tracking-tight text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-61" : undefined}>
               18+ · In-person verified
@@ -4033,7 +4033,7 @@ function HowItWorksGraphic({
 
   if (art === "signals") {
     return (
-      <div className="rounded-[26px] bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
+      <div className="rounded-none bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
         <div className="grid gap-3 sm:grid-cols-3">
           <InlineDetail title="Soft check" body="Looks for adult financial signals only." />
           <InlineDetail title="Bank step" body="Refundable authorisation confirms control." />
@@ -4045,7 +4045,7 @@ function HowItWorksGraphic({
 
   if (art === "signing") {
     return (
-      <div className="rounded-[26px] bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
+      <div className="rounded-none bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
         <div className="grid gap-3">
           <WorkflowStage label="1" title="Local key" body="Created on this device only." />
           <WorkflowStage label="2" title="Human review" body="Cooling off completes before signing." />
@@ -4056,9 +4056,9 @@ function HowItWorksGraphic({
   }
 
   return (
-    <div className="rounded-[26px] bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
+    <div className="rounded-none bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
       <div className="space-y-4">
-        <div className="rounded-[22px] border border-ink/8 bg-white p-4">
+        <div className="rounded-none border border-ink/8 bg-white p-4">
           <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/42" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-62" : undefined}>Site sees</p>
           <p className="mt-2 font-heading text-2xl font-semibold tracking-tight text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-63" : undefined}>Over 18</p>
         </div>
@@ -4181,7 +4181,7 @@ function FieldTextarea({
 
 function InlineDetail({ title, body }: { title: string; body: string }) {
   return (
-    <div className="min-w-0 rounded-[20px] bg-white/75 px-4 py-4">
+    <div className="min-w-0 rounded-none bg-white/75 px-4 py-4">
       <p className="text-sm font-medium text-ink">{title}</p>
       <p className="mt-2 break-words text-sm leading-6 text-ink/64">{body}</p>
     </div>
@@ -4198,7 +4198,7 @@ function WorkflowStage({
   body: string;
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-[22px] bg-white px-4 py-4">
+    <div className="flex items-start gap-3 rounded-none bg-white px-4 py-4">
       <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#DDF0EC] text-xs font-semibold text-ink">
         {label}
       </span>
@@ -4220,7 +4220,7 @@ function InfoBlock({
   dark?: boolean;
 }) {
   return (
-    <div className={clsx("rounded-[26px] p-5", dark ? "border border-white/8 bg-white/[0.03]" : "border border-ink/8 bg-white/78")}>
+    <div className={clsx("rounded-none p-5", dark ? "border border-white/8 bg-white/[0.03]" : "border border-ink/8 bg-white/78")}>
       <p className={clsx("font-heading text-2xl font-semibold tracking-tight", dark ? "text-mist" : "text-ink")}>{title}</p>
       <p className={clsx("mt-3 text-sm leading-7", dark ? "text-mist/55" : "text-ink/68")}>{body}</p>
     </div>
@@ -4229,7 +4229,7 @@ function InfoBlock({
 
 function InstructionRow({ number, body }: { number: string; body: string }) {
   return (
-    <div className="flex items-start gap-3 rounded-[20px] bg-ink/5 px-4 py-3">
+    <div className="flex items-start gap-3 rounded-none bg-ink/5 px-4 py-3">
       <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ink text-xs font-semibold text-mist">
         {number}
       </span>
@@ -4248,7 +4248,7 @@ function MetaTile({
   dark?: boolean;
 }) {
   return (
-    <div className={clsx("min-w-0 rounded-[18px] px-2.5 py-1.5", dark ? "bg-white/5" : "bg-white")}>
+    <div className={clsx("min-w-0 rounded-none px-2.5 py-1.5", dark ? "bg-white/5" : "bg-white")}>
       <p className={clsx("font-mono text-[9px] uppercase tracking-[0.16em]", dark ? "text-mist/40" : "text-ink/45")}>
         {label}
       </p>
@@ -4259,7 +4259,7 @@ function MetaTile({
 
 function BankMetaTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0 rounded-[22px] bg-white/8 px-4 py-4">
+    <div className="min-w-0 rounded-none bg-white/8 px-4 py-4">
       <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/55">{label}</p>
       <p className="mt-2 break-words text-sm font-medium text-mist">{value}</p>
     </div>

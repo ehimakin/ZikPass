@@ -55,7 +55,7 @@ export function RecoveryPanel({
     <section
       aria-live="assertive"
       role="alert"
-      className="mx-auto w-full max-w-xl rounded-[28px] border border-[#d27a86]/25 bg-[#fdf3f4] p-6 text-left shadow-panel"
+      className="mx-auto w-full max-w-xl rounded-none border border-[#d27a86]/25 bg-[#fdf3f4] p-6 text-left shadow-panel"
     >
       <h2 className="font-heading text-2xl font-semibold text-ink">{title}</h2>
       <p className="mt-2 text-sm leading-6 text-ink/76">{message}</p>

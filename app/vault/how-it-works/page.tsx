@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default function VaultGuidePage() {
-  return <CustomerShell active="pass" immersive>
+  return <CustomerShell active="vault" immersive>
     <article className={styles.page}>
       <header className={styles.intro}>
         <p className={styles.eyebrow} data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-1" : undefined}>HOW ZIK VAULT WORKS</p>

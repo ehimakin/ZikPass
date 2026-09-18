@@ -70,6 +70,8 @@ export function consumeZikIdSignalSession(id: string, code: string): boolean {
   return true;
 }
 
-export function resetZikIdSignalSessionsForTests() {
+export function resetZikIdSignalSessions() {
   sessions.clear();
 }
+
+export const resetZikIdSignalSessionsForTests = resetZikIdSignalSessions;

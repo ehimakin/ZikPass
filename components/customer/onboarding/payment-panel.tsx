@@ -232,7 +232,7 @@ export function PaymentPanel({
       ) : null}
 
       <Sheet open={sheetOpen} onClose={() => setSheetOpen(false)} title="Zik demo checkout">
-        <div className="rounded-[var(--zk-r-md)] bg-[var(--zk-sunken)] p-3.5">
+        <div className="rounded-none bg-[var(--zk-sunken)] p-3.5">
           <div className="flex items-center justify-between text-[13px]">
             <span className="text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-4b80c27ad530-7" : undefined}>Zik Pass</span>
             <span className="font-bold text-[var(--zk-text)]">
