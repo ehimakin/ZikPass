@@ -15,7 +15,12 @@ export function ProductFamily({ price }: { price: string }) {
             <p className="mt-3 text-[15px] font-semibold leading-relaxed">{product.promise}</p>
             <p className="mt-2 text-sm leading-relaxed text-[var(--zk-text-soft)]">{product.detail}</p>
             <p className="mt-4 text-sm font-bold">{product.displayPrice}</p>
-            {product.available ? <ButtonLink href={product.destination} className="mt-4">Get Zik Pass · {price}</ButtonLink> : <p className="mt-2 text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-292792b74590-2" : undefined}>Planned concept · Not available in this prototype</p>}
+            {product.available
+              ? <ButtonLink href={product.destination} className="mt-4">Get Zik Pass · {price}</ButtonLink>
+              : product.destination
+                // Usable on this device, but the membership behind it is not a real product yet.
+                ? <><ButtonLink href={product.destination} variant="secondary" className="mt-4">Open {product.name}</ButtonLink><p className="mt-2 text-xs text-[var(--zk-text-soft)]">Works on this device. The planned price is illustrative and cannot be charged here.</p></>
+                : <p className="mt-2 text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-292792b74590-2" : undefined}>Planned concept · Not available in this prototype</p>}
           </Card>
         </li>
       ))}

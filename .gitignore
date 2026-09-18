@@ -26,3 +26,7 @@ data/demo-merchant-*.json
 data/disclosures.json
 
 .next-sprint6-*/
+
+# Generated at install time by scripts/vendor-ocr-assets.mjs
+public/ocr/
+public/pdf/

@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { VaultSession } from "@/lib/client/vault-adapter";
-import { selfEntered, type VaultProfileV1 } from "@/lib/shared/vault";
+import { VaultV2 } from "@/lib/client/vault/session";
+import { selfEntered } from "@/lib/shared/vault";
+import type { VaultProfileV2 } from "@/lib/shared/vault/model";
 import { Alert, Button, Sheet, StatusBadge } from "@/components/customer/ui";
 
 type Step = "welcome" | "payment" | "setup" | "complete";
 
-export function VaultSignup({ onCreated }: { onCreated: (profile: VaultProfileV1) => void }) {
+export function VaultSignup({ vault, onCreated }: { vault: VaultV2; onCreated: (profile: VaultProfileV2) => void }) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<Step>("welcome");
   const [paying, setPaying] = useState(false);
@@ -20,8 +21,7 @@ export function VaultSignup({ onCreated }: { onCreated: (profile: VaultProfileV1
     passphrase: "",
     confirmation: ""
   });
-  const vault = useRef(new VaultSession());
-  const createdProfile = useRef<VaultProfileV1 | undefined>(undefined);
+  const createdProfile = useRef<VaultProfileV2 | undefined>(undefined);
 
   useEffect(() => {
     try {
@@ -59,13 +59,14 @@ export function VaultSignup({ onCreated }: { onCreated: (profile: VaultProfileV1
     setSaving(true);
     try {
       const updatedAt = new Date().toISOString();
-      const profile: VaultProfileV1 = {
-        version: 1,
+      const profile: VaultProfileV2 = {
+        version: 2,
         legal_name: selfEntered({ value: values.legalName, provenance: "self_entered", updated_at: updatedAt }),
         delivery_address: selfEntered({ value: values.deliveryAddress, provenance: "self_entered", updated_at: updatedAt }),
-        ...(values.email.trim() ? { email: selfEntered({ value: values.email, provenance: "self_entered", updated_at: updatedAt }) } : {})
+        ...(values.email.trim() ? { email: selfEntered({ value: values.email, provenance: "self_entered", updated_at: updatedAt }) } : {}),
+        designations: []
       };
-      await vault.current.save(profile, values.passphrase);
+      await vault.create(profile, values.passphrase);
       createdProfile.current = profile;
       try {
         window.localStorage.removeItem("zik-vault-onboarding");

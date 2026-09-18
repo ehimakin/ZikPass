@@ -12,10 +12,15 @@ is a progression in what a person can choose to prove, not a dependency for usin
 | Product | Canonical distinction | Commercial model | Product status |
 | --- | --- | --- | --- |
 | Zik Pass | One thing about me that I can prove without identifying myself. | £1.99 one-off; not a subscription | Available now in the prototype |
-| ZikVault | What I can prove. | Planned £0.99/month | Coming next; planned concept |
-| Zik ID | Who I am when identity is genuinely required. | Planned £2.99 one-off | Planned concept |
+| ZikVault | What I can prove. | Planned £0.99/month | Working on the device; membership not a real product |
+| Zik ID | Who I am when identity is genuinely required. | Planned £2.99 one-off | Application only; cannot be issued |
 
-ZikVault and Zik ID are planned products and are not available in this prototype.
+ZikVault works in this prototype: documents chosen by the user are stored encrypted on
+the device and read there to suggest details the user reviews. Nothing it reads is a
+check that a document is genuine, and nothing in a Vault is labelled verified. Zik ID
+can be applied for and the application saved; it cannot be issued, because the identity
+checks and the issuer do not exist yet — see
+[ZIK_ID_ONBOARDING_DEPENDENCIES.md](ZIK_ID_ONBOARDING_DEPENDENCIES.md).
 “Available now” for Pass means the working prototype journey; payments remain demo-only.
 Planned prices cannot currently be charged. Pass purchase amounts remain server-authoritative
 in `lib/shared/payment-config.ts` and the existing payment services, including configured
@@ -30,12 +35,18 @@ a subscription to obtain or use Pass. This milestone changes neither expiry nor 
 
 ## ZikVault: local-first proof-backed credentials
 
-The planned Vault is a device-held pool of proof-backed credential objects derived from
-sources such as a passport, driving licence, utility bill, designated verified photograph,
-address evidence, student credential or professional credential. Underlying credentials
-and identity documents are designed to live on the user's device rather than in a central
-Zik identity-document database. Users would choose which verified claims to combine and
-share for a particular request. Self-entered profile fields are not verified credentials.
+The Vault is a device-held pool of documents and the claims they support, from sources
+such as a passport, driving licence, utility bill, address evidence, or a student or
+professional credential. Documents live on the user's device, not in a central Zik
+identity-document database, and are read on the device rather than by Zik or an AI
+provider.
+
+Today the Vault holds documents, extractions, user-reviewed claims and consents — not
+verified credentials. An extraction the user has confirmed means Zik read the text
+correctly; it is not an authenticity or holder check, and the interface never calls it
+one. Proof-backed credentials require the issuance path described in
+[ZIK_ID_ONBOARDING_DEPENDENCIES.md](ZIK_ID_ONBOARDING_DEPENDENCIES.md). Self-entered
+profile fields are not verified credentials either.
 
 Local-first does not mean “Zik stores no data”. Operational server data may include public
 keys, revocation/status data, issuer metadata, fraud signals and audit events. A separate

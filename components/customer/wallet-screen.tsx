@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { loadWalletState } from "@/lib/client/wallet-client";
+import { hasApplicationRecord } from "@/lib/client/vault/store";
 import type { WalletState } from "@/lib/shared/types";
 import { Alert, Button, ButtonLink, Skeleton, StatusBadge } from "./ui";
 
@@ -11,10 +12,16 @@ export function WalletScreen() {
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [now, setNow] = useState(() => Date.now());
+  const [application, setApplication] = useState(false);
   useEffect(() => {
     let cancelled = false;
     setFailed(false);
     void loadWalletState().then(value => { if (!cancelled) setWallet(value); }).catch(() => { if (!cancelled) setFailed(true); });
+    return () => { cancelled = true; };
+  }, [attempt]);
+  useEffect(() => {
+    let cancelled = false;
+    void hasApplicationRecord().then(value => { if (!cancelled) setApplication(value); });
     return () => { cancelled = true; };
   }, [attempt]);
   useEffect(() => {
@@ -39,6 +46,11 @@ export function WalletScreen() {
         <div className="flex items-center justify-between border-t border-[#e4dfc8] pt-4 text-sm font-semibold"><span>{credential ? "Open Zik Pass" : wallet.enrollmentId ? "View pass progress" : "Explore Zik Pass"}</span><span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-6" : undefined}>→</span></div>
       </Link>
       {!credential && !wallet.enrollmentId ? <div className="mt-4"><ButtonLink href="/find" size="lg">Get Zik Pass</ButtonLink></div> : null}
+      {application ? <Link href="/id/apply" aria-label="Open your Zik ID application" className="mt-4 block rounded-3xl border border-[#e4dfc8] bg-white p-6 transition hover:border-[#cbb95b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#28623c]">
+        <div className="flex items-center justify-between gap-3"><h2 className="text-xl font-extrabold"><span className="text-[#28623c]">Zik</span> ID</h2><StatusBadge tone="neutral">Application saved</StatusBadge></div>
+        <p className="mt-4 text-sm text-[var(--zk-text-soft)]">Your application is held in your Vault on this device. Zik ID identity checks are not available yet, so nothing has been approved or issued.</p>
+        <div className="mt-5 flex items-center justify-between border-t border-[#e4dfc8] pt-4 text-sm font-semibold"><span>Unlock your Vault to view it</span><span aria-hidden="true">→</span></div>
+      </Link> : null}
     </section>}
     <div className="flex justify-center border-t border-[var(--zk-line)] pt-5"><ButtonLink href="/vault" className="!bg-[#424242] !text-white hover:!bg-[#303030] active:!bg-[#252525]">Go to Vault</ButtonLink></div>
   </div>;

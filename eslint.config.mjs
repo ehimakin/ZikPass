@@ -11,7 +11,8 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   {
-    ignores: [".next/**", ".next-sprint6-*/**", "node_modules/**", "next-env.d.ts", "scripts/**"]
+    // public/ocr and public/pdf are third-party engine builds vendored at install time.
+    ignores: [".next/**", ".next-sprint6-*/**", "node_modules/**", "next-env.d.ts", "scripts/**", "public/ocr/**", "public/pdf/**"]
   },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   { files: ["lib/server/**/*.ts", "lib/client/**/*.ts", "components/**/*.{ts,tsx}"], rules: { "no-restricted-imports": ["error", { patterns: ["**/demo-rp/**"] }] } }

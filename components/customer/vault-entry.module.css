@@ -223,3 +223,8 @@
 .detailForm input:focus-visible { outline: 2px solid var(--zk-focus); outline-offset: 2px; }
 .detailForm > button { justify-self: start; }
 .detailSecret { display: grid; gap: 5px; font-size: 12px; }
+
+/* Provenance and status lines added with the real document pipeline. */
+.provenance { display: block; margin-top: 5px; color: #626258; font-size: 11px; line-height: 1.5; }
+.workspaceError { max-width: 1160px; margin: 18px auto 0; padding: 13px 15px; background: #fdf0ee; color: #9b2c20; font-size: 13px; }
+.storageNote { max-width: 1160px; margin: 22px auto 0; color: #626258; font-size: 12px; line-height: 1.6; }

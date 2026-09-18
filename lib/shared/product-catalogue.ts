@@ -13,21 +13,21 @@ export function getProductCatalogue(passDisplayPrice: string) {
     },
     {
       name: "ZikVault",
-      promise: "A device-held pool of things you can prove about yourself.",
-      status: "Coming next",
+      promise: "Your documents, kept and read on your own device.",
+      status: "Working on this device",
       displayPrice: "Planned: £0.99/month",
       available: false,
-      destination: null,
-      detail: "What I can prove. Verified credentials designed to live on your device, ready to share only the claims a situation requires."
+      destination: "/vault",
+      detail: "What I can prove. Documents you choose are stored encrypted on this device and can be read here to suggest details you review. Nothing is uploaded, and nothing Zik reads is a check that a document is genuine."
     },
     {
       name: "Zik ID",
-      promise: "A ready-made identity assembled from verified information in ZikVault.",
-      status: "Planned",
+      promise: "An identity application built from details you have confirmed in your Vault.",
+      status: "Application only",
       displayPrice: "Planned: £2.99 one-off",
       available: false,
       destination: null,
-      detail: "Who I am when identity is genuinely required. A predefined presentation of Vault claims, not a separate identity store."
+      detail: "Who I am when identity is genuinely required. You can prepare and save an application today. The identity checks behind a Zik ID are not available yet, so none can be issued."
     }
   ] as const;
 }

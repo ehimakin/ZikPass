@@ -114,3 +114,77 @@ experimental direct routes are not part of this product demonstration.
   reconciles a pass that was issued server-side but not stored locally.
 - Codes expire after ~5 minutes — start again from `/get-pass` if the clerk
   can't find one.
+
+---
+
+# Zik Vault — document demo script
+
+Shows the Vault reading real files on the device and preparing a Zik ID
+application. Every document used is a synthetic specimen from
+`tests/fixtures/documents`; no real identity document is involved.
+
+## Before you start
+
+1. `npm run fixtures` once, if `tests/fixtures/documents` is missing.
+2. Reset to a clean slate on `/help` → **Reset demo data**.
+3. Have an active Zik Pass on the device if you want to reach `ready_to_apply` —
+   the readiness policy requires one. Without it the checklist simply shows the
+   Pass as the missing requirement, which is also worth showing.
+
+## 1. Create and unlock (45s)
+
+- Go to **`/vault`**. With no Vault on the device, take **Get Zik Vault** →
+  **Continue to payment** → **Pay £0.99**. Say plainly: preview checkout, nothing
+  collected, nothing charged.
+- Fill in name, address and a passphrase of at least 12 characters. Create the
+  Vault, then **Go to my Vault**.
+- Point out: "Zik cannot reset this passphrase. There is no cloud copy."
+
+## 2. Choose documents and consent (60s)
+
+- **Add document**. Show the three entry points, and read the line aloud: *a
+  website cannot look through your phone*. Only what you pick is visible to Zik.
+- **Add files** → choose `passport-clean.png` and `utility-bill-recent.pdf`.
+- On the scope screen, show the two separate consents. Tick only the first and
+  note that storing without reading is a complete path. Then tick the second.
+- **Add and read.** Watch the per-file progress. This is real OCR running on the
+  device — the network tab stays empty.
+
+## 3. Review one match and one conflict (90s)
+
+- The passport's name comes back **Matches your details**; the date of birth comes
+  back **You have not added this yet**. Take **Use this** for the date of birth.
+- Show "Exactly as written": `940312` from the machine-readable zone, next to the
+  proposal `1994-03-12`. The raw text is always kept beside the interpretation.
+- Now add `driving-licence-dob-conflict.png` the same way. Its date of birth reads
+  `1974-03-12` and is marked **Different from your details**. Take **Keep mine**.
+- Say the important sentence: confirming Zik read a document correctly is *not* a
+  check that the document is genuine or that it is yours.
+
+## 4. Lock and reopen (30s)
+
+- **Lock Vault**, reload the page, unlock with the passphrase. Documents, proposals
+  and confirmed details are all still there.
+- Optional: open DevTools → IndexedDB → `zik-vault` and show that the filename,
+  the name and the date of birth are nowhere in the stored records.
+
+## 5. Readiness and application (60s)
+
+- Scroll to the readiness panel. It names each requirement and what is still
+  missing in plain language. Add `utility-bill-recent.pdf`'s address and confirm it
+  to reach **ready to apply**.
+- Take **Apply for Zik ID**. Walk through the evidence, the details, and the
+  "what happens next" list.
+- Save the application. It becomes **pending onboarding**: nothing sent, nothing
+  approved, no ID issued. Show it appears in **`/wallet`** as an application only.
+
+## 6. Withdraw by deleting evidence (30s)
+
+- Back in the Vault, delete the supporting document. Readiness drops immediately and
+  the application is marked as needing checking again. Evidence changing after you
+  applied is never hidden.
+
+## 7. Reset (15s)
+
+- `/help` → **Reset demo data**. Return to `/vault`: a fresh device with no Vault,
+  no documents and no application.

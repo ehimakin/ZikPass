@@ -217,11 +217,31 @@ When adding a capability:
 4. Add a focused test for the state transition and one adverse/retry path.
 5. Keep the route handler thin and update `README.md`, this document, and `docs/TESTING.md` if the user-visible flow changes.
 
-## Sprint 6 Vault / disclosure extension
+## Vault v2: documents, local analysis and the Zik ID application
 
-`lib/shared/vault.ts` defines strict profile/envelope parsing and Web Crypto encryption;
-`lib/client/vault-adapter.ts` owns a separate `zik-local-vault` IndexedDB record and
-memory-only session. Nothing is added to WalletState or native pass handoff.
+`lib/shared/vault/` holds the v2 model and crypto: `model.ts` (documents,
+observations, claims, consents, applications, all strictly parsed), `crypto.ts` (the
+wrapped-data-key hierarchy and per-record AAD binding) and `claims.ts` (reconciling
+accepted evidence against the value the user stands behind).
+
+`lib/client/vault/` holds the device side: `store.ts` (the encrypted `zik-vault`
+IndexedDB database and its atomic `commit()`), `session.ts` (`VaultV2`, the unlock
+lifecycle, the v1 migration and every read/write path), `analysis.worker.ts` (PDF.js
+plus Tesseract WASM, entirely on-device), `analysis-client.ts` (one worker, one job,
+generation-guarded) and `import-sources.ts` (file, camera and folder adapters).
+
+`lib/shared/analysis/` is pure and testable in Node: `text.ts` (date, name and
+address normalisation and comparison), `mrz.ts` (ICAO 9303 parsing and check digits)
+and `extract.ts` (classification and field proposals).
+
+`lib/shared/policy/zik-id-readiness.ts` is the versioned readiness function;
+`lib/shared/onboarding/adapter.ts` is the boundary a future authorised checker
+implements, and which currently refuses every outcome.
+
+Read [ADR 007](decisions/007-vault-v2-local-analysis.md) before changing storage or
+the CSP. v1 (`lib/shared/vault.ts`, `lib/client/vault-adapter.ts`) is retained for
+migration, for the legacy `/vault-legacy` screen and for disclosure. Nothing is added
+to WalletState or native pass handoff.
 `lib/shared/disclosure.ts` handles field selection and hybrid encryption.
 `lib/server/disclosure-service.ts` registers Harbour & Pine, delegates age verification
 to the existing affiliate service, and serializes ciphertext redemption. Only

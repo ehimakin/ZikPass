@@ -61,10 +61,9 @@ test('a new user can purchase the preview and create an encrypted Vault', async 
   await expect(details.getByRole('button', { name: 'Save Legal name' })).toHaveCount(0);
   await details.getByLabel('Legal name', { exact: true }).fill('Updated Vault User');
   await expect(details.getByRole('button', { name: 'Save Legal name' })).toBeVisible();
-  await details.getByLabel('Vault passphrase').fill('incorrect passphrase');
-  await details.getByRole('button', { name: 'Save Legal name' }).click();
-  await expect(details.getByRole('alert')).toBeVisible();
-  await details.getByLabel('Vault passphrase').fill('correct horse battery staple');
+  // v2 unwraps one data key at unlock, so an edit no longer re-derives from the
+  // passphrase and no longer asks for it. The passphrase is still never stored, and
+  // the Vault still locks on inactivity, on hiding the tab and on demand.
   await details.getByRole('button', { name: 'Save Legal name' }).click();
   await expect(details.getByText('Updated Vault User', { exact: true })).toBeVisible();
   await details.getByRole('button', { name: 'Edit Delivery address', exact: true }).click();
@@ -78,15 +77,15 @@ test('a new user can purchase the preview and create an encrypted Vault', async 
   await details.getByLabel('Designation', { exact: true }).fill('Founder');
   await details.getByRole('button', { name: 'Save Designation' }).click();
   await expect(details.getByText('Founder', { exact: true })).toBeVisible();
+  // The simulated search is gone: documents now come from the OS picker, the camera
+  // or a folder the user grants, and consent is asked for after a real selection.
   await page.getByRole('button', { name: /Add document/ }).click();
-  const discovery = page.getByRole('dialog', { name: 'Find what matters.' });
-  await expect(discovery.getByText('Choose a document yourself')).toBeVisible();
-  await expect(discovery.getByLabel('Date of birth')).toBeVisible();
-  await expect(discovery.getByLabel('Occupation / employment (CVs)')).toBeVisible();
-  await expect(discovery.getByLabel('Camera roll / photo library')).toBeVisible();
-  await expect(discovery.getByLabel('Documents library')).toBeVisible();
-  await expect(discovery.getByLabel('Files / folders')).toBeVisible();
-  await expect(discovery.getByRole('button', { name: 'Show demo matches' })).toBeDisabled();
+  const importDialog = page.getByRole('dialog', { name: 'Add what you choose.' });
+  await expect(importDialog.getByRole('button', { name: /Add files/ })).toBeVisible();
+  await expect(importDialog.getByRole('button', { name: /Take a document photo/ })).toBeVisible();
+  await expect(importDialog.getByRole('button', { name: /Search a folder you choose/ })).toBeVisible();
+  await expect(importDialog.getByText(/A website cannot look through your phone/)).toBeVisible();
+  await expect(importDialog.getByRole('checkbox')).toHaveCount(0);
   await page.keyboard.press('Escape');
   await page.reload();
   await expect(page.locator('#vault-title')).toBeVisible();

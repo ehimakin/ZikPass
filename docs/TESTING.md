@@ -139,6 +139,42 @@ Build separately with `ZIK_NEXT_DIST_DIR=.next-sprint6-build npm run build`.
 Next may rewrite its generated TypeScript include paths when switching output directories.
 Real iPhone/PWA verification remains a manual gate; see [demo checklist](sprint-6/DEMO.md).
 
+## Vault documents and on-device analysis
+
+Four suites cover the document pipeline, none of them mocked:
+
+- `tests/analysis-text.test.ts` — date, name and address normalisation and
+  comparison, including every case where the code must refuse to guess.
+- `tests/extraction-fixtures.test.ts` — field-level accuracy against
+  `tests/fixtures/ocr-transcripts.json`, which is the text **real in-browser OCR**
+  produced from the committed fixtures. It runs offline and fast.
+- `tests/zik-id-readiness.test.ts` — the readiness policy, including duplicate
+  evidence, expired primary evidence, stale address evidence and conflicts.
+- `tests/vault-v2.test.ts` — key hierarchy, record binding, migration, lock
+  lifecycle and cascade deletion, against `fake-indexeddb`.
+
+Regenerate the inputs when the engine or pipeline changes:
+
+```sh
+npm run fixtures      # rebuild the 18 synthetic documents (Playwright, macOS for HEIC)
+npm run measure:ocr   # re-record transcripts and print the measured table
+```
+
+`npm run measure:ocr` blocks every non-origin request and reports how many were
+attempted; it must stay at zero. Do not hand-edit `ocr-transcripts.json` — if a test
+fails after an engine change, re-record and judge the new numbers.
+
+`e2e/vault-documents.spec.ts` drives the real application: OS file picker, consent,
+real OCR, review, lock and reload, conflict handling, unsupported files, and deleting
+evidence withdrawing readiness. It also asserts that no request body carries a
+document value and that nothing left the origin. Real OCR takes seconds per document,
+so it sets a longer per-test timeout.
+
+Three tests in `e2e/vault-preview.spec.ts` exercise the development-only demo Vault
+and require a development server; they fail against a production build, on this
+branch and on `main` alike.
+
+
 For production browser verification, first build with the isolated output directory, then use the same directory with `ZIK_E2E_PRODUCTION=true` in the browser command (full exact invocation in the handoff).
 
 ## Product-positioning manual checks

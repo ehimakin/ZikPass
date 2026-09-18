@@ -11,10 +11,15 @@ This repository implements **Zik Pass**, the first product in the wider **Zik** 
 and **Zik ID** (planned £2.99 one-off) are future products. See the
 [product source of truth](docs/PRODUCT_DIRECTION.md).
 
-Existing experimental Vault/disclosure and Zik ID code is preserved, but does not implement
-the agreed proof-backed products. It would be inaccurate to say no such logic exists in
-this checkout. New customer product links lead to a read-only explanation; no planned-product
-setup, upload, payment or issuance is added by this milestone.
+**ZikVault now works on the device**: documents the user picks are stored encrypted in
+the browser and read there with on-device OCR, producing suggestions the user reviews.
+Nothing is uploaded, and nothing it reads is a check that a document is genuine.
+**Zik ID** can be applied for but not issued — Zik has not defined the identity checks
+or the issuer, so an application stops at `pending_onboarding`. See
+[ADR 007](docs/decisions/007-vault-v2-local-analysis.md),
+[the analysis capability and results](docs/VAULT_LOCAL_ANALYSIS.md) and
+[the onboarding decisions still needed](docs/ZIK_ID_ONBOARDING_DEPENDENCIES.md).
+Planned prices are illustrative and cannot be charged here.
 
 ## Surfaces
 
@@ -173,10 +178,16 @@ All supported environment variables are documented in [`.env.example`](.env.exam
 
 For the system map and extension points, start with [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), then [`docs/TESTING.md`](docs/TESTING.md).
 
-## Preserved experiments: Sprint 6 local Vault and selective disclosure
+## Zik Vault documents and selective disclosure
 
-The controlled investor demo adds `/vault` and `/retail-demo`. Enable explicitly with
-`ZIK_DISCLOSURE_V1=true`; the default is off. Name/address/email are self-entered,
+`/vault` is a working device Vault: import from the file picker, camera or a chosen
+folder, consent separately to storing and to reading, real local OCR, review of what
+was found, and a Zik ID application that stops at pending onboarding. Run
+`npm run fixtures` for synthetic test documents and `npm run measure:ocr` to reproduce
+the measured extraction results.
+
+`/retail-demo` selective disclosure is separate and still gated: enable explicitly
+with `ZIK_DISCLOSURE_V1=true`; the default is off. Name/address/email are self-entered,
 separate from the signed age pass. Zik disclosure endpoints receive only encrypted
 profile fields; the co-hosted demo merchant is the decryption boundary.
 

@@ -8,6 +8,78 @@ Branch: `v2-ui-overhaul` · Baseline commit: `675a050`
 
 ---
 
+## Vault documents and Zik ID application — 2026-09-18
+
+Branch: `sprint-6-vault-selective-disclosure` · Baseline commit: `b86d3b1`
+Brief: `docs/sprints/vault-to-zik-id-opus-brief.md`
+
+The Vault now does the thing it described. Documents the user picks are stored
+encrypted on the device, read on the device with real OCR, turned into reviewable
+proposals, and reconciled against claims the user controls. When enough reviewed
+evidence exists, a Zik ID application can be prepared and saved — and can go no
+further, because no identity checks or issuer exist yet.
+
+Read first: [ADR 007](decisions/007-vault-v2-local-analysis.md) for storage and
+security, [VAULT_LOCAL_ANALYSIS.md](VAULT_LOCAL_ANALYSIS.md) for measured results,
+capability matrix and limitations, and
+[ZIK_ID_ONBOARDING_DEPENDENCIES.md](ZIK_ID_ONBOARDING_DEPENDENCIES.md) for what the
+owner still has to decide.
+
+### What changed
+
+- **Real local analysis.** PDF.js text layers, Tesseract WASM OCR for everything
+  else, in a Web Worker, from same-origin assets vendored at install time. No CDN,
+  no cloud fallback. Deterministic parsers for MRZ, UK driving licences, address
+  evidence, certificates and contracts.
+- **Vault v2 storage.** Wrapped data key, per-record nonces and AAD binding, binary
+  document storage, transactional writes, generation-guarded lifecycle, and a v1
+  migration that never destroys the old record.
+- **Review and reconciliation.** Every proposal carries its raw text, method,
+  legibility and ambiguities, and shows matches / different / missing / needs review
+  against the user's own value. Nothing overwrites a self-entered value silently.
+- **Readiness policy.** A pure versioned function (`zik-id-readiness/1`) returning
+  `not_ready | needs_review | ready_to_apply` with machine-readable reasons. Duplicate
+  evidence cannot raise readiness; deleting evidence withdraws it.
+- **Application.** `/id/apply` prepares and saves a `pending_onboarding` application
+  against an explicit onboarding adapter boundary that refuses every outcome. The
+  Wallet shows that an application exists without opening the Vault.
+
+### Validation — 2026-09-18
+
+- `npm test`: 221 tests across 34 files (was 152/28). New: `analysis-text`,
+  `extraction-fixtures`, `zik-id-readiness`, `vault-v2`.
+- `npm run measure:ocr`: 18 fixtures, real browser OCR, **0 off-origin requests**.
+  Full table in VAULT_LOCAL_ANALYSIS.md.
+- Playwright against an isolated production server (`ZIK_DISCLOSURE_V1=true`):
+  27 passed, 3 failed. The 3 failures are the dev-only demo Vault tests in
+  `vault-preview.spec.ts`, which need a development server for the `memaguy`
+  development key; **they fail identically on unmodified HEAD** in a production build,
+  verified in a separate worktree.
+- `npm run lint`: 0 errors, 7 warnings (all pre-existing, in the legacy Zik ID
+  components). `npx tsc --noEmit`: passed. Production build: passed.
+
+### Deliberate changes to existing behaviour
+
+- **CSP now allows `'wasm-unsafe-eval'`** in `middleware.ts`. Without it the OCR
+  engine cannot compile its WebAssembly. It permits WebAssembly only; JavaScript
+  `eval` stays blocked outside development. `frame-src blob:` was added for sandboxed
+  document preview.
+- **Editing a Vault detail no longer asks for the passphrase.** v2 unwraps one data
+  key at unlock rather than re-deriving per write. The passphrase is still never
+  stored, and inactivity, tab-hide and manual locking are unchanged. The assertion in
+  `vault-preview.spec.ts` was updated with that reason rather than worked around.
+- **The simulated document search is gone from the real Vault.** `vault-search.tsx`
+  survives only behind the development-only demo Vault on `/vault-preview`.
+
+### Known incomplete
+
+- No encrypted Vault export or import. The Vault cannot be backed up or moved.
+- No real-device testing. Headless Chromium is not an iPhone, and CPU throttling does
+  not reach the OCR worker thread, so mobile timings are unmeasured.
+- English language model and UK layouts only.
+
+---
+
 ## Product-positioning milestone — 2026-09-15
 
 Added the agreed Zik → Zik Pass / ZikVault / Zik ID product direction, shared display

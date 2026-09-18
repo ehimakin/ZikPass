@@ -2,6 +2,7 @@
 
 import { clearWallet } from "./wallet-client";
 import { indexedVaultStorage } from "./vault-adapter";
+import { destroyDatabase } from "./vault/store";
 import { isDemoEnvironment } from "@/lib/shared/demo-environment";
 
 /** Reset only Zik demo data, never unrelated browser storage or app caches. */
@@ -21,6 +22,9 @@ export async function resetDemoData(): Promise<void> {
     }
     await clearWallet();
     await indexedVaultStorage.remove();
+    // The v2 Vault holds documents, extracted text, claims and applications; the whole
+    // database goes, so nothing can reappear through a later migration or restore.
+    await destroyDatabase();
     document.cookie = "zikpass-home-splash-seen=; Max-Age=0; Path=/; SameSite=Lax";
   } catch {
     throw new Error("The server was reset, but some data on this browser could not be cleared. Please retry before starting another demo.");

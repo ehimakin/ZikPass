@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
-import { VaultSession } from "@/lib/client/vault-adapter";
+import { VaultV2 } from "@/lib/client/vault/session";
 import { validateMockVaultKey } from "@/lib/client/vault-preview";
-import type { VaultProfileV1 } from "@/lib/shared/vault";
+import type { VaultProfileV2 } from "@/lib/shared/vault/model";
 import { VaultDemo } from "./vault-demo";
 import { VaultSignup } from "./vault-signup";
 import { VaultWorkspace } from "./vault-workspace";
@@ -56,7 +56,7 @@ function Safe({ phase, attempt, staysOpen = false }: { phase: Phase; attempt: nu
 
 export function VaultEntry({ previewMode = false }: { previewMode?: boolean }) {
   const [vaultExists, setVaultExists] = useState<boolean>();
-  const [workspaceProfile, setWorkspaceProfile] = useState<VaultProfileV1>();
+  const [workspaceProfile, setWorkspaceProfile] = useState<VaultProfileV2>();
   const [openingVault, setOpeningVault] = useState(false);
   const [demoOpen, setDemoOpen] = useState(false);
   const [openingDemo, setOpeningDemo] = useState(false);
@@ -66,7 +66,7 @@ export function VaultEntry({ previewMode = false }: { previewMode?: boolean }) {
   const [attempt, setAttempt] = useState(0);
   const [message, setMessage] = useState("");
   const pending = useRef<AbortController | null>(null);
-  const vault = useRef(new VaultSession());
+  const vault = useRef(new VaultV2());
   const input = useRef<HTMLInputElement>(null);
   const hero = useRef<HTMLDivElement>(null);
   const workspace = useRef<HTMLDivElement>(null);
@@ -74,7 +74,7 @@ export function VaultEntry({ previewMode = false }: { previewMode?: boolean }) {
   useEffect(() => () => pending.current?.abort(), []);
 
   useEffect(() => {
-    void vault.current.exists().then(setVaultExists).catch(() => setVaultExists(false));
+    void VaultV2.status().then(status => setVaultExists(status !== 'none')).catch(() => setVaultExists(false));
   }, []);
 
   useEffect(() => {
@@ -123,7 +123,7 @@ export function VaultEntry({ previewMode = false }: { previewMode?: boolean }) {
       }
       await vault.current.unlock(key);
       if (controller.signal.aborted) return;
-      setWorkspaceProfile(vault.current.read());
+      setWorkspaceProfile(await vault.current.readProfile());
       setPhase("success"); setOpeningVault(true); setMessage("Opening your Vault…");
     } catch {
       if (!controller.signal.aborted) { setPhase("failure"); setMessage("That key didn’t unlock this Vault. Please try again."); }
@@ -193,7 +193,7 @@ export function VaultEntry({ previewMode = false }: { previewMode?: boolean }) {
           </div>
           <p id="vault-help" className={`${styles.demo} ${styles.formHelp}`}>{previewMode ? <>Preview only. Try <strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-10" : undefined}>OPEN</strong> for success, or any other key for the alarm. Use a demo key, not a real credential.{process.env.NODE_ENV === "development" && <> Enter <strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-11" : undefined}>memaguy</strong> to explore the demo Vault.</>}</> : <>Use the passphrase you created when setting up this Vault. Zik cannot recover it.</>}</p>
         </form> : null}
-        {vaultExists === false && !previewMode ? <VaultSignup onCreated={profile => {
+        {vaultExists === false && !previewMode ? <VaultSignup vault={vault.current} onCreated={profile => {
           setVaultExists(true);
           setWorkspaceProfile(profile);
           setPhase("success");
@@ -205,11 +205,7 @@ export function VaultEntry({ previewMode = false }: { previewMode?: boolean }) {
     </div>
     <p className={styles.footer} data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-8" : undefined}>A SPACE THAT’S SIMPLY YOURS.</p>
     {workspaceProfile && !previewMode ? <div ref={workspace} className={`${styles.workspaceReveal} ${openingVault ? styles.workspaceRevealPending : styles.workspaceRevealOpen}`} aria-hidden={openingVault || undefined}>
-      <div><VaultWorkspace profile={workspaceProfile} onSaveField={async (field, value, secret) => {
-        const next = { ...workspaceProfile, [field]: { value, provenance: "self_entered" as const, updated_at: new Date().toISOString() } };
-        await vault.current.save(next, secret);
-        setWorkspaceProfile(vault.current.read());
-      }} headingRef={workspaceHeading} onLock={() => lockWorkspace(true)} /></div>
+      <div><VaultWorkspace vault={vault.current} profile={workspaceProfile} headingRef={workspaceHeading} onLock={() => lockWorkspace(true)} /></div>
     </div> : null}
   </section>;
 }
