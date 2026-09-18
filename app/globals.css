@@ -214,9 +214,16 @@ pre {
   mask-image: linear-gradient(to right, transparent, black 8%, black 97%, transparent);
 }
 
-/* Desktop hero footage fills the viewport without a gradient overlay. */
+/* Hero footage fills its backdrop on mobile and desktop. */
 .zk-home-hero-video {
-  display: none;
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 @media (min-width: 1024px) {

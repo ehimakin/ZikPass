@@ -77,14 +77,15 @@ export function PhoneHero() {
   );
 }
 
-/** Desktop video backdrop, with the original artwork on smaller screens. */
+/** Responsive video backdrop with artwork as the playback/reduced-motion fallback. */
 export function HomeHero() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const manuallyPausedRef = useRef(false);
   const [enabled, setEnabled] = useState(false);
+  const [hasPlayed, setHasPlayed] = useState(false);
 
   useEffect(() => {
-    const media = window.matchMedia("(min-width: 1024px) and (prefers-reduced-motion: no-preference)");
+    const media = window.matchMedia("(prefers-reduced-motion: no-preference)");
     const update = () => setEnabled(media.matches);
     update();
     media.addEventListener("change", update);
@@ -139,6 +140,11 @@ export function HomeHero() {
           <video
             ref={videoRef}
             className="zk-home-hero-video"
+            style={{ opacity: hasPlayed ? 1 : 0 }}
+            onPlaying={() => setHasPlayed(true)}
+            onError={() => setHasPlayed(false)}
+            preload="metadata"
+            autoPlay
             src="/13061609-hd_1920_1080_60fps.mp4"
             muted
             loop
