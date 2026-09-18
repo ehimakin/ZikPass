@@ -2,6 +2,7 @@
 
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import type { Route } from "next";
 import clsx from "clsx";
@@ -259,7 +260,7 @@ export function Sheet({
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center">
       <div
         className="absolute inset-0 bg-[rgba(14,23,38,0.42)]"
@@ -271,7 +272,7 @@ export function Sheet({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="relative w-full max-w-[460px] rounded-t-[var(--zk-r-xl)] bg-[var(--zk-card)] p-5 pb-[calc(20px+env(safe-area-inset-bottom))] shadow-[var(--zk-shadow-sheet)] sm:rounded-[var(--zk-r-xl)] sm:pb-5"
+        className="relative max-h-[calc(100dvh-16px)] w-full max-w-[460px] overflow-y-auto rounded-t-[var(--zk-r-xl)] bg-[var(--zk-card)] p-5 pb-[calc(20px+env(safe-area-inset-bottom))] shadow-[var(--zk-shadow-sheet)] sm:max-h-[calc(100dvh-32px)] sm:rounded-[var(--zk-r-xl)] sm:pb-5"
       >
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-[17px] font-bold text-[var(--zk-text)]">{title}</h2>
@@ -285,7 +286,8 @@ export function Sheet({
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

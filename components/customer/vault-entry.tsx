@@ -1,11 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
-import { validateMockVaultKey, type VaultOutcome } from "@/lib/client/vault-preview";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { VaultSession } from "@/lib/client/vault-adapter";
+import { validateMockVaultKey } from "@/lib/client/vault-preview";
+import type { VaultProfileV1 } from "@/lib/shared/vault";
 import { VaultDemo } from "./vault-demo";
+import { VaultSignup } from "./vault-signup";
+import { VaultWorkspace } from "./vault-workspace";
 import styles from "./vault-entry.module.css";
 
-type Phase = "idle" | "checking" | Exclude<VaultOutcome, "demo">;
+type Phase = "idle" | "checking" | "success" | "failure";
 
 function CombinationDial({ rotation }: { rotation: number }) {
   return <svg className={styles.dial} viewBox="0 0 400 400" aria-hidden="true" focusable="false">
@@ -23,9 +27,9 @@ function CombinationDial({ rotation }: { rotation: number }) {
   </svg>;
 }
 
-function Safe({ phase, attempt }: { phase: Phase; attempt: number }) {
+function Safe({ phase, attempt, staysOpen = false }: { phase: Phase; attempt: number; staysOpen?: boolean }) {
   return <div className={styles.safeWrap} aria-hidden="true">
-    <svg key={attempt} className={`${styles.safe} ${phase === "success" ? styles.open : ""} ${phase === "failure" ? styles.alarm : ""}`} viewBox="0 0 440 480" focusable="false" data-testid="vault-safe" data-state={phase}>
+    <svg key={attempt} className={`${styles.safe} ${phase === "success" ? (staysOpen ? styles.unlockedSafe : styles.open) : ""} ${phase === "failure" ? styles.alarm : ""}`} viewBox="0 0 440 480" focusable="false" data-testid="vault-safe" data-state={phase}>
       <g className={styles.beacon}>
         <path d="M196 73V58a24 24 0 0 1 48 0v15Z" fill="currentColor" />
         <rect x="188" y="74" width="64" height="9" rx="4" fill="currentColor" />
@@ -50,7 +54,10 @@ function Safe({ phase, attempt }: { phase: Phase; attempt: number }) {
   </div>;
 }
 
-export function VaultEntry() {
+export function VaultEntry({ previewMode = false }: { previewMode?: boolean }) {
+  const [vaultExists, setVaultExists] = useState<boolean>();
+  const [workspaceProfile, setWorkspaceProfile] = useState<VaultProfileV1>();
+  const [openingVault, setOpeningVault] = useState(false);
   const [demoOpen, setDemoOpen] = useState(false);
   const [openingDemo, setOpeningDemo] = useState(false);
   const [key, setKey] = useState("");
@@ -59,8 +66,33 @@ export function VaultEntry() {
   const [attempt, setAttempt] = useState(0);
   const [message, setMessage] = useState("");
   const pending = useRef<AbortController | null>(null);
+  const vault = useRef(new VaultSession());
   const input = useRef<HTMLInputElement>(null);
+  const hero = useRef<HTMLDivElement>(null);
+  const workspace = useRef<HTMLDivElement>(null);
+  const workspaceHeading = useRef<HTMLHeadingElement>(null);
   useEffect(() => () => pending.current?.abort(), []);
+
+  useEffect(() => {
+    void vault.current.exists().then(setVaultExists).catch(() => setVaultExists(false));
+  }, []);
+
+  useEffect(() => {
+    if (!openingVault || !workspaceProfile) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const timer = setTimeout(() => { setOpeningVault(false); setKey(""); }, reduced ? 0 : 1450);
+    return () => clearTimeout(timer);
+  }, [openingVault, workspaceProfile]);
+
+  useEffect(() => {
+    if (!workspaceProfile || openingVault) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const timer = window.setTimeout(() => {
+      workspace.current?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+      workspaceHeading.current?.focus({ preventScroll: true });
+    }, reduced ? 0 : 600);
+    return () => window.clearTimeout(timer);
+  }, [openingVault, workspaceProfile]);
 
   useEffect(() => {
     if (!openingDemo) return;
@@ -71,27 +103,64 @@ export function VaultEntry() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (pending.current || openingDemo) return;
-    if (!key.trim()) { setMessage("Enter a demo key to try the Vault."); input.current?.focus(); return; }
+    if (pending.current || openingVault || openingDemo || (!vaultExists && !previewMode)) return;
+    if (!key.trim()) { setMessage(previewMode ? "Enter a demo key to try the Vault." : "Enter your Vault key."); input.current?.focus(); return; }
     const controller = new AbortController();
     pending.current = controller;
     setPhase("checking");
-    setMessage("Checking demo key…");
+    setMessage("Unlocking your Vault…");
     setAttempt(value => value + 1);
     try {
-      const result = await validateMockVaultKey(key, controller.signal);
-      if (controller.signal.aborted) return;
-      if (result === "demo" && process.env.NODE_ENV === "development") {
-        setPhase("success"); setOpeningDemo(true); setMessage("Opening demo Vault…"); return;
+      if (previewMode) {
+        const result = await validateMockVaultKey(key, controller.signal);
+        if (controller.signal.aborted) return;
+        if (result === "demo" && process.env.NODE_ENV === "development") {
+          setPhase("success"); setOpeningDemo(true); setMessage("Opening demo Vault…"); return;
+        }
+        setPhase(result === "success" ? "success" : "failure");
+        setMessage(result === "success" ? "Demo Vault opened. Nothing has been unlocked or stored." : "That demo key didn’t fit. Try OPEN to see the Vault open.");
+        return;
       }
-      setPhase(result === "demo" ? "failure" : result);
-      setMessage(result === "success" ? "Demo Vault opened. Nothing has been unlocked or stored." : "That demo key didn’t fit. Try OPEN to see the Vault open.");
+      await vault.current.unlock(key);
+      if (controller.signal.aborted) return;
+      setWorkspaceProfile(vault.current.read());
+      setPhase("success"); setOpeningVault(true); setMessage("Opening your Vault…");
     } catch {
-      if (!controller.signal.aborted) { setPhase("idle"); setMessage("The preview couldn’t finish. Please try again."); }
+      if (!controller.signal.aborted) { setPhase("failure"); setMessage("That key didn’t unlock this Vault. Please try again."); }
     } finally {
       if (pending.current === controller) pending.current = null;
     }
   }
+
+  const lockWorkspace = useCallback((returnToKey = true) => {
+    vault.current.lock();
+    setWorkspaceProfile(undefined);
+    setPhase("idle");
+    setKey("");
+    setMessage("");
+    setRotation(0);
+    if (returnToKey) requestAnimationFrame(() => {
+      hero.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+      input.current?.focus({ preventScroll: true });
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!workspaceProfile || previewMode) return;
+    let timer: number;
+    const resetTimer = () => { window.clearTimeout(timer); timer = window.setTimeout(() => lockWorkspace(true), 120000); };
+    const visibility = () => { if (document.hidden) lockWorkspace(true); };
+    resetTimer();
+    window.addEventListener("pointerdown", resetTimer);
+    window.addEventListener("keydown", resetTimer);
+    document.addEventListener("visibilitychange", visibility);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("pointerdown", resetTimer);
+      window.removeEventListener("keydown", resetTimer);
+      document.removeEventListener("visibilitychange", visibility);
+    };
+  }, [lockWorkspace, previewMode, workspaceProfile]);
 
   if (demoOpen && process.env.NODE_ENV === "development") return <VaultDemo onLock={() => {
     setDemoOpen(false); setPhase("idle"); setKey(""); setMessage(""); setRotation(0);
@@ -99,30 +168,48 @@ export function VaultEntry() {
   }} />;
 
   return <section className={styles.page} aria-labelledby="vault-title">
-    <div className={styles.composition}>
+    <div ref={hero} className={styles.composition}>
       <div className={styles.dialWrap}><CombinationDial rotation={rotation} /></div>
       <div className={styles.content}>
         <p className={styles.eyebrow} data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-2" : undefined}>ZIK VAULT</p>
-        <h1 id="vault-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-3" : undefined}>Your world.<br />Your <em>key.</em></h1>
-        <p className={styles.intro} data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-4" : undefined}>A little privacy. A lot of possibility.<br />Unlock your Vault.</p>
-        <form onSubmit={submit} className={styles.form} aria-busy={phase === "checking"}>
-          <label htmlFor="vault-key" data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-5" : undefined}>Vault key</label>
-          <div className={styles.inputRow}>
-            <input ref={input} id="vault-key" type="text" value={key} maxLength={128} autoComplete="off" autoCapitalize="none" spellCheck={false} placeholder="Enter your key" readOnly={phase === "checking" || openingDemo} aria-describedby="vault-demo vault-status" aria-invalid={phase === "failure" || undefined} onChange={event => {
-              const next = event.target.value;
-              setRotation(value => value + Math.max(1, Math.abs(next.length - key.length)) * 18);
-              setKey(next); setPhase("idle"); setMessage("");
-            }} />
-            <button type="submit" disabled={phase === "checking" || openingDemo} aria-label="Unlock Vault">
-              <svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6" /></svg>
-            </button>
+        <h1 id="vault-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-3" : undefined} style={{"fontSize":62}}>{"There's a safer way to store"}<br />{"that "}<em>{"passport scan"}</em></h1>
+        <p className={styles.intro} data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-4" : undefined}>{"Zik it. Lock it. Put it in your pocket."}<br />{"Lock your secure documents behind Zik Vault"}</p>
+        {workspaceProfile && !previewMode ? <div className={styles.unlockedStatus} role="status"><span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-6" : undefined}>✓</span><div><strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-7" : undefined}>Vault unlocked</strong><small data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-9" : undefined}>Your private workspace is open below.</small></div></div> : vaultExists || previewMode ? <form onSubmit={submit} className={styles.form} aria-busy={phase === "checking"}>
+          <div className={styles.formPanel}>
+            <label htmlFor="vault-key" data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-5" : undefined}>Vault key</label>
+            <div className={styles.inputRow}>
+              <input ref={input} id="vault-key" type={previewMode ? "text" : "password"} value={key} maxLength={previewMode ? 128 : 1024} minLength={previewMode ? undefined : 12} autoComplete={previewMode ? "off" : "current-password"} autoCapitalize={previewMode ? "none" : undefined} spellCheck={previewMode ? false : undefined} placeholder="Enter your key" readOnly={phase === "checking" || openingVault || openingDemo} aria-describedby="vault-help vault-status" aria-invalid={phase === "failure" || undefined} onChange={event => {
+                const next = event.target.value;
+                const direction = Math.random() < 0.5 ? -1 : 1;
+                const step = Math.max(1, Math.abs(next.length - key.length)) * 18 * direction;
+                setRotation(value => value + step);
+                setKey(next); setPhase("idle"); setMessage("");
+              }} />
+              <button type="submit" disabled={phase === "checking" || openingVault || openingDemo} aria-label="Unlock Vault">
+                <svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6" /></svg>
+              </button>
+            </div>
+            <p id="vault-status" role="status" aria-live="polite" aria-atomic="true" className={styles.status} data-error={phase === "failure"}>{message}</p>
           </div>
-          <p id="vault-status" role="status" aria-live="polite" aria-atomic="true" className={styles.status} data-error={phase === "failure"}>{message}</p>
-          <p id="vault-demo" className={styles.demo}>Preview only. Try <strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-6" : undefined}>OPEN</strong> for success, or any other key for the alarm. Use a demo key, not a real credential.{process.env.NODE_ENV === "development" && <> Enter <strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-7" : undefined}>memaguy</strong> to explore the demo Vault.</>}</p>
-        </form>
+          <p id="vault-help" className={`${styles.demo} ${styles.formHelp}`}>{previewMode ? <>Preview only. Try <strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-10" : undefined}>OPEN</strong> for success, or any other key for the alarm. Use a demo key, not a real credential.{process.env.NODE_ENV === "development" && <> Enter <strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-11" : undefined}>memaguy</strong> to explore the demo Vault.</>}</> : <>Use the passphrase you created when setting up this Vault. Zik cannot recover it.</>}</p>
+        </form> : null}
+        {vaultExists === false && !previewMode ? <VaultSignup onCreated={profile => {
+          setVaultExists(true);
+          setWorkspaceProfile(profile);
+          setPhase("success");
+          setAttempt(value => value + 1);
+          setOpeningVault(true);
+        }} /> : null}
       </div>
-      <Safe phase={phase} attempt={attempt} />
+      <Safe phase={phase} attempt={attempt} staysOpen={Boolean(workspaceProfile && !previewMode)} />
     </div>
     <p className={styles.footer} data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-8" : undefined}>A SPACE THAT’S SIMPLY YOURS.</p>
+    {workspaceProfile && !previewMode ? <div ref={workspace} className={`${styles.workspaceReveal} ${openingVault ? styles.workspaceRevealPending : styles.workspaceRevealOpen}`} aria-hidden={openingVault || undefined}>
+      <div><VaultWorkspace profile={workspaceProfile} onSaveField={async (field, value, secret) => {
+        const next = { ...workspaceProfile, [field]: { value, provenance: "self_entered" as const, updated_at: new Date().toISOString() } };
+        await vault.current.save(next, secret);
+        setWorkspaceProfile(vault.current.read());
+      }} headingRef={workspaceHeading} onLock={() => lockWorkspace(true)} /></div>
+    </div> : null}
   </section>;
 }
