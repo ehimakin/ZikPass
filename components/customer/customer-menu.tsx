@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Route } from "next";
 import { ZikLogoMark } from "@/components/zik-logo";
+import { loadWalletState } from "@/lib/client/wallet-client";
 import { environmentBadgeLabel } from "@/lib/shared/demo-environment";
 
 export function CustomerMenu({ items, pathname }: {
@@ -13,6 +14,21 @@ export function CustomerMenu({ items, pathname }: {
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
+  const [hasPass, setHasPass] = useState(false);
+
+  useEffect(() => {
+    let disposed = false;
+    const refresh = () => loadWalletState()
+      .then((wallet) => { if (!disposed) setHasPass(Boolean(wallet.credential)); })
+      .catch(() => {});
+    void refresh();
+    window.addEventListener("focus", refresh);
+    return () => { disposed = true; window.removeEventListener("focus", refresh); };
+  }, [open, pathname]);
+
+  const menuItems = items.map((item) => item.label === "Get Zik Pass" && hasPass
+    ? { href: "/wallet" as Route, label: "Wallet" }
+    : item);
   const [hovered, setHovered] = useState<number | null>(null);
 
   useEffect(() => {
@@ -78,7 +94,7 @@ export function CustomerMenu({ items, pathname }: {
           </button>
         </div>
         <nav aria-label="Site menu" className="zk-menu-nav">
-          {items.map((item, index) => (
+          {menuItems.map((item, index) => (
             <Link key={item.href} href={item.href} onClick={close} aria-current={pathname === item.href ? "page" : undefined}
               onMouseEnter={() => setHovered(index)} onMouseLeave={() => setHovered(null)} onFocus={() => setHovered(index)}
               className="zk-menu-link">
@@ -89,7 +105,7 @@ export function CustomerMenu({ items, pathname }: {
         <div className="zk-menu-footer">
           <div className="zk-menu-utility">
             <Link href="/wallet" onClick={close}>Wallet</Link>
-            <Link href="/vault" onClick={close} aria-current={pathname === "/vault" ? "page" : undefined}>Vault</Link>
+            <Link href="/vault" onClick={close} aria-current={pathname === "/vault" ? "page" : undefined}>Zik Vault</Link>
             <Link href="/id" onClick={close} aria-current={pathname === "/id" ? "page" : undefined}>Zik ID</Link>
             <Link href={"/ecosystem" as Route} onClick={close} aria-current={pathname === "/ecosystem" ? "page" : undefined}>The Zik ecosystem</Link>
             <Link href="/help" onClick={close}>Help</Link>

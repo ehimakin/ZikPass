@@ -58,11 +58,11 @@ export function ApplicationScreen() {
   }
 
   if (!data) return <section className={styles.applyPage} aria-labelledby="apply-title">
-    <p className={styles.eyebrow}>ZIK ID</p>
-    <h1 id="apply-title">Apply for Zik ID</h1>
-    <p className={styles.applyIntro}>Unlock your Vault to see what your application would include. Everything stays on this device.</p>
+    <p className={styles.eyebrow} data-local-edit={process.env.NODE_ENV === "development" ? "ve-7116a0c3c145-1" : undefined}>ZIK ID</p>
+    <h1 id="apply-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-7116a0c3c145-2" : undefined}>Apply for Zik ID</h1>
+    <p className={styles.applyIntro} data-local-edit={process.env.NODE_ENV === "development" ? "ve-7116a0c3c145-3" : undefined}>Unlock your Vault to see what your application would include. Everything stays on this device.</p>
     <form className={styles.unlockForm} onSubmit={unlock}>
-      <label htmlFor="apply-key">Vault key</label>
+      <label htmlFor="apply-key" data-local-edit={process.env.NODE_ENV === "development" ? "ve-7116a0c3c145-4" : undefined}>Vault key</label>
       <div>
         <input id="apply-key" type="password" value={secret} minLength={12} maxLength={1024} autoComplete="current-password" onChange={event => setSecret(event.target.value)} placeholder="Enter your key" />
         <Button type="submit" loading={unlocking}>Unlock</Button>
@@ -77,12 +77,12 @@ export function ApplicationScreen() {
   const evidenceDocuments = snapshot.evidence_snapshot.map(entry => documents.find(document => document.id === entry.document_id)).filter((entry): entry is VaultDocument => Boolean(entry));
 
   return <section className={styles.applyPage} aria-labelledby="apply-title">
-    <p className={styles.eyebrow}>ZIK ID</p>
+    <p className={styles.eyebrow} data-local-edit={process.env.NODE_ENV === "development" ? "ve-7116a0c3c145-5" : undefined}>ZIK ID</p>
     <h1 id="apply-title">{application ? "Your Zik ID application" : "Apply for Zik ID"}</h1>
 
     {application?.state === "pending_onboarding" ? <div className={styles.pendingNotice} role="status">
       <StatusBadge>Waiting for identity checks</StatusBadge>
-      <p>
+      <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-7116a0c3c145-6" : undefined}>
         Your application is saved on this device. Zik has not published the identity checks for Zik ID yet, so nothing
         has been sent, approved or issued, and no ID exists. You can withdraw it at any time.
       </p>
@@ -97,24 +97,24 @@ export function ApplicationScreen() {
     {error ? <p role="alert" className={styles.error}>{error}</p> : null}
 
     {readiness.status !== "ready_to_apply" && !application ? <>
-      <p className={styles.applyIntro}>Your evidence is not ready yet. Here is what is still needed.</p>
+      <p className={styles.applyIntro} data-local-edit={process.env.NODE_ENV === "development" ? "ve-7116a0c3c145-7" : undefined}>Your evidence is not ready yet. Here is what is still needed.</p>
       <ul className={styles.requirements}>
         {readiness.requirements.filter(requirement => !requirement.satisfied).map(requirement =>
-          <li key={requirement.id} data-met={false}><span aria-hidden="true">○</span><div><strong>{requirement.id.replace(/_/g, " ")}</strong>{requirement.reasons.map(reason => <small key={reason}>{nextAction(reason)}</small>)}</div></li>)}
+          <li key={requirement.id} data-met={false}><span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-7116a0c3c145-8" : undefined}>○</span><div><strong>{requirement.id.replace(/_/g, " ")}</strong>{requirement.reasons.map(reason => <small key={reason}>{nextAction(reason)}</small>)}</div></li>)}
       </ul>
       <p className={styles.applyFoot}><Link href="/vault">Back to your Vault</Link></p>
     </> : null}
 
     {step === "evidence" && readiness.status === "ready_to_apply" ? <>
-      <p className={styles.applyIntro}>These are the documents and details your application would be based on. Check them before you continue.</p>
-      <h2 className={styles.applySubhead}>Evidence</h2>
+      <p className={styles.applyIntro} data-local-edit={process.env.NODE_ENV === "development" ? "ve-7116a0c3c145-9" : undefined}>These are the documents and details your application would be based on. Check them before you continue.</p>
+      <h2 className={styles.applySubhead} data-local-edit={process.env.NODE_ENV === "development" ? "ve-7116a0c3c145-10" : undefined}>Evidence</h2>
       <ul className={styles.documents}>
         {evidenceDocuments.map(document => <li key={document.id}><div className={styles.documentMain}><div>
           <strong>{document.label ?? document.filename}</strong>
           <small>{document.classification?.replace(/_/g, " ")} · confirmed by you · Zik has not checked whether it is genuine</small>
         </div></div></li>)}
       </ul>
-      <h2 className={styles.applySubhead}>Details</h2>
+      <h2 className={styles.applySubhead} data-local-edit={process.env.NODE_ENV === "development" ? "ve-7116a0c3c145-11" : undefined}>Details</h2>
       <dl className={styles.claimList}>
         {Object.entries(snapshot.claim_snapshot).map(([field, value]) => <div key={field}><dt>{field.replace(/_/g, " ")}</dt><dd>{value}</dd></div>)}
       </dl>
@@ -125,13 +125,13 @@ export function ApplicationScreen() {
     </> : null}
 
     {step === "confirm" ? <>
-      <h2 className={styles.applySubhead}>What happens next</h2>
+      <h2 className={styles.applySubhead} data-local-edit={process.env.NODE_ENV === "development" ? "ve-7116a0c3c145-12" : undefined}>What happens next</h2>
       <ul className={styles.plainList}>
-        <li>Your application is saved in your Vault on this device, encrypted like everything else in it.</li>
-        <li>Nothing is sent anywhere now. Zik has not published the identity checks for Zik ID yet.</li>
-        <li>When those checks exist, you will be asked separately before anything is shared, and you can refuse.</li>
-        <li>Your Zik Pass is unaffected. It keeps proving your age on its own, without your name or documents.</li>
-        <li>You can withdraw this application at any time, and deleting the evidence withdraws it automatically.</li>
+        <li data-local-edit={process.env.NODE_ENV === "development" ? "ve-7116a0c3c145-13" : undefined}>Your application is saved in your Vault on this device, encrypted like everything else in it.</li>
+        <li data-local-edit={process.env.NODE_ENV === "development" ? "ve-7116a0c3c145-14" : undefined}>Nothing is sent anywhere now. Zik has not published the identity checks for Zik ID yet.</li>
+        <li data-local-edit={process.env.NODE_ENV === "development" ? "ve-7116a0c3c145-15" : undefined}>When those checks exist, you will be asked separately before anything is shared, and you can refuse.</li>
+        <li data-local-edit={process.env.NODE_ENV === "development" ? "ve-7116a0c3c145-16" : undefined}>Your Zik Pass is unaffected. It keeps proving your age on its own, without your name or documents.</li>
+        <li data-local-edit={process.env.NODE_ENV === "development" ? "ve-7116a0c3c145-17" : undefined}>You can withdraw this application at any time, and deleting the evidence withdraws it automatically.</li>
       </ul>
       <div className={styles.actions}>
         <Button type="button" variant="secondary" onClick={() => setStep("evidence")}>Back</Button>
@@ -168,7 +168,7 @@ export function ApplicationScreen() {
       }}>Withdraw application</Button>
     </div> : null}
 
-    <p className={styles.applyFoot}>
+    <p className={styles.applyFoot} data-local-edit={process.env.NODE_ENV === "development" ? "ve-7116a0c3c145-18" : undefined}>
       Zik cannot issue a Zik ID from anything on this device. An ID can only exist once an authorised checker has
       verified you and an issuer has signed it.
     </p>

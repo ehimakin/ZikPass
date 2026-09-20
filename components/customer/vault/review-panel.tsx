@@ -50,10 +50,10 @@ export function ReviewPanel({ observations, claims, documents, onReview, onSetCl
 
   return <section className={styles.review} aria-labelledby="vault-review-title">
     <div className={styles.libraryHeader}>
-      <h2 id="vault-review-title">Found in your documents</h2>
+      <h2 id="vault-review-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-f5bd9e77a1c9-1" : undefined}>Found in your documents</h2>
       <span className={styles.reviewCount}>{pending.length} to review</span>
     </div>
-    <p className={styles.reviewIntro}>
+    <p className={styles.reviewIntro} data-local-edit={process.env.NODE_ENV === "development" ? "ve-f5bd9e77a1c9-2" : undefined}>
       These are suggestions read from your documents on this device. Nothing changes until you choose.
       Confirming one means the text was read correctly — it is not a check that the document is genuine.
     </p>
@@ -69,15 +69,15 @@ export function ReviewPanel({ observations, claims, documents, onReview, onSetCl
           <div className={styles.proposalHead}>
             <div>
               <p className={styles.proposalField}>{FIELD_LABELS[field]}</p>
-              <p className={styles.proposalValue}>{observation.normalised ?? <em>Zik could not read this clearly</em>}</p>
+              <p className={styles.proposalValue}>{observation.normalised ?? <em data-local-edit={process.env.NODE_ENV === "development" ? "ve-f5bd9e77a1c9-3" : undefined}>Zik could not read this clearly</em>}</p>
             </div>
             <span className={styles.statusPill} data-status={status}>{STATUS_LABELS[status]}</span>
           </div>
 
           <dl className={styles.proposalDetail}>
-            <div><dt>Found in</dt><dd>{documentName(observation.document_id)}{observation.page > 1 ? `, page ${observation.page}` : ""} · {observation.method === "mrz" ? "machine-readable zone" : observation.method === "pdf_text_layer" ? "PDF text" : observation.method === "labelled_field" ? "a labelled field" : "the document text"}</dd></div>
-            <div><dt>Your details say</dt><dd>{claim?.value ?? "Nothing yet"}</dd></div>
-            <div><dt>Exactly as written</dt><dd className={styles.rawText}>{observation.raw_text}</dd></div>
+            <div><dt data-local-edit={process.env.NODE_ENV === "development" ? "ve-f5bd9e77a1c9-4" : undefined}>Found in</dt><dd>{documentName(observation.document_id)}{observation.page > 1 ? `, page ${observation.page}` : ""} · {observation.method === "mrz" ? "machine-readable zone" : observation.method === "pdf_text_layer" ? "PDF text" : observation.method === "labelled_field" ? "a labelled field" : "the document text"}</dd></div>
+            <div><dt data-local-edit={process.env.NODE_ENV === "development" ? "ve-f5bd9e77a1c9-5" : undefined}>Your details say</dt><dd>{claim?.value ?? "Nothing yet"}</dd></div>
+            <div><dt data-local-edit={process.env.NODE_ENV === "development" ? "ve-f5bd9e77a1c9-6" : undefined}>Exactly as written</dt><dd className={styles.rawText}>{observation.raw_text}</dd></div>
           </dl>
 
           {observation.excerpt ? <p className={styles.excerpt}>“{observation.excerpt}”</p> : null}
@@ -105,8 +105,8 @@ export function ReviewPanel({ observations, claims, documents, onReview, onSetCl
             <Button type="button" variant="secondary" disabled={busy} onClick={async () => { setBusy(true); try { await onReview(observation.id, "rejected"); } finally { setBusy(false); } }}>
               {claim?.value ? "Keep mine" : "Not this"}
             </Button>
-            <button type="button" className={styles.linkAction} onClick={() => { setEditing(observation.id); setDraft(observation.normalised ?? claim?.value ?? ""); }}>Correct it</button>
-            <button type="button" className={styles.linkAction} onClick={() => setEditing(null)} hidden>Later</button>
+            <button type="button" className={styles.linkAction} onClick={() => { setEditing(observation.id); setDraft(observation.normalised ?? claim?.value ?? ""); }} data-local-edit={process.env.NODE_ENV === "development" ? "ve-f5bd9e77a1c9-7" : undefined}>Correct it</button>
+            <button type="button" className={styles.linkAction} onClick={() => setEditing(null)} hidden data-local-edit={process.env.NODE_ENV === "development" ? "ve-f5bd9e77a1c9-8" : undefined}>Later</button>
           </div>}
         </li>;
       })}

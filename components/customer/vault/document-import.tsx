@@ -71,27 +71,27 @@ export function DocumentImport({ open, busy, jobs, onClose, onImport, onCancelJo
   return <dialog ref={dialog} className={styles.importModal} aria-labelledby="vault-import-title" onCancel={event => { event.preventDefault(); if (!busy) onClose(); }}>
     <div className={styles.importHeader}>
       <div>
-        <p className={styles.eyebrow}>ZIK VAULT · ADD DOCUMENTS</p>
-        <h2 id="vault-import-title">Add what you choose.</h2>
+        <p className={styles.eyebrow} data-local-edit={process.env.NODE_ENV === "development" ? "ve-c843ec8ff896-1" : undefined}>ZIK VAULT · ADD DOCUMENTS</p>
+        <h2 id="vault-import-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-c843ec8ff896-2" : undefined}>Add what you choose.</h2>
       </div>
-      <button type="button" className={styles.close} aria-label="Close" onClick={onClose} disabled={busy}>×</button>
+      <button type="button" className={styles.close} aria-label="Close" onClick={onClose} disabled={busy} data-local-edit={process.env.NODE_ENV === "development" ? "ve-c843ec8ff896-3" : undefined}>×</button>
     </div>
 
-    <p className={styles.importIntro}>
+    <p className={styles.importIntro} data-local-edit={process.env.NODE_ENV === "development" ? "ve-c843ec8ff896-4" : undefined}>
       Zik can only see the files you pick here. A website cannot look through your phone on its own, so nothing is
       searched in the background and nothing is uploaded — reading happens on this device.
     </p>
 
     {!jobs.length ? <>
       <div className={styles.sources}>
-        <button type="button" className={styles.source} onClick={() => void pick("files")} disabled={busy || scanning}>
+        <button type="button" className={styles.source} onClick={() => void pick("files")} disabled={busy || scanning} data-local-edit={process.env.NODE_ENV === "development" ? "ve-c843ec8ff896-5" : undefined}>
           <strong>Add files</strong><small>Pick photos or PDFs from this device</small>
         </button>
-        <button type="button" className={styles.source} onClick={() => void pick("camera")} disabled={busy || scanning}>
+        <button type="button" className={styles.source} onClick={() => void pick("camera")} disabled={busy || scanning} data-local-edit={process.env.NODE_ENV === "development" ? "ve-c843ec8ff896-6" : undefined}>
           <strong>Take a document photo</strong><small>Use the camera, or pick a photo if the camera is unavailable</small>
         </button>
         <button type="button" className={styles.source} onClick={() => void pick("folder")} disabled={busy || scanning || !folders}>
-          <strong>Search a folder you choose</strong>
+          <strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-c843ec8ff896-7" : undefined}>Search a folder you choose</strong>
           <small>{folders ? "Only the folder you select, and the files inside it" : "Not available in this browser — use “Add files” instead"}</small>
         </button>
       </div>
@@ -104,7 +104,7 @@ export function DocumentImport({ open, busy, jobs, onClose, onImport, onCancelJo
       {notice && !scanning ? <p className={styles.notice} role="status">{notice}</p> : null}
 
       {selection?.files.length ? <section className={styles.scope} aria-labelledby="vault-scope-title">
-        <h3 id="vault-scope-title">What you have chosen</h3>
+        <h3 id="vault-scope-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-c843ec8ff896-8" : undefined}>What you have chosen</h3>
         <p className={styles.scopeSummary}>{selection.descriptor} · {selection.files.length} file{selection.files.length === 1 ? "" : "s"} Zik can read</p>
         <ul className={styles.fileList}>
           {selection.files.map(entry => <li key={entry.path}><span>{entry.path}</span><small>{(entry.file.size / 1024).toFixed(0)} KB</small></li>)}
@@ -119,11 +119,11 @@ export function DocumentImport({ open, busy, jobs, onClose, onImport, onCancelJo
 
         <label className={styles.consent}>
           <input type="checkbox" checked={consentStore} onChange={event => { setConsentStore(event.target.checked); if (!event.target.checked) setConsentAnalyse(false); }} />
-          <span><strong>Keep these in my Vault</strong><small>Stored encrypted on this device. You can delete any of them at any time.</small></span>
+          <span data-local-edit={process.env.NODE_ENV === "development" ? "ve-c843ec8ff896-9" : undefined}><strong>Keep these in my Vault</strong><small>Stored encrypted on this device. You can delete any of them at any time.</small></span>
         </label>
         <label className={styles.consent}>
           <input type="checkbox" checked={consentAnalyse} disabled={!consentStore} onChange={event => setConsentAnalyse(event.target.checked)} />
-          <span><strong>Also read them on this device to suggest details</strong><small>Optional. Zik proposes what it finds, and you decide what to keep. Nothing is shared with anyone by ticking this.</small></span>
+          <span data-local-edit={process.env.NODE_ENV === "development" ? "ve-c843ec8ff896-10" : undefined}><strong>Also read them on this device to suggest details</strong><small>Optional. Zik proposes what it finds, and you decide what to keep. Nothing is shared with anyone by ticking this.</small></span>
         </label>
 
         <div className={styles.actions}>
@@ -141,7 +141,7 @@ export function DocumentImport({ open, busy, jobs, onClose, onImport, onCancelJo
           <small role={job.stage === "done" ? undefined : "status"}>
             {job.error ? job.error : job.stage === "done" ? "Added" : stageLabel(job)}
           </small>
-          {job.stage !== "done" && !job.error ? <button type="button" onClick={() => onCancelJob(job.id)}>Stop</button> : null}
+          {job.stage !== "done" && !job.error ? <button type="button" onClick={() => onCancelJob(job.id)} data-local-edit={process.env.NODE_ENV === "development" ? "ve-c843ec8ff896-11" : undefined}>Stop</button> : null}
         </li>)}
       </ul>
       {finished ? <div className={styles.actions}><Button type="button" onClick={onClose}>Done</Button></div> : null}

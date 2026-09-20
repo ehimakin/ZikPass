@@ -34,7 +34,7 @@ function EditableDetail({ label, value, type = "text", onSave, provenance }: { l
     <dt id={`${id}-label`}>{label}</dt>
     <dd>
       <div className={styles.detailRow}>
-        {!editing ? <span>{value || <em>Not added yet</em>}</span> : <form id={`${id}-form`} className={styles.detailForm} onSubmit={save}>
+        {!editing ? <span>{value || <em data-local-edit={process.env.NODE_ENV === "development" ? "ve-b78d8dc630c6-1" : undefined}>Not added yet</em>}</span> : <form id={`${id}-form`} className={styles.detailForm} onSubmit={save}>
           <input aria-labelledby={`${id}-label`} type={type} value={draft} onChange={event => setDraft(event.target.value)} maxLength={512} required autoFocus disabled={busy} onKeyDown={event => { if (event.key === "Escape" && !busy) setEditing(false); }} />
           {changed ? <Button type="submit" loading={busy} aria-label={`Save ${label}`}>Save</Button> : null}
           {error ? <p role="alert">{error}</p> : null}
@@ -94,35 +94,35 @@ export function VaultWorkspace({ vault, profile, onLock, headingRef }: { vault: 
   return <section className={styles.unlockedWorkspace} aria-labelledby="vault-workspace-title">
     <div className={styles.demoHeader}>
       <div>
-        <p className={styles.eyebrow}>ZIK IT. LOCK IT. PUT IT IN YOUR POCKET.</p>
-        <h2 ref={headingRef} tabIndex={-1} id="vault-workspace-title">{"Vault."}</h2>
+        <p className={styles.eyebrow} data-local-edit={process.env.NODE_ENV === "development" ? "ve-b78d8dc630c6-2" : undefined}>ZIK IT. LOCK IT. PUT IT IN YOUR POCKET.</p>
+        <h2 ref={headingRef} tabIndex={-1} id="vault-workspace-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b78d8dc630c6-3" : undefined}>{"Vault."}</h2>
       </div>
       <Button variant="secondary" onClick={workspace.lock}>Lock Vault</Button>
     </div>
 
-    <p className={styles.demoNotice}>Your Vault is unlocked on this device. Everything you add is encrypted here and is not uploaded.</p>
+    <p className={styles.demoNotice} data-local-edit={process.env.NODE_ENV === "development" ? "ve-b78d8dc630c6-4" : undefined}>Your Vault is unlocked on this device. Everything you add is encrypted here and is not uploaded.</p>
 
     {state.error ? <p role="alert" className={styles.workspaceError}>{state.error}</p> : null}
 
     <div className={styles.workspaceActions}>
-      <button type="button" className={styles.workspaceAction} onClick={() => setShowDesignation(value => !value)}>
+      <button type="button" className={styles.workspaceAction} onClick={() => setShowDesignation(value => !value)} data-local-edit={process.env.NODE_ENV === "development" ? "ve-b78d8dc630c6-5" : undefined}>
         <span className={styles.workspaceActionIcon} aria-hidden="true">Aa</span>
         <span><strong>Add name or designation</strong><small>Add another name, role or professional title</small></span>
       </button>
-      <button type="button" className={styles.workspaceAction} onClick={() => setImportOpen(true)} aria-haspopup="dialog">
+      <button type="button" className={styles.workspaceAction} onClick={() => setImportOpen(true)} aria-haspopup="dialog" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b78d8dc630c6-6" : undefined}>
         <span className={styles.workspaceActionIcon} aria-hidden="true">＋</span>
         <span><strong>Add document</strong><small>Choose files from this device, with or without reading them</small></span>
       </button>
     </div>
 
     {showDesignation ? <form className={styles.designationForm} onSubmit={addDesignation}>
-      <label htmlFor="vault-designation">Name or designation</label>
+      <label htmlFor="vault-designation" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b78d8dc630c6-7" : undefined}>Name or designation</label>
       <div><input id="vault-designation" value={designation} onChange={event => setDesignation(event.target.value)} maxLength={120} autoFocus placeholder="e.g. Dr, Director, preferred name" /><Button type="submit">Add</Button></div>
     </form> : null}
 
     <div className={styles.workspaceGrid}>
       <section className={styles.workspacePanel} aria-labelledby="vault-identity-title">
-        <div className={styles.workspacePanelHeader}><h2 id="vault-identity-title">Names &amp; details</h2><StatusBadge>Device-only</StatusBadge></div>
+        <div className={styles.workspacePanelHeader}><h2 id="vault-identity-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b78d8dc630c6-8" : undefined}>Names &amp; details</h2><StatusBadge>Device-only</StatusBadge></div>
         <dl>
           <EditableDetail label="Legal name" value={current.legal_name.value} provenance={provenanceFor("legal_name")} onSave={value => workspace.setClaim("legal_name", value, "user_corrected")} />
           <EditableDetail label="Date of birth" type="date" value={current.date_of_birth?.value ?? ""} provenance={provenanceFor("date_of_birth")} onSave={value => workspace.setClaim("date_of_birth", value, "user_corrected")} />

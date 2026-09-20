@@ -38,17 +38,17 @@ export function ReadinessBanner({ readiness, dismissed, onDismiss, applicationSt
   return <section className={styles.readiness} data-status={readiness.status} aria-labelledby="vault-readiness-title">
     <div className={styles.readinessHead}>
       <div>
-        <p className={styles.eyebrow}>ZIK ID · APPLICATION READINESS</p>
+        <p className={styles.eyebrow} data-local-edit={process.env.NODE_ENV === "development" ? "ve-ec70541e8bfb-1" : undefined}>ZIK ID · APPLICATION READINESS</p>
         <h2 id="vault-readiness-title">{applicationState === "pending_onboarding" ? "Your Zik ID application is with us" : HEADLINES[readiness.status]}</h2>
       </div>
       {readiness.status === "ready_to_apply" && !applicationState
-        ? <button type="button" className={styles.dismiss} onClick={onDismiss}>Not now</button> : null}
+        ? <button type="button" className={styles.dismiss} onClick={onDismiss} data-local-edit={process.env.NODE_ENV === "development" ? "ve-ec70541e8bfb-2" : undefined}>Not now</button> : null}
     </div>
 
-    {applicationState === "pending_onboarding" ? <p className={styles.readinessIntro}>
+    {applicationState === "pending_onboarding" ? <p className={styles.readinessIntro} data-local-edit={process.env.NODE_ENV === "development" ? "ve-ec70541e8bfb-3" : undefined}>
       We have your application and the details you confirmed. The identity checks themselves are not available yet,
       so nothing has been approved or issued.
-    </p> : <p className={styles.readinessIntro}>
+    </p> : <p className={styles.readinessIntro} data-local-edit={process.env.NODE_ENV === "development" ? "ve-ec70541e8bfb-4" : undefined}>
       This checks that your evidence is <strong>prepared</strong>. It is not an identity check: confirming text in a
       document does not show the document is genuine or that it belongs to you. That happens later, with a checker
       authorised to do it.
@@ -72,7 +72,7 @@ export function ReadinessBanner({ readiness, dismissed, onDismiss, applicationSt
       <Link href="/id/apply" className={styles.applyLink}>View your application</Link>
     </div> : null}
     {applicationState === "stale" ? <div className={styles.actions}>
-      <p className={styles.notice}>Your evidence changed after you applied, so the application needs checking again.</p>
+      <p className={styles.notice} data-local-edit={process.env.NODE_ENV === "development" ? "ve-ec70541e8bfb-5" : undefined}>Your evidence changed after you applied, so the application needs checking again.</p>
       <Link href="/id/apply" className={styles.applyLink}>Review your application</Link>
     </div> : null}
     {readiness.status !== "ready_to_apply" && !applicationState ? <p className={styles.readinessFoot}>

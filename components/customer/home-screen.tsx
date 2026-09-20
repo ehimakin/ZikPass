@@ -337,8 +337,18 @@ export function HomeScreen({ price }: { price: string }) {
 
       <section className="zk-scene zk-scene-pass" aria-labelledby="pass-title">
         <div className="zk-scene-inner zk-pass-layout">
-          <div className="zk-pass-copy"><p className="zk-scene-kicker" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-19" : undefined}>The pass</p><h2 id="pass-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-20" : undefined}>Proof you own.<br/><em>Not data you surrender.</em></h2><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-21" : undefined}>Signed. Device-bound. Reusable.</p></div>
-          <div className="zk-pass-object"><HomePassOverview wallet={wallet} failed={walletFailed}/></div>
+          <div className="zk-pass-copy"><p className="zk-scene-kicker" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-19" : undefined}>The pass</p><h2 id="pass-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-20" : undefined}>{"Buy a physical card in store"}<br/><em>{"or a digital pass in the app"}</em></h2><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-21" : undefined}>Signed. Device-bound. Reusable.</p></div>
+          <div className="zk-pass-products">
+            <figure className="zk-card-artwork">
+              <div className="zk-physical-card" role="img" aria-label="Zik Card concept: a lime physical backup card with the Zik brand mark">
+                <div className="zk-card-brand"><svg viewBox="0 0 100 100" aria-hidden="true"><ZikGlyph /></svg><span>Zik Card</span></div>
+                <span className="zk-card-watermark" aria-hidden="true">Zik</span>
+                <div className="zk-card-footer"><span>Your physical backup.</span><span>KEEP IT CLOSE</span></div>
+              </div>
+              <figcaption>Physical card · Available separately in store</figcaption>
+            </figure>
+            <div className="zk-pass-object"><HomePassOverview wallet={wallet} failed={walletFailed}/></div>
+          </div>
         </div>
       </section>
 

@@ -46,7 +46,7 @@ function DemoResetRow() {
     catch (reason) { setError(reason instanceof Error ? reason.message : "Reset failed. Please try again."); setState("confirm"); }
   }
   return <div className="mt-3 space-y-3 border-t border-[var(--zk-line)] pt-3">
-    <p className="text-[13px] text-[var(--zk-text-soft)]">Start a fresh walkthrough. Reset server demo records and this browser’s saved Pass, device keys, encrypted Vault, onboarding progress and demo sessions. This also signs you out of the clerk demo.</p>
+    <p className="text-[13px] text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-77c96c1e782b-1" : undefined}>Start a fresh walkthrough. Reset server demo records and this browser’s saved Pass, device keys, encrypted Vault, onboarding progress and demo sessions. This also signs you out of the clerk demo.</p>
     {state === "confirm" || state === "working" ? <>
       <Alert tone="caution" title="Delete demo data?">Your saved Vault details will be permanently deleted from this browser. Server demo records are shared, so this also resets other ongoing walkthroughs. Close other Zik tabs before continuing. Data saved in other browsers or devices is not erased.</Alert>
       <div className="flex flex-wrap gap-2">
@@ -55,7 +55,7 @@ function DemoResetRow() {
       </div>
     </> : <Button variant="secondary" onClick={() => { setState("confirm"); setError(""); }}>Reset demo data</Button>}
     {error ? <p role="alert" className="text-sm text-[var(--zk-critical)]">{error}</p> : null}
-    {state === "done" ? <p role="status" className="text-sm">Demo reset complete. This browser’s Wallet and Vault are empty. You can start again from Home.</p> : null}
+    {state === "done" ? <p role="status" className="text-sm" data-local-edit={process.env.NODE_ENV === "development" ? "ve-77c96c1e782b-5" : undefined}>Demo reset complete. This browser’s Wallet and Vault are empty. You can start again from Home.</p> : null}
   </div>;
 }
 

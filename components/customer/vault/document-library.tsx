@@ -65,18 +65,18 @@ export function DocumentLibrary({ documents, vault, onDelete, onRename, onReanal
 
   return <section className={styles.library} aria-labelledby="vault-documents-title">
     <div className={styles.libraryHeader}>
-      <h2 id="vault-documents-title">Documents</h2>
+      <h2 id="vault-documents-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-619a07049c0e-1" : undefined}>Documents</h2>
       <StatusBadge>{documents.length} stored</StatusBadge>
     </div>
 
     {documents.length > 1 ? <label className={styles.search}>
-      <span className="sr-only">Search your documents</span>
+      <span className="sr-only" data-local-edit={process.env.NODE_ENV === "development" ? "ve-619a07049c0e-2" : undefined}>Search your documents</span>
       <input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search by name or document type" />
     </label> : null}
 
     {error ? <p role="alert" className={styles.error}>{error}</p> : null}
 
-    {!documents.length ? <p className={styles.empty}>No documents yet. Use “Add document” to choose files from this device.</p>
+    {!documents.length ? <p className={styles.empty} data-local-edit={process.env.NODE_ENV === "development" ? "ve-619a07049c0e-3" : undefined}>No documents yet. Use “Add document” to choose files from this device.</p>
       : !visible.length ? <p className={styles.empty}>Nothing matches “{query}”.</p>
       : <ul className={styles.documents}>
         {visible.map(document => <li key={document.id}>
@@ -87,7 +87,7 @@ export function DocumentLibrary({ documents, vault, onDelete, onRename, onReanal
                 if (draft.trim()) await onRename(document.id, draft.trim());
                 setRenaming(null);
               }}>
-                <label htmlFor={`rename-${document.id}`} className="sr-only">New name</label>
+                <label htmlFor={`rename-${document.id}`} className="sr-only" data-local-edit={process.env.NODE_ENV === "development" ? "ve-619a07049c0e-4" : undefined}>New name</label>
                 <input id={`rename-${document.id}`} value={draft} maxLength={120} autoFocus onChange={event => setDraft(event.target.value)} onKeyDown={event => { if (event.key === "Escape") setRenaming(null); }} />
                 <Button type="submit">Save</Button>
               </form> : <strong>{document.label ?? document.filename}</strong>}
@@ -101,15 +101,15 @@ export function DocumentLibrary({ documents, vault, onDelete, onRename, onReanal
             </div>
           </div>
           <div className={styles.documentActions}>
-            <button type="button" onClick={() => void open(document)}>Preview</button>
-            <button type="button" onClick={() => void download(document)}>Save a copy</button>
-            <button type="button" onClick={() => { setRenaming(document.id); setDraft(document.label ?? document.filename); }}>Rename</button>
-            {document.media_type !== "application/pdf" ? <button type="button" disabled={busy} onClick={() => void onReanalyse(document, (((document.rotation + 90) % 360) as Rotation))}>Rotate &amp; read again</button> : null}
-            {document.processing !== "analysed" && document.processing !== "unsupported" ? <button type="button" disabled={busy} onClick={() => void onReanalyse(document, document.rotation)}>Read again</button> : null}
-            <button type="button" className={styles.danger} onClick={() => setConfirming(document.id)}>Delete</button>
+            <button type="button" onClick={() => void open(document)} data-local-edit={process.env.NODE_ENV === "development" ? "ve-619a07049c0e-5" : undefined}>Preview</button>
+            <button type="button" onClick={() => void download(document)} data-local-edit={process.env.NODE_ENV === "development" ? "ve-619a07049c0e-6" : undefined}>Save a copy</button>
+            <button type="button" onClick={() => { setRenaming(document.id); setDraft(document.label ?? document.filename); }} data-local-edit={process.env.NODE_ENV === "development" ? "ve-619a07049c0e-7" : undefined}>Rename</button>
+            {document.media_type !== "application/pdf" ? <button type="button" disabled={busy} onClick={() => void onReanalyse(document, (((document.rotation + 90) % 360) as Rotation))} data-local-edit={process.env.NODE_ENV === "development" ? "ve-619a07049c0e-8" : undefined}>Rotate &amp; read again</button> : null}
+            {document.processing !== "analysed" && document.processing !== "unsupported" ? <button type="button" disabled={busy} onClick={() => void onReanalyse(document, document.rotation)} data-local-edit={process.env.NODE_ENV === "development" ? "ve-619a07049c0e-9" : undefined}>Read again</button> : null}
+            <button type="button" className={styles.danger} onClick={() => setConfirming(document.id)} data-local-edit={process.env.NODE_ENV === "development" ? "ve-619a07049c0e-10" : undefined}>Delete</button>
           </div>
           {confirming === document.id ? <div className={styles.confirm} role="alertdialog" aria-label={`Delete ${document.label ?? document.filename}`}>
-            <p>Delete this document and everything Zik read from it? Details you confirmed yourself are kept, but they will lose this document&rsquo;s support.</p>
+            <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-619a07049c0e-11" : undefined}>Delete this document and everything Zik read from it? Details you confirmed yourself are kept, but they will lose this document&rsquo;s support.</p>
             <div>
               <Button type="button" variant="secondary" onClick={() => setConfirming(null)}>Keep it</Button>
               <Button type="button" onClick={async () => { setConfirming(null); await onDelete(document.id); }}>Delete</Button>
@@ -120,8 +120,8 @@ export function DocumentLibrary({ documents, vault, onDelete, onRename, onReanal
 
     {preview ? <dialog className={styles.previewModal} ref={node => node?.showModal()} aria-label="Document preview" onClick={event => { if (event.target === event.currentTarget) setPreview(null); }} onCancel={event => { event.preventDefault(); setPreview(null); }}>
       <div className={styles.previewHeader}>
-        <p>Preview · this file stays on your device</p>
-        <button type="button" aria-label="Close preview" onClick={() => setPreview(null)}>×</button>
+        <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-619a07049c0e-12" : undefined}>Preview · this file stays on your device</p>
+        <button type="button" aria-label="Close preview" onClick={() => setPreview(null)} data-local-edit={process.env.NODE_ENV === "development" ? "ve-619a07049c0e-13" : undefined}>×</button>
       </div>
       {preview.type === "application/pdf"
         // Rendered in a sandboxed frame: a document must never be able to run anything.

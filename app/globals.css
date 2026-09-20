@@ -612,6 +612,32 @@ pre {
 .zk-pass-copy h2 { font-size: clamp(3.4rem, 6.8vw, 7.5rem); }
 .zk-pass-copy h2 em { color: #d7f171; }
 .zk-pass-copy > p:last-child { margin-top: 35px; color: rgb(246 246 239 / 58%); font-size: 13px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+.zk-pass-products { min-width: 0; display: grid; gap: 36px; }
+.zk-card-artwork { margin: 0; padding: 18px 8px 0; }
+.zk-physical-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  aspect-ratio: 1.586;
+  width: 100%;
+  padding: 7%;
+  border: 1px solid #efffb7;
+  border-radius: 18px;
+  color: #15231a;
+  background: linear-gradient(125deg, #f0ffb7, #d7f171 45%, #a7cc48);
+  box-shadow: 0 3px 0 #789735, 0 24px 48px #0006, inset 0 0 0 2px #ffffff30;
+  transform: rotate(-6deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.zk-card-brand { display: flex; align-items: center; gap: 8px; font-size: clamp(21px, 2.5vw, 36px); font-weight: 800; letter-spacing: -.05em; }
+.zk-card-brand svg { width: 42px; height: 42px; }
+.zk-card-watermark { position: absolute; z-index: -1; right: -4%; bottom: -16%; color: #15231a0d; font-size: clamp(120px, 17vw, 240px); font-weight: 900; line-height: 1; letter-spacing: -.1em; }
+.zk-card-footer { display: flex; justify-content: space-between; align-items: end; gap: 12px; font-size: 12px; font-weight: 650; }
+.zk-card-footer > span:last-child { font-size: 8px; letter-spacing: .15em; }
+.zk-card-artwork figcaption { margin-top: 28px; text-align: center; color: #f6f6efab; font-size: 12px; }
+
 .zk-pass-object { display: flex; justify-content: center; }
 .zk-pass-object .zk-verification-seal-wrap { width: min(100%, 460px); }
 

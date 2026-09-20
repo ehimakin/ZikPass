@@ -118,11 +118,11 @@ export function CustomerShell({
           )}
           <div className={clsx("shrink-0", !title && "ml-auto sm:ml-0")}>
             <CustomerMenu items={[
-              { href: "/find" as Route, label: "Get ZikPass" },
+              { href: "/find" as Route, label: "Get Zik Pass" },
               { href: "/home#how-it-works" as Route, label: "How it works" },
               { href: "/about" as Route, label: "Why Zik?" },
-              { href: "/ZikParental" as Route, label: "For parents" },
-              { href: "/affiliates" as Route, label: "For businesses" }
+              { href: "/vault" as Route, label: "Zik Vault" },
+              { href: "/id" as Route, label: "Zik ID" }
             ]} pathname={pathname} />
           </div>
         </div>
