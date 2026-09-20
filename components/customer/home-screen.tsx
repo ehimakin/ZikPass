@@ -153,7 +153,7 @@ export function HomeHero() {
             onError={() => setHasPlayed(false)}
             preload="metadata"
             autoPlay
-            src="/13061609-hd_1920_1080_60fps.mp4"
+            src="/Hero%20Videos/Splash%20rough%201.mp4"
             muted
             loop
             playsInline
@@ -331,13 +331,6 @@ export function HomeScreen({ price }: { price: string }) {
             {["Name", "Date of birth", "Passport", "Selfie"].map((label, index)=><span key={label} style={{"--token-index":index} as CSSProperties}>{label}</span>)}
           </div>
           <div className="zk-answer-lockup"><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-8" : undefined}>{"Zik answers this with"}</p><strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-9" : undefined}>Over 18 <i>✓</i></strong><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-10" : undefined}>{"cryptographically backed, device tethered 18 plus certificates."}</span></div>
-          <div className="col-span-full mt-6 max-w-3xl rounded-2xl border border-current/20 p-5">
-            <p className="text-xs font-bold uppercase tracking-widest" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-34" : undefined}>Product 6 · Planned premium service</p>
-            <h3 className="mt-2 text-2xl font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-35" : undefined}>Zik Validate</h3>
-            <p className="mt-3 text-sm leading-relaxed" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-36" : undefined}>Need a professional to vouch for a passport photo or ID application? We’re bringing that process online, starting with people who already know a participating dentist or other eligible professional. Proposed price: £9.99 per validation, paid once.</p>
-            <p className="mt-2 text-sm leading-relaxed" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-37" : undefined}>A peer-to-peer network of dentists, doctors and other professionals, plus in-person validations, is being explored. Eligibility depends on the application’s requirements.</p>
-            <Link href={"/customer_validate" as Route} className="mt-3 inline-flex min-h-[44px] items-center font-bold underline underline-offset-4">Explore Zik Validate →</Link>
-          </div>
         </div>
       </section>
 

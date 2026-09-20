@@ -33,7 +33,7 @@ const PRECACHE = [
 const CACHEABLE_PAGES = ["/home", "/find", "/pass", "/help", "/about", "/card"];
 
 // Never cache or serve-from-cache these path prefixes.
-const NEVER = ["/vault", "/retail-demo", "/api/", "/verify", "/affiliate-demo", "/app/handoff", "/issuer", "/store"];
+const NEVER = ["/admin", "/help/ticket", "/account-recovery", "/vault", "/retail-demo", "/api/", "/verify", "/affiliate-demo", "/app/handoff", "/issuer", "/store"];
 
 const SENSITIVE_PARAMS = ["handoff_token", "token", "code", "request_id", "session_id"];
 

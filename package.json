@@ -12,7 +12,8 @@
     "e2e:report": "playwright show-report",
     "prepare": "node scripts/vendor-ocr-assets.mjs",
     "fixtures": "node scripts/generate-fixtures.mjs",
-    "measure:ocr": "node scripts/measure-ocr.mjs"
+    "measure:ocr": "node scripts/measure-ocr.mjs",
+    "admin:setup": "node scripts/configure-admin.mjs"
   },
   "dependencies": {
     "@noble/ciphers": "^2.4.0",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { TicketCreate } from "@/components/customer/support/ticket-create";
 import { Alert, Button, Card, SectionHeading } from "@/components/customer/ui";
 import { environmentBadgeLabel, isDemoEnvironment } from "@/lib/shared/demo-environment";
 
@@ -14,6 +15,10 @@ const ACCEPTED_ID = [
 ];
 
 const FAQ = [
+  {
+    q: "I lost both my phone and Zik Card.",
+    a: "Open /account-recovery/restore on your replacement device. If you saved a 24-word recovery phrase and enabled a backup, you can restore from it. Never put those words in a help ticket. Without a phrase or usable backup, support can explain fresh verification but cannot decrypt the lost Vault."
+  },
   {
     q: "Why do I have to go to a store?",
     a: "The age check happens in person; the physical flow does not upload an ID photo. Your pass stays on your device, with operational issuance records on Zik servers."
@@ -68,6 +73,8 @@ export function HelpScreen() {
           How Zik Pass works and what to do when something goes wrong.
         </p>
       </div>
+
+      <TicketCreate />
 
       <section>
         <SectionHeading>Accepted ID</SectionHeading>

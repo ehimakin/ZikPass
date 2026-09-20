@@ -1,7 +1,13 @@
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import type { Route } from "next";
+import { ADMIN_COOKIE, readAdminSession } from "@/lib/server/support/auth";
 import { AppShell } from "@/components/app-shell";
 import { IssuerDashboard } from "@/components/issuer-dashboard";
 
-export default function IssuerPage() {
+export default async function IssuerPage() {
+  const session = await readAdminSession((await cookies()).get(ADMIN_COOKIE)?.value).catch(() => null);
+  if (!session) redirect("/admin" as Route);
   return (
     <AppShell currentPath="/issuer">
       <main className="grid gap-6 pb-16 pt-6">

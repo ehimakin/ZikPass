@@ -15,7 +15,7 @@ export function getProductCatalogue(passDisplayPrice: string) {
       name: "ZikVault",
       promise: "Your documents, kept and read on your own device.",
       status: "Working on this device",
-      displayPrice: "Planned: £0.35/month",
+      displayPrice: "Planned: £0.35/month standalone · Included in the £3.99 remote bundle",
       available: false,
       destination: "/vault",
       detail: "What I can prove. Documents you choose are stored encrypted on this device and can be read here to suggest details you review. Uploads happen only if you choose an encrypted recovery backup. Nothing Zik reads is a check that a document is genuine."
@@ -46,6 +46,15 @@ export function getProductCatalogue(passDisplayPrice: string) {
       available: false,
       destination: "/customer_validate",
       detail: "Premium support for passport photo countersigning and ID applications, starting with people who already know a participating dentist or other reputable professional. A future peer-to-peer network could let dentists, doctors and other eligible professionals offer validations, with in-person appointments also being explored."
+    },
+    {
+      name: "Zik Pass · Finance Check",
+      promise: "A fully remote route to proving you’re 18+ online.",
+      status: "Product 7 · Prototype",
+      displayPrice: "Proposed: £3.99 one-off",
+      available: false,
+      destination: "/prove-with-finance-check",
+      detail: "£3.99 includes the finance check, ZikVault and passport verification, with no shop visit. Adding a passport scan would start a disclosed remote verification step, with no separate check fee. Explore the sample journey. Provider integration, assurance testing and legal review are required before launch."
     }
   ] as const;
 }

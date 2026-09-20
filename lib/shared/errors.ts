@@ -86,7 +86,7 @@ export function errorMessage(error: unknown): string {
 }
 
 const REDACTED_KEY_PATTERN =
-  /key|credential|private|token|identity|address|dob|date_of_birth|name|card|payment|secret|password/i;
+  /key|credential|private|token|identity|address|dob|date_of_birth|name|card|payment|secret|password|phrase|mnemonic|seed|pin/i;
 
 /**
  * Strips any context key that looks like it could carry private keys,

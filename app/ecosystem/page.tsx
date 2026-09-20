@@ -5,7 +5,7 @@ import { getPassPrice } from "@/lib/shared/payment-config";
 
 export const metadata = {
   title: "The Zik ecosystem",
-  description: "Explore Zik Pass, ZikVault, Zik ID and Zik Validate, our planned premium professional validation service."
+  description: "Explore Zik Pass, ZikVault, Zik ID and Zik Validate, our planned premium professional validation service, plus Product 7: a £3.99 remote finance-check route to Zik Pass."
 };
 
 export default function EcosystemPage() {
