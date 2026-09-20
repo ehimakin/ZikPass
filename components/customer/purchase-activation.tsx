@@ -1,4 +1,5 @@
 "use client";
+import { getStoreById } from "@/lib/shared/stores";
 import { useEffect, useState } from "react";
 import { ensureHolderKeyPair, storeEnrollmentContext } from "@/lib/client/wallet-client";
 import type { EnrollmentRecord } from "@/lib/shared/types";
@@ -6,7 +7,8 @@ import type { PassPrice } from "@/lib/shared/payment-config";
 import { Alert, Button, ButtonLink, Card } from "@/components/customer/ui";
 import { OnboardingFlow } from "@/components/customer/onboarding/onboarding-flow";
 
-export function PurchaseActivation({ price }: { price: PassPrice }) {
+export function PurchaseActivation({ price, storeId }: { price: PassPrice; storeId?: string }) {
+  const store = getStoreById(storeId);
   const [token, setToken] = useState<string | null>(null);
   const [record, setRecord] = useState<EnrollmentRecord | null>(null);
   const [busy, setBusy] = useState(false);
@@ -32,9 +34,10 @@ export function PurchaseActivation({ price }: { price: PassPrice }) {
   }
   if (record) return <OnboardingFlow price={price} initialEnrollment={record} storeId={record.physical_verification?.session.store_id} />;
   if (token === null) return <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-de7db1afb88b-1" : undefined}>Preparing activation…</p>;
-  return <div className="space-y-5"><h1 className="text-2xl font-extrabold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-de7db1afb88b-2" : undefined}>Activate your Zik Pass</h1>
+  return <div className="space-y-5"><h1 className="text-2xl font-extrabold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-de7db1afb88b-2" : undefined}>Set up your Zik Card</h1>
+    {!token && store ? <Card className="space-y-2 p-4"><p className="font-semibold">Selected store: {store.name}</p><p className="text-sm text-[var(--zk-text-soft)]">{store.addressLine}, {store.postcode}</p><ButtonLink href="/find?product=card" variant="ghost">Change store</ButtonLink></Card> : null}
     {error && <Alert tone="critical">{error}</Alert>}
     {token ? <Card className="space-y-4 p-5"><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-de7db1afb88b-3" : undefined}>Use the QR your clerk showed after checking your ID and taking payment. Save the pass to this phone and complete the device setup.</p><p className="font-semibold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-de7db1afb88b-4" : undefined}>No further payment is needed.</p><Button loading={busy} onClick={() => void claim()}>Save my Zik Pass</Button><p className="text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-de7db1afb88b-5" : undefined}>This prototype uses a demo device check. Keep the activation link private.</p></Card>
-    : <Card className="space-y-4 p-5"><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-de7db1afb88b-6" : undefined}>Bring your purchase card to the till. The clerk will check your photo ID, take payment, and show a private activation QR for your phone.</p><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-de7db1afb88b-7" : undefined}>Already paid? Scan the QR on the clerk’s screen. The printed purchase card alone does not activate a pass.</p><ButtonLink href="/find" variant="secondary">I&apos;m at the till</ButtonLink></Card>}
+    : <Card className="space-y-4 p-5"><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-de7db1afb88b-6" : undefined}>Zik Card is a physical backup, purchased separately from the digital-only Zik Pass. Bring your card and photo ID to the till. The clerk will check your ID, take payment, and show a private activation QR for your phone.</p><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-de7db1afb88b-7" : undefined}>Already paid? Scan the QR on the clerk’s screen. The printed purchase card alone does not activate a pass.</p><p className="text-sm text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-de7db1afb88b-8" : undefined}>At the till? Ask the clerk to start a Zik Card sale, then scan the activation QR they show you.</p>{!store ? <ButtonLink href="/find?product=card" variant="secondary">Find a store</ButtonLink> : null}</Card>}
   </div>;
 }

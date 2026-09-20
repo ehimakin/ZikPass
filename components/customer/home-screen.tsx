@@ -9,7 +9,9 @@ import { ProductFamily } from "@/components/customer/product-family";
 import { HomePassOverview } from "@/components/customer/home-pass-overview";
 import type { WalletState } from "@/lib/shared/types";
 import { ZikGlyph } from "@/components/zik-logo";
+import { ZikPassCard } from "@/components/customer/zik-pass-card";
 import heroImage from "@/public/hero-zikpass-warm.png";
+import physicalHeroImage from "@/public/hero-zik-card-overlap.png";
 
 const HERO_SLIDES = [
   {
@@ -282,7 +284,7 @@ export function HomeScreen({ price }: { price: string }) {
             ))}
           </div>
           <div className="zk-hero-actions">
-            <Link className="zk-editorial-cta zk-editorial-cta--primary" href={(isVaultSlide ? "/vault" : hasPass ? "/pass" : "/find") as Route}>{isVaultSlide ? (hasPass ? "Go to Vault" : "Get a Vault") : hasPass ? "Open my pass" : <>Get Zik Pass <span>· {price}</span></>}</Link>
+            <Link className={`zk-editorial-cta zk-editorial-cta--primary${isVaultSlide && hasPass ? " !rounded-none" : ""}`} href={(isVaultSlide ? "/vault" : hasPass ? "/pass" : "/find") as Route}>{isVaultSlide ? (hasPass ? "Go to Vault" : "Get a Vault") : hasPass ? "Open my pass" : <>Get Zik Pass <span>· {price}</span></>}</Link>
             <Link className="zk-editorial-cta zk-editorial-cta--text" href={(isVaultSlide ? "/vault/how-it-works" : "#how-it-works") as Route}>{isVaultSlide ? "How Vault works" : "How it works"} <span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-4" : undefined}>→</span></Link>
           </div>
           <div className="zk-hero-dots" role="tablist" aria-label="Hero slides">
@@ -327,11 +329,11 @@ export function HomeScreen({ price }: { price: string }) {
       </section>
 
       <section className="zk-scene zk-scene-physical" aria-labelledby="physical-title">
-        <Image src={heroImage} alt="Zik Pass on a phone after real-world verification" className="zk-scene-device-image" sizes="100vw" priority />
+        <Image src={physicalHeroImage} alt="Zik Pass on a phone beside the lime physical Zik Card" className="zk-scene-device-image" sizes="100vw" priority />
         <div className="zk-scene-inner zk-physical-copy">
           <p className="zk-scene-kicker" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-11" : undefined}>{"Ok, GTTP already!"}</p>
           <h2 id="physical-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-12" : undefined} style={{"fontSize":66}}>{"Zik verifies your age once, physically. In the real world."}<br/><em>{"By keeping your identity offline, we help you stay anonymous online."}</em></h2>
-          <ol className="zk-editorial-steps"><li><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-13" : undefined}>01</span><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-14" : undefined}>Show ID once<br/><small>Checked by a participating store. Not retained.</small></p></li><li><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-15" : undefined}>02</span><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-16" : undefined}>Bind your device<br/><small>Your private holder key stays with you.</small></p></li><li><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-17" : undefined}>03</span><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-18" : undefined}>Use it for a year<br/><small>Sites receive the answer, not your evidence.</small></p></li></ol>
+          <ol className="zk-editorial-steps"><li><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-13" : undefined}>01</span><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-14" : undefined}>Show ID once<br/><small>Checked by a participating store. Not retained.</small></p></li><li><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-15" : undefined}>02</span><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-16" : undefined}>Bind your device<br/><small>Your private holder key stays with you.</small></p></li><li><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-17" : undefined}>03</span><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-18" : undefined}>{"Use it for life*"}<br/><small>{"*Zik Card purchases only."}</small></p></li></ol>
         </div>
       </section>
 
@@ -340,12 +342,8 @@ export function HomeScreen({ price }: { price: string }) {
           <div className="zk-pass-copy"><p className="zk-scene-kicker" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-19" : undefined}>The pass</p><h2 id="pass-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-20" : undefined}>{"Buy a physical card in store"}<br/><em>{"or a digital pass in the app"}</em></h2><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-21" : undefined}>Signed. Device-bound. Reusable.</p></div>
           <div className="zk-pass-products">
             <figure className="zk-card-artwork">
-              <div className="zk-physical-card" role="img" aria-label="Zik Card concept: a lime physical backup card with the Zik brand mark">
-                <div className="zk-card-brand"><svg viewBox="0 0 100 100" aria-hidden="true"><ZikGlyph /></svg><span>Zik Card</span></div>
-                <span className="zk-card-watermark" aria-hidden="true">Zik</span>
-                <div className="zk-card-footer"><span>Your physical backup.</span><span>KEEP IT CLOSE</span></div>
-              </div>
-              <figcaption>Physical card · Available separately in store</figcaption>
+              <ZikPassCard />
+              <figcaption data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-38" : undefined}>Physical card · Available separately in store</figcaption>
             </figure>
             <div className="zk-pass-object"><HomePassOverview wallet={wallet} failed={walletFailed}/></div>
           </div>

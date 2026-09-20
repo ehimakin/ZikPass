@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ZIK_STORES,
   formatDistanceKm,
@@ -27,6 +27,7 @@ function project(store: ZikStore): { x: number; y: number } {
 
 export function StoreFinder({ selectMode = false }: { selectMode?: boolean }) {
   const router = useRouter();
+  const params = useSearchParams();
   const [query, setQuery] = useState("");
   const [origin, setOrigin] = useState<Origin>(null);
   const [geoState, setGeoState] = useState<GeoState>("idle");
@@ -103,7 +104,11 @@ export function StoreFinder({ selectMode = false }: { selectMode?: boolean }) {
     } catch {
       /* storage may be unavailable; selection still passes via the URL */
     }
-    router.push(`/get-pass?store_id=${encodeURIComponent(store.id)}` as never);
+    const next = new URLSearchParams({ store_id: store.id });
+    if (params.get("product") === "card" || params.get("entry_mode") === "retail_card") {
+      next.set("product", "card");
+    }
+    router.push(`/get-pass?${next.toString()}` as never);
   }
 
   const geoMessage: Record<Exclude<GeoState, "idle" | "locating">, string> = {

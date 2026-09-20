@@ -20,7 +20,7 @@ export default function EcosystemPage() {
         <p className="rounded-none bg-[var(--zk-sunken)] p-4 text-sm font-semibold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-4" : undefined}>ZikVault works on this device: you can store documents in it and have them read here. Zik ID is not available — you can prepare an application, but the identity checks behind it do not exist yet, so no ID can be issued.</p>
         <section aria-labelledby="products-title">
           <h2 id="products-title" className="mb-4 text-xl font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-5" : undefined}>Zik starts with Zik Pass.</h2>
-          <ProductFamily price={getPassPrice().display} />
+          <ProductFamily price={getPassPrice().display} vaultLinkLabel="Get Zik Vault" />
         </section>
         <Card as="section" className="p-5">
           <h2 className="text-xl font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-6" : undefined}>Verify once. Choose what to disclose.</h2>

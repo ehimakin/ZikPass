@@ -31,7 +31,7 @@ export default function VaultGuidePage() {
           <li><span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-17" : undefined}>04</span><div><h3 data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-18" : undefined}>Share a fact, with your permission.</h3><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-19" : undefined}>The aim is to let you approve a specific proof, such as being over 18, without routinely handing over the entire document. Any external verification checks would need a clear explanation of the information involved.</p></div></li>
         </ol>
       </section>
-      <footer className={styles.actions}><ButtonLink href="/vault">Go to Vault</ButtonLink></footer>
+      <footer className={styles.actions}><ButtonLink href="/vault" className="!rounded-none">Go to Vault</ButtonLink></footer>
     </article>
   </CustomerShell>;
 }

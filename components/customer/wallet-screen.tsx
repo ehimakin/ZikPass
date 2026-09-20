@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { loadWalletState } from "@/lib/client/wallet-client";
 import { hasApplicationRecord } from "@/lib/client/vault/store";
-import type { WalletState } from "@/lib/shared/types";
+import { ZikPassCard } from "./zik-pass-card";
+import type { EnrollmentRecord, WalletState } from "@/lib/shared/types";
 import { Alert, Button, ButtonLink, Skeleton, StatusBadge } from "./ui";
 
 export function WalletScreen() {
   const [wallet, setWallet] = useState<WalletState | null>(null);
+  const [cardLinked, setCardLinked] = useState(false);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [now, setNow] = useState(() => Date.now());
@@ -28,6 +30,21 @@ export function WalletScreen() {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
   }, []);
+  useEffect(() => {
+    let cancelled = false;
+    setCardLinked(false);
+    if (wallet?.credential && wallet.enrollmentId) {
+      void fetch(`/api/enrollment/${encodeURIComponent(wallet.enrollmentId)}`)
+        .then(async response => {
+          if (!response.ok) return;
+          const record = await response.json() as EnrollmentRecord;
+          if (!cancelled && record.issued_credential?.payload.credential_id === wallet.credential?.payload.credential_id) {
+            setCardLinked(record.physical_verification?.session.entry_mode === "retail_card");
+          }
+        }).catch(() => {});
+    }
+    return () => { cancelled = true; };
+  }, [wallet]);
   const credential = wallet?.credential;
   const expired = credential && Date.parse(credential.payload.expires_at) <= now;
   const active = credential && !expired && Date.parse(credential.payload.activates_at) <= now;
@@ -40,11 +57,15 @@ export function WalletScreen() {
       <p className="text-sm text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-3" : undefined}>Choose a credential to open and use.</p>
     </header>
     {failed ? <Alert tone="caution" title="Couldn’t open your wallet" action={<Button variant="secondary" onClick={() => setAttempt(value => value + 1)}>Try again</Button>}>Your saved credentials haven’t been changed.</Alert> : !wallet ? <div role="status" aria-label="Loading wallet"><Skeleton className="h-64 w-full rounded-none" /></div> : <section aria-label="Your credentials">
-      <Link href="/pass" aria-label="Open Zik Pass" className="block rounded-3xl border border-[#cbb95b] bg-[#faf8ed] p-6 shadow-sm transition hover:border-[#28623c] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#28623c]">
-        <div className="flex items-center justify-between gap-3"><h2 className="text-xl font-extrabold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-4" : undefined}><span className="text-[#28623c]">Zik</span> Pass</h2><StatusBadge tone={expired ? "critical" : active ? "positive" : "neutral"}>{status}</StatusBadge></div>
-        <div className="py-8"><p className="text-6xl font-extrabold tracking-tight text-[#28623c]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-5" : undefined}>18+</p><p className="mt-2 text-sm text-[var(--zk-text-soft)]">{credential ? "Your proof of adult status" : wallet.enrollmentId ? "Continue setting up your proof of age" : "Your proof of age belongs here"}</p></div>
-        <div className="flex items-center justify-between border-t border-[#e4dfc8] pt-4 text-sm font-semibold"><span>{credential ? "Open Zik Pass" : wallet.enrollmentId ? "View pass progress" : "Explore Zik Pass"}</span><span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-6" : undefined}>→</span></div>
-      </Link>
+      <div className="zk-wallet-pass relative block rounded-3xl p-4">
+        <div className="mb-5 flex justify-end"><StatusBadge tone={expired ? "critical" : active ? "positive" : "neutral"}>{status}</StatusBadge></div>
+        <div className="relative">
+          <ZikPassCard digital={!cardLinked} />
+          {credential && !cardLinked ? <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center"><ButtonLink href="/ecosystem" variant="secondary" className="pointer-events-auto zk-wallet-digital-explore">Explore Zik ID</ButtonLink></div> : null}
+        </div>
+        <p className="mt-6 text-sm text-[var(--zk-text-soft)]">{credential ? "Your proof of adult status" : wallet.enrollmentId ? "Continue setting up your proof of age" : "Your proof of age belongs here"}</p>
+        <Link href="/pass" className="mt-4 flex items-center justify-between border-t border-[var(--zk-line)] pt-4 text-sm font-semibold after:absolute after:inset-0 after:rounded-3xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#28623c]"><span>{credential ? cardLinked ? "Open Zik Card" : "Open Zik Pass" : wallet.enrollmentId ? "View pass progress" : "Explore Zik Pass"}</span><span aria-hidden="true">→</span></Link>
+      </div>
       {!credential && !wallet.enrollmentId ? <div className="mt-4"><ButtonLink href="/find" size="lg">Get Zik Pass</ButtonLink></div> : null}
       {application ? <Link href="/id/apply" aria-label="Open your Zik ID application" className="mt-4 block rounded-3xl border border-[#e4dfc8] bg-white p-6 transition hover:border-[#cbb95b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#28623c]">
         <div className="flex items-center justify-between gap-3"><h2 className="text-xl font-extrabold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-7" : undefined}><span className="text-[#28623c]">Zik</span> ID</h2><StatusBadge tone="neutral">Application saved</StatusBadge></div>
@@ -52,6 +73,6 @@ export function WalletScreen() {
         <div className="mt-5 flex items-center justify-between border-t border-[#e4dfc8] pt-4 text-sm font-semibold"><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-9" : undefined}>Unlock your Vault to view it</span><span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-10" : undefined}>→</span></div>
       </Link> : null}
     </section>}
-    <div className="flex justify-center border-t border-[var(--zk-line)] pt-5"><ButtonLink href="/vault" className="!bg-[#424242] !text-white hover:!bg-[#303030] active:!bg-[#252525]">Go to Vault</ButtonLink></div>
+    <div className="flex justify-center border-t border-[var(--zk-line)] pt-5"><ButtonLink href="/vault" className="!rounded-none !bg-[#424242] !text-white hover:!bg-[#303030] active:!bg-[#252525]">Go to Vault</ButtonLink></div>
   </div>;
 }

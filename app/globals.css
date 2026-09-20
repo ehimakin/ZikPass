@@ -1119,3 +1119,22 @@ pre {
 .zk-hero-scroll-cue:focus-visible { outline: 2px solid #d3bb53; outline-offset: 3px; }
 @keyframes zk-scroll-cue-hover { 0%, 100% { transform: translateY(-3px); } 50% { transform: translateY(3px); } }
 @media (prefers-reduced-motion: reduce) { .zk-hero-scroll-cue svg { animation: none; } }
+
+/* Shared homepage card artwork, shown flat inside the wallet. */
+.zk-wallet-pass .zk-physical-card { transform: none; }
+.zk-physical-card--digital {
+  background: transparent;
+  border: 2px solid #789735;
+  box-shadow: none;
+  color: var(--zk-text);
+  /* Follow the visible ink and border, leaving the centre transparent. */
+  filter: drop-shadow(5px 5px 3px rgb(21 35 26 / 48%));
+}
+.zk-wallet-digital-explore {
+  background: transparent;
+  filter: drop-shadow(5px 5px 3px rgb(21 35 26 / 48%));
+}
+.zk-physical-card--digital .zk-card-watermark {
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(120 151 53 / 24%);
+}

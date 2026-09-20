@@ -1,7 +1,7 @@
 import { getProductCatalogue } from "@/lib/shared/product-catalogue";
 import { ButtonLink, Card, StatusBadge } from "@/components/customer/ui";
 
-export function ProductFamily({ price }: { price: string }) {
+export function ProductFamily({ price, vaultLinkLabel }: { price: string; vaultLinkLabel?: string }) {
   return (
     <ol className="space-y-3" aria-label="Zik product progression">
       {getProductCatalogue(price).map((product, index) => (
@@ -19,7 +19,7 @@ export function ProductFamily({ price }: { price: string }) {
               ? <ButtonLink href={product.destination} className="mt-4">Get Zik Pass · {price}</ButtonLink>
               : product.destination
                 // Usable on this device, but the membership behind it is not a real product yet.
-                ? <><ButtonLink href={product.destination} variant="secondary" className="mt-4">Open {product.name}</ButtonLink><p className="mt-2 text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-292792b74590-3" : undefined}>Works on this device. The planned price is illustrative and cannot be charged here.</p></>
+                ? <><ButtonLink href={product.destination} variant="secondary" className="mt-4">{product.destination === "/vault" && vaultLinkLabel ? vaultLinkLabel : `Open ${product.name}`}</ButtonLink><p className="mt-2 text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-292792b74590-3" : undefined}>Works on this device. The planned price is illustrative and cannot be charged here.</p></>
                 : <p className="mt-2 text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-292792b74590-2" : undefined}>Planned concept · Not available in this prototype</p>}
           </Card>
         </li>
