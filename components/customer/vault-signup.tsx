@@ -1,5 +1,7 @@
 "use client";
 
+import { AccountRecoveryPrompt } from "@/components/customer/account-recovery/recovery-prompt";
+
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { VaultV2 } from "@/lib/client/vault/session";
 import { selfEntered } from "@/lib/shared/vault";
@@ -118,14 +120,14 @@ function Payment({ paying, onBack, onPay }: { paying: boolean; onBack: () => voi
   return <div>
     <div className="flex items-start justify-between gap-4 rounded-none bg-[var(--zk-sunken)] p-4">
       <div><p className="font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-8" : undefined}>Zik Vault</p><p className="mt-1 text-[13px] text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-9" : undefined}>Planned monthly membership</p></div>
-      <p className="text-[18px] font-extrabold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-10" : undefined}>£0.99<span className="text-[12px] font-medium">/month</span></p>
+      <p className="text-[18px] font-extrabold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-10" : undefined}>£0.35<span className="text-[12px] font-medium">/month</span></p>
     </div>
     <div className="mt-4"><Alert tone="caution" title="Preview checkout only">No real payment method is collected and no charge or subscription will be created.</Alert></div>
     <button type="button" onClick={onPay} disabled={paying} className="mt-4 flex w-full items-center justify-between rounded-xl border border-[var(--zk-line-strong)] px-4 py-3.5 text-left disabled:opacity-55">
       <span data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-11" : undefined}><span className="block text-[14px] font-semibold">Zik demo checkout</span><span className="block text-[12px] text-[var(--zk-text-soft)]">Simulate successful payment</span></span>
       <StatusBadge tone="caution">Test</StatusBadge>
     </button>
-    <div className="mt-5 flex justify-between gap-3"><Button type="button" variant="ghost" onClick={onBack} disabled={paying}>Back</Button><Button type="button" onClick={onPay} loading={paying}>Pay £0.99</Button></div>
+    <div className="mt-5 flex justify-between gap-3"><Button type="button" variant="ghost" onClick={onBack} disabled={paying}>Back</Button><Button type="button" onClick={onPay} loading={paying}>Pay £0.35</Button></div>
   </div>;
 }
 
@@ -144,7 +146,7 @@ function Setup({ values, setValues, error, saving, onSubmit }: { values: Values;
       <label className="block text-[13px] font-semibold">Create a passphrase<input {...field("passphrase")} className={inputClass} type="password" required minLength={12} maxLength={1024} autoComplete="new-password" /></label>
       <label className="block text-[13px] font-semibold">Confirm passphrase<input {...field("confirmation")} className={inputClass} type="password" required minLength={12} maxLength={1024} autoComplete="new-password" /></label>
     </div>
-    <p className="mt-3 text-[12px] leading-5 text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-14" : undefined}>Use at least 12 characters. Zik cannot reset this passphrase or recover the Vault if you lose it.</p>
+    <p className="mt-3 text-[12px] leading-5 text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-14" : undefined}>Use at least 12 characters. Zik cannot reset this passphrase. Set up a recovery phrase and encrypted backup after creating your Vault to protect against losing this device.</p>
     {error ? <p className="mt-3 text-[13px] font-semibold text-[var(--zk-critical)]" role="alert">{error}</p> : null}
     <Button type="submit" size="lg" className="mt-5" loading={saving}>Create encrypted Vault</Button>
   </form>;
@@ -153,6 +155,7 @@ function Setup({ values, setValues, error, saving, onSubmit }: { values: Values;
 function Complete({ onDone }: { onDone: () => void }) {
   return <div>
     <Alert tone="positive" title="Your encrypted Vault is ready">It is stored on this device. Unlock it with the passphrase you just created.</Alert>
+    <div className="mt-5"><AccountRecoveryPrompt /></div>
     <Button type="button" size="lg" className="mt-5" onClick={onDone}>Go to my Vault</Button>
   </div>;
 }

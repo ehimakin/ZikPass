@@ -64,7 +64,8 @@ export async function authorizeDeviceBinding(input: {
 }): Promise<DeviceBindingAuthorization> {
   const plan = await resolveStorePlan(input.storeId);
 
-  return runDeviceBindingTransaction<DeviceBindingAuthorization>(({ bindings, payments }) => {
+  return runDeviceBindingTransaction<DeviceBindingAuthorization>(({ bindings, payments, recoveredEnrollmentIds }) => {
+    if (recoveredEnrollmentIds.includes(input.enrollmentId)) throw new Error("Use your recovery phrase to replace this device.");
     const enrollmentBindings = bindings.filter((binding) => binding.enrollment_id === input.enrollmentId);
     const existing = enrollmentBindings.find(
       (binding) =>

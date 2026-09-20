@@ -40,7 +40,7 @@ test('a new user can purchase the preview and create an encrypted Vault', async 
   await expect(signup.getByText('Your Vault keeps the details you add encrypted')).toBeVisible();
   await signup.getByRole('button', { name: 'Continue to payment' }).click();
   await expect(signup.getByText('No real payment method is collected')).toBeVisible();
-  await signup.getByRole('button', { name: 'Pay £0.99' }).click();
+  await signup.getByRole('button', { name: 'Pay £0.35' }).click();
 
   await signup.getByLabel('Legal name', { exact: true }).fill('Vault Test User');
   await signup.getByLabel('Delivery address', { exact: true }).fill('1 Device Lane, London');

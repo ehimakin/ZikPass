@@ -1,5 +1,6 @@
 "use client";
 
+import type { DocumentClass } from "@/lib/shared/vault/model";
 import type { AnalysisMessage, AnalysisProgress, AnalysisSuccess } from './analysis-protocol';
 
 /**
@@ -28,7 +29,7 @@ export class AnalysisClient {
   }
 
   /** Jobs run one after another; the returned promise settles for this job only. */
-  analyse(input: { job_id: string; filename: string; media_type: string; bytes: ArrayBuffer; rotation?: 0 | 90 | 180 | 270; onProgress?: (progress: AnalysisProgress) => void }): Promise<AnalysisOutcome> {
+  analyse(input: { document_class?: DocumentClass; job_id: string; filename: string; media_type: string; bytes: ArrayBuffer; rotation?: 0 | 90 | 180 | 270; onProgress?: (progress: AnalysisProgress) => void }): Promise<AnalysisOutcome> {
     const generation = this.generationValue;
     const run = this.queue.then(() => new Promise<AnalysisOutcome>(resolve => {
       const worker = this.ensure();
@@ -45,7 +46,7 @@ export class AnalysisClient {
       const onError = () => settle({ status: 'failed', reason: 'Document analysis could not start on this device.', unsupported: false });
       worker.addEventListener('message', onMessage);
       worker.addEventListener('error', onError);
-      worker.postMessage({ type: 'analyse', job_id: input.job_id, generation, filename: input.filename, media_type: input.media_type, bytes: input.bytes, rotation: input.rotation ?? 0, now: new Date().toISOString() }, [input.bytes]);
+      worker.postMessage({ type: 'analyse', document_class: input.document_class, job_id: input.job_id, generation, filename: input.filename, media_type: input.media_type, bytes: input.bytes, rotation: input.rotation ?? 0, now: new Date().toISOString() }, [input.bytes]);
     }));
     this.queue = run.catch(() => undefined);
     return run;

@@ -1,8 +1,11 @@
+import { appleWalletDemoConfigured } from "@/lib/server/apple-wallet";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { CustomerShell } from "@/components/customer/customer-shell";
 import { WalletScreen } from "@/components/customer/wallet-screen";
 import { WalletSurface } from "@/components/wallet-surface";
+
+export const dynamic = "force-dynamic";
 
 export default async function WalletPage({
   searchParams
@@ -34,7 +37,7 @@ export default async function WalletPage({
     if (handoffToken) q.set("handoff_token", handoffToken);
     redirect(`/pass?${q.toString()}`);
   }
-  return <CustomerShell active="wallet"><WalletScreen /></CustomerShell>;
+  return <CustomerShell active="wallet"><WalletScreen appleWalletAvailable={appleWalletDemoConfigured()} /></CustomerShell>;
 }
 
 function getParam(value: string | string[] | undefined): string | undefined {

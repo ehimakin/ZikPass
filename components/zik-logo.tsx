@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { useId } from "react";
 
 /** Original supplied artwork, cropped by its viewBox without altering the file. */
 export function ZikGlyph() {
@@ -9,18 +10,34 @@ export function ZikGlyph() {
 
 export function ZikLogoMark({
   className,
-  tone = "dark"
+  tone = "dark",
+  padlock = false
 }: {
   className?: string;
   tone?: "dark" | "light";
+  padlock?: boolean;
 }) {
+  const shackleMaskId = useId();
   return (
     <svg
-      viewBox="0 0 100 100"
+      viewBox={padlock ? "0 -15 100 115" : "0 0 100 100"}
+      overflow={padlock ? "visible" : undefined}
       fill="none"
       aria-hidden="true"
       className={clsx(tone === "light" ? "text-mist" : "text-ink", className)}
     >
+      {padlock ? (
+        <>
+          <defs>
+            <mask id={shackleMaskId} maskUnits="userSpaceOnUse" x="0" y="-25" width="100" height="125">
+              <rect x="0" y="-25" width="100" height="125" fill="white" />
+              {/* Trim the tips exactly at the outside of the diamond stroke. */}
+              <rect x="18" y="18" width="64" height="64" rx="14" transform="rotate(45 50 50)" fill="black" stroke="black" strokeWidth="6" />
+            </mask>
+          </defs>
+          <path d="M31.8 22V-1.4a18.2 18.2 0 0 1 36.4 0V22" stroke="currentColor" strokeWidth="6" strokeLinecap="butt" mask={`url(#${shackleMaskId})`} />
+        </>
+      ) : null}
       <rect
         x="18"
         y="18"

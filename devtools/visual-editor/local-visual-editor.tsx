@@ -1,11 +1,13 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import type { Editable, EditStyle } from './source';
 import styles from './local-visual-editor.module.css';
 type Entry=Editable & {file:string;hash:string};
 type Snapshot={token:string;entries:Entry[];canUndo:boolean};
 function textNodes(element:Element):Text[]{const walker=document.createTreeWalker(element,NodeFilter.SHOW_TEXT);const nodes:Text[]=[];let node;while((node=walker.nextNode()))if(node.textContent?.trim())nodes.push(node as Text);return nodes;}
 export function LocalVisualEditor(){
+  const pathname = usePathname();
   const [enabled,setEnabled]=useState(false),[snapshot,setSnapshot]=useState<Snapshot>(),[entry,setEntry]=useState<Entry>(),[texts,setTexts]=useState<string[]>([]),[style,setStyle]=useState<EditStyle>({}),[message,setMessage]=useState('Select Edit page, then click highlighted text.'),[busy,setBusy]=useState(false);
   const selected=useRef<{element:HTMLElement;nodes:Text[];originals:string[];style:string|null} | undefined>(undefined);
   const panel=useRef<HTMLElement>(null);
@@ -46,6 +48,8 @@ export function LocalVisualEditor(){
   useEffect(()=>{const handler=(event:KeyboardEvent)=>{if(!enabled)return;if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='s'){event.preventDefault();void save();}if(event.key==='Escape'){restore();setEnabled(false);sessionStorage.removeItem('local-visual-editor:resume');setEntry(undefined);}};window.addEventListener('keydown',handler);return()=>window.removeEventListener('keydown',handler);},[enabled,save,restore]);
   
   async function undo(){if(!snapshot)return;setBusy(true);try{restore();const response=await fetch('/api/local-editor',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:snapshot.token})});const result=await response.json();if(!response.ok)throw Error(result.error);setEntry(undefined);setEnabled(false);sessionStorage.removeItem('local-visual-editor:resume');await refresh();setMessage('Undone. The previous source has been restored.');setBusy(false);}catch(e){setMessage((e as Error).message);setBusy(false);}}
+  // Keep the developer toolbar out of affiliate installation and paired forms.
+  if (pathname?.startsWith("/affiliates")) return null;
   return <aside ref={panel} className={styles.editor} aria-label="Local visual editor">
     <div className={styles.header}><strong>Local page editor</strong><span>Development only</span></div>
     <p role="status" aria-live="polite">{message}</p>

@@ -643,7 +643,7 @@ pre {
 
 .zk-scene-control {
   z-index: 2;
-  background: #f6f6f1;
+  background: rgb(246 246 241 / 20%);
   padding-bottom: calc(clamp(64px, 9vw, 130px) + var(--zk-bottom-nav-height, 64px));
 }
 
@@ -1137,4 +1137,10 @@ pre {
 .zk-physical-card--digital .zk-card-watermark {
   color: transparent;
   -webkit-text-stroke: 1px rgb(120 151 53 / 24%);
+}
+
+/* Filled artwork previews the physical card without implying activation. */
+.zk-physical-card--pending {
+  opacity: .55;
+  box-shadow: 0 2px 0 #789735, 0 10px 24px #0002;
 }

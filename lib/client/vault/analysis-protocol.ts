@@ -25,6 +25,7 @@ export const KNOWN_UNSUPPORTED: Record<string, string> = {
 
 export type AnalysisRequest = {
   type: 'analyse';
+  document_class?: DocumentClass;
   job_id: string;
   /** Bumped on lock, reset and re-import; a result from an old generation is dropped. */
   generation: number;

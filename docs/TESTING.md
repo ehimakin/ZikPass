@@ -188,7 +188,8 @@ only for visual review). Check the empty and expired Pass states too.
 - Family appears below the Pass explanation/how-it-works. Pass says Available now;
   ZikVault says Coming next and planned/not available; Zik ID says Planned/not available.
 - Prices agree on home/ecosystem; Pass reflects server configuration, including free demo
-  configuration. Planned £0.99/month and £2.99 one-off cannot be charged.
+  configuration. Planned £0.35/month, £0.99/month cloud backup, and £2.99 one-off cannot
+  be charged.
 - Only Pass has an acquisition CTA. No planned-product element initiates setup, upload,
   payment or issuance. Follow ecosystem links from home, menu, About and active Pass.
 - Car-hire example has plain Shared/Not shared labels and no checkboxes or form controls.

@@ -12,7 +12,7 @@ import {
   type VendorVerificationResult,
   type VendorVerificationSession
 } from "@/lib/shared/vendor-verification";
-import { verifyPresentationBundle } from "@/lib/shared/verifier-sdk";
+import { verifyOnlinePresentation } from "@/lib/client/verify-online";
 import { getWalletStatusSnapshot } from "@/lib/shared/wallet-state";
 
 type HostedFlowState =
@@ -96,7 +96,7 @@ export function ZikHostedVerification({
         try {
           const challenge = `zik_vendor_${session.session_id}_${crypto.randomUUID()}`;
           const bundle = await createPresentationBundle(challenge);
-          const verification = await verifyPresentationBundle(bundle, issuerPublicKey, new Date());
+          const verification = await verifyOnlinePresentation(bundle, issuerPublicKey, new Date());
 
           if (verification.decision === "allow") {
             const result = createVendorVerificationResult(session, {

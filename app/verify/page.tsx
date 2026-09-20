@@ -1,3 +1,4 @@
+import { cardDemoEnabled } from "@/lib/shared/card-activation";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ClerkVerify } from "@/components/operator/clerk-verify";
@@ -14,7 +15,7 @@ export default async function VerifyPage({
     const code = getParam(params.code);
     redirect(`/store?next=/verify${code ? `&code=${encodeURIComponent(code)}` : ""}`);
   }
-  return <ClerkVerify initialCode={getParam(params.code)} storeId={session.storeId} />;
+  return <ClerkVerify cardDemo={cardDemoEnabled()} initialCode={getParam(params.code)} storeId={session.storeId} />;
 }
 
 function getParam(value: string | string[] | undefined): string | undefined {

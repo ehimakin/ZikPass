@@ -1,3 +1,4 @@
+import { recordAffiliateEvidence } from "@/lib/server/affiliate-onboarding";
 import { NextRequest, NextResponse } from "next/server";
 import { exchangeAffiliateAuthorizationCode } from "@/lib/server/affiliate-verifier";
 import { AFFILIATE_DENIAL_MESSAGE } from "@/lib/shared/affiliate-verifier";
@@ -28,6 +29,7 @@ export async function POST(request: NextRequest) {
       state: body.state ?? ""
     });
 
+    recordAffiliateEvidence(body.client_id ?? "", "verifiedAt");
     return NextResponse.json(result, { headers: { "Cache-Control": "no-store" } });
   } catch {
     return NextResponse.json({ error: AFFILIATE_DENIAL_MESSAGE }, { status: 400 });

@@ -13,7 +13,7 @@ export default async function StorePage({
   const params = await searchParams;
   const requested = getParam(params.next);
   const customerCode = getParam(params.code);
-  const nextPath = requested === "/verify/purchase"
+  const nextPath = (requested === "/verify/purchase" || requested === "/verify/card")
     ? requested
     : customerCode
       ? `/verify?code=${encodeURIComponent(customerCode)}`

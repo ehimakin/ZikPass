@@ -12,7 +12,8 @@ is a progression in what a person can choose to prove, not a dependency for usin
 | Product | Canonical distinction | Commercial model | Product status |
 | --- | --- | --- | --- |
 | Zik Pass | One thing about me that I can prove without identifying myself. | £1.99 one-off; not a subscription | Available now in the prototype |
-| ZikVault | What I can prove. | Planned £0.99/month | Working on the device; membership not a real product |
+| ZikVault | What I can prove. | Planned £0.35/month | Working on the device; membership not a real product |
+| ZikVault Cloud Backup | An optional encrypted copy of ZikVault, held off the device. | Planned £0.99/month, on top of ZikVault | Not yet available; no storage integration exists |
 | Zik ID | Who I am when identity is genuinely required. | Planned £2.99 one-off | Application only; cannot be issued |
 
 ZikVault works in this prototype: documents chosen by the user are stored encrypted on

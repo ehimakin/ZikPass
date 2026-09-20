@@ -38,6 +38,11 @@ export async function saveWalletState(state: WalletState): Promise<void> {
   });
 }
 
+export async function recordCardDemoCheckout(): Promise<void> {
+  const wallet = await loadWalletState();
+  await saveWalletState({ ...wallet, cardDemoCheckoutAt: new Date().toISOString() });
+}
+
 export async function ensureHolderKeyPair(existing?: WalletState): Promise<WalletState> {
   const wallet = normalizeWalletState(existing ?? (await loadWalletState()));
 
@@ -291,6 +296,10 @@ export function normalizeWalletState(input: unknown): WalletState {
 
   const candidate = input as Partial<WalletState>;
   const nextState: WalletState = {};
+
+  if (typeof candidate.cardDemoCheckoutAt === "string" && Number.isFinite(Date.parse(candidate.cardDemoCheckoutAt))) {
+    nextState.cardDemoCheckoutAt = candidate.cardDemoCheckoutAt;
+  }
 
   if (candidate.enrollmentId && typeof candidate.enrollmentId === "string") {
     nextState.enrollmentId = candidate.enrollmentId;

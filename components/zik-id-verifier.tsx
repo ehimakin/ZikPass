@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { waitForIceGathering } from "@/lib/client/zik-id-peer";
 import { parseZikIdPeerPayload, type ZikIdPeerPayload } from "@/lib/shared/zik-id";
-import { verifyPresentationBundle } from "@/lib/shared/verifier-sdk";
+import { verifyOnlinePresentation } from "@/lib/client/verify-online";
 import { ZikLogoMark } from "@/components/zik-logo";
 import { Button, StatusBadge } from "@/components/customer/ui";
 
@@ -38,7 +38,7 @@ export function ZikIdVerifier({ sessionId, code, issuerPublicKey }: { sessionId:
           if (frame.type !== "zik-id-end" || chunks.length !== expectedChunks) return;
           const next = parseZikIdPeerPayload(JSON.parse(chunks.join("")));
           if (next.sessionId !== sessionId || next.presentation.challenge !== expectedChallenge || Math.abs(Date.now() - Date.parse(next.sharedAt)) > 30000) throw new Error("This Zik ID presentation does not match the one-time request.");
-          const verification = await verifyPresentationBundle(next.presentation, issuerPublicKey, new Date());
+          const verification = await verifyOnlinePresentation(next.presentation, issuerPublicKey, new Date());
           if (verification.decision !== "allow") throw new Error("The signed Zik Pass could not be verified.");
           if (disposed) return;
           setPayload(next); setRemaining(8); setStatus("Compare the photo with the person presenting this Zik ID.");

@@ -1,3 +1,4 @@
+import type { RecoveryRecord, RecoveryChallenge, RevokedHolder } from "@/lib/shared/account-recovery/types";
 import { promises as fs } from "node:fs";
 import { runtimeConfig } from "@/lib/shared/config";
 import type {
@@ -16,6 +17,9 @@ import type {
 import { getRuntimeDataDir, getRuntimeStatePath, getSeedStatePath } from "@/lib/server/runtime-paths";
 
 interface StoreData {
+  account_recoveries: RecoveryRecord[];
+  recovery_challenges: RecoveryChallenge[];
+  revoked_holders: RevokedHolder[];
   enrollments: EnrollmentRecord[];
   physical_sessions: PhysicalStoreSessionRecord[];
   mobile_handoffs: NativeAppHandoffRecord[];
@@ -60,6 +64,7 @@ interface LegacyEnrollmentRecord {
   last_user_message?: string;
   last_retryable_error?: EnrollmentRecord["last_retryable_error"];
   issued_credential?: EnrollmentRecord["issued_credential"];
+  account_recovered_at?: string;
   physical_verification?: EnrollmentRecord["physical_verification"];
   possession?: {
     code: string;
@@ -88,6 +93,9 @@ async function ensureStateFile() {
 async function readStore(): Promise<StoreData> {
   await ensureStateFile();
   const parsed = await readStateJson<{
+    account_recoveries?: RecoveryRecord[];
+    recovery_challenges?: RecoveryChallenge[];
+    revoked_holders?: RevokedHolder[];
     enrollments?: LegacyEnrollmentRecord[];
     physical_sessions?: unknown[];
     mobile_handoffs?: unknown[];
@@ -100,6 +108,9 @@ async function readStore(): Promise<StoreData> {
   }>();
 
   return {
+    account_recoveries: parsed.account_recoveries ?? [],
+    recovery_challenges: parsed.recovery_challenges ?? [],
+    revoked_holders: parsed.revoked_holders ?? [],
     enrollments: (parsed.enrollments ?? []).map(normalizeEnrollment),
     physical_sessions: normalizePhysicalSessions(parsed.physical_sessions),
     mobile_handoffs: normalizeMobileHandoffs(parsed.mobile_handoffs),
@@ -134,6 +145,9 @@ export async function listEnrollments(): Promise<EnrollmentRecord[]> {
  */
 export async function resetDemoRuntimeState(): Promise<void> {
   await mutateStore((store) => {
+    store.account_recoveries = [];
+    store.recovery_challenges = [];
+    store.revoked_holders = [];
     store.enrollments = [];
     store.physical_sessions = [];
     store.mobile_handoffs = [];
@@ -190,6 +204,8 @@ export async function findPhysicalSessionByUserCode(
 
 export async function upsertEnrollment(record: EnrollmentRecord): Promise<EnrollmentRecord> {
   return mutateStore((store) => {
+    const recovery = store.account_recoveries.find(item => item.enrollmentId === record.id && item.recoveredAt);
+    if (recovery && (recovery.holderPublicKey.x !== record.holder_public_key.x || recovery.holderPublicKey.x !== record.issued_credential?.payload.subject_public_key.x)) throw new Error("This device binding was replaced through recovery.");
     const index = store.enrollments.findIndex((enrollment) => enrollment.id === record.id);
 
     if (index >= 0) {
@@ -245,6 +261,7 @@ export async function upsertMobileAppHandoff(
   record: NativeAppHandoffRecord
 ): Promise<NativeAppHandoffRecord> {
   return mutateStore((store) => {
+    if (store.account_recoveries.some(item => item.enrollmentId === record.enrollment_id && item.recoveredAt)) throw new Error("This handoff was revoked by account recovery.");
     const index = store.mobile_handoffs.findIndex((handoff) => handoff.token_hash === record.token_hash);
 
     if (index >= 0) {
@@ -286,10 +303,11 @@ export async function runDeviceBindingTransaction<T>(
   transaction: (input: {
     bindings: DeviceBindingRecord[];
     payments: PaymentRecord[];
+    recoveredEnrollmentIds: string[];
   }) => { result: T; bindings?: DeviceBindingRecord[]; payments?: PaymentRecord[] }
 ): Promise<T> {
   return mutateStore((store) => {
-    const outcome = transaction({ bindings: store.device_bindings, payments: store.payments });
+    const outcome = transaction({ bindings: store.device_bindings, payments: store.payments, recoveredEnrollmentIds: store.account_recoveries.filter(item => item.recoveredAt && item.enrollmentId).map(item => item.enrollmentId!) });
 
     if (outcome.bindings) {
       store.device_bindings = outcome.bindings;
@@ -464,10 +482,25 @@ export async function runAffiliateAuthorizationCodeTransaction<T>(
 
 async function mutateStore<T>(mutator: (store: StoreData) => T | Promise<T>): Promise<T> {
   const operation = storeMutationQueue.then(async () => {
-    const store = await readStore();
-    const result = await mutator(store);
-    await writeStore(store);
-    return result;
+    // Recovery, replacement bindings and revocations must commit together,
+    // including when requests run in different Node processes.
+    await fs.mkdir(dataDir, { recursive: true });
+    const lock = `${runtimeStatePath}.lock`;
+    let acquired = false;
+    for (let attempt = 0; attempt < 200; attempt++) {
+      try { await fs.mkdir(lock); acquired = true; break; }
+      catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+        await new Promise(resolve => setTimeout(resolve, 25));
+      }
+    }
+    if (!acquired) throw new Error("Storage is busy. Please retry.");
+    try {
+      const store = await readStore();
+      const result = await mutator(store);
+      await writeStore(store);
+      return result;
+    } finally { await fs.rm(lock, { recursive: true, force: true }); }
   });
 
   storeMutationQueue = operation.then(
@@ -669,6 +702,7 @@ function normalizeEnrollment(record: LegacyEnrollmentRecord): EnrollmentRecord {
     provider_scenario: record.provider_scenario,
     last_user_message: record.last_user_message,
     last_retryable_error: record.last_retryable_error,
+    account_recovered_at: record.account_recovered_at,
     issued_credential: record.issued_credential
   };
 }
@@ -1043,4 +1077,17 @@ async function writeJsonAtomic(filePath: string, value: unknown): Promise<void> 
 
 function randomSuffix(): string {
   return Math.random().toString(36).slice(2, 10);
+}
+
+/** Recovery uses the same atomic commit as enrollments, handoffs and bindings. */
+export function runAccountRecoveryTransaction<T>(work: (store: StoreData) => T | Promise<T>): Promise<T> {
+  return mutateStore(work);
+}
+
+export async function isRecoveredEnrollment(enrollmentId: string): Promise<boolean> {
+  return (await readStore()).account_recoveries.some(record => record.enrollmentId === enrollmentId && record.recoveredAt);
+}
+
+export async function isHolderRevoked(credentialId: string, holderX: string | undefined): Promise<boolean> {
+  return (await readStore()).revoked_holders.some(record => record.credentialId === credentialId && record.holderX === holderX);
 }

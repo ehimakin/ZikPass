@@ -2,7 +2,9 @@
 
 import { useEffect, useId, useState, type FormEvent, type RefObject } from "react";
 import type { VaultV2 } from "@/lib/client/vault/session";
-import type { ClaimField, VaultProfileV2 } from "@/lib/shared/vault/model";
+import { claimFieldFor } from "@/lib/shared/vault/claims";
+import { fieldReading } from "@/lib/shared/vault/field-reading";
+import type { Observation, ClaimField, VaultProfileV2 } from "@/lib/shared/vault/model";
 import { Button, StatusBadge } from "@/components/customer/ui";
 import { DocumentImport } from "./vault/document-import";
 import { DocumentLibrary } from "./vault/document-library";
@@ -11,15 +13,16 @@ import { ReviewPanel } from "./vault/review-panel";
 import { useVaultWorkspace } from "./vault/use-vault-workspace";
 import styles from "./vault-entry.module.css";
 
-function EditableDetail({ label, value, type = "text", onSave, provenance }: { label: string; value: string; type?: "text" | "email" | "date"; onSave: (value: string) => Promise<void>; provenance: string }) {
+function EditableDetail({ label, value, type = "text", onSave, provenance, reading, documents, onConfirm }: { label: string; value: string; type?: "text" | "email" | "date"; onSave: (value: string) => Promise<void>; provenance: string; reading?: ReturnType<typeof fieldReading>; documents?: Map<string, string>; onConfirm?: (observation: Observation) => Promise<void> }) {
   const id = useId();
   const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(value);
+  const displayed = value || reading?.suggestion?.normalised || "";
+  const [draft, setDraft] = useState(displayed);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const changed = draft.trim() !== value;
 
-  useEffect(() => { setDraft(value); }, [value]);
+  useEffect(() => { if (!editing) setDraft(displayed); }, [displayed, editing]);
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -34,16 +37,22 @@ function EditableDetail({ label, value, type = "text", onSave, provenance }: { l
     <dt id={`${id}-label`}>{label}</dt>
     <dd>
       <div className={styles.detailRow}>
-        {!editing ? <span>{value || <em data-local-edit={process.env.NODE_ENV === "development" ? "ve-b78d8dc630c6-1" : undefined}>Not added yet</em>}</span> : <form id={`${id}-form`} className={styles.detailForm} onSubmit={save}>
+        {!editing ? <span>{displayed || <em data-local-edit={process.env.NODE_ENV === "development" ? "ve-b78d8dc630c6-1" : undefined}>Not added yet</em>}</span> : <form id={`${id}-form`} className={styles.detailForm} onSubmit={save}>
           <input aria-labelledby={`${id}-label`} type={type} value={draft} onChange={event => setDraft(event.target.value)} maxLength={512} required autoFocus disabled={busy} onKeyDown={event => { if (event.key === "Escape" && !busy) setEditing(false); }} />
           {changed ? <Button type="submit" loading={busy} aria-label={`Save ${label}`}>Save</Button> : null}
           {error ? <p role="alert">{error}</p> : null}
         </form>}
-        <button type="button" className={styles.detailEdit} aria-label={`${editing ? "Cancel editing" : "Edit"} ${label}`} aria-pressed={editing} disabled={busy} onClick={() => { setDraft(value); setError(""); setEditing(current => !current); }}>
+        <button type="button" className={styles.detailEdit} aria-label={`${editing ? "Cancel editing" : "Edit"} ${label}`} aria-pressed={editing} disabled={busy} onClick={() => { setDraft(displayed); setError(""); setEditing(current => !current); }}>
           <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m15 5 4 4M4 20l4.5-1L20 7.5a2.8 2.8 0 0 0-4-4L4.5 15Z" /></svg>
         </button>
       </div>
-      <small className={styles.provenance}>{provenance}</small>
+      <small className={styles.provenance}>{reading?.suggestion ? `Pre-filled from ${documents?.get(reading.suggestion.document_id) ?? "document"} · check and confirm` : provenance}</small>
+      {reading?.conflicts.length ? <p className="mt-2 text-sm text-amber-800" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b78d8dc630c6-9" : undefined}>Different document details found — review below.</p> : reading?.matches.length ? <p className="mt-2 text-sm font-semibold text-green-800"><span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b78d8dc630c6-10" : undefined}>✓ </span>Matches document: {[...new Set(reading.matches.map(o => documents?.get(o.document_id) ?? "Document"))].join(", ")}</p> : reading?.uncertain ? <p className="mt-2 text-sm text-amber-800" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b78d8dc630c6-11" : undefined}>Some text needs review below.</p> : null}
+      {reading?.suggestion && onConfirm ? <Button type="button" variant="secondary" className="mt-2" loading={busy} onClick={async () => {
+        setBusy(true); setError("");
+        try { await onConfirm(reading.suggestion!); } catch { setError("Could not confirm. Please try again."); } finally { setBusy(false); }
+      }}>Confirm {label.toLowerCase()}</Button> : null}
+      {!editing && error ? <p role="alert">{error}</p> : null}
     </dd>
   </div>;
 }
@@ -80,6 +89,16 @@ export function VaultWorkspace({ vault, profile, onLock, headingRef }: { vault: 
     setShowDesignation(false);
   }
 
+  const documentNames = new Map(state.documents.map(d => [d.id, d.label ?? d.filename]));
+  const readingProps = (field: ClaimField, value: string) => ({
+    reading: fieldReading(field, value, state.observations), documents: documentNames,
+    onConfirm: async (observation: Observation) => {
+      if (!observation.normalised) return;
+      await workspace.setClaim(field, observation.normalised, "accepted_extraction");
+      await workspace.review(observation.id, "accepted");
+    },
+  });
+
   const provenanceFor = (field: ClaimField) => {
     const claim = state.claims.find(entry => entry.field === field);
     if (!claim?.value) return "Not added yet";
@@ -100,7 +119,7 @@ export function VaultWorkspace({ vault, profile, onLock, headingRef }: { vault: 
       <Button variant="secondary" onClick={workspace.lock}>Lock Vault</Button>
     </div>
 
-    <p className={styles.demoNotice} data-local-edit={process.env.NODE_ENV === "development" ? "ve-b78d8dc630c6-4" : undefined}>Your Vault is unlocked on this device. Everything you add is encrypted here and is not uploaded.</p>
+    <p className={styles.demoNotice} data-local-edit={process.env.NODE_ENV === "development" ? "ve-b78d8dc630c6-4" : undefined}>Your Vault is unlocked on this device. Everything you add is encrypted here. An encrypted copy is uploaded only when you choose to save a recovery backup.</p>
 
     {state.error ? <p role="alert" className={styles.workspaceError}>{state.error}</p> : null}
 
@@ -109,7 +128,7 @@ export function VaultWorkspace({ vault, profile, onLock, headingRef }: { vault: 
         <span className={styles.workspaceActionIcon} aria-hidden="true">Aa</span>
         <span><strong>Add name or designation</strong><small>Add another name, role or professional title</small></span>
       </button>
-      <button type="button" className={styles.workspaceAction} onClick={() => setImportOpen(true)} aria-haspopup="dialog" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b78d8dc630c6-6" : undefined}>
+      <button type="button" className={styles.workspaceAction} onClick={() => { workspace.clearJobs(); setImportOpen(true); }} aria-haspopup="dialog" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b78d8dc630c6-6" : undefined}>
         <span className={styles.workspaceActionIcon} aria-hidden="true">＋</span>
         <span><strong>Add document</strong><small>Choose files from this device, with or without reading them</small></span>
       </button>
@@ -124,9 +143,9 @@ export function VaultWorkspace({ vault, profile, onLock, headingRef }: { vault: 
       <section className={styles.workspacePanel} aria-labelledby="vault-identity-title">
         <div className={styles.workspacePanelHeader}><h2 id="vault-identity-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b78d8dc630c6-8" : undefined}>Names &amp; details</h2><StatusBadge>Device-only</StatusBadge></div>
         <dl>
-          <EditableDetail label="Legal name" value={current.legal_name.value} provenance={provenanceFor("legal_name")} onSave={value => workspace.setClaim("legal_name", value, "user_corrected")} />
-          <EditableDetail label="Date of birth" type="date" value={current.date_of_birth?.value ?? ""} provenance={provenanceFor("date_of_birth")} onSave={value => workspace.setClaim("date_of_birth", value, "user_corrected")} />
-          <EditableDetail label="Delivery address" value={current.delivery_address.value} provenance={provenanceFor("address")} onSave={value => workspace.setClaim("address", value, "user_corrected")} />
+          <EditableDetail {...readingProps("legal_name", current.legal_name.value)} label="Legal name" value={current.legal_name.value} provenance={provenanceFor("legal_name")} onSave={value => workspace.setClaim("legal_name", value, "user_corrected")} />
+          <EditableDetail {...readingProps("date_of_birth", current.date_of_birth?.value ?? "")} label="Date of birth" type="date" value={current.date_of_birth?.value ?? ""} provenance={provenanceFor("date_of_birth")} onSave={value => workspace.setClaim("date_of_birth", value, "user_corrected")} />
+          <EditableDetail {...readingProps("address", current.delivery_address.value)} label="Delivery address" value={current.delivery_address.value} provenance={provenanceFor("address")} onSave={value => workspace.setClaim("address", value, "user_corrected")} />
           {current.email ? <EditableDetail label="Email" type="email" value={current.email.value} provenance={provenanceFor("email")} onSave={value => workspace.setClaim("email", value, "user_corrected")} /> : null}
           {current.designations.map((entry, index) => <EditableDetail
             key={`${entry.value}-${index}`}
@@ -152,6 +171,15 @@ export function VaultWorkspace({ vault, profile, onLock, headingRef }: { vault: 
         onReanalyse={workspace.reanalyse}
       />
     </div>
+
+    {state.observations.some(o => !claimFieldFor(o.field)) ? <section className={styles.workspacePanel} aria-labelledby="document-facts-title">
+      <h2 id="document-facts-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b78d8dc630c6-12" : undefined}>Document details</h2>
+      <p className="my-3 text-sm" data-local-edit={process.env.NODE_ENV === "development" ? "ve-b78d8dc630c6-13" : undefined}>Read from your files. These details describe the document and are not identity verification.</p>
+      {state.documents.map(document => {
+        const facts = state.observations.filter(o => o.document_id === document.id && !claimFieldFor(o.field) && o.review !== "rejected");
+        return facts.length ? <div key={document.id} className="mb-5"><h3 className="font-semibold">{document.label ?? document.filename}</h3><dl>{facts.map(o => <div key={o.id}><dt className="capitalize">{o.field.replaceAll("_", " ")}</dt><dd>{o.normalised ?? o.raw_text}<small className="block">{o.ambiguities.length ? "Needs review" : "Read from document"}</small></dd></div>)}</dl></div> : null;
+      })}
+    </section> : null}
 
     <ReviewPanel
       observations={state.observations}

@@ -339,6 +339,8 @@ export interface IssuanceOrchestrationState {
 }
 
 export interface EnrollmentRecord {
+  /** Recovery replaced device bindings; an earlier physical card is not a replacement card. */
+  account_recovered_at?: string;
   id: string;
   lane: IssuanceLane;
   assurance_level: AssuranceLevel;
@@ -375,6 +377,8 @@ export interface EnrollmentRecord {
 }
 
 export interface WalletState {
+  /** Local shop demo only; never evidence of payment, delivery or activation. */
+  cardDemoCheckoutAt?: string;
   holderKeyPair?: {
     publicKeyJwk: JsonWebKey;
     privateKeyJwk: JsonWebKey;

@@ -202,7 +202,7 @@ async function analyse(job: AnalysisRequest): Promise<void> {
   if (stop(job.job_id, job.generation)) return post({ type: 'cancelled', job_id: job.job_id, generation: job.generation });
 
   post({ type: 'progress', job_id: job.job_id, generation: job.generation, stage: 'extracting' });
-  const classification = classify(text);
+  const classification = job.document_class ? { document_class: job.document_class, matched: ["User-designated document type"] } : classify(text);
   const candidates: Candidate[] = extractCandidates({ text, document_class: classification.document_class, method: method === 'pdf_text_layer' ? 'pdf_text_layer' : 'labelled_field', now: new Date(job.now) });
   const lowQuality = quality !== null && quality < 70;
 

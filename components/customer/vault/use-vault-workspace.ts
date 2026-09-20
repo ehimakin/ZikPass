@@ -9,7 +9,7 @@ import { VaultV2 } from "@/lib/client/vault/session";
 import { storageStatus, type StorageEstimate } from "@/lib/client/vault/store";
 import { evaluateReadiness, type ReadinessResult } from "@/lib/shared/policy/zik-id-readiness";
 import { getWalletStatusSnapshot } from "@/lib/shared/wallet-state";
-import { PARSER_VERSION, type Claim, type ClaimField, type ClaimSource, type Observation, type Rotation, type VaultDocument, type VaultProfileV2 } from "@/lib/shared/vault/model";
+import { PARSER_VERSION, type DocumentClass, type Claim, type ClaimField, type ClaimSource, type Observation, type Rotation, type VaultDocument, type VaultProfileV2 } from "@/lib/shared/vault/model";
 
 export const CONSENT_POLICY_VERSION = "zik-vault-consent/1";
 
@@ -75,7 +75,7 @@ export function useVaultWorkspace(vault: VaultV2, onLocked?: () => void) {
    * Each file's outcome is reported on its own; a failure never hides behind a
    * batch-level "complete".
    */
-  const importSelection = useCallback(async (selection: Selection, options: { analyse: boolean }) => {
+  const importSelection = useCallback(async (selection: Selection, options: { analyse: boolean; documentTypes?: Record<string, DocumentClass> }) => {
     setState(current => ({ ...current, busy: true, error: "", jobs: selection.files.map(entry => ({ id: entry.path, name: entry.path, stage: "queued" as const })) }));
     try {
       await vault.recordConsent({
@@ -106,7 +106,7 @@ export function useVaultWorkspace(vault: VaultV2, onLocked?: () => void) {
     async function runAnalysis(document: VaultDocument, bytes: ArrayBuffer, label: string) {
       const generation = analysis.current.generation;
       const outcome = await analysis.current.analyse({
-        job_id: document.id, filename: document.filename, media_type: document.media_type, bytes, rotation: document.rotation,
+        document_class: options.documentTypes?.[label], job_id: document.id, filename: document.filename, media_type: document.media_type, bytes, rotation: document.rotation,
         onProgress: progress => setState(current => ({ ...current, jobs: current.jobs.map(job => (job.id === label ? { ...job, stage: progress.stage, page: progress.page, pages: progress.pages } : job)) })),
       });
       if (!vault.unlocked || generation !== analysis.current.generation) return;
@@ -143,7 +143,7 @@ export function useVaultWorkspace(vault: VaultV2, onLocked?: () => void) {
       await vault.updateDocument(document.id, { processing: "queued", rotation });
       const generation = analysis.current.generation;
       const outcome = await analysis.current.analyse({
-        job_id: `${document.id}-retry`, filename: document.filename, media_type: document.media_type, bytes: bytes.slice().buffer, rotation,
+        document_class: document.classification ?? undefined, job_id: `${document.id}-retry`, filename: document.filename, media_type: document.media_type, bytes: bytes.slice().buffer, rotation,
         onProgress: progress => setState(current => ({ ...current, jobs: current.jobs.map(job => (job.id === document.id ? { ...job, stage: progress.stage, page: progress.page, pages: progress.pages } : job)) })),
       });
       if (!vault.unlocked || generation !== analysis.current.generation) return;
@@ -192,9 +192,11 @@ export function useVaultWorkspace(vault: VaultV2, onLocked?: () => void) {
     await refresh();
   }, [refresh, vault]);
 
+  const clearJobs = useCallback(() => setState(current => ({ ...current, jobs: [] })), []);
+
   const cancelJob = useCallback((id: string) => { analysis.current.cancel(id); }, []);
 
-  return { state: { ...state, readiness }, passActive, refresh, lock, importSelection, reanalyse, review, setClaim, removeDocument, renameDocument, cancelJob, vault };
+  return { state: { ...state, readiness }, passActive, refresh, lock, importSelection, reanalyse, review, setClaim, removeDocument, renameDocument, cancelJob, clearJobs, vault };
 }
 
 function message(error: unknown): string {

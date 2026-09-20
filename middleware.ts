@@ -12,9 +12,9 @@ export function middleware(request: NextRequest) {
     ? NextResponse.redirect(new URL('/vault' + request.nextUrl.search, request.url), 307)
     : NextResponse.next({request:{headers}});
   response.headers.set('Content-Security-Policy',csp);
-  response.headers.set('X-Content-Type-Options','nosniff');response.headers.set('Referrer-Policy','no-referrer');response.headers.set('X-Frame-Options','DENY');response.headers.set('Permissions-Policy','camera=(), microphone=(), geolocation=(self)');
+  response.headers.set('X-Content-Type-Options','nosniff');response.headers.set('Referrer-Policy','no-referrer');response.headers.set('X-Frame-Options','DENY');response.headers.set('Permissions-Policy',request.nextUrl.pathname === '/verify/card' && dev ? 'camera=(self), microphone=(), geolocation=(self)' : 'camera=(), microphone=(), geolocation=(self)');
   if(request.nextUrl.protocol==='https:')response.headers.set('Strict-Transport-Security','max-age=31536000');
-  if(['/Vault','/vault','/id','/verify/id','/retail-demo','/api/disclosure','/api/demo-merchant','/api/zik-id'].some(p=>request.nextUrl.pathname.startsWith(p)))response.headers.set('Cache-Control','no-store');
+  if(['/api/credential/status','/account-recovery','/api/account-recovery','/Vault','/vault','/id','/verify/id','/retail-demo','/api/disclosure','/api/demo-merchant','/api/zik-id','/recovery','/wallet/recovery','/r/','/api/recovery','/api/r/'].some(p=>request.nextUrl.pathname.startsWith(p)))response.headers.set('Cache-Control','no-store');
   return response;
 }
 export const config = {matcher:['/((?!_next/static|_next/image|favicon.ico|icons/|sw.js).*)']};

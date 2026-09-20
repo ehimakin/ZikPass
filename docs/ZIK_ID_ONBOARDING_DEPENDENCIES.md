@@ -71,6 +71,8 @@ claims move on, and the same question applies after issuance.
 
 ## 7. Commercial
 
-The £2.99 Zik ID and £0.99/month Vault prices are display-only. There is no payment,
+The £2.99 Zik ID and £0.35/month Vault prices are display-only. There is no payment,
 entitlement or subscription integration behind either, and the Vault signup runs a
-clearly labelled preview checkout that collects nothing and charges nothing.
+clearly labelled preview checkout that collects nothing and charges nothing. The
+£0.99/month optional cloud backup price is also display-only; the backup capability
+itself has no storage or payment integration yet.

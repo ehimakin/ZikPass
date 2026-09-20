@@ -103,7 +103,7 @@ export function CustomerShell({
                 replayHomepageSplash();
               }}
             >
-              <ZikLogoMark className="zk-logo-float h-7 w-7 shrink-0" />
+              <ZikLogoMark padlock className="zk-logo-float h-7 w-7 shrink-0" />
               <span className="text-[16px] font-extrabold tracking-tight text-[#28623c]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-58a0b92fcc86-2" : undefined}>Zik</span>
             </Link>
           )}

@@ -20,7 +20,7 @@ async function createVault(page: Page) {
   await page.goto('/vault');
   await page.getByRole('button', { name: 'Get Zik Vault' }).click();
   await page.getByRole('button', { name: 'Continue to payment' }).click();
-  await page.getByRole('button', { name: /Pay £0.99/ }).click();
+  await page.getByRole('button', { name: /Pay £0.35/ }).click();
   await page.getByLabel('Legal name').fill(name);
   await page.getByLabel('Delivery address').fill(address);
   await page.getByLabel('Create a passphrase').fill(secret);

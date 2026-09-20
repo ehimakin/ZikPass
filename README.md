@@ -7,8 +7,9 @@ Active branch: `v2-ui-overhaul` (aligned with `origin/v2-ui-overhaul`). `main` a
 ## Product direction
 
 This repository implements **Zik Pass**, the first product in the wider **Zik** platform:
-£1.99 one-off, with no Vault or subscription requirement. **ZikVault** (planned £0.99/month)
-and **Zik ID** (planned £2.99 one-off) are future products. See the
+£1.99 one-off, with no Vault or subscription requirement. **ZikVault** (planned £0.35/month,
+with an optional encrypted cloud backup planned at £0.99/month) and **Zik ID** (planned
+£2.99 one-off) are future products. See the
 [product source of truth](docs/PRODUCT_DIRECTION.md).
 
 **ZikVault now works on the device**: documents the user picks are stored encrypted in

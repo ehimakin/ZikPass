@@ -1,5 +1,7 @@
 "use client";
 
+import { AccountRecoveryPrompt } from "@/components/customer/account-recovery/recovery-prompt";
+
 import { useEffect, useState } from "react";
 import type { Route } from "next";
 import { useSearchParams } from "next/navigation";
@@ -12,6 +14,7 @@ import {
 import { isDemoEnvironment } from "@/lib/shared/demo-environment";
 import { getWalletStatusSnapshot } from "@/lib/shared/wallet-state";
 import type { EnrollmentRecord, WalletState } from "@/lib/shared/types";
+import { AppleWalletButton } from "./apple-wallet-button";
 import { VerificationSeal } from "@/components/customer/verification-seal";
 import { PwaInstallButton } from "@/components/pwa-install-button";
 import { Alert, Button, ButtonLink, Card, SectionHeading, Skeleton, StatusBadge } from "@/components/customer/ui";
@@ -41,7 +44,7 @@ function demoWallet(mode: string): WalletState {
   } as unknown as WalletState;
 }
 
-export function PassScreen() {
+export function PassScreen({ appleWalletAvailable = false }: { appleWalletAvailable?: boolean }) {
   const params = useSearchParams();
   const demoMode = isDemoEnvironment ? params.get("demo") : null;
   const [wallet, setWallet] = useState<WalletState | null>(null);
@@ -145,6 +148,8 @@ export function PassScreen() {
       </div>
 
       <VerificationSeal credential={credential} detailed />
+      <AccountRecoveryPrompt />
+      <AppleWalletButton available={appleWalletAvailable} product="Zik Pass" />
 
       {!active && !expired ? (
         <Alert tone="info" title="Almost ready">

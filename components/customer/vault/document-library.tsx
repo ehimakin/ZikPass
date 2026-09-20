@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, StatusBadge } from "@/components/customer/ui";
 import type { VaultV2 } from "@/lib/client/vault/session";
-import type { Rotation, VaultDocument } from "@/lib/shared/vault/model";
+import { DOCUMENT_CLASSES, type DocumentClass, type Rotation, type VaultDocument } from "@/lib/shared/vault/model";
 import styles from "./vault-documents.module.css";
 
 const CLASS_LABELS: Record<string, string> = {
@@ -25,6 +25,7 @@ export function DocumentLibrary({ documents, vault, onDelete, onRename, onReanal
   onReanalyse: (document: VaultDocument, rotation: Rotation) => Promise<void>;
   busy: boolean;
 }) {
+  const [types, setTypes] = useState<Record<string, DocumentClass | "auto">>({});
   const [query, setQuery] = useState("");
   const [confirming, setConfirming] = useState<string | null>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
@@ -99,6 +100,12 @@ export function DocumentLibrary({ documents, vault, onDelete, onRename, onReanal
               </small>
               {document.failure_reason ? <small className={styles.failure}>{document.failure_reason}</small> : null}
             </div>
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <label className="text-sm">Read as <select aria-label={`Read ${document.filename} as`} disabled={busy} value={types[document.id] ?? document.classification ?? "auto"} onChange={event => setTypes(current => ({ ...current, [document.id]: event.target.value as DocumentClass | "auto" }))} className="rounded border p-2">
+              <option value="auto">Detect automatically</option>{DOCUMENT_CLASSES.map(kind => <option key={kind} value={kind}>{CLASS_LABELS[kind]}</option>)}
+            </select></label>
+            <Button variant="secondary" disabled={busy} onClick={() => { const kind = types[document.id] ?? document.classification; void onReanalyse({ ...document, classification: kind === "auto" ? null : kind }, document.rotation); }}>Read and fill details</Button>
           </div>
           <div className={styles.documentActions}>
             <button type="button" onClick={() => void open(document)} data-local-edit={process.env.NODE_ENV === "development" ? "ve-619a07049c0e-5" : undefined}>Preview</button>

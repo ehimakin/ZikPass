@@ -30,3 +30,16 @@ data/disclosures.json
 # Generated at install time by scripts/vendor-ocr-assets.mjs
 public/ocr/
 public/pdf/
+
+# Isolated affiliate onboarding validation build
+.next-onboarding/
+
+# Apple Wallet signing material and generated passes
+.secrets/
+*.p12
+*.pfx
+*.pem
+*.key
+*.csr
+*.cer
+*.pkpass

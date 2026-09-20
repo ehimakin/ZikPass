@@ -1,11 +1,5 @@
-/**
- * Fixed demo affiliate registry, mirroring the pattern in retail-verifier.ts
- * (a hardcoded prototype credential rather than a real client-management
- * system). Real affiliate onboarding would register a client_id with its
- * own redirect URI allowlist server-side, never trusting a redirect_uri
- * supplied only by the browser.
- */
 import { timingSafeEqual } from "node:crypto";
+import { registeredAffiliate, authenticateRegisteredAffiliate } from "./affiliate-onboarding";
 
 export interface AffiliateClientConfig {
   client_id: string;
@@ -30,6 +24,10 @@ const EXTERNAL_AFFILIATE_ENV: Record<string, { redirectUriEnv: string; clientSec
 };
 
 export function getAffiliateClient(clientId: string): AffiliateClientConfig | undefined {
+  if (clientId.startsWith("zik_dev_")) {
+    const row = registeredAffiliate(clientId);
+    return row ? { client_id: row.id, display_name: row.name, redirect_uris: [row.callback] } : undefined;
+  }
   const external = EXTERNAL_AFFILIATE_ENV[clientId];
   if (external) {
     const redirectUri = process.env[external.redirectUriEnv];
@@ -41,6 +39,7 @@ export function getAffiliateClient(clientId: string): AffiliateClientConfig | un
 
 /** External affiliates authenticate from their backend; never expose this secret to a browser. */
 export function authenticateAffiliateClient(clientId: string, authorization: string | null): boolean {
+  if (clientId.startsWith("zik_dev_")) return authenticateRegisteredAffiliate(clientId, authorization);
   if (clientId === "nightfall-demo") return true; // Existing embedded prototype only.
   const external = EXTERNAL_AFFILIATE_ENV[clientId];
   if (!external || !getAffiliateClient(clientId)) return false;

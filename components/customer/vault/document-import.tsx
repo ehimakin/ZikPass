@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { DOCUMENT_CLASSES, type DocumentClass } from "@/lib/shared/vault/model";
 import { Button } from "@/components/customer/ui";
 import { ANALYSIS_LIMITS } from "@/lib/client/vault/analysis-protocol";
 import { captureDocument, pickFiles, pickFolder, supportsDirectoryPicker, type Selection } from "@/lib/client/vault/import-sources";
@@ -19,10 +20,11 @@ export function DocumentImport({ open, busy, jobs, onClose, onImport, onCancelJo
   busy: boolean;
   jobs: JobState[];
   onClose: () => void;
-  onImport: (selection: Selection, options: { analyse: boolean }) => Promise<void>;
+  onImport: (selection: Selection, options: { analyse: boolean; documentTypes?: Record<string, DocumentClass> }) => Promise<void>;
   onCancelJob: (id: string) => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const [documentTypes, setDocumentTypes] = useState<Record<string, DocumentClass>>({});
   const [selection, setSelection] = useState<Selection | null>(null);
   const [consentStore, setConsentStore] = useState(false);
   const [consentAnalyse, setConsentAnalyse] = useState(false);
@@ -44,6 +46,7 @@ export function DocumentImport({ open, busy, jobs, onClose, onImport, onCancelJo
   /** Any change of scope invalidates the consent already given. */
   function choose(next: Selection) {
     setSelection(next);
+    setDocumentTypes({});
     setConsentStore(false);
     setConsentAnalyse(false);
     setNotice(next.files.length ? "" : "Nothing was selected, so nothing has been added.");
@@ -107,7 +110,10 @@ export function DocumentImport({ open, busy, jobs, onClose, onImport, onCancelJo
         <h3 id="vault-scope-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-c843ec8ff896-8" : undefined}>What you have chosen</h3>
         <p className={styles.scopeSummary}>{selection.descriptor} · {selection.files.length} file{selection.files.length === 1 ? "" : "s"} Zik can read</p>
         <ul className={styles.fileList}>
-          {selection.files.map(entry => <li key={entry.path}><span>{entry.path}</span><small>{(entry.file.size / 1024).toFixed(0)} KB</small></li>)}
+          {selection.files.map(entry => <li key={entry.path}><span>{entry.path}<select aria-label={`Document type for ${entry.path}`} value={documentTypes[entry.path] ?? "auto"} onChange={event => {
+            const value = event.target.value;
+            setDocumentTypes(current => { const next = { ...current }; if (value === "auto") delete next[entry.path]; else next[entry.path] = value as DocumentClass; return next; });
+          }} className="ml-2 rounded border p-2"><option value="auto">Detect document type</option>{DOCUMENT_CLASSES.map(kind => <option key={kind} value={kind}>{kind.replaceAll("_", " ")}</option>)}</select></span><small>{(entry.file.size / 1024).toFixed(0)} KB</small></li>)}
         </ul>
         {selection.skipped.length ? <div className={styles.skipped}>
           <h4>{selection.skipped.length} file{selection.skipped.length === 1 ? " was" : "s were"} left out</h4>
@@ -128,7 +134,7 @@ export function DocumentImport({ open, busy, jobs, onClose, onImport, onCancelJo
 
         <div className={styles.actions}>
           <Button type="button" variant="secondary" onClick={() => choose({ ...selection, files: [], skipped: [] })}>Change selection</Button>
-          <Button type="button" disabled={!consentStore || busy} loading={busy} onClick={() => void onImport(selection, { analyse: consentAnalyse })}>
+          <Button type="button" disabled={!consentStore || busy} loading={busy} onClick={() => void onImport(selection, { analyse: consentAnalyse, documentTypes })}>
             {consentAnalyse ? "Add and read" : "Add without reading"}
           </Button>
         </div>

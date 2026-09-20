@@ -19,8 +19,8 @@ export function ProductFamily({ price, vaultLinkLabel }: { price: string; vaultL
               ? <ButtonLink href={product.destination} className="mt-4">Get Zik Pass · {price}</ButtonLink>
               : product.destination
                 // Usable on this device, but the membership behind it is not a real product yet.
-                ? <><ButtonLink href={product.destination} variant="secondary" className="mt-4">{product.destination === "/vault" && vaultLinkLabel ? vaultLinkLabel : `Open ${product.name}`}</ButtonLink><p className="mt-2 text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-292792b74590-3" : undefined}>Works on this device. The planned price is illustrative and cannot be charged here.</p></>
-                : <p className="mt-2 text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-292792b74590-2" : undefined}>Planned concept · Not available in this prototype</p>}
+                ? <><ButtonLink href={product.destination} variant="secondary" className="mt-4">{product.destination === "/vault" && vaultLinkLabel ? vaultLinkLabel : product.destination === "/customer_validate" ? "Explore Zik Validate" : `Open ${product.name}`}</ButtonLink><p className="mt-2 text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-292792b74590-3" : undefined}>{product.destination === "/customer_validate" ? "Planned service · Applications, professional sign-up and payments are not open yet." : "Works on this device. The planned price is illustrative and cannot be charged here."}</p></>
+                : <p className="mt-2 text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-292792b74590-2" : undefined}>{"Planned concept · Not available in this prototype"}</p>}
           </Card>
         </li>
       ))}

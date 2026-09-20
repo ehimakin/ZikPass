@@ -1,3 +1,4 @@
+import { isHolderRevoked } from "@/lib/server/storage";
 import type { AgeConsentV1 } from "@/lib/shared/age-consent";
 import { createHash, randomBytes } from "node:crypto";
 import { getAffiliateClient, isAllowedAffiliateRedirectUri } from "@/lib/server/affiliate-clients";
@@ -193,7 +194,8 @@ export async function completeAffiliateChallenge(input: {
 
     const verification = await verifyPresentationBundle(input.presentationBundle, issuerPublicKey, new Date());
 
-    if (verification.decision !== "allow") {
+    const revoked = await isHolderRevoked(input.presentationBundle.credential.payload.credential_id, input.presentationBundle.credential.payload.subject_public_key.x);
+    if (verification.decision !== "allow" || revoked) {
       const reason: AffiliateDenialReason = !verification.checks.holder_signature_valid
         ? "invalid_signature"
         : !verification.checks.not_expired

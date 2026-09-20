@@ -134,7 +134,7 @@ application. Every document used is a synthetic specimen from
 ## 1. Create and unlock (45s)
 
 - Go to **`/vault`**. With no Vault on the device, take **Get Zik Vault** →
-  **Continue to payment** → **Pay £0.99**. Say plainly: preview checkout, nothing
+  **Continue to payment** → **Pay £0.35**. Say plainly: preview checkout, nothing
   collected, nothing charged.
 - Fill in name, address and a passphrase of at least 12 characters. Create the
   Vault, then **Go to my Vault**.

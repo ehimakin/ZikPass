@@ -11,7 +11,7 @@ import type { WalletState } from "@/lib/shared/types";
 import { ZikGlyph } from "@/components/zik-logo";
 import { ZikPassCard } from "@/components/customer/zik-pass-card";
 import heroImage from "@/public/hero-zikpass-warm.png";
-import physicalHeroImage from "@/public/hero-zik-card-overlap.png";
+import physicalHeroImage from "@/public/hero-zik-card-lock.png";
 
 const HERO_SLIDES = [
   {
@@ -24,7 +24,7 @@ const HERO_SLIDES = [
   },
   {
     word: "Vault",
-    support: "Keep your verified documents encrypted on your own device, never on our servers.",
+    support: "Keep your documents encrypted on your device, with an optional encrypted recovery backup.",
   },
   {
     word: "ID",
@@ -136,7 +136,13 @@ export function HomeHero() {
 
   return (
     <>
-      <PhoneHero />
+      <Image
+        src={physicalHeroImage}
+        alt=""
+        priority
+        sizes="100vw"
+        className="zk-home-hero-image"
+      />
       {enabled && (
         <>
           <video
@@ -303,7 +309,7 @@ export function HomeScreen({ price }: { price: string }) {
         </div>
         <a href="#how-it-works" className="zk-hero-scroll-cue" aria-label="Explore more about Zik" onClick={event => {
           event.preventDefault();
-          const section = privacyRef.current;
+          const section = document.getElementById("how-it-works");
           if (!section) return;
           section.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
           section.focus({ preventScroll: true });
@@ -318,17 +324,24 @@ export function HomeScreen({ price }: { price: string }) {
         <p className="zk-interaction-note" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-5" : undefined}>The interface responds only when you do.</p>
       </section>
 
-      <section ref={privacyRef} id="how-it-works" tabIndex={-1} className={`zk-scene zk-scene-privacy ${privacyRevealed ? "is-revealed" : ""}`} aria-labelledby="privacy-title">
+      <section ref={privacyRef} className={`zk-scene zk-scene-privacy ${privacyRevealed ? "is-revealed" : ""}`} aria-labelledby="privacy-title">
         <div className="zk-scene-inner zk-privacy-layout">
           <div><p className="zk-scene-kicker" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-6" : undefined}>{"Why do sites ask for your name..."}</p><h2 id="privacy-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-7" : undefined}>{"When they only need"}<br/>{"your age?"}</h2></div>
           <div className="zk-identity-stack" aria-label="Identity details Zik does not need to share">
             {["Name", "Date of birth", "Passport", "Selfie"].map((label, index)=><span key={label} style={{"--token-index":index} as CSSProperties}>{label}</span>)}
           </div>
           <div className="zk-answer-lockup"><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-8" : undefined}>{"Zik answers this with"}</p><strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-9" : undefined}>Over 18 <i>✓</i></strong><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-10" : undefined}>{"cryptographically backed, device tethered 18 plus certificates."}</span></div>
+          <div className="col-span-full mt-6 max-w-3xl rounded-2xl border border-current/20 p-5">
+            <p className="text-xs font-bold uppercase tracking-widest" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-34" : undefined}>Product 6 · Planned premium service</p>
+            <h3 className="mt-2 text-2xl font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-35" : undefined}>Zik Validate</h3>
+            <p className="mt-3 text-sm leading-relaxed" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-36" : undefined}>Need a professional to vouch for a passport photo or ID application? We’re bringing that process online, starting with people who already know a participating dentist or other eligible professional. Proposed price: £9.99 per validation, paid once.</p>
+            <p className="mt-2 text-sm leading-relaxed" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-37" : undefined}>A peer-to-peer network of dentists, doctors and other professionals, plus in-person validations, is being explored. Eligibility depends on the application’s requirements.</p>
+            <Link href={"/customer_validate" as Route} className="mt-3 inline-flex min-h-[44px] items-center font-bold underline underline-offset-4">Explore Zik Validate →</Link>
+          </div>
         </div>
       </section>
 
-      <section className="zk-scene zk-scene-physical" aria-labelledby="physical-title">
+      <section id="how-it-works" tabIndex={-1} className="zk-scene zk-scene-physical" aria-labelledby="physical-title">
         <Image src={physicalHeroImage} alt="Zik Pass on a phone beside the lime physical Zik Card" className="zk-scene-device-image" sizes="100vw" priority />
         <div className="zk-scene-inner zk-physical-copy">
           <p className="zk-scene-kicker" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-11" : undefined}>{"Ok, GTTP already!"}</p>
@@ -353,7 +366,7 @@ export function HomeScreen({ price }: { price: string }) {
       <section className="zk-scene zk-scene-control" aria-labelledby="control-title">
         <div className="zk-scene-inner zk-control-layout">
           <div><p className="zk-scene-kicker" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-22" : undefined}>You stay in control</p><h2 id="control-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-23" : undefined}>Share the answer.<br/><em>Not the evidence.</em></h2></div>
-          <div className="zk-disclosure-demo"><div><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-24" : undefined}>Website asks</span><strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-25" : undefined}>Are you over 18?</strong></div><div className="zk-disclosure-line"/><div className="zk-disclosure-result"><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-26" : undefined}>Zik returns</span><strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-27" : undefined}>Yes <i>✓</i></strong></div><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-28" : undefined}>Name · date of birth · photo ID remain private</p></div>
+          <div className="zk-disclosure-demo"><div><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-24" : undefined}>Website asks</span><strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-25" : undefined}>Are you over 18?</strong></div><div className="zk-disclosure-line"/><div className="zk-disclosure-result"><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-26" : undefined}>Zik returns</span><strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-27" : undefined} style={{"color":"#ffffff"}}>{"Yes "}<i>{"✓"}</i></strong></div><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-28" : undefined} style={{"color":"#ffffff","backgroundColor":"#90bf26"}}>{"Name · date of birth · photo ID remain private"}</p></div>
           <div className="zk-final-action"><Link className="zk-editorial-cta zk-editorial-cta--lime" href={(hasPass ? "/pass" : "/find") as Route}>{hasPass ? "Open my pass" : "Get Zik Pass"} <span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-29" : undefined}>→</span></Link>{!hasPass?<Link href={"/pass" as Route}>I already have a pass</Link>:null}</div>
         </div>
       </section>
