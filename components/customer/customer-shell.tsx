@@ -10,6 +10,7 @@ import { environmentBadgeLabel } from "@/lib/shared/demo-environment";
 import { ZikLogoMark } from "@/components/zik-logo";
 import { CustomerMenu } from "@/components/customer/customer-menu";
 import { OfflineBanner } from "@/components/customer/offline-banner";
+import { SupportChat } from "@/components/customer/support/support-chat";
 import { AffiliateLogoRails } from "@/components/customer/affiliate-logo-rails";
 import { replayHomepageSplash } from "@/components/homepage-splash";
 
@@ -122,7 +123,8 @@ export function CustomerShell({
               { href: "/home#how-it-works" as Route, label: "How it works" },
               { href: "/about" as Route, label: "Why Zik?" },
               { href: "/vault" as Route, label: "Zik Vault" },
-              { href: "/id" as Route, label: "Zik ID" }
+              { href: "/id" as Route, label: "Zik ID" },
+              { href: "/validate" as Route, label: "Zik Validate" }
             ]} pathname={pathname} />
           </div>
         </div>
@@ -141,6 +143,7 @@ export function CustomerShell({
       </main>
 
       <AffiliateLogoRails />
+      <SupportChat />
 
       <nav
         ref={navRef}

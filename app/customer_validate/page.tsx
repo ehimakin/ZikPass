@@ -17,6 +17,7 @@ export default function CustomerValidatePage() {
   return (
     <CustomerShell active="about" title="Zik Validate">
       <div className="space-y-6 pb-8">
+        <Card className="!rounded-2xl p-5"><p className="mb-3 text-sm" data-local-edit={process.env.NODE_ENV === "development" ? "ve-1a31761225ef-12" : undefined}>The document validation workflow is now available as a local prototype. The original service concept is retained below.</p><ButtonLink href="/validate">Explore Zik Validate →</ButtonLink></Card>
         <section className="pt-5">
           <StatusBadge>Product 6 · Planned premium service</StatusBadge>
           <h1 className="mt-4 text-[36px] font-extrabold leading-tight tracking-tight" data-local-edit={process.env.NODE_ENV === "development" ? "ve-1a31761225ef-1" : undefined}>A trusted professional. A personal confirmation.</h1>
@@ -50,7 +51,7 @@ export default function CustomerValidatePage() {
           <h2 className="text-xl font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-1a31761225ef-9" : undefined}>The right person for the application</h2>
           <p className="mt-3 text-sm leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-1a31761225ef-10" : undefined}>Each receiving organisation sets its own rules, including eligible professions, how well the professional must know you and how confirmation must be submitted. A platform match alone does not establish eligibility, and paying for a review does not guarantee an endorsement or acceptance of your application.</p>
         </Card>
-        <p className="text-sm leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-1a31761225ef-11" : undefined}>Zik Validate is in development. Applications, document uploads, bookings and payments are not available yet.</p>
+        <p className="text-sm leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-1a31761225ef-11" : undefined}>Zik Validate is in development. Real applications, bookings and payments are not available. Dummy document uploads are available in the local workflow prototype.</p>
         <ButtonLink href="/ecosystem" variant="secondary">Explore the Zik ecosystem</ButtonLink>
       </div>
     </CustomerShell>

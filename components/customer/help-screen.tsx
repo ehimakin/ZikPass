@@ -74,7 +74,9 @@ export function HelpScreen() {
         </p>
       </div>
 
-      <TicketCreate />
+      <section id="contact-support" className="scroll-mt-20" aria-label="Contact support">
+        <TicketCreate />
+      </section>
 
       <section>
         <SectionHeading>Accepted ID</SectionHeading>

@@ -85,7 +85,7 @@ export function DocumentImport({ open, busy, jobs, onClose, onImport, onCancelJo
       searched in the background and nothing is uploaded — reading happens on this device.
     </p>
 
-    <p className={styles.importIntro}>
+    <p className={styles.importIntro} data-local-edit={process.env.NODE_ENV === "development" ? "ve-c843ec8ff896-12" : undefined}>
       Planned for the £3.99 remote bundle: adding a passport scan would also offer included remote passport verification.
       You would review the provider and authorise sharing before the scan leaves this device.
       This verification service is not connected yet; adding a file here does not verify it.

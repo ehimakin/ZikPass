@@ -30,6 +30,10 @@ const HERO_SLIDES = [
     word: "ID",
     support: "Forget forgetting ID! Use your mobile Zik ID at multiple venues, gigs and vendors.",
   },
+  {
+    word: "Validate",
+    support: "Get a document independently verified. Find out what needs confirming, choose an appropriate verifier and receive their attestation. Explore the prototype.",
+  },
 ] as const;
 
 const HERO_ROULETTE_TRANSITION_MS = 490;
@@ -178,6 +182,7 @@ export function HomeScreen({ price }: { price: string }) {
   const [heroAutoplay, setHeroAutoplay] = useState(true);
   const [heroManualNonce, setHeroManualNonce] = useState(0);
   const heroSlide = rouletteIndex % HERO_SLIDES.length;
+  const isValidateSlide = HERO_SLIDES[heroSlide].word === "Validate";
   const isVaultSlide = HERO_SLIDES[heroSlide].word === "Vault";
 
   useEffect(() => {
@@ -290,8 +295,8 @@ export function HomeScreen({ price }: { price: string }) {
             ))}
           </div>
           <div className="zk-hero-actions">
-            <Link className={`zk-editorial-cta zk-editorial-cta--primary${isVaultSlide && hasPass ? " !rounded-none" : ""}`} href={(isVaultSlide ? "/vault" : hasPass ? "/pass" : "/find") as Route}>{isVaultSlide ? (hasPass ? "Go to Vault" : "Get a Vault") : hasPass ? "Open my pass" : <>Get Zik Pass <span>· {price}</span></>}</Link>
-            <Link className="zk-editorial-cta zk-editorial-cta--text" href={(isVaultSlide ? "/vault/how-it-works" : "#how-it-works") as Route}>{isVaultSlide ? "How Vault works" : "How it works"} <span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-4" : undefined}>→</span></Link>
+            <Link className={`zk-editorial-cta zk-editorial-cta--primary${isVaultSlide && hasPass ? " !rounded-none" : ""}`} href={(isValidateSlide ? "/validate" : isVaultSlide ? "/vault" : hasPass ? "/pass" : "/find") as Route}>{isValidateSlide ? "Explore Zik Validate" : isVaultSlide ? (hasPass ? "Go to Vault" : "Get a Vault") : hasPass ? "Open my pass" : <>Get Zik Pass <span>· {price}</span></>}</Link>
+            <Link className="zk-editorial-cta zk-editorial-cta--text" href={(isValidateSlide ? "/validate#how-it-works" : isVaultSlide ? "/vault/how-it-works" : "#how-it-works") as Route}>{isValidateSlide ? "How validation works" : isVaultSlide ? "How Vault works" : "How it works"} <span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-4" : undefined}>→</span></Link>
           </div>
           <div className="zk-hero-dots" role="tablist" aria-label="Hero slides">
             {HERO_SLIDES.map((slide, index) => (
@@ -348,7 +353,9 @@ export function HomeScreen({ price }: { price: string }) {
           <div className="zk-pass-copy"><p className="zk-scene-kicker" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-19" : undefined}>The pass</p><h2 id="pass-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-20" : undefined}>{"Buy a physical card in store"}<br/><em>{"or a digital pass in the app"}</em></h2><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-21" : undefined}>Signed. Device-bound. Reusable.</p></div>
           <div className="zk-pass-products">
             <figure className="zk-card-artwork">
-              <ZikPassCard />
+              <Link href="/shop" aria-label="Shop Zik Cards" className="block rounded-3xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-white">
+                <ZikPassCard />
+              </Link>
               <figcaption data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-38" : undefined}>Physical card · Available separately in store</figcaption>
             </figure>
             <div className="zk-pass-object"><HomePassOverview wallet={wallet} failed={walletFailed}/></div>

@@ -40,12 +40,12 @@ export function getProductCatalogue(passDisplayPrice: string) {
     },
     {
       name: "Zik Validate",
-      promise: "A trusted professional to vouch for your application.",
-      status: "Product 6 · Planned",
-      displayPrice: "Proposed: £9.99 one-time fee per validation",
+      promise: "Get a document independently verified.",
+      status: "Workflow prototype",
+      displayPrice: "Demo · No payment",
       available: false,
-      destination: "/customer_validate",
-      detail: "Premium support for passport photo countersigning and ID applications, starting with people who already know a participating dentist or other reputable professional. A future peer-to-peer network could let dentists, doctors and other eligible professionals offer validations, with in-person appointments also being explored."
+      destination: "/validate",
+      detail: "Upload the document you’ve been asked to validate. Zik helps determine what kind of verification is required and connects it with an appropriate verifier."
     },
     {
       name: "Zik Pass · Finance Check",

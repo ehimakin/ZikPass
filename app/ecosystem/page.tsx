@@ -1,11 +1,12 @@
 import { CustomerShell } from "@/components/customer/customer-shell";
 import { ProductFamily } from "@/components/customer/product-family";
-import { Card, StatusBadge } from "@/components/customer/ui";
+import { ValidationWorkflow } from "@/components/validate/workflow";
+import { Card, StatusBadge, ButtonLink } from "@/components/customer/ui";
 import { getPassPrice } from "@/lib/shared/payment-config";
 
 export const metadata = {
   title: "The Zik ecosystem",
-  description: "Explore Zik Pass, ZikVault, Zik ID and Zik Validate, our planned premium professional validation service, plus Product 7: a £3.99 remote finance-check route to Zik Pass."
+  description: "Explore Zik Pass, ZikVault, Zik ID and Zik Validate, our document attestation prototype, plus Product 7: a £3.99 remote finance-check route to Zik Pass."
 };
 
 export default function EcosystemPage() {
@@ -22,6 +23,15 @@ export default function EcosystemPage() {
           <h2 id="products-title" className="mb-4 text-xl font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-5" : undefined}>Zik starts with Zik Pass.</h2>
           <ProductFamily price={getPassPrice().display} vaultLinkLabel="Get Zik Vault" />
         </section>
+        <Card as="section" className="!rounded-2xl p-5">
+          <StatusBadge>Trusted attestation · Prototype</StatusBadge>
+          <h2 className="mt-3 text-xl font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-14" : undefined}>Zik Validate</h2>
+          <p className="mt-2 font-semibold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-15" : undefined}>Get a document independently verified.</p>
+          <p className="mt-3 text-sm leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-16" : undefined}>ZikPass proves an attribute. Zik Vault holds documents and, in future, verified credentials. Zik ID would selectively present identity. Zik Validate adds a workflow for obtaining a trusted attestation: what needs to be established, who is qualified, and exactly what they confirmed.</p>
+          <ValidationWorkflow />
+          <p className="mb-4 text-sm text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-17" : undefined}>Requirements vary by document, receiving organisation and jurisdiction. Zik provides evidence of the attestation, not a guarantee of its underlying truth.</p>
+          <ButtonLink href="/validate" variant="secondary">Explore Zik Validate →</ButtonLink>
+        </Card>
         <Card as="section" className="p-5">
           <h2 className="text-xl font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-6" : undefined}>{"Verify once. Choose what to disclose."}</h2>
           <p className="mt-3 text-sm leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-7" : undefined}>Verifying identity and disclosing identity are separate actions. Today, Zik Pass proves one attribute: you’re 18+. A participating site receives the minimum age assertion and verification metadata, without your name, exact date of birth, photograph, address or identity document.</p>
