@@ -27,6 +27,7 @@ describe("clerk-first purchase sale", () => {
   });
   it("issues after payment and customer device setup, with one ledger entry", async () => {
     const sale = await paidSale();
+    expect(sale.amountMinor).toBe(299);
     const key = (await generateKeyPair()).publicKeyJwk;
     const record = await claimPurchaseSale(sale.token, key);
     expect(record.status).toBe("device_auth_pending");

@@ -89,7 +89,7 @@ export function VaultSignup({ vault, onCreated }: { vault: VaultV2; onCreated: (
         <div className="max-w-[360px]">
           <p className="text-[12px] font-extrabold tracking-[0.16em] text-[#65604c]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-1" : undefined}>NO VAULT ON THIS DEVICE</p>
           <h2 className="mt-2 text-[22px] font-bold tracking-[-0.03em]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-2" : undefined}>Make this space yours.</h2>
-          <p className="mt-2 text-[14px] leading-6 text-[#55594f]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-3" : undefined}>Start Vault onboarding, preview payment, then create an encrypted Vault held on this device.</p>
+          <p className="mt-2 text-[14px] leading-6 text-[#55594f]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-3" : undefined}>Keep your documents encrypted on this device. 35p/month; subscription billing is not connected yet.</p>
         </div>
         <Button type="button" onClick={() => setOpen(true)}>Get Zik Vault</Button>
       </div>
@@ -112,22 +112,18 @@ function Welcome({ onContinue }: { onContinue: () => void }) {
       <li className="rounded-none bg-[var(--zk-sunken)] p-3" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-6" : undefined}><strong>You hold the key.</strong> Your passphrase cannot be recovered by Zik.</li>
       <li className="rounded-none bg-[var(--zk-sunken)] p-3" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-7" : undefined}><strong>Choose what leaves.</strong> Nothing is shared without your approval.</li>
     </ul>
-    <Button type="button" size="lg" className="mt-5" onClick={onContinue}>Continue to payment</Button>
+    <Button type="button" size="lg" className="mt-5" onClick={onContinue}>Continue</Button>
   </div>;
 }
 
 function Payment({ paying, onBack, onPay }: { paying: boolean; onBack: () => void; onPay: () => void }) {
-  return <div>
-    <div className="flex items-start justify-between gap-4 rounded-none bg-[var(--zk-sunken)] p-4">
-      <div><p className="font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-8" : undefined}>Zik Vault</p><p className="mt-1 text-[13px] text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-9" : undefined}>Planned monthly membership</p></div>
-      <p className="text-[18px] font-extrabold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-10" : undefined}>£0.35<span className="text-[12px] font-medium">/month</span></p>
-    </div>
-    <div className="mt-4"><Alert tone="caution" title="Preview checkout only">No real payment method is collected and no charge or subscription will be created.</Alert></div>
-    <button type="button" onClick={onPay} disabled={paying} className="mt-4 flex w-full items-center justify-between rounded-xl border border-[var(--zk-line-strong)] px-4 py-3.5 text-left disabled:opacity-55">
-      <span data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-11" : undefined}><span className="block text-[14px] font-semibold">Zik demo checkout</span><span className="block text-[12px] text-[var(--zk-text-soft)]">Simulate successful payment</span></span>
-      <StatusBadge tone="caution">Test</StatusBadge>
-    </button>
-    <div className="mt-5 flex justify-between gap-3"><Button type="button" variant="ghost" onClick={onBack} disabled={paying}>Back</Button><Button type="button" onClick={onPay} loading={paying}>Pay £0.35</Button></div>
+  return <div className="space-y-5">
+    <StatusBadge>Early Access</StatusBadge>
+    <h3 className="text-2xl font-bold">Your private document space.</h3>
+    <p className="text-sm text-[var(--zk-text-soft)]">Zik Vault · 35p/month. Zik VaultCloud · 99p/month. No charge or subscription starts in this preview.</p>
+    <details className="rounded-2xl bg-[var(--zk-sunken)] p-4 text-sm"><summary className="cursor-pointer font-semibold">Future subscriptions</summary><p className="mt-3">On iPhone, paid plans will use Apple’s In-App Purchase confirmation, with the price and renewal terms shown before you subscribe. Purchases and subscription management are not connected yet.</p></details>
+    <Button size="lg" onClick={onPay} loading={paying}>Create my Vault</Button>
+    <Button variant="ghost" onClick={onBack} disabled={paying}>Back</Button>
   </div>;
 }
 
@@ -137,7 +133,7 @@ function Setup({ values, setValues, error, saving, onSubmit }: { values: Values;
   const field = (name: keyof Values) => ({ value: values[name], onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setValues({ ...values, [name]: event.target.value }) });
   const inputClass = "mt-1.5 w-full rounded-lg border border-[var(--zk-line-strong)] bg-white p-3 text-[16px]";
   return <form onSubmit={onSubmit}>
-    <StatusBadge tone="positive">Demo payment complete</StatusBadge>
+    <StatusBadge tone="positive">Vault preview · No subscription started</StatusBadge>
     <p className="mt-3 text-[14px] leading-6 text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-12" : undefined}>Now add the basics for your device Vault. You can edit these later.</p>
     <div className="mt-4 space-y-3">
       <label className="block text-[13px] font-semibold">Legal name<input {...field("legalName")} className={inputClass} required maxLength={200} autoComplete="name" /></label>

@@ -1,21 +1,5 @@
-import { Suspense } from "react";
 import { CustomerShell } from "@/components/customer/customer-shell";
-import { StoreFinder } from "@/components/customer/store-finder";
-
+import { ButtonLink, Card, StatusBadge } from "@/components/customer/ui";
 export default function FindStorePage() {
-  return (
-    <CustomerShell active="find">
-      <div className="mb-4">
-        <h1 className="text-[22px] font-extrabold tracking-tight text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-81beef8f0747-1" : undefined}>
-          Find a store
-        </h1>
-        <p className="mt-1 text-[14px] text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-81beef8f0747-2" : undefined}>
-          Choose where to get verified in person.
-        </p>
-      </div>
-      <Suspense fallback={null}>
-        <StoreFinder selectMode />
-      </Suspense>
-    </CustomerShell>
-  );
+  return <CustomerShell active="find"><div className="space-y-6 py-6"><header><h1 className="text-4xl font-extrabold">Find your Zik spot.</h1><p className="mt-3 text-[var(--zk-text-soft)]">Physical cards and in-person checks, close to home.</p></header><Card className="!rounded-3xl p-6 space-y-4"><StatusBadge>Coming Soon</StatusBadge><h2 className="text-xl font-bold">The first locations are on their way.</h2><p className="text-sm text-[var(--zk-text-soft)]">Confirmed stores will appear here with opening hours and available services.</p><p className="text-sm font-semibold">Digital Zik Pass · 99p one-off, free during Early Access.<br />Physical Zik Card · £2.99, kept for life.</p></Card><ButtonLink href="/card/pair" variant="secondary" size="lg">I already have a card</ButtonLink><ButtonLink href="/partner_stores" variant="ghost">Bring Zik to your store →</ButtonLink></div></CustomerShell>;
 }

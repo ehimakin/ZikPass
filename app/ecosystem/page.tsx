@@ -16,13 +16,14 @@ export default function EcosystemPage() {
         <section className="pt-5">
           <p className="text-xs font-bold uppercase tracking-widest text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-1" : undefined}>One principle. A growing ecosystem.</p>
           <h1 className="mt-3 text-[32px] font-extrabold leading-tight tracking-tight" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-2" : undefined}>The Zik ecosystem</h1>
-          <p className="mt-4 text-[15px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-3" : undefined}>Zik separates verifying information from disclosing it. Start by proving your age. Later, keep more verified information on your device and share only what a situation actually requires.</p>
+          <p className="mt-4 text-[15px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-3" : undefined}>Your age, documents and identity. Always on your terms.</p>
         </section>
         <p className="rounded-none bg-[var(--zk-sunken)] p-4 text-sm font-semibold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-4" : undefined}>{"ZikVault works on this device: you can store documents securely within it and have them read here, locally. Zik ID is not available"}</p>
         <section aria-labelledby="products-title">
           <h2 id="products-title" className="mb-4 text-xl font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-5" : undefined}>Zik starts with Zik Pass.</h2>
           <ProductFamily price={getPassPrice().display} vaultLinkLabel="Get Zik Vault" />
         </section>
+        <details className="rounded-2xl border border-[var(--zk-line)] p-5"><summary className="cursor-pointer font-semibold">Privacy, verification & future products</summary><div className="mt-4 space-y-4">
         <Card as="section" className="!rounded-2xl p-5">
           <StatusBadge>Trusted attestation · Prototype</StatusBadge>
           <h2 className="mt-3 text-xl font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-14" : undefined}>Zik Validate</h2>
@@ -50,6 +51,7 @@ export default function EcosystemPage() {
           </dl>
         </Card>
         <p className="text-xs leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-13" : undefined}>Local-first does not mean Zik stores no data. Operational services may still hold public keys, status and revocation data, issuer metadata, fraud signals and audit events. The Vault&rsquo;s storage and on-device analysis decisions are recorded in ADR 007. Planned prices cannot be charged here, and Zik ID is not currently accepted as physical identification.</p>
+        </div></details>
       </div>
     </CustomerShell>
   );

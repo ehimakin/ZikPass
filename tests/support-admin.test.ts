@@ -73,6 +73,14 @@ describe('owner authentication and admin API', () => {
 });
 
 describe('ticket privacy, retries and workflow', () => {
+  it('stores partner enquiries in the team workspace and supports private replies', async () => {
+    const { ticket, accessKey } = await create('store_partner');
+    const workspace = await service.getWorkspace();
+    expect(workspace.tickets.find(item => item.id === ticket.id)?.category).toBe('store_partner');
+    await service.updateTicket('owner', { id: ticket.id, action: 'message', version: 1, requestId: randomUUID(), visibility: 'public', body: 'Let us discuss your store setup.' });
+    expect((await service.readCustomerTicket(ticket.id, accessKey)).messages.at(-1)?.body).toBe('Let us discuss your store setup.');
+  });
+
   it('requires the private key, deduplicates creation, and never exposes internal notes or email', async () => {
     const { ticket, input, accessKey } = await create();
     expect((await service.createTicket(input)).id).toBe(ticket.id);

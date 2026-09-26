@@ -1,29 +1,5 @@
 import { getProductCatalogue } from "@/lib/shared/product-catalogue";
-import { ButtonLink, Card, StatusBadge } from "@/components/customer/ui";
-
+import { ButtonLink, Card, StatusBadge } from "./ui";
 export function ProductFamily({ price, vaultLinkLabel }: { price: string; vaultLinkLabel?: string }) {
-  return (
-    <ol className="space-y-3" aria-label="Zik product progression">
-      {getProductCatalogue(price).map((product, index) => (
-        <li key={product.name}>
-          {index > 0 ? <p aria-hidden="true" className="mb-3 pl-6 text-xl text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-292792b74590-1" : undefined}>↓</p> : null}
-          <Card as="article" className={`!rounded-[var(--zk-r-lg)] p-5 ${product.available ? "border-[var(--zk-accent)] border-l-4" : ""}`}>
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h3 className="text-xl font-extrabold tracking-tight">{product.name}</h3>
-              <StatusBadge tone={product.available ? "positive" : "neutral"}>{product.status}</StatusBadge>
-            </div>
-            <p className="mt-3 text-[15px] font-semibold leading-relaxed">{product.promise}</p>
-            <p className="mt-2 text-sm leading-relaxed text-[var(--zk-text-soft)]">{product.detail}</p>
-            <p className="mt-4 text-sm font-bold">{product.displayPrice}</p>
-            {product.available
-              ? <ButtonLink href={product.destination} className="mt-4">Get Zik Pass · {price}</ButtonLink>
-              : product.destination
-                // Usable on this device, but the membership behind it is not a real product yet.
-                ? <><ButtonLink href={product.destination} variant="secondary" className="mt-4">{product.destination === "/vault" && vaultLinkLabel ? vaultLinkLabel : product.destination === "/prove-with-finance-check" ? "Explore the remote route" : product.destination === "/validate" ? "Explore Zik Validate →" : `Open ${product.name}`}</ButtonLink><p className="mt-2 text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-292792b74590-3" : undefined}>{product.destination === "/prove-with-finance-check" ? "Sample journey only · No credit search, payment or pass issuance." : product.destination === "/validate" ? "Try the local prototype · Eligibility and professional status are simulated." : "Works on this device. The planned price is illustrative and cannot be charged here."}</p></>
-                : <p className="mt-2 text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-292792b74590-2" : undefined}>{"Planned concept · Not available in this prototype"}</p>}
-          </Card>
-        </li>
-      ))}
-    </ol>
-  );
+  return <ul className="space-y-3" aria-label="Zik products">{getProductCatalogue(price).map(product => <li key={product.name}><Card className="!rounded-3xl p-5"><div className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-xl font-bold">{product.name}</h3><StatusBadge>{product.status}</StatusBadge></div><p className="mt-3 text-sm">{product.promise}</p>{product.displayPrice ? <p className="mt-3 text-sm font-semibold">{product.displayPrice}</p> : null}<details className="mt-2 text-sm text-[var(--zk-text-soft)]"><summary className="cursor-pointer py-2">Learn more</summary><p className="py-2">{product.detail}</p></details>{product.destination ? <ButtonLink href={product.destination} variant={product.available ? "primary" : "secondary"} className="mt-3">{product.available ? "Get ZikPass" : product.destination === "/shop" ? "Explore the card" : product.destination === "/vault" ? vaultLinkLabel ?? "Open Vault" : "Explore"}</ButtonLink> : null}</Card></li>)}</ul>;
 }

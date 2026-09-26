@@ -29,7 +29,7 @@ export function SupportChat() {
   return <>
     <button ref={launcher} type="button" aria-label="Open Zik support chat" aria-haspopup="dialog" aria-controls="zik-support-chat" onClick={() => { setTopic(null); dialog.current?.showModal(); }}
       className="fixed right-4 z-40 flex min-h-12 items-center gap-2 rounded-full border border-[#d9e8a1] bg-[#e9f5bc] px-4 text-sm font-bold text-[#173426] shadow-lg transition hover:bg-[#dceda0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--zk-focus)]"
-      style={{ bottom: process.env.NODE_ENV === "development" ? "max(180px, calc(var(--zk-bottom-nav-height, 72px) + 12px))" : "calc(var(--zk-bottom-nav-height, 72px) + 12px)" }}>
+      style={{ bottom: "calc(var(--zk-bottom-nav-height, 72px) + 12px)" }}>
       <ChatIcon className="h-5 w-5" /><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-7725991f8aa6-1" : undefined}>Help</span>
     </button>
     <dialog key={pathname} ref={dialog} id="zik-support-chat" aria-labelledby="zik-chat-title" aria-describedby="zik-chat-description" onClose={() => launcher.current?.focus()} onClick={event => { if (event.target === event.currentTarget) close(); }}

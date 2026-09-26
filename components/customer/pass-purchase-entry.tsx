@@ -19,6 +19,7 @@ export function PassPurchaseEntry({ price }: { price: PassPrice }) {
   }
   return (
     <div className="space-y-6">
+      <p className="pt-5 text-sm text-[var(--zk-text-soft)]">Digital Zik Pass · 99p one-off, free during Early Access. Get verified in person.</p>
       <nav aria-label="Choose your pass product" className="grid grid-cols-2 gap-3">
         <ButtonLink href={href("digital")} variant={isCard ? "secondary" : "primary"}>Digital Zik Pass</ButtonLink>
         <ButtonLink href={href("card")} variant={isCard ? "primary" : "secondary"}>Physical Zik Card</ButtonLink>

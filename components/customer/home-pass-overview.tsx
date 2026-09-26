@@ -36,7 +36,7 @@ export function HomePassOverview({ wallet, failed }: { wallet: WalletState | nul
   let detail = "No pass saved on this device yet. One check in store gets you started.";
   let badge = "No pass yet";
   let action = "Get your pass";
-  let href = "/find";
+  let href = "/get-pass";
 
   if (failed) {
     title = "Let’s check your pass";

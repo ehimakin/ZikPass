@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import { ZikLogoMark } from "@/components/zik-logo";
 import { loadWalletState } from "@/lib/client/wallet-client";
-import { environmentBadgeLabel } from "@/lib/shared/demo-environment";
+
 
 export function CustomerMenu({ items, pathname }: {
   items: Array<{ href: Route; label: string }>;
@@ -26,7 +26,7 @@ export function CustomerMenu({ items, pathname }: {
     return () => { disposed = true; window.removeEventListener("focus", refresh); };
   }, [open, pathname]);
 
-  const menuItems = items.map((item) => item.label === "Get Zik Pass" && hasPass
+  const menuItems = items.map((item) => item.label === "Get ZikPass" && hasPass
     ? { href: "/wallet" as Route, label: "Wallet" }
     : item);
   const [hovered, setHovered] = useState<number | null>(null);
@@ -106,6 +106,7 @@ export function CustomerMenu({ items, pathname }: {
           <div className="zk-menu-utility">
             <Link href="/wallet" onClick={close}>Wallet</Link>
             <Link href="/ZikParental" onClick={close} aria-current={pathname === "/ZikParental" ? "page" : undefined}>Zik for Parents</Link>
+            <Link href={"/partner_stores" as Route} onClick={close}>Become a partner store</Link>
             <Link href="/affiliates" onClick={close} aria-current={pathname === "/affiliates" ? "page" : undefined}>Zik for businesses</Link>
             <Link href={"/ecosystem" as Route} onClick={close} aria-current={pathname === "/ecosystem" ? "page" : undefined}>The Zik ecosystem</Link>
             <Link href={"/account-recovery/restore" as Route} onClick={close}>Lost phone and card?</Link>
@@ -116,7 +117,7 @@ export function CustomerMenu({ items, pathname }: {
             <Link href="/verify" onClick={close}>Verify a customer</Link>
             <Link href="/verify/purchase" onClick={close}>Sell a Zik Pass</Link>
           </div>
-          <p>{environmentBadgeLabel()}</p>
+          <p>Early Access</p>
         </div>
       </dialog>
     </>

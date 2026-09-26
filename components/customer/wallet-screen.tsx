@@ -1,5 +1,6 @@
 "use client";
 
+import { FinanceCheckPreview } from "./finance-check-preview";
 import { AccountRecoveryPrompt } from "@/components/customer/account-recovery/recovery-prompt";
 
 import { useEffect, useState } from "react";
@@ -61,6 +62,7 @@ export function WalletScreen({ appleWalletAvailable = false }: { appleWalletAvai
       <h1 className="text-4xl font-extrabold tracking-tight" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-2" : undefined}>Wallet</h1>
       <p className="text-sm text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-3" : undefined}>Choose a credential to open and use.</p>
     </header>
+    <FinanceCheckPreview compact />
     {failed ? <Alert tone="caution" title="Couldn’t open your wallet" action={<Button variant="secondary" onClick={() => setAttempt(value => value + 1)}>Try again</Button>}>Your saved credentials haven’t been changed.</Alert> : !wallet ? <div role="status" aria-label="Loading wallet"><Skeleton className="h-64 w-full rounded-none" /></div> : <section aria-label="Your credentials">
       <div className="zk-wallet-pass relative block rounded-3xl p-4">
         <div className="mb-5 flex justify-end"><StatusBadge tone={expired ? "critical" : active ? "positive" : "neutral"}>{pendingCard ? `Pass: ${status}` : status}</StatusBadge></div>
@@ -71,13 +73,13 @@ export function WalletScreen({ appleWalletAvailable = false }: { appleWalletAvai
         <p className="mt-6 text-sm text-[var(--zk-text-soft)]">{credential ? "Your proof of adult status" : wallet.enrollmentId ? "Continue setting up your proof of age" : "Your proof of age belongs here"}</p>
         <Link href="/pass" className="mt-4 flex items-center justify-between border-t border-[var(--zk-line)] pt-4 text-sm font-semibold after:absolute after:inset-0 after:rounded-3xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#28623c]"><span>{credential ? cardLinked ? "Open Zik Card" : "Open Zik Pass" : wallet.enrollmentId ? "View pass progress" : "Explore Zik Pass"}</span><span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-4" : undefined}>→</span></Link>
       </div>
-      <div className="mt-4"><AppleWalletButton available={appleWalletAvailable} product="Zik Card" /></div>
+      {credential ? <div className="mt-4"><AppleWalletButton available={appleWalletAvailable} product="Zik Card" /></div> : null}
       {pendingCard ? <div className="mt-4 space-y-2 rounded-2xl border border-[var(--zk-line)] bg-[var(--zk-sunken)] p-4" role="status">
-        <p className="font-semibold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-5" : undefined}>Demo card · Awaiting receipt and activation</p>
-        <p className="text-sm text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-6" : undefined}>Your demo checkout is complete. This previews a card waiting to be received and activated; no payment or real order was made, and no card will be shipped. Your Pass status is unchanged.</p>
+        <p className="font-semibold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-5" : undefined}>Card not linked</p>
+        <p className="text-sm text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-6" : undefined}>Collect a physical card at a participating store, then scan it to link your phone. No card has been ordered.</p>
       </div> : null}
-      {cardLinked !== true && !pendingCard ? <div className="mt-4"><ButtonLink href="/shop" size="lg" variant="secondary">Purchase physical pass</ButtonLink></div> : null}
-      {!credential && !wallet.enrollmentId ? <div className="mt-4"><ButtonLink href="/find" size="lg">Get Zik Pass</ButtonLink></div> : null}
+      {cardLinked !== true && !pendingCard ? <div className="mt-4"><ButtonLink href="/find" size="lg" variant="secondary">Find a Zik Card</ButtonLink></div> : null}
+      {!credential && !wallet.enrollmentId ? <div className="mt-4"><ButtonLink href="/get-pass" size="lg">Get ZikPass</ButtonLink></div> : null}
       {application ? <Link href="/id/apply" aria-label="Open your Zik ID application" className="mt-4 block rounded-3xl border border-[#e4dfc8] bg-white p-6 transition hover:border-[#cbb95b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#28623c]">
         <div className="flex items-center justify-between gap-3"><h2 className="text-xl font-extrabold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-7" : undefined}><span className="text-[#28623c]">Zik</span> ID</h2><StatusBadge tone="neutral">Application saved</StatusBadge></div>
         <p className="mt-4 text-sm text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-8" : undefined}>Your application is held in your Vault on this device. Zik ID identity checks are not available yet, so nothing has been approved or issued.</p>

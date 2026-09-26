@@ -1,4 +1,4 @@
-export const CATEGORIES = ['general', 'technical', 'bug', 'recovery', 'billing', 'privacy'] as const;
+export const CATEGORIES = ['general', 'technical', 'bug', 'recovery', 'billing', 'privacy', 'store_partner'] as const;
 export const TICKET_STATUSES = ['open', 'in_progress', 'waiting_customer', 'waiting_engineering', 'resolved', 'closed'] as const;
 export const PRIORITIES = ['urgent', 'high', 'normal', 'low'] as const;
 export const BUG_STATUSES = ['new', 'investigating', 'in_progress', 'in_review', 'resolved'] as const;

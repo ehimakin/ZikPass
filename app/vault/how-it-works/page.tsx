@@ -14,13 +14,13 @@ export default function VaultGuidePage() {
       <header className={styles.intro}>
         <p className={styles.eyebrow} data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-1" : undefined}>HOW ZIK VAULT WORKS</p>
         <h1 data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-2" : undefined}>Your documents.<br /><em>Your say.</em></h1>
-        <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-3" : undefined}>A home for the things that prove something about you. The vision for Vault is simple: keep your documents on your device and choose what you share.</p>
+        <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-3" : undefined}>Keep your documents together. Choose what you share.</p>
         <div className={styles.actions}><ButtonLink href="/vault">Explore Vault</ButtonLink><ButtonLink href="/home" variant="ghost">Back to Zik</ButtonLink></div>
       </header>
       <section className={styles.preview} aria-labelledby="preview-title">
-        <h2 id="preview-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-4" : undefined}>Try the idea today.</h2>
-        <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-5" : undefined}>Vault is currently a demo with fictional documents. Real document storage, AI search, identity verification and sharing are not available yet.</p>
-        {process.env.NODE_ENV === "development" && <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-6" : undefined}>Use <strong>memaguy</strong> on the Vault page to explore. Your samples disappear when you lock the demo or refresh.</p>}
+        <h2 id="preview-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-4" : undefined}>Early Access. Yours to use.</h2>
+        <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-5" : undefined}>Store and read documents on this device. Identity verification and remote passport checks are coming soon.</p>
+
       </section>
       <section aria-labelledby="vision-title">
         <h2 id="vision-title" className={styles.sectionTitle} data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-7" : undefined}>The Vault we’re building</h2>

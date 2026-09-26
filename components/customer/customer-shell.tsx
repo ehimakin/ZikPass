@@ -6,12 +6,12 @@ import { usePathname } from "next/navigation";
 import type { Route } from "next";
 import clsx from "clsx";
 import { HomeIcon, PinIcon, PassIcon, VaultIcon } from "@/components/customer/icons";
-import { environmentBadgeLabel } from "@/lib/shared/demo-environment";
+
 import { ZikLogoMark } from "@/components/zik-logo";
 import { CustomerMenu } from "@/components/customer/customer-menu";
 import { OfflineBanner } from "@/components/customer/offline-banner";
 import { SupportChat } from "@/components/customer/support/support-chat";
-import { AffiliateLogoRails } from "@/components/customer/affiliate-logo-rails";
+
 import { replayHomepageSplash } from "@/components/homepage-splash";
 
 interface NavItem {
@@ -114,12 +114,12 @@ export function CustomerShell({
             </span>
           ) : (
             <span className="ml-auto hidden rounded-full bg-[var(--zk-sunken)] sm:block px-2.5 py-1 text-[11px] font-semibold text-[var(--zk-text-soft)]">
-              {environmentBadgeLabel()}
+              Early Access
             </span>
           )}
           <div className={clsx("shrink-0", !title && "ml-auto sm:ml-0")}>
             <CustomerMenu items={[
-              { href: "/find" as Route, label: "Get Zik Pass" },
+              { href: "/get-pass" as Route, label: "Get ZikPass" },
               { href: "/home#how-it-works" as Route, label: "How it works" },
               { href: "/about" as Route, label: "Why Zik?" },
               { href: "/vault" as Route, label: "Zik Vault" },
@@ -142,7 +142,7 @@ export function CustomerShell({
         {children}
       </main>
 
-      <AffiliateLogoRails />
+
       <SupportChat />
 
       <nav

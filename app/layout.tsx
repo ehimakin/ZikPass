@@ -17,7 +17,7 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: "Zik Pass",
   description:
-    "Get a reusable age pass in person, then prove you are old enough online without sharing your ID. Prototype.",
+    "Your proof of age, in your pocket. Explore ZikPass, physical Zik Cards and your private document Vault.",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
@@ -55,7 +55,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         ) : <PwaRegistration />}
         <GlobalErrorReporter />
         {children}
-        {process.env.NODE_ENV === "development" && <LocalVisualEditor />}
+        {process.env.NODE_ENV === "development" && process.env.ZIK_VISUAL_EDITOR === "true" && <LocalVisualEditor />}
       </body>
     </html>
   );

@@ -171,8 +171,8 @@ export function VaultEntry({ previewMode = false }: { previewMode?: boolean }) {
     <div ref={hero} className={styles.composition}>
       <div className={styles.dialWrap}><CombinationDial rotation={rotation} /></div>
       <div className={styles.content}>
-        <p className={styles.eyebrow} data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-2" : undefined}>ZIK VAULT</p>
-        <h1 id="vault-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-3" : undefined} style={{"fontSize":62}}>{"There's a safer way to store"}<br />{"that "}<em>{"passport scan"}</em></h1>
+        <p className={styles.eyebrow} data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-2" : undefined}>ZIK VAULT · EARLY ACCESS</p>
+        <h1 id="vault-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-3" : undefined} >{"There's a safer way to store"}<br />{"that "}<em>{"passport scan"}</em></h1>
         <p className={styles.intro} data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-4" : undefined}>{"Zik it. Lock it. Put it in your pocket."}<br />{"Lock your secure documents behind Zik Vault"}</p>
         {workspaceProfile && !previewMode ? <div className={styles.unlockedStatus} role="status"><span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-6" : undefined}>✓</span><div><strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-7" : undefined}>Vault unlocked</strong><small data-local-edit={process.env.NODE_ENV === "development" ? "ve-23054f094a27-9" : undefined}>Your private workspace is open below.</small></div></div> : vaultExists || previewMode ? <form onSubmit={submit} className={styles.form} aria-busy={phase === "checking"}>
           <div className={styles.formPanel}>

@@ -29,7 +29,7 @@ export async function startPurchaseSale(storeId: string, verifierToken?: string)
     location_id: verifier.location_id, entry_mode: "retail_card", created_at: now, updated_at: now,
     expires_at: new Date(Date.now() + runtimeConfig.physicalSessionTtlSeconds * 1000).toISOString(),
     status: "open", clerk_verification: { status: "pending" }, device_auth: { status: "pending" },
-    purchase_sale: { token_hash: hash(token), amount_minor: runtimeConfig.passIssuancePriceMinor, currency: runtimeConfig.deviceExtensionCurrency }
+    purchase_sale: { token_hash: hash(token), amount_minor: 299, currency: runtimeConfig.deviceExtensionCurrency }
   };
   return runPurchaseSaleTransaction((data) => {
     data.physical_sessions.push(session);

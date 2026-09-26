@@ -6,7 +6,7 @@ import { getPassPrice } from "@/lib/shared/payment-config";
 
 export default function GetPassPage() {
   return (
-    <CustomerShell active="find" back={{ href: "/find" as Route, label: "Stores" }}>
+    <CustomerShell active="wallet" back={{ href: "/home" as Route, label: "Home" }}>
       <Suspense fallback={null}>
         <PassPurchaseEntry price={getPassPrice()} />
       </Suspense>

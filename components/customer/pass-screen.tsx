@@ -214,7 +214,7 @@ export function PassScreen({ appleWalletAvailable = false }: { appleWalletAvaila
           <StatusBadge>Try it</StatusBadge>
           <h2 className="mt-3 text-lg font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-3" : undefined}>Build your Zik Vault</h2>
           <p className="mt-2 text-sm leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-4" : undefined}>Planned verified credentials, designed to live on your device and be selectively shared. Sufficient verified information could eventually be assembled into Zik ID.</p>
-          <p className="mt-2 text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-5" : undefined}>ZikVault and Zik ID are not available in this prototype.</p>
+          <p className="mt-2 text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-5" : undefined}>Vault · Early Access. Zik ID · Coming Soon.</p>
           <ButtonLink href="/vault" variant="ghost" className="mt-3 !rounded-none">Go to Vault</ButtonLink>
         </Card>
       ) : null}

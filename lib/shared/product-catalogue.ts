@@ -1,60 +1,13 @@
-/** Display copy only. Pass pricing is supplied by the server's getPassPrice().
- * Planned products have no payment, entitlement or persistence integration. */
-export function getProductCatalogue(passDisplayPrice: string) {
+/** Product prices and acquisition routes. Finance is a separate future route. */
+export function getProductCatalogue(_passDisplayPrice: string) {
+  void _passDisplayPrice;
   return [
-    {
-      name: "Zik Pass",
-      promise: "Prove you’re 18+ online without sharing your identity.",
-      status: "Available now",
-      displayPrice: `${passDisplayPrice} one-off`,
-      available: true,
-      destination: "/find",
-      detail: "One thing about me that I can prove without identifying myself. No subscription or ZikVault required."
-    },
-    {
-      name: "ZikVault",
-      promise: "Your documents, kept and read on your own device.",
-      status: "Working on this device",
-      displayPrice: "Planned: £0.35/month standalone · Included in the £3.99 remote bundle",
-      available: false,
-      destination: "/vault",
-      detail: "What I can prove. Documents you choose are stored encrypted on this device and can be read here to suggest details you review. Uploads happen only if you choose an encrypted recovery backup. Nothing Zik reads is a check that a document is genuine."
-    },
-    {
-      name: "ZikVault Cloud Backup",
-      promise: "An optional encrypted copy of your Vault, held off this device.",
-      status: "Not yet available",
-      displayPrice: "Planned: £0.99/month, on top of ZikVault",
-      available: false,
-      destination: null,
-      detail: "Files are encrypted on this device before anything leaves it. Zik stores the encrypted copy without the key needed to read it. Requires ZikVault."
-    },
-    {
-      name: "Zik ID",
-      promise: "An identity application built from details you have confirmed in your Vault.",
-      status: "Application only",
-      displayPrice: "Planned: £2.99 one-off",
-      available: false,
-      destination: null,
-      detail: "Who I am when identity is genuinely required. You can prepare and save an application today. The identity checks behind a Zik ID are not available yet, so none can be issued."
-    },
-    {
-      name: "Zik Validate",
-      promise: "Get a document independently verified.",
-      status: "Workflow prototype",
-      displayPrice: "Demo · No payment",
-      available: false,
-      destination: "/validate",
-      detail: "Upload the document you’ve been asked to validate. Zik helps determine what kind of verification is required and connects it with an appropriate verifier."
-    },
-    {
-      name: "Zik Pass · Finance Check",
-      promise: "A fully remote route to proving you’re 18+ online.",
-      status: "Product 7 · Prototype",
-      displayPrice: "Proposed: £3.99 one-off",
-      available: false,
-      destination: "/prove-with-finance-check",
-      detail: "£3.99 includes the finance check, ZikVault and passport verification, with no shop visit. Adding a passport scan would start a disclosed remote verification step, with no separate check fee. Explore the sample journey. Provider integration, assurance testing and legal review are required before launch."
-    }
+    { name: "Digital Zik Pass", promise: "Check your age in store. Keep your pass on your phone.", status: "Early Access", displayPrice: "99p one-off · Free during Early Access", available: true, destination: "/get-pass", detail: "An in-person ID check at a participating store. No finance check required." },
+    { name: "Physical Zik Card", promise: "Pick up your card. Get checked in person.", status: "In store", displayPrice: "£2.99 · Keep your card for life", available: false, destination: "/shop", detail: "Purchased and activated at participating locations." },
+    { name: "Zik Vault", promise: "Your documents. Kept close.", status: "Early Access", displayPrice: "35p/month", available: false, destination: "/vault", detail: "Encrypted storage on this device. Subscription billing is not connected yet; no subscription is created in this build." },
+    { name: "Zik VaultCloud", promise: "A little extra peace of mind.", status: "Coming Soon", displayPrice: "99p/month", available: false, destination: null, detail: "An optional encrypted backup subscription, managed through Apple on iPhone." },
+    { name: "Zik ID", promise: "Share identity only when you choose.", status: "Coming Soon", displayPrice: "£1.99 one-off", available: false, destination: "/id", detail: "Identity checks and issuance are not available yet." },
+    { name: "Zik Validate", promise: "Independent document verification.", status: "Coming Soon", displayPrice: "From £5.99 · Depends on the document", available: false, destination: "/validate", detail: "The fee depends on the document needing validation. Professional verification is not connected yet." },
+    { name: "Zik Pass via Finance Check", promise: "Prefer not to visit a store?", status: "Coming Soon", displayPrice: "£3.99 one-off", available: false, destination: "/prove-with-finance-check", detail: "A separate future remote route. Stripe, Apple Pay and Google Pay are prototyped but not connected. No charge or real finance check in this preview." }
   ] as const;
 }
