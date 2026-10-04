@@ -37,17 +37,17 @@ export function StoreAccessSetup() {
     finally { setBusy(false); }
   }
   return <Card as="section" className="space-y-4 p-5">
-    <h2 className="text-xl font-bold">Set up store access</h2>
-    <p className="text-sm">Set the staff login code for a configured store. Staff then sign in from the store dashboard on their terminal.</p>
-    {loading ? <p role="status">Checking setup access…</p> : !csrf ? <div className="space-y-3"><p className="text-sm">A Zik admin sets or changes staff codes during store setup.</p><ButtonLink href="/dashboard/admin" variant="secondary">Admin sign-in</ButtonLink></div> : <form onSubmit={save} className="space-y-4">
+    <h2 className="text-xl font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-c26099c2439a-1" : undefined}>Set up store access</h2>
+    <p className="text-sm" data-local-edit={process.env.NODE_ENV === "development" ? "ve-c26099c2439a-2" : undefined}>Set the staff login code for a configured store. Staff then sign in from the store dashboard on their terminal.</p>
+    {loading ? <p role="status" data-local-edit={process.env.NODE_ENV === "development" ? "ve-c26099c2439a-3" : undefined}>Checking setup access…</p> : !csrf ? <div className="space-y-3"><p className="text-sm" data-local-edit={process.env.NODE_ENV === "development" ? "ve-c26099c2439a-4" : undefined}>A Zik admin sets or changes staff codes during store setup.</p><ButtonLink href="/dashboard/admin" variant="secondary">Admin sign-in</ButtonLink></div> : <form onSubmit={save} className="space-y-4">
       <label className="block text-sm font-semibold">Store<select className={field} value={storeId} onChange={event => { setStoreId(event.target.value); setSaved(false); setCode(''); setConfirmation(''); }}>{ZIK_STORES.map(store => <option key={store.id} value={store.id}>{store.name}</option>)}</select></label>
       <label className="block text-sm font-semibold">New staff code<input className={field} type="password" autoComplete="new-password" inputMode="numeric" pattern="[0-9]{6}" minLength={6} maxLength={6} required value={code} onChange={event => setCode(event.target.value.replace(/\D/g, ''))} /></label>
       <label className="block text-sm font-semibold">Confirm staff code<input className={field} type="password" autoComplete="new-password" inputMode="numeric" pattern="[0-9]{6}" minLength={6} maxLength={6} required value={confirmation} onChange={event => setConfirmation(event.target.value.replace(/\D/g, ''))} /></label>
-      <p className="text-xs text-[var(--zk-text-soft)]">Use six digits. Saving replaces this store’s previous code and signs out existing staff sessions.</p>
+      <p className="text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-c26099c2439a-5" : undefined}>Use six digits. Saving replaces this store’s previous code and signs out existing staff sessions.</p>
       <Button type="submit" loading={busy}>Save staff code</Button>
     </form>}
     {error && <p role="alert" className="text-sm text-red-800">{error}</p>}
-    {saved && <p role="status" className="text-sm">Staff code saved. You can now sign in to this store.</p>}
+    {saved && <p role="status" className="text-sm" data-local-edit={process.env.NODE_ENV === "development" ? "ve-c26099c2439a-6" : undefined}>Staff code saved. You can now sign in to this store.</p>}
     <ButtonLink href="/dashboard/store/login" variant="ghost">Staff sign-in</ButtonLink>
   </Card>;
 }

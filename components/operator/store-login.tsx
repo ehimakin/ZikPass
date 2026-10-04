@@ -86,7 +86,7 @@ export function StoreLogin({ nextPath = "/dashboard/store" }: { nextPath?: strin
                 aria-describedby="clerk-code-help"
                 className="mt-3 block min-h-[62px] w-full rounded-[14px] border border-[var(--zk-line-strong)] bg-[var(--zk-sunken)] px-5 text-center font-mono text-[28px] font-bold tracking-[0.38em] outline-none transition focus:border-[var(--zk-focus)] focus:ring-2 focus:ring-[var(--zk-focus)]/20"
               />
-              <span id="clerk-code-help" className="mt-2 block text-[11px] leading-relaxed text-[var(--zk-text-soft)]">
+              <span id="clerk-code-help" className="mt-2 block text-[11px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-782b43252e3b-7" : undefined}>
                 Use the staff code provided for your store.
               </span>
             </label>

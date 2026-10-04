@@ -1,3 +1,4 @@
+import { HomeHero } from "@/components/customer/home-screen";
 import { CustomerShell } from "@/components/customer/customer-shell";
 import { ProductFamily } from "@/components/customer/product-family";
 import { ValidationWorkflow } from "@/components/validate/workflow";
@@ -11,19 +12,21 @@ export const metadata = {
 
 export default function EcosystemPage() {
   return (
-    <CustomerShell active="about" title="The Zik ecosystem">
-      <div className="space-y-6 pb-6">
-        <section className="pt-5">
-          <p className="text-xs font-bold uppercase tracking-widest text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-1" : undefined}>One principle. A growing ecosystem.</p>
-          <h1 className="mt-3 text-[32px] font-extrabold leading-tight tracking-tight" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-2" : undefined}>The Zik ecosystem</h1>
-          <p className="mt-4 text-[15px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-3" : undefined}>Your age, documents and identity. Always on your terms.</p>
+    <div className="zk-ecosystem-page"><CustomerShell active="about" hero={<HomeHero />} immersive>
+      <div>
+        <section className="zk-ecosystem-hero">
+          <p className="text-xs font-bold uppercase tracking-widest text-white/80" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-1" : undefined}>One principle. A growing ecosystem.</p>
+          <h1 className="mt-4 max-w-4xl text-5xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-7xl lg:text-8xl" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-2" : undefined}>The Zik ecosystem</h1>
+          <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/90 sm:text-xl" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-3" : undefined}>Your age, documents and identity. Always on your terms.</p>
+          <a href="#ecosystem-products" className="mt-8 inline-flex w-fit rounded-lg border border-white/50 bg-black/20 px-5 py-3 font-semibold text-white hover:bg-black/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-18" : undefined}>Explore the Zik suite ↓</a>
         </section>
-        <p className="rounded-none bg-[var(--zk-sunken)] p-4 text-sm font-semibold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-4" : undefined}>{"ZikVault works on this device: you can store documents securely within it and have them read here, locally. Zik ID is not available"}</p>
+        <div className="zk-ecosystem-content relative px-4 py-10"><div id="ecosystem-products" className="mx-auto max-w-[760px] scroll-mt-20 space-y-6">
+        <p className="rounded-xl border border-white/40 bg-white/80 p-4 text-sm font-semibold backdrop-blur-sm" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-4" : undefined}>{"ZikVault works on this device: you can store documents securely within it and have them read here, locally. Zik ID is not available"}</p>
         <section aria-labelledby="products-title">
-          <h2 id="products-title" className="mb-4 text-xl font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-5" : undefined}>Zik starts with Zik Pass.</h2>
+          <h2 id="products-title" className="mb-4 text-xl font-bold text-white" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-5" : undefined}>Zik starts with Zik Pass.</h2>
           <ProductFamily price={getPassPrice().display} vaultLinkLabel="Get Zik Vault" />
         </section>
-        <details className="rounded-2xl border border-[var(--zk-line)] p-5"><summary className="cursor-pointer font-semibold">Privacy, verification & future products</summary><div className="mt-4 space-y-4">
+        <details className="rounded-2xl border border-white/40 bg-white/85 p-5 backdrop-blur-sm"><summary className="cursor-pointer font-semibold">Privacy, verification & future products</summary><div className="mt-4 space-y-4">
         <Card as="section" className="!rounded-2xl p-5">
           <StatusBadge>Trusted attestation · Prototype</StatusBadge>
           <h2 className="mt-3 text-xl font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-14" : undefined}>Zik Validate</h2>
@@ -52,7 +55,8 @@ export default function EcosystemPage() {
         </Card>
         <p className="text-xs leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-2b27d2feb142-13" : undefined}>Local-first does not mean Zik stores no data. Operational services may still hold public keys, status and revocation data, issuer metadata, fraud signals and audit events. The Vault&rsquo;s storage and on-device analysis decisions are recorded in ADR 007. Planned prices cannot be charged here, and Zik ID is not currently accepted as physical identification.</p>
         </div></details>
+        </div></div>
       </div>
-    </CustomerShell>
+    </CustomerShell></div>
   );
 }

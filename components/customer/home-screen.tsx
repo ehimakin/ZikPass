@@ -1,5 +1,6 @@
 "use client";
 
+import { createHeroPlayback } from "@/lib/client/hero-playback";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -86,7 +87,7 @@ export function PhoneHero() {
 /** Responsive video backdrop with artwork as the playback/reduced-motion fallback. */
 export function HomeHero() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const manuallyPausedRef = useRef(false);
+  const playback = useRef<ReturnType<typeof createHeroPlayback> | null>(null);
   const [enabled, setEnabled] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
 
@@ -102,41 +103,25 @@ export function HomeHero() {
     const video = videoRef.current;
     if (!enabled || !video) return;
 
-    let idleTimer: ReturnType<typeof setTimeout> | undefined;
-    let disposed = false;
-    const pauseUntilIdle = () => {
-      clearTimeout(idleTimer);
-      video.pause();
-      if (manuallyPausedRef.current || document.hidden) return;
-      idleTimer = setTimeout(() => {
-        if (!disposed && !manuallyPausedRef.current && !document.hidden) void video.play().catch(() => {});
-      }, 750);
-    };
-
-    window.addEventListener("mousemove", pauseUntilIdle, { passive: true });
-    window.addEventListener("scroll", pauseUntilIdle, { passive: true, capture: true });
-    window.addEventListener("wheel", pauseUntilIdle, { passive: true });
-    document.addEventListener("visibilitychange", pauseUntilIdle);
-    pauseUntilIdle();
-
+    const controller = createHeroPlayback(video);
+    playback.current = controller;
+    const visibility = () => controller.setHidden(document.hidden);
+    window.addEventListener("mousemove", controller.movement, { passive: true });
+    window.addEventListener("scroll", controller.movement, { passive: true, capture: true });
+    window.addEventListener("wheel", controller.movement, { passive: true });
+    document.addEventListener("visibilitychange", visibility);
+    visibility();
     return () => {
-      disposed = true;
-      clearTimeout(idleTimer);
-      video.pause();
-      window.removeEventListener("mousemove", pauseUntilIdle);
-      window.removeEventListener("scroll", pauseUntilIdle, true);
-      window.removeEventListener("wheel", pauseUntilIdle);
-      document.removeEventListener("visibilitychange", pauseUntilIdle);
+      controller.dispose();
+      playback.current = null;
+      window.removeEventListener("mousemove", controller.movement);
+      window.removeEventListener("scroll", controller.movement, true);
+      window.removeEventListener("wheel", controller.movement);
+      document.removeEventListener("visibilitychange", visibility);
     };
   }, [enabled]);
 
-  const toggleVideoPlayback = () => {
-    const video = videoRef.current;
-    if (!video) return;
-    manuallyPausedRef.current = !manuallyPausedRef.current;
-    if (manuallyPausedRef.current) video.pause();
-    else void video.play().catch(() => {});
-  };
+  const toggleVideoPlayback = () => playback.current?.toggle();
 
   return (
     <>
@@ -156,7 +141,6 @@ export function HomeHero() {
             onPlaying={() => setHasPlayed(true)}
             onError={() => setHasPlayed(false)}
             preload="metadata"
-            autoPlay
             src="/Hero%20Videos/Splash%20rough%201.mp4"
             muted
             loop

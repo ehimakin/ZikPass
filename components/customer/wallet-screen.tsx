@@ -60,7 +60,7 @@ export function WalletScreen({ appleWalletAvailable = false }: { appleWalletAvai
     <header className="space-y-2">
       <p className="text-xs font-bold uppercase tracking-[.2em] text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-1" : undefined}>Your credentials</p>
       <h1 className="text-4xl font-extrabold tracking-tight" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-2" : undefined}>Wallet</h1>
-      <p className="text-sm text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-3" : undefined}>Choose a credential to open and use.</p>
+      <p className="text-sm text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-3" : undefined}>{">"}</p>
     </header>
     <FinanceCheckPreview compact />
     {failed ? <Alert tone="caution" title="Couldn’t open your wallet" action={<Button variant="secondary" onClick={() => setAttempt(value => value + 1)}>Try again</Button>}>Your saved credentials haven’t been changed.</Alert> : !wallet ? <div role="status" aria-label="Loading wallet"><Skeleton className="h-64 w-full rounded-none" /></div> : <section aria-label="Your credentials">
@@ -70,7 +70,7 @@ export function WalletScreen({ appleWalletAvailable = false }: { appleWalletAvai
           <ZikPassCard digital={!cardLinked} pending={pendingCard} />
           {credential && !cardLinked && !pendingCard ? <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center"><ButtonLink href="/ecosystem" variant="secondary" className="pointer-events-auto zk-wallet-digital-explore">Explore Zik ID</ButtonLink></div> : null}
         </div>
-        <p className="mt-6 text-sm text-[var(--zk-text-soft)]">{credential ? "Your proof of adult status" : wallet.enrollmentId ? "Continue setting up your proof of age" : "Your proof of age belongs here"}</p>
+        <p className="mt-6 text-sm text-[var(--zk-text-soft)]">{credential ? "Your proof of adult status" : wallet.enrollmentId ? "Continue setting up your proof of age" : ">"}</p>
         <Link href="/pass" className="mt-4 flex items-center justify-between border-t border-[var(--zk-line)] pt-4 text-sm font-semibold after:absolute after:inset-0 after:rounded-3xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#28623c]"><span>{credential ? cardLinked ? "Open Zik Card" : "Open Zik Pass" : wallet.enrollmentId ? "View pass progress" : "Explore Zik Pass"}</span><span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-4" : undefined}>→</span></Link>
       </div>
       {credential ? <div className="mt-4"><AppleWalletButton available={appleWalletAvailable} product="Zik Card" /></div> : null}
@@ -78,7 +78,7 @@ export function WalletScreen({ appleWalletAvailable = false }: { appleWalletAvai
         <p className="font-semibold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-5" : undefined}>Card not linked</p>
         <p className="text-sm text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-6" : undefined}>Collect a physical card at a participating store, then scan it to link your phone. No card has been ordered.</p>
       </div> : null}
-      {cardLinked !== true && !pendingCard ? <div className="mt-4"><ButtonLink href="/find" size="lg" variant="secondary">Find a Zik Card</ButtonLink></div> : null}
+      {cardLinked !== true && !pendingCard ? <div className="mt-4"><ButtonLink href="/find" size="lg" variant="secondary">Find A Zik Card retailer</ButtonLink></div> : null}
       {!credential && !wallet.enrollmentId ? <div className="mt-4"><ButtonLink href="/get-pass" size="lg">Get ZikPass</ButtonLink></div> : null}
       {application ? <Link href="/id/apply" aria-label="Open your Zik ID application" className="mt-4 block rounded-3xl border border-[#e4dfc8] bg-white p-6 transition hover:border-[#cbb95b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#28623c]">
         <div className="flex items-center justify-between gap-3"><h2 className="text-xl font-extrabold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-eaaa9ce15387-7" : undefined}><span className="text-[#28623c]">Zik</span> ID</h2><StatusBadge tone="neutral">Application saved</StatusBadge></div>

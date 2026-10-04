@@ -117,12 +117,12 @@ export function StoreLocationPicker({ storeId, onSelect, audience = "staff" }: {
   }
   const nearby = origin ? ZIK_STORES.map(store => ({ store, distance: straightLineDistanceKm(origin, store) })).sort((a, b) => a.distance - b.distance).slice(0, 3) : [];
   return <section aria-label="Find your store" className="space-y-3 rounded-xl bg-[var(--zk-sunken)] p-4">
-    <h2 className="font-bold">Find your store</h2>
+    <h2 className="font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-7d29e17c91f2-1" : undefined}>Find your store</h2>
     <div className="flex flex-wrap gap-2">{key && !enabled && <Button variant="secondary" onClick={() => setEnabled(true)}>Choose on map</Button>}<Button variant="secondary" loading={locating} onClick={locate}>Use my location</Button></div>
-    <p className="text-xs text-[var(--zk-text-soft)]">Location is used only when requested. Opening the map shares map activity, place searches and its viewed location with Google. The current store pins are demo locations.</p>
+    <p className="text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-7d29e17c91f2-2" : undefined}>Location is used only when requested. Opening the map shares map activity, place searches and its viewed location with Google. The current store pins are demo locations.</p>
     {enabled && <div ref={searchHost} className="min-w-0" />}
     {enabled && <div ref={host} className="h-72 w-full rounded-lg" aria-label="Store map" />}
-    {!key && <p className="text-sm">Map unavailable. Use your location or the store list below.</p>}
+    {!key && <p className="text-sm" data-local-edit={process.env.NODE_ENV === "development" ? "ve-7d29e17c91f2-3" : undefined}>Map unavailable. Use your location or the store list below.</p>}
     {status && <p role="status" className="text-sm">{status}</p>}
     {nearby.length > 0 && <ul className="space-y-2">{nearby.map(({ store, distance }) => <li key={store.id}><button type="button" aria-pressed={storeId === store.id} className="w-full rounded-lg border border-[var(--zk-line-strong)] bg-white p-3 text-left text-sm focus-visible:outline focus-visible:outline-2" onClick={() => onSelect(store.id)}>{store.name}<span className="block text-xs text-[var(--zk-text-soft)]">{formatDistanceKm(distance)}</span></button></li>)}</ul>}
   </section>;
