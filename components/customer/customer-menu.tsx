@@ -4,31 +4,20 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Route } from "next";
 import { ZikLogoMark } from "@/components/zik-logo";
-import { loadWalletState } from "@/lib/client/wallet-client";
 
+
+type MenuLink = { href: Route; label: string };
+type MenuItem = MenuLink | { label: string; children: MenuLink[] };
 
 export function CustomerMenu({ items, pathname }: {
-  items: Array<{ href: Route; label: string }>;
+  items: MenuItem[];
   pathname: string;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
-  const [hasPass, setHasPass] = useState(false);
-
-  useEffect(() => {
-    let disposed = false;
-    const refresh = () => loadWalletState()
-      .then((wallet) => { if (!disposed) setHasPass(Boolean(wallet.credential)); })
-      .catch(() => {});
-    void refresh();
-    window.addEventListener("focus", refresh);
-    return () => { disposed = true; window.removeEventListener("focus", refresh); };
-  }, [open, pathname]);
-
-  const menuItems = items.map((item) => item.label === "Get ZikPass" && hasPass
-    ? { href: "/wallet" as Route, label: "Wallet" }
-    : item);
+  const [suiteOpen, setSuiteOpen] = useState(false);
+  const menuItems: MenuItem[] = [{ href: "/dashboard" as Route, label: "Dashboard" }, ...items];
   const [hovered, setHovered] = useState<number | null>(null);
 
   useEffect(() => {
@@ -47,6 +36,7 @@ export function CustomerMenu({ items, pathname }: {
 
   function close() {
     setOpen(false);
+    setSuiteOpen(false);
     // Return focus to the trigger after the dialog has torn down.
     setTimeout(() => trigger.current?.focus(), 0);
   }
@@ -94,7 +84,22 @@ export function CustomerMenu({ items, pathname }: {
           </button>
         </div>
         <nav aria-label="Site menu" className="zk-menu-nav">
-          {menuItems.map((item, index) => (
+          {menuItems.map((item, index) => "children" in item ? (
+            <div key={item.label}>
+              <button type="button" className="zk-menu-link w-full text-left" aria-expanded={suiteOpen} aria-controls="zik-suite-submenu"
+                onClick={() => setSuiteOpen(value => !value)}
+                onMouseEnter={() => setHovered(index)} onMouseLeave={() => setHovered(null)} onFocus={() => setHovered(index)}>
+                <span className="zk-menu-index">0{index + 1}</span><span>{item.label}</span><span className="zk-menu-arrow" aria-hidden="true">{suiteOpen ? "−" : "+"}</span>
+              </button>
+              <ul id="zik-suite-submenu" hidden={!suiteOpen} className="zk-menu-submenu">
+                {item.children.map(child => <li key={child.href}>
+                  <Link href={child.href} onClick={close} aria-current={pathname === child.href ? "page" : undefined}>
+                    <span>{child.label}</span><span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-8319931b3b11-7" : undefined}>↗</span>
+                  </Link>
+                </li>)}
+              </ul>
+            </div>
+          ) : (
             <Link key={item.href} href={item.href} onClick={close} aria-current={pathname === item.href ? "page" : undefined}
               onMouseEnter={() => setHovered(index)} onMouseLeave={() => setHovered(null)} onFocus={() => setHovered(index)}
               className="zk-menu-link">
@@ -106,7 +111,7 @@ export function CustomerMenu({ items, pathname }: {
           <div className="zk-menu-utility">
             <Link href="/wallet" onClick={close}>Wallet</Link>
             <Link href="/ZikParental" onClick={close} aria-current={pathname === "/ZikParental" ? "page" : undefined}>Zik for Parents</Link>
-            <Link href={"/partner_stores" as Route} onClick={close}>Become a partner store</Link>
+            <a href="/partner_stores" onClick={close} data-local-edit={process.env.NODE_ENV === "development" ? "ve-8319931b3b11-5" : undefined}>Become a partner store</a>
             <Link href="/affiliates" onClick={close} aria-current={pathname === "/affiliates" ? "page" : undefined}>Zik for businesses</Link>
             <Link href={"/ecosystem" as Route} onClick={close} aria-current={pathname === "/ecosystem" ? "page" : undefined}>The Zik ecosystem</Link>
             <Link href={"/account-recovery/restore" as Route} onClick={close}>Lost phone and card?</Link>
@@ -114,10 +119,10 @@ export function CustomerMenu({ items, pathname }: {
           </div>
           <div className="zk-menu-staff">
             <span data-local-edit={process.env.NODE_ENV === "development" ? "ve-8319931b3b11-4" : undefined}>For staff</span>
-            <Link href="/verify" onClick={close}>Verify a customer</Link>
-            <Link href="/verify/purchase" onClick={close}>Sell a Zik Pass</Link>
+            <Link href="/dashboard/store/verify" onClick={close}>Verify a customer</Link>
+            <Link href="/dashboard/store/purchase" onClick={close}>Sell a Zik Pass</Link>
           </div>
-          <p>Early Access</p>
+          <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-8319931b3b11-6" : undefined}>Early Access</p>
         </div>
       </dialog>
     </>

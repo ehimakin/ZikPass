@@ -1,26 +1,7 @@
-import { StoreLogin } from "@/components/operator/store-login";
-
-export const metadata = {
-  title: "Store login · Zik Pass",
-  description: "Select a store and sign in to the Zik Pass clerk tools."
-};
-
-export default async function StorePage({
-  searchParams
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const params = await searchParams;
-  const requested = getParam(params.next);
-  const customerCode = getParam(params.code);
-  const nextPath = (requested === "/verify/purchase" || requested === "/verify/card")
-    ? requested
-    : customerCode
-      ? `/verify?code=${encodeURIComponent(customerCode)}`
-      : "/verify";
-  return <StoreLogin nextPath={nextPath} />;
-}
-
-function getParam(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
+import type { Route } from "next";
+import { redirect } from "next/navigation";
+export default async function Page({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(await searchParams)) if (typeof value === "string") query.set(key, value);
+  redirect(`/dashboard/store/login${query.size ? `?${query}` : ""}` as Route);
 }

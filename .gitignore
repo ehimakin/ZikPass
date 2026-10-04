@@ -43,3 +43,6 @@ public/pdf/
 *.csr
 *.cer
 *.pkpass
+
+# Local development credentials; delete before production
+/DELETE_BEFORE_PRODUCTION_CREDENTIALS/

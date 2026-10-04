@@ -118,7 +118,7 @@ export function ApplicationScreen() {
       <dl className={styles.claimList}>
         {Object.entries(snapshot.claim_snapshot).map(([field, value]) => <div key={field}><dt>{field.replace(/_/g, " ")}</dt><dd>{value}</dd></div>)}
       </dl>
-      <div className={styles.actions}>
+      <div className={`zk-action-row ${styles.actions}`}>
         <Link href="/vault" className={styles.secondaryLink}>Back to Vault</Link>
         <Button type="button" onClick={() => setStep("confirm")}>Continue</Button>
       </div>
@@ -133,7 +133,7 @@ export function ApplicationScreen() {
         <li data-local-edit={process.env.NODE_ENV === "development" ? "ve-7116a0c3c145-16" : undefined}>Your Zik Pass is unaffected. It keeps proving your age on its own, without your name or documents.</li>
         <li data-local-edit={process.env.NODE_ENV === "development" ? "ve-7116a0c3c145-17" : undefined}>You can withdraw this application at any time, and deleting the evidence withdraws it automatically.</li>
       </ul>
-      <div className={styles.actions}>
+      <div className={`zk-action-row ${styles.actions}`}>
         <Button type="button" variant="secondary" onClick={() => setStep("evidence")}>Back</Button>
         <Button type="button" loading={busy} onClick={async () => {
           setBusy(true);
@@ -159,7 +159,7 @@ export function ApplicationScreen() {
       </div>
     </> : null}
 
-    {step === "done" && application ? <div className={styles.actions}>
+    {step === "done" && application ? <div className={`zk-action-row ${styles.actions}`}>
       <Link href="/wallet" className={styles.secondaryLink}>See it in your Wallet</Link>
       <Button type="button" variant="secondary" loading={busy} onClick={async () => {
         setBusy(true);

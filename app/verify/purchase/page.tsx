@@ -1,10 +1,10 @@
-import { cookies } from "next/headers";
+import type { Route } from "next";
 import { redirect } from "next/navigation";
-import { PurchaseSale } from "@/components/operator/purchase-sale";
-import { OPERATOR_SESSION_COOKIE, readOperatorSession } from "@/lib/server/operator-session";
-
-export default async function PurchaseSalePage() {
-  const session = await readOperatorSession((await cookies()).get(OPERATOR_SESSION_COOKIE)?.value);
-  if (!session) redirect("/store?next=/verify/purchase");
-  return <PurchaseSale storeId={session.storeId} />;
+export default async function LegacyPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(await searchParams)) {
+    if (Array.isArray(value)) value.forEach(item => query.append(key, item));
+    else if (value !== undefined) query.set(key, value);
+  }
+  redirect(`/dashboard/store/purchase${query.size ? `?${query}` : ""}` as Route);
 }

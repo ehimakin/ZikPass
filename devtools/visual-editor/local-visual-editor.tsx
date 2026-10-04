@@ -8,6 +8,8 @@ type Snapshot={token:string;entries:Entry[];canUndo:boolean};
 function textNodes(element:Element):Text[]{const walker=document.createTreeWalker(element,NodeFilter.SHOW_TEXT);const nodes:Text[]=[];let node;while((node=walker.nextNode()))if(node.textContent?.trim())nodes.push(node as Text);return nodes;}
 export function LocalVisualEditor(){
   const pathname = usePathname();
+  const [local, setLocal] = useState(false);
+  useEffect(() => { setLocal(['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname)); }, []);
   const [enabled,setEnabled]=useState(false),[snapshot,setSnapshot]=useState<Snapshot>(),[entry,setEntry]=useState<Entry>(),[texts,setTexts]=useState<string[]>([]),[style,setStyle]=useState<EditStyle>({}),[message,setMessage]=useState('Select Edit page, then click highlighted text.'),[busy,setBusy]=useState(false);
   const selected=useRef<{element:HTMLElement;nodes:Text[];originals:string[];style:string|null} | undefined>(undefined);
   const panel=useRef<HTMLElement>(null);
@@ -25,7 +27,7 @@ export function LocalVisualEditor(){
     }catch(e){sessionStorage.removeItem('local-visual-editor:resume');setMessage((e as Error).message);}
     finally{setBusy(false);}
   },[refresh]);
-  useEffect(()=>{if(sessionStorage.getItem('local-visual-editor:resume')==='true')void start();},[start]);
+  useEffect(()=>{if(local && sessionStorage.getItem('local-visual-editor:resume')==='true')void start();},[local,start]);
   function close(){sessionStorage.removeItem('local-visual-editor:resume');restore();setEnabled(false);sessionStorage.removeItem('local-visual-editor:resume');setEntry(undefined);}
   useEffect(()=>{if(!enabled)return;document.documentElement.classList.add(styles.editing);
     function choose(event:MouseEvent){const target=event.target;if(!(target instanceof Element)||panel.current?.contains(target))return;
@@ -49,7 +51,7 @@ export function LocalVisualEditor(){
   
   async function undo(){if(!snapshot)return;setBusy(true);try{restore();const response=await fetch('/api/local-editor',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:snapshot.token})});const result=await response.json();if(!response.ok)throw Error(result.error);setEntry(undefined);setEnabled(false);sessionStorage.removeItem('local-visual-editor:resume');await refresh();setMessage('Undone. The previous source has been restored.');setBusy(false);}catch(e){setMessage((e as Error).message);setBusy(false);}}
   // Keep the developer toolbar out of affiliate installation and paired forms.
-  if (pathname?.startsWith("/affiliates")) return null;
+  if (!local || pathname?.startsWith("/affiliates")) return null;
   return <aside ref={panel} className={styles.editor} aria-label="Local visual editor">
     <div className={styles.header}><strong>Local page editor</strong><span>Development only</span></div>
     <p role="status" aria-live="polite">{message}</p>
@@ -67,7 +69,7 @@ export function LocalVisualEditor(){
           <label>Background colour<input aria-label="Background colour" placeholder="#111111" value={style.backgroundColor??''} onChange={e=>previewStyle('backgroundColor',e.target.value)}/></label>
         </fieldset>}
       </div>}
-      {snapshot?.canUndo&&<button onClick={()=>void undo()} disabled={busy}>Undo last source save</button>}
     </>}
+    {snapshot?.canUndo&&<button onClick={()=>void undo()} disabled={busy}>Undo last source save</button>}
   </aside>;
 }

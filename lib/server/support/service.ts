@@ -69,6 +69,34 @@ export async function replyToTicket(id: string, token: string, value: unknown) {
   });
 }
 
+/** Approve an existing partnership enquiry atomically with its customer reply and audit event. */
+export async function approvePartnerOnboarding(actor: string, value: unknown): Promise<AdminTicket> {
+  const input = inputObject(value);
+  return supportTransaction(data => {
+    const ticket = data.tickets.find(item => item.id === input.id);
+    if (!ticket) throw new SupportError('Ticket not found.', 404);
+    if (ticket.category !== 'store_partner') throw new SupportError('Only store partnership requests can be approved.', 400);
+    // Repeated clicks/retries must not duplicate the approval or customer reply.
+    if (ticket.partnerApproval) return adminView(ticket);
+    requireVersion(input.version, ticket.version);
+    if (ticket.status === 'closed' || ticket.status === 'resolved') throw new SupportError('Reopen this ticket before approving onboarding.', 409);
+    if (ticket.messages.length >= 300) throw new SupportError('Ticket message limit reached.');
+    const now = new Date().toISOString();
+    ticket.partnerApproval = { status: 'approved', approvedAt: now, approvedBy: actor };
+    ticket.status = 'resolved';
+    ticket.resolution = 'Your store partnership request has been approved for onboarding. This request is now resolved. Store activation, staff login credentials and a public directory listing will follow separately once setup is complete. Reply to this ticket if you need help with the next steps.';
+    ticket.assignee ||= actor;
+    ticket.firstResponseAt ??= now;
+    ticket.updatedAt = now;
+    ticket.version++;
+    ticket.messages.push({ id: randomUUID(), requestId: randomUUID(), author: 'admin', authorName: actor,
+      visibility: 'public', createdAt: now,
+      body: ticket.resolution });
+    audit(data, actor, 'partner.onboarding_approved', ticket.id, ['partnerApproval', 'status', 'resolution', 'assignee']);
+    return adminView(ticket);
+  });
+}
+
 export async function updateTicket(actor: string, value: unknown): Promise<AdminTicket> {
   const input = inputObject(value);
   return supportTransaction(data => {

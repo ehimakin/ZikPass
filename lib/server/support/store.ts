@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { getRuntimeDataDir } from '@/lib/server/runtime-paths';
 import type { AuditEvent, Bug, Ticket } from '@/lib/shared/support/model';
 export type AdminSession = { tokenHash: string; csrf: string; actor: string; configHash: string; createdAt: number; lastSeenAt: number; expiresAt: number };
-export type SupportStore = { version: 1; ingestedErrorIds: string[]; tickets: Ticket[]; bugs: Bug[]; audit: AuditEvent[]; sessions: AdminSession[]; limits: Record<string, { count: number; until: number }> };
+export type SupportStore = { storeAccess?: Record<string, { salt: string; hash: string; version: string }>; version: 1; ingestedErrorIds: string[]; tickets: Ticket[]; bugs: Bug[]; audit: AuditEvent[]; sessions: AdminSession[]; limits: Record<string, { count: number; until: number }> };
 let queue: Promise<unknown> = Promise.resolve();
 export function supportStorageReady(): boolean {
   return !((process.env.NODE_ENV === 'production' || process.env.VERCEL || process.env.LAMBDA_TASK_ROOT || process.env.AWS_REGION) && (!process.env.ZIK_RUNTIME_DATA_DIR?.trim() || process.env.ZIK_SUPPORT_STORAGE_DURABLE !== 'true'));

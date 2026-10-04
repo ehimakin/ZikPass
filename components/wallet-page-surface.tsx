@@ -588,7 +588,7 @@ function EmptyWalletState() {
         </p>
       </div>
       <Link
-        className="relative mt-8 rounded-full bg-lime px-8 py-4 text-base font-semibold text-ink transition hover:bg-lime/90"
+        className="zk-button relative mt-8 rounded-full bg-lime px-8 py-4 text-base font-semibold text-ink transition hover:bg-lime/90"
         href={buildAppOnboardingUrl() as Route}
       >
         Get Zik Pass

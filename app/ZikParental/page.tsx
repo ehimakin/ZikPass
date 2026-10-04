@@ -15,7 +15,7 @@ export default function ZikParentalPage() {
             and additional safeguards for families.
           </p>
           <Link
-            className="mt-8 inline-flex rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist transition hover:bg-[#24364d]"
+            className="zk-button mt-8 inline-flex rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist transition hover:bg-[#24364d]"
             href="/"
           >
             Back to Zik Pass

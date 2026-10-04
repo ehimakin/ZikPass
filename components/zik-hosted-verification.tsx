@@ -287,7 +287,7 @@ export function ZikHostedVerification({
                 {(flowState === "missing" || flowState === "expired" || flowState === "unavailable") ? (
                   <>
                     <Link
-                      className="rounded-full bg-lime px-5 py-3 text-sm font-semibold text-ink"
+                      className="zk-button rounded-full bg-lime px-5 py-3 text-sm font-semibold text-ink"
                       href="/wallet"
                       target="_blank"
                     >

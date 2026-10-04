@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { toErrorResponse } from "@/lib/server/api-errors";
-import { claimNativeAppHandoff } from "@/lib/server/mobile-handoff";
+import { claimNativeAppHandoff, nativeHandoffProduct } from "@/lib/server/mobile-handoff";
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,7 +17,8 @@ export async function POST(request: NextRequest) {
       await claimNativeAppHandoff({
         token: body.token.trim(),
         holderPublicKey: body.holderPublicKey
-      })
+      }),
+      { headers: { "X-Zik-Product": await nativeHandoffProduct(body.token.trim()), "Cache-Control": "no-store" } }
     );
   } catch (error) {
     return toErrorResponse(error);

@@ -1,3 +1,4 @@
+import { checkStoreAccessCode, readStoreAccess } from "@/lib/server/store-access";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { getIssuerKeyMaterial } from "@/lib/server/issuer-keys";
 import { signString, verifyString } from "@/lib/shared/crypto/ed25519";
@@ -10,6 +11,7 @@ const DOMAIN = "zik:operator-session:v1:";
 
 export interface OperatorSession {
   storeId: string;
+  accessVersion?: string;
   issuedAt: number;
   expiresAt: number;
   nonce: string;
@@ -29,10 +31,16 @@ export function verifyOperatorLoginCode(input: string): boolean {
   return left.length === right.length && timingSafeEqual(left, right);
 }
 
+export async function verifyStoreLoginCode(storeId: string, input: string): Promise<boolean> {
+  const configured = await checkStoreAccessCode(storeId, input);
+  return configured ?? verifyOperatorLoginCode(input);
+}
+
 export async function createOperatorSession(storeId: string, now = Date.now()) {
   if (!getStoreById(storeId)) throw new Error("Choose a valid store.");
   const session: OperatorSession = {
     storeId,
+    accessVersion: (await readStoreAccess(storeId))?.version,
     issuedAt: now,
     expiresAt: now + OPERATOR_SESSION_TTL_MS,
     nonce: randomBytes(24).toString("base64url")
@@ -56,6 +64,7 @@ export async function readOperatorSession(token: string | undefined, now = Date.
       || !Number.isFinite(session.expiresAt) || session.issuedAt > now || session.expiresAt <= now
       || session.expiresAt - session.issuedAt > OPERATOR_SESSION_TTL_MS
       || typeof session.nonce !== "string" || session.nonce.length < 16) return null;
+    if (session.accessVersion !== (await readStoreAccess(session.storeId))?.version) return null;
     return session;
   } catch {
     return null;

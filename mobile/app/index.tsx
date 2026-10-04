@@ -1,5 +1,2 @@
-import { Redirect } from "expo-router";
-
-export default function Index() {
-  return <Redirect href="/wallet" />;
-}
+import { Redirect } from 'expo-router';
+export default function Index() { return <Redirect href="/vault" />; }

@@ -1,3 +1,4 @@
+import { getZikEnvironment } from "@/lib/shared/demo-environment";
 import { createHash, randomBytes, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
 import { audit, SupportError, supportRateLimit, supportTransaction } from './store';
@@ -15,10 +16,17 @@ export async function hashAdminPassword(password: string): Promise<string> {
   const salt = randomBytes(16).toString('hex');
   return `scrypt:${salt}:${(await scrypt(password, salt, 64) as Buffer).toString('hex')}`;
 }
+export function adminLoginRateLimitBypassed(): boolean {
+  return process.env.NODE_ENV === 'development'
+    && getZikEnvironment() !== 'live'
+    && process.env.ZIK_DEV_BYPASS_ADMIN_RATE_LIMIT === 'true';
+}
 export async function loginAdmin(username: string, password: string, ip: string) {
   if (!adminConfigured()) throw new SupportError('Admin access is not configured. Run npm run admin:setup on the server.', 503);
-  await supportRateLimit(`admin-login:${secretHash(ip)}`, 5, 15 * 60_000);
-  await supportRateLimit('admin-login:global', 40, 15 * 60_000);
+  if (!adminLoginRateLimitBypassed()) {
+    await supportRateLimit(`admin-login:${secretHash(ip)}`, 5, 15 * 60_000);
+    await supportRateLimit('admin-login:global', 40, 15 * 60_000);
+  }
   const [, salt, expected] = process.env.ZIK_ADMIN_PASSWORD_HASH!.split(':');
   const actual = (await scrypt(password.slice(0, 257), salt, 64) as Buffer).toString('hex');
   if (password.length > 256 || !safeEqual(actual, expected) || !safeEqual(username, process.env.ZIK_ADMIN_USERNAME!.trim())) {

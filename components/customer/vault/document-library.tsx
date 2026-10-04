@@ -117,7 +117,7 @@ export function DocumentLibrary({ documents, vault, onDelete, onRename, onReanal
           </div>
           {confirming === document.id ? <div className={styles.confirm} role="alertdialog" aria-label={`Delete ${document.label ?? document.filename}`}>
             <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-619a07049c0e-11" : undefined}>Delete this document and everything Zik read from it? Details you confirmed yourself are kept, but they will lose this document&rsquo;s support.</p>
-            <div>
+            <div className="zk-action-row">
               <Button type="button" variant="secondary" onClick={() => setConfirming(null)}>Keep it</Button>
               <Button type="button" onClick={async () => { setConfirming(null); await onDelete(document.id); }}>Delete</Button>
             </div>

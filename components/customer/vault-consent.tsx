@@ -26,7 +26,7 @@ export function VaultConsent({ onAccept, onDecline }: { onAccept: () => void; on
       <p className={styles.searchPreview} data-local-edit={process.env.NODE_ENV === "development" ? "ve-e061f504c627-12" : undefined}>Prototype permission screen, not a final legal agreement. This demo uses fictional samples only: no document processing, AI, uploads or persistent storage takes place. Your choice resets when you lock or refresh.</p>
       <form onSubmit={event => { event.preventDefault(); if (accepted) onAccept(); }}>
         <label className={styles.searchConsent}><input type="checkbox" checked={accepted} onChange={event => setAccepted(event.target.checked)} />I agree to the local-processing scope above and want to enter the demo Vault.</label>
-        <div className={styles.searchActions}><Button type="button" variant="secondary" onClick={onDecline}>Not now</Button><Button type="submit" disabled={!accepted}>Accept and enter Vault</Button></div>
+        <div className={`zk-action-row ${styles.searchActions}`}><Button type="button" variant="secondary" onClick={onDecline}>Not now</Button><Button type="submit" disabled={!accepted}>Accept and enter Vault</Button></div>
       </form>
     </div>
   </section>;

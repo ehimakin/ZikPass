@@ -20,7 +20,7 @@ export default function NativeHandoffFallbackPage() {
               label="Install web wallet"
             />
             <Link
-              className="rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-mist/80"
+              className="zk-button rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-mist/80"
               href="/wallet"
             >
               Open browser wallet

@@ -295,7 +295,7 @@ export function HomeScreen({ price }: { price: string }) {
             ))}
           </div>
           <div className="zk-hero-actions">
-            <Link className={`zk-editorial-cta zk-editorial-cta--primary${isVaultSlide && hasPass ? " !rounded-none" : ""}`} href={(isValidateSlide ? "/validate" : isVaultSlide ? "/vault" : hasPass ? "/pass" : "/get-pass") as Route}>{isValidateSlide ? "Explore Zik Validate" : isVaultSlide ? (hasPass ? "Go to Vault" : "Get a Vault") : hasPass ? "Open my pass" : <>Get Zik Pass <span>· Free in Early Access</span></>}</Link>
+            <Link className={`zk-editorial-cta zk-editorial-cta--primary${isVaultSlide && hasPass ? " !rounded-none" : ""}`} href={(isValidateSlide ? "/validate" : isVaultSlide ? "/vault" : hasPass ? "/pass" : "/get-pass") as Route}>{isValidateSlide ? "Explore Zik Validate" : isVaultSlide ? (hasPass ? "Go to Vault" : "Get a Vault") : hasPass ? "Open my pass" : <>Get Zik Pass <span data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-34" : undefined}>· Free in Early Access</span></>}</Link>
             <Link className="zk-editorial-cta zk-editorial-cta--text" href={(isValidateSlide ? "/validate#how-it-works" : isVaultSlide ? "/vault/how-it-works" : "#how-it-works") as Route}>{isValidateSlide ? "How validation works" : isVaultSlide ? "How Vault works" : "How it works"} <span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fbec76acddfc-4" : undefined}>→</span></Link>
           </div>
           <div className="zk-hero-dots" role="tablist" aria-label="Hero slides">

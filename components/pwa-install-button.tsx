@@ -10,11 +10,29 @@ interface BeforeInstallPromptEvent extends Event {
 
 interface PwaHandoffResponse {
   pwaStartUrl: string;
+  customSchemeUrl?: string;
 }
 
 export function PwaRegistration() {
   useEffect(() => {
     if (!("serviceWorker" in navigator)) {
+      return;
+    }
+
+    // Run development cleanup after hydration rather than rendering an inline
+    // nonce-bearing script, whose DOM attributes differ after browser parsing.
+    if (process.env.NODE_ENV === "development") {
+      void navigator.serviceWorker.getRegistrations().then(async registrations => {
+        await Promise.all(registrations.filter(registration =>
+          registration.active && new URL(registration.active.scriptURL).pathname === "/sw.js"
+        ).map(registration => registration.unregister()));
+        if ("caches" in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.filter(key => key.startsWith("zikpass-")).map(key => caches.delete(key)));
+        }
+      }).catch(() => {
+        // Cleanup is best effort when browser storage is unavailable.
+      });
       return;
     }
 
@@ -37,11 +55,13 @@ export function PwaInstallButton({
   enrollmentId?: string;
   onInstalled?: () => void;
 }) {
+  const [nativeApp, setNativeApp] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    setNativeApp(navigator.userAgent.includes("ZikNative/1"));
     const standalone = window.matchMedia("(display-mode: standalone)").matches;
     const iosStandalone = (navigator as Navigator & { standalone?: boolean }).standalone === true;
     const handoffToken = new URLSearchParams(window.location.search).get("handoff_token");
@@ -97,6 +117,12 @@ export function PwaInstallButton({
           throw new Error((data as { error?: string }).error ?? "Unable to prepare the device handoff.");
         }
 
+        if (nativeApp) {
+          const nativeLink = (data as PwaHandoffResponse).customSchemeUrl;
+          if (!nativeLink?.startsWith("zik://handoff?token=")) throw new Error("The native activation link is unavailable.");
+          window.location.assign(nativeLink);
+          return;
+        }
         pwaStartUrl = (data as PwaHandoffResponse).pwaStartUrl;
         const manifestLink = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
         if (manifestLink) {
@@ -141,7 +167,7 @@ export function PwaInstallButton({
         onClick={() => void install()}
         type="button"
       >
-        {isInstalled ? "Zik Pass added to device" : label}
+        {nativeApp ? "Save to Zik app" : isInstalled ? "Zik Pass added to device" : label}
       </button>
       {message ? (
         <p aria-live="polite" className="text-xs leading-5 text-ink/58">

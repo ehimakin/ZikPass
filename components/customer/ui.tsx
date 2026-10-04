@@ -16,7 +16,7 @@ type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 type ButtonSize = "md" | "lg";
 
 const buttonBase =
-  "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition " +
+  "zk-button inline-flex items-center justify-center gap-2 rounded-[5px] font-semibold transition " +
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--zk-focus)] focus-visible:ring-offset-2 " +
   "focus-visible:ring-offset-[var(--zk-canvas)] disabled:cursor-not-allowed disabled:opacity-55";
 
@@ -74,6 +74,8 @@ export function ButtonLink({
   className?: string;
   children: ReactNode;
 }) {
+  // Google Places needs the partner page's document CSP and referrer policy.
+  if (href === '/partner_stores') return <a href={href} className={clsx(buttonBase, buttonVariants[variant], buttonSizes[size], className)}>{children}</a>;
   return (
     <Link
       href={href as Route}

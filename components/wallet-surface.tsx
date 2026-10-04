@@ -1305,7 +1305,7 @@ export function WalletSurface({
                     </div>
                     {homepageMode ? (
                       <Link
-                        className="mt-4 inline-flex w-fit rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist transition hover:bg-[#24364d]"
+                        className="zk-button mt-4 inline-flex w-fit rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist transition hover:bg-[#24364d]"
                         href="/wallet"
                       >
                         View pass
@@ -1423,7 +1423,7 @@ export function WalletSurface({
                     >
                       {isPhysicalLane && !onboardingMode ? (
                         <Link
-                          className="rounded-full bg-ink px-6 py-3 text-sm font-semibold text-mist transition"
+                          className="zk-button rounded-full bg-ink px-6 py-3 text-sm font-semibold text-mist transition"
                           href={onboardingHref}
                         >
                           Get Zik Pass
@@ -1569,7 +1569,7 @@ export function WalletSurface({
                     {parentalControlsSlide.body}
                   </p>
                   <Link
-                    className="inline-flex w-fit rounded-full bg-ink px-4 py-[10px] text-[12px] font-semibold text-mist transition hover:bg-[#24364d]"
+                    className="zk-button inline-flex w-fit rounded-full bg-ink px-4 py-[10px] text-[12px] font-semibold text-mist transition hover:bg-[#24364d]"
                     href="/ZikParental"
                   >
                     Learn more
@@ -2590,14 +2590,14 @@ function HomepageHero({
           <div className="flex flex-wrap items-center gap-3 pt-1">
             {credential ? (
               <Link
-                className="rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-lime/90"
+                className="zk-button rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-lime/90"
                 href="/wallet"
               >
                 View pass
               </Link>
             ) : isPhysicalLane && !isPendingIssuance ? (
               <Link
-                className="rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-lime/90"
+                className="zk-button rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-lime/90"
                 href={onboardingHref}
               >
                 Get Zik Pass
@@ -2712,7 +2712,7 @@ function OnboardingHero({
               />
             </div>
             <Link
-              className="inline-flex rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-lime/90"
+              className="zk-button inline-flex rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-lime/90"
               href="/wallet"
             >
               View pass
@@ -3090,7 +3090,7 @@ function PhysicalOnboardingExperience({
               label="Install Zik Pass"
             />
             <Link
-              className="rounded-full border border-ink/15 px-7 py-4 text-center text-base font-semibold text-ink"
+              className="zk-button rounded-full border border-ink/15 px-7 py-4 text-center text-base font-semibold text-ink"
               href="/wallet"
             >
               Open wallet
@@ -3130,7 +3130,7 @@ function PhysicalOnboardingExperience({
           </div>
           <div className="grid w-full gap-3">
             <a
-              className="rounded-full border border-ink/15 px-7 py-4 text-center text-base font-semibold text-ink"
+              className="zk-button rounded-full border border-ink/15 px-7 py-4 text-center text-base font-semibold text-ink"
               href={appHref}
              data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-45" : undefined}>
               Open Zik
@@ -3199,7 +3199,7 @@ function PhysicalOnboardingExperience({
           <a
             aria-label="Open retailer verification screen for this temporary customer QR"
             className="block w-full"
-            href={challengeUrl ?? "/verify"}
+            href={challengeUrl ?? "/dashboard/store/verify"}
           >
             <PhysicalChallengeQr value={challengeValue} />
           </a>
@@ -3546,7 +3546,7 @@ function FullscreenCard({
 
         {!renderActionAside && actionHref ? (
           <Link
-            className={`mt-8 inline-flex rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist ${
+            className={`zk-button mt-8 inline-flex rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist ${
               actionClassName ?? "w-fit"
             }`}
             href={actionHref}
@@ -3570,7 +3570,7 @@ function FullscreenCard({
           <aside className="relative flex min-w-0 w-full items-center justify-center border-t border-ink/10 p-4 sm:p-8 lg:border-l lg:border-t-0">
             {actionHref ? (
               <Link
-                className={`inline-flex h-[150px] w-full max-w-[400px] items-center justify-center rounded-full px-5 py-4 text-center font-semibold sm:px-8 ${
+                className={`zk-button inline-flex h-[150px] w-full max-w-[400px] items-center justify-center rounded-full px-5 py-4 text-center font-semibold sm:px-8 ${
                   actionClassName ?? "w-full max-w-xs justify-center"
                 }`}
                 href={actionHref}

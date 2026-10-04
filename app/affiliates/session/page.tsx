@@ -1,5 +1,10 @@
-import { Suspense } from "react";
-import { CustomerShell } from "@/components/customer/customer-shell";
-import { AffiliatePairedSession } from "@/components/affiliate-paired-session";
-export const metadata = { title: "Paired affiliate setup · Zik Pass" };
-export default function Page() { return <CustomerShell title="Paired setup" active="about" back={{ href: "/affiliates", label: "Affiliate setup" }}><Suspense fallback={<p data-local-edit={process.env.NODE_ENV === "development" ? "ve-0e5372ffd834-1" : undefined}>Loading setup…</p>}><AffiliatePairedSession /></Suspense></CustomerShell>; }
+import { redirect } from "next/navigation";
+import type { Route } from "next";
+export default async function Page({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(await searchParams)) {
+    if (Array.isArray(value)) value.forEach(item => query.append(key, item));
+    else if (value !== undefined) query.set(key, value);
+  }
+  redirect(`/dashboard/affiliate/session${query.size ? `?${query}` : ""}` as Route);
+}

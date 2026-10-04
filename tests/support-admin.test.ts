@@ -73,6 +73,50 @@ describe('owner authentication and admin API', () => {
 });
 
 describe('ticket privacy, retries and workflow', () => {
+  it('approves partnership onboarding once with a private-ticket reply and audit history', async () => {
+    const { ticket, accessKey } = await create('store_partner');
+    const approved = await service.approvePartnerOnboarding('owner', { id: ticket.id, version: 1 });
+    expect(approved.partnerApproval).toMatchObject({ status: 'approved', approvedBy: 'owner' });
+    expect(approved.status).toBe('resolved');
+    expect(approved.resolution).toContain('approved for onboarding');
+    expect(approved.assignee).toBe('owner');
+    expect(approved.version).toBe(2);
+    const repeated = await service.approvePartnerOnboarding('another-admin', { id: ticket.id, version: 1 });
+    expect(repeated).toEqual(approved);
+    const customer = await service.readCustomerTicket(ticket.id, accessKey);
+    expect(customer.status).toBe('resolved');
+    expect(customer.resolution).toBe(approved.resolution);
+    expect(customer.messages.at(-1)?.body).toBe(approved.resolution);
+    expect(customer.messages.at(-1)?.body).toContain('approved for onboarding');
+    expect(customer.messages.at(-1)?.body).toContain('Store activation');
+    expect(JSON.stringify(customer)).not.toContain('approvedBy');
+    expect((await service.getWorkspace()).audit.filter(event => event.action === 'partner.onboarding_approved')).toHaveLength(1);
+  });
+
+  it('rejects non-partner, stale and closed requests without recording approval', async () => {
+    const ordinary = await create();
+    await expect(service.approvePartnerOnboarding('owner', { id: ordinary.ticket.id, version: 1 })).rejects.toMatchObject({ status: 400 });
+    const { ticket } = await create('store_partner');
+    await expect(service.approvePartnerOnboarding('owner', { id: ticket.id, version: 0 })).rejects.toMatchObject({ status: 409 });
+    await store.supportTransaction(data => { data.tickets.find(item => item.id === ticket.id)!.status = 'closed'; });
+    await expect(service.approvePartnerOnboarding('owner', { id: ticket.id, version: 1 })).rejects.toMatchObject({ status: 409 });
+    expect((await service.getWorkspace()).tickets.find(item => item.id === ticket.id)?.partnerApproval).toBeUndefined();
+  });
+
+  it('requires admin and CSRF credentials for the approval API', async () => {
+    const { ticket } = await create('store_partner');
+    const route = await import('@/app/api/admin/workspace/route');
+    const send = (headers: Record<string, string>) => route.POST(new NextRequest('http://localhost/api/admin/workspace', {
+      method: 'POST', headers: { 'Content-Type': 'application/json', ...headers },
+      body: JSON.stringify({ action: 'approve_partner', id: ticket.id, version: 1 })
+    }));
+    expect((await send({ origin: 'http://localhost' })).status).toBe(401);
+    const session = await auth.loginAdmin('owner', password, 'approval-ip');
+    const cookie = `${auth.ADMIN_COOKIE}=${session.token}`;
+    expect((await send({ cookie, origin: 'http://localhost' })).status).toBe(403);
+    expect((await send({ cookie, origin: 'http://localhost', 'x-csrf-token': session.csrf })).status).toBe(200);
+  });
+
   it('stores partner enquiries in the team workspace and supports private replies', async () => {
     const { ticket, accessKey } = await create('store_partner');
     const workspace = await service.getWorkspace();

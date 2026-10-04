@@ -1,65 +1,27 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import { claimHandoff } from "../src/native-wallet";
-
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
+import { Action, Body, ErrorText, Field, Heading, Panel, Screen } from '../src/components/ui';
+import { claimHandoff } from '../src/native-wallet';
+import { WEB_ORIGIN } from '../src/config';
+import { webDestination } from '../src/web-policy';
 export default function HandoffScreen() {
   const params = useLocalSearchParams<{ token?: string | string[] }>();
+  const token = Array.isArray(params.token) ? params.token[0] : params.token;
+  const [link, setLink] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(false);
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const token = Array.isArray(params.token) ? params.token[0] : params.token;
-    if (!token) {
-      setError("This ZikPass handoff is missing its token.");
-      return;
-    }
-
-    void claimHandoff(token)
-      .then(() => router.replace("/wallet"))
-      .catch((reason: unknown) => {
-        setError(reason instanceof Error ? reason.message : "Unable to secure the ZikPass on this device.");
-      });
-  }, [params.token, router]);
-
-  return (
-    <View style={styles.screen}>
-      {error ? (
-        <>
-          <Text style={styles.title}>Handoff could not complete</Text>
-          <Text style={styles.body}>{error}</Text>
-        </>
-      ) : (
-        <>
-          <ActivityIndicator color="#0e1726" size="large" />
-          <Text style={styles.title}>Securing your ZikPass</Text>
-          <Text style={styles.body}>Creating a device-bound native wallet.</Text>
-        </>
-      )}
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  screen: {
-    alignItems: "center",
-    backgroundColor: "#f4f7ee",
-    flex: 1,
-    justifyContent: "center",
-    padding: 32
-  },
-  title: {
-    color: "#0e1726",
-    fontSize: 28,
-    fontWeight: "700",
-    marginTop: 24,
-    textAlign: "center"
-  },
-  body: {
-    color: "#536070",
-    fontSize: 16,
-    lineHeight: 24,
-    marginTop: 12,
-    textAlign: "center"
+  async function claim() {
+    if (busy) return;
+    setBusy(true); setError('');
+    try {
+      const destination = webDestination(link.trim(), WEB_ORIGIN ?? 'https://unconfigured.invalid');
+      const supplied = token ?? (destination.kind === 'handoff' ? destination.token : null);
+      if (!supplied) throw new Error('Paste the private Open in Zik link supplied after your pass is issued. A card serial alone cannot link a pass.');
+      await claimHandoff(supplied); setDone(true);
+    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Could not link your pass.'); }
+    finally { setBusy(false); }
   }
-});
+  return <Screen title={done ? 'Pass linked.' : 'Link this phone'} subtitle="Your pass stays yours."><Panel><Heading>{done ? 'Your pass is saved locally.' : 'Confirm your digital twin.'}</Heading><Body>{done ? 'Open Card to view your saved pass.' : 'Use the private activation link from your issued Zik pass. Linking uses the existing device allowance and requires an internet connection.'}</Body>{!token && !done ? <Field label="Private activation link" value={link} onChangeText={setLink} autoCapitalize="none" autoCorrect={false} textContentType="none" /> : null}{done ? <Action onPress={() => router.replace('/wallet')}>Open Card</Action> : <Action busy={busy} onPress={() => void claim()}>Confirm and link</Action>}<ErrorText>{error}</ErrorText><Action secondary disabled={busy} onPress={() => router.replace('/wallet')}>{done ? 'Done' : 'Cancel'}</Action></Panel></Screen>;
+}

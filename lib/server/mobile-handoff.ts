@@ -145,3 +145,11 @@ function validateHolderPublicKey(value: JsonWebKey) {
 function sameHolderPublicKey(left: JsonWebKey, right: JsonWebKey): boolean {
   return left.kty === right.kty && left.crv === right.crv && left.x === right.x;
 }
+
+/** Product context comes from the authorised enrollment, never a scanned serial. */
+export async function nativeHandoffProduct(token: string): Promise<"physical_card" | "digital"> {
+  const handoff = await getMobileAppHandoff(hashToken(token));
+  if (!handoff?.claimed_at) throw new Error("Claim this handoff first.");
+  const enrollment = await getEnrollmentOrThrow(handoff.enrollment_id);
+  return enrollment.physical_verification?.session.entry_mode === "retail_card" ? "physical_card" : "digital";
+}

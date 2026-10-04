@@ -138,7 +138,7 @@ export function DocumentImport({ open, busy, jobs, onClose, onImport, onCancelJo
           <span data-local-edit={process.env.NODE_ENV === "development" ? "ve-c843ec8ff896-10" : undefined}><strong>Also read them on this device to suggest details</strong><small>Optional. Zik proposes what it finds, and you decide what to keep. Nothing is shared with anyone by ticking this.</small></span>
         </label>
 
-        <div className={styles.actions}>
+        <div className={`zk-action-row ${styles.actions}`}>
           <Button type="button" variant="secondary" onClick={() => choose({ ...selection, files: [], skipped: [] })}>Change selection</Button>
           <Button type="button" disabled={!consentStore || busy} loading={busy} onClick={() => void onImport(selection, { analyse: consentAnalyse, documentTypes })}>
             {consentAnalyse ? "Add and read" : "Add without reading"}
@@ -156,7 +156,7 @@ export function DocumentImport({ open, busy, jobs, onClose, onImport, onCancelJo
           {job.stage !== "done" && !job.error ? <button type="button" onClick={() => onCancelJob(job.id)} data-local-edit={process.env.NODE_ENV === "development" ? "ve-c843ec8ff896-11" : undefined}>Stop</button> : null}
         </li>)}
       </ul>
-      {finished ? <div className={styles.actions}><Button type="button" onClick={onClose}>Done</Button></div> : null}
+      {finished ? <div className={`zk-action-row ${styles.actions}`}><Button type="button" onClick={onClose}>Done</Button></div> : null}
     </section>}
   </dialog>;
 }

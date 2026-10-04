@@ -40,6 +40,8 @@
   --zk-info-bg: #e9eefb;
 
   /* Radius scale */
+  --zk-r-control: 5px;
+  --zk-r-input: 9999px;
   --zk-r-sm: 10px;
   --zk-r-md: 14px;
   --zk-r-lg: 20px;
@@ -105,6 +107,41 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+/* Site-wide control shapes override legacy utilities and route-specific styles.
+   Keep these separate from card, badge and decorative radii. */
+html body button,
+html body [role="button"],
+html body .zk-button,
+html body .zk-editorial-cta,
+html body input:is([type="button"], [type="submit"], [type="reset"]),
+html body textarea,
+html body [role="textbox"][aria-multiline="true"] {
+  border-radius: var(--zk-r-control) !important;
+}
+
+html body input:not([type]),
+html body input:is([type="text"], [type="search"], [type="email"], [type="password"], [type="tel"], [type="url"], [type="number"], [type="date"], [type="datetime-local"], [type="month"], [type="week"], [type="time"]),
+html body [role="textbox"]:not([aria-multiline="true"]) {
+  border-radius: var(--zk-r-input) !important;
+}
+
+html body input::file-selector-button {
+  border-radius: var(--zk-r-control) !important;
+}
+
+/* Two-action rows use the available content width. Match exactly two action
+   children so tabs, larger toolbars and intentionally stacked actions keep
+   their layouts. Auto margins also keep a wrapped second action right-aligned. */
+:is(.flex:not(.flex-col):not(.flex-col-reverse), .zk-action-row, .zk-hero-actions)
+  > :is(button:not([role="tab"]), .zk-button, .zk-editorial-cta):first-child
+  + :is(button:not([role="tab"]), .zk-button, .zk-editorial-cta):last-child {
+  margin-inline-start: auto;
+}
+
+.zk-action-row:has(> :is(button, .zk-button):first-child + :is(button, .zk-button):last-child) {
+  justify-content: space-between;
 }
 
 pre {
@@ -699,6 +736,11 @@ pre {
 .zk-menu-link:hover, .zk-menu-link:focus-visible { padding-left: clamp(28px, 6vw, 104px); background: #d7f171; color: #101813; }
 .zk-menu-index { align-self: start; padding-top: .25em; font-size: 10px; font-weight: 800; letter-spacing: .12em; opacity: .5; }
 .zk-menu-arrow { font-size: .38em; font-weight: 500; opacity: .45; }
+.zk-menu-submenu { margin: 0; padding: 12px clamp(20px, 5vw, 82px) 20px; list-style: none; border-bottom: 1px solid rgb(246 246 239 / 18%); background: rgb(0 0 0 / 12%); }
+.zk-menu-submenu a { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 0 16px clamp(30px, 5vw, 82px); color: #f6f6ef; font-size: clamp(1.3rem, 3vw, 2.4rem); font-weight: 650; letter-spacing: -.035em; }
+.zk-menu-submenu a:hover, .zk-menu-submenu a[aria-current="page"] { color: #d7f171; }
+.zk-menu-submenu a:focus-visible { outline: 2px solid #d7f171; outline-offset: 4px; }
+.zk-menu-submenu a > span:last-child { font-size: .7em; opacity: .6; }
 .zk-menu-footer { display: grid; grid-template-columns: 1fr auto auto; align-items: end; gap: clamp(22px, 5vw, 80px); padding: 28px clamp(20px, 5vw, 82px) 38px; color: rgb(246 246 239 / 58%); font-size: 11px; }
 .zk-menu-utility, .zk-menu-staff { display: flex; flex-wrap: wrap; gap: 12px 24px; }
 .zk-menu-utility a, .zk-menu-staff a { color: #f6f6ef; font-weight: 700; }
@@ -727,6 +769,7 @@ pre {
   .zk-hero-support { max-width: 34ch; font-size: 14px; line-height: 1.48; }
   .zk-hero-support-stack { margin-top: 20px; }
   .zk-hero-actions { align-items: flex-start; flex-direction: column; gap: 12px; margin-top: 23px; }
+  .zk-hero-actions > .zk-editorial-cta:first-child + .zk-editorial-cta:last-child { margin-inline-start: 0; }
   .zk-hero-dots { margin-top: 20px; }
   .zk-editorial-cta { min-height: 48px; }
   .zk-editorial-cta--text { min-height: auto; }
@@ -1144,3 +1187,11 @@ pre {
   opacity: .55;
   box-shadow: 0 2px 0 #789735, 0 10px 24px #0002;
 }
+
+/* The native shell owns the bottom tabs; embedded web journeys keep their content. */
+html[data-zik-native="true"] nav[aria-label="Primary"] { display: none; }
+html[data-zik-native="true"] .zk-surface { --zk-bottom-nav-height: 0px; }
+
+/* Keyboard-accessible store pins on the shared Google map. */
+.zik-store-map-pin { position: absolute; transform: translate(-50%, -50%); display: grid; place-items: center; width: 36px; height: 36px; border: 2px solid #fff; border-radius: 50%; background: #16202f; color: #d7f171; box-shadow: 0 2px 6px #0005; cursor: pointer; }
+.zik-store-map-pin:focus-visible { outline: 3px solid #16202f; outline-offset: 3px; }

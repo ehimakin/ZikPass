@@ -56,11 +56,11 @@ export function VaultSearch({ onClose, onChooseFile }: { onClose: () => void; on
         <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-c70c751f7c7c-6" : undefined}>You would choose the specific photos, files or supported resources to share through your device’s permission controls. Nothing would be added to your Vault without your review.</p>
       </fieldset>
       <label className={styles.searchConsent}><input type="checkbox" checked={consent} onChange={event => setConsent(event.target.checked)} />Allow a demo AI search for these proof details in my selected sources.</label>
-      <div className={styles.searchActions}><Button type="button" variant="secondary" onClick={onClose}>Not now</Button><Button type="submit" disabled={!consent || !locations.length || (!types.length && !other.trim())}>Show demo matches</Button></div>
+      <div className={`zk-action-row ${styles.searchActions}`}><Button type="button" variant="secondary" onClick={onClose}>Not now</Button><Button type="submit" disabled={!consent || !locations.length || (!types.length && !other.trim())}>Show demo matches</Button></div>
     </form> : <div>
       <div role="status" className={styles.searchResultStatus}><h3 ref={resultsHeading} tabIndex={-1}>{results.length} example {results.length === 1 ? "match" : "matches"}</h3><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-c70c751f7c7c-7" : undefined}>Illustrative results only. Your device was not searched.</p></div>
       <ul className={styles.searchResults}>{results.map((result, index) => <li key={`${index}-${result}`}><strong>{result}</strong><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-c70c751f7c7c-8" : undefined}>Fictional example · unverified · not added</span></li>)}</ul>
-      <div className={styles.searchActions}><Button type="button" variant="secondary" onClick={() => { setResults(null); setConsent(false); requestAnimationFrame(() => dialog.current?.querySelector<HTMLInputElement>('input')?.focus()); }}>Change search</Button><Button type="button" onClick={onClose}>Done</Button></div>
+      <div className={`zk-action-row ${styles.searchActions}`}><Button type="button" variant="secondary" onClick={() => { setResults(null); setConsent(false); requestAnimationFrame(() => dialog.current?.querySelector<HTMLInputElement>('input')?.focus()); }}>Change search</Button><Button type="button" onClick={onClose}>Done</Button></div>
     </div>}
   </dialog>;
 }

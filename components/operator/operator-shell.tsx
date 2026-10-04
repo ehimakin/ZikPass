@@ -71,7 +71,7 @@ export function OperatorShell({
                 <span className="block text-[10px] font-bold uppercase tracking-wide text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d22c3571f16f-4" : undefined}>This terminal</span>
                 <span className="block truncate font-bold text-[var(--zk-text)]">{boundStore.name}</span>
               </span>
-              <Link href="/store?change=1" className="shrink-0 font-semibold text-[var(--zk-text-soft)] underline underline-offset-2">
+              <Link href="/dashboard/store/login?change=1" className="shrink-0 font-semibold text-[var(--zk-text-soft)] underline underline-offset-2">
                 Change store
               </Link>
             </div>

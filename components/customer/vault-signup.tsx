@@ -119,9 +119,9 @@ function Welcome({ onContinue }: { onContinue: () => void }) {
 function Payment({ paying, onBack, onPay }: { paying: boolean; onBack: () => void; onPay: () => void }) {
   return <div className="space-y-5">
     <StatusBadge>Early Access</StatusBadge>
-    <h3 className="text-2xl font-bold">Your private document space.</h3>
-    <p className="text-sm text-[var(--zk-text-soft)]">Zik Vault · 35p/month. Zik VaultCloud · 99p/month. No charge or subscription starts in this preview.</p>
-    <details className="rounded-2xl bg-[var(--zk-sunken)] p-4 text-sm"><summary className="cursor-pointer font-semibold">Future subscriptions</summary><p className="mt-3">On iPhone, paid plans will use Apple’s In-App Purchase confirmation, with the price and renewal terms shown before you subscribe. Purchases and subscription management are not connected yet.</p></details>
+    <h3 className="text-2xl font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-8" : undefined}>Your private document space.</h3>
+    <p className="text-sm text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-9" : undefined}>Zik Vault · 35p/month. Zik VaultCloud · 99p/month. No charge or subscription starts in this preview.</p>
+    <details className="rounded-2xl bg-[var(--zk-sunken)] p-4 text-sm"><summary className="cursor-pointer font-semibold">Future subscriptions</summary><p className="mt-3" data-local-edit={process.env.NODE_ENV === "development" ? "ve-cf6999a23b54-10" : undefined}>On iPhone, paid plans will use Apple’s In-App Purchase confirmation, with the price and renewal terms shown before you subscribe. Purchases and subscription management are not connected yet.</p></details>
     <Button size="lg" onClick={onPay} loading={paying}>Create my Vault</Button>
     <Button variant="ghost" onClick={onBack} disabled={paying}>Back</Button>
   </div>;

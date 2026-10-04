@@ -12,7 +12,7 @@ export function AppleWalletButton({ available, product }: { available: boolean; 
         <a
           href="/api/wallet/apple/demo"
           aria-describedby={descriptionId}
-          className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-ink px-5 text-[15px] font-semibold text-white hover:bg-[#1c2839] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--zk-focus)] focus-visible:ring-offset-2"
+          className="zk-button inline-flex min-h-[44px] items-center justify-center rounded-full bg-ink px-5 text-[15px] font-semibold text-white hover:bg-[#1c2839] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--zk-focus)] focus-visible:ring-offset-2"
          data-local-edit={process.env.NODE_ENV === "development" ? "ve-2727035791ec-1" : undefined}>
           Add to Apple Wallet
         </a>

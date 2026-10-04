@@ -5,11 +5,13 @@ import { Button, ButtonLink, Card } from '@/components/customer/ui';
 import { CATEGORIES, label } from '@/lib/shared/support/model';
 import { containsSupportSecret } from '@/lib/shared/support/validation';
 import { bytesToBase64Url } from '@/lib/shared/utils';
+import { GoogleBusinessSearch, type GoogleBusiness } from './google-business-search';
 const control = 'mt-1.5 w-full rounded-xl border border-[var(--zk-line-strong)] bg-white p-3 text-base';
 export function TicketCreate({ partnerStore = false }: { partnerStore?: boolean }) {
   const router = useRouter();
   const [category, setCategory] = useState(partnerStore ? 'store_partner' : 'general');
   const [storeName, setStoreName] = useState('');
+  const [googleBusiness, setGoogleBusiness] = useState<GoogleBusiness | null>(null);
   const [location, setLocation] = useState('');
   const [contactName, setContactName] = useState('');
   const pendingKey = partnerStore ? 'zik-partner-store-pending' : 'zik-support-pending';
@@ -32,7 +34,7 @@ export function TicketCreate({ partnerStore = false }: { partnerStore?: boolean 
       const previous = sessionStorage.getItem(pendingKey);
       const pending = previous ? JSON.parse(previous) as { requestId: string; accessKey: string } : { requestId: crypto.randomUUID(), accessKey: bytesToBase64Url(crypto.getRandomValues(new Uint8Array(32))) };
       sessionStorage.setItem(pendingKey, JSON.stringify(pending));
-      const response = await fetch('/api/support/tickets', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...pending, category, subject: partnerStore ? `Store partnership: ${storeName.trim()}` : subject, body: partnerStore ? `Store: ${storeName.trim()}\nLocation: ${location.trim()}\nContact: ${contactName.trim()}\n\n${body.trim() || "Interested in becoming a Zik partner store."}` : body, email, errorReference: reference, ...(diagnostics ? { diagnostic: `Browser: ${navigator.userAgent.slice(0, 300)}; viewport: ${window.innerWidth}×${window.innerHeight}; online: ${navigator.onLine}` } : {}) }) });
+      const response = await fetch('/api/support/tickets', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...pending, category, subject: partnerStore ? `Store partnership: ${storeName.trim()}` : subject, body: partnerStore ? `Store: ${storeName.trim()}\nLocation: ${location.trim()}\nContact: ${contactName.trim()}${googleBusiness ? `\nGoogle Place ID: ${googleBusiness.id}` : ""}\n\n${body.trim() || "Interested in becoming a Zik partner store."}` : body, email, errorReference: reference, ...(diagnostics ? { diagnostic: `Browser: ${navigator.userAgent.slice(0, 300)}; viewport: ${window.innerWidth}×${window.innerHeight}; online: ${navigator.onLine}` } : {}) }) });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error ?? 'Could not submit your ticket. Please retry.');
       sessionStorage.setItem(`zik-support:${result.id}`, pending.accessKey);
@@ -45,8 +47,10 @@ export function TicketCreate({ partnerStore = false }: { partnerStore?: boolean 
     {category === 'recovery' ? <div className="mt-4 rounded-xl bg-[var(--zk-sunken)] p-4 text-sm"><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-30f16f0555ad-3" : undefined}>Lost your phone and card? Your saved recovery phrase belongs only on the recovery screen. Support cannot retrieve it or bypass encryption.</p><ButtonLink href="/account-recovery/restore" variant="secondary" className="mt-3">Recover with my phrase</ButtonLink></div> : null}
     <form onSubmit={e => void submit(e)} className="mt-5 space-y-4">
       {partnerStore ? <>
+        <GoogleBusinessSearch onSelect={business => { setGoogleBusiness(business); setStoreName(business.name.slice(0, 120)); setLocation(business.address.slice(0, 300)); }} />
+        {googleBusiness ? <div className="text-sm"><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-30f16f0555ad-5" : undefined}>Google listing selected. You can correct the imported details.</p><button type="button" className="mt-1 underline" onClick={() => setGoogleBusiness(null)} data-local-edit={process.env.NODE_ENV === "development" ? "ve-30f16f0555ad-6" : undefined}>Remove Google listing link</button></div> : null}
         <label className="block text-sm font-semibold">Store or business name<input className={control} required maxLength={120} autoComplete="organization" value={storeName} onChange={e => setStoreName(e.target.value)} /></label>
-        <label className="block text-sm font-semibold">Town and postcode<input className={control} required maxLength={160} value={location} onChange={e => setLocation(e.target.value)} /></label>
+        <label className="block text-sm font-semibold">Town and postcode (full address if available)<input className={control} required maxLength={300} value={location} onChange={e => setLocation(e.target.value)} /></label>
         <label className="block text-sm font-semibold">Your name<input className={control} required maxLength={120} autoComplete="name" value={contactName} onChange={e => setContactName(e.target.value)} /></label>
       </> : <>
       <label className="block text-sm font-semibold">What do you need help with?<select className={control} value={category} onChange={e => setCategory(e.target.value)}>{CATEGORIES.map(v => <option key={v} value={v}>{label(v)}</option>)}</select></label>

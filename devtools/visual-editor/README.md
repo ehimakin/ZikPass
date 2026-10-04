@@ -59,3 +59,11 @@ Remove the layout import/render, API adapter, config and this folder to uninstal
 Copy updated runtime files, including `discovery.ts`, and the installer/setup scripts into `devtools/visual-editor`. Export `PUT` alongside the existing methods in the API adapter and pass `config`, not `config.files`. To migrate an old installation, replace its `files` config with `directories` as above.
 
 Text computed from state, conditions or data arrays remains intentionally uneditable; edit its source directly. Static headings, labels, paragraphs and inline emphasis are supported.
+
+## ZikPass development default
+
+The editor is enabled by default when running `npm run dev` on localhost,
+127.0.0.1 or IPv6 loopback. It is hidden on remote hosts, production builds and
+affiliate installation pages. Set `ZIK_VISUAL_EDITOR=false` before starting the
+server to hide it. Undo remains available after saving, even after leaving edit
+mode. The source-writing API retains its development and loopback checks.

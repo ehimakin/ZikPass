@@ -65,13 +65,13 @@ export function ReadinessBanner({ readiness, dismissed, onDismiss, applicationSt
       </li>)}
     </ul>
 
-    {readiness.status === "ready_to_apply" && !applicationState ? <div className={styles.actions}>
+    {readiness.status === "ready_to_apply" && !applicationState ? <div className={`zk-action-row ${styles.actions}`}>
       <Link href="/id/apply" className={styles.applyLink}>Apply for Zik ID</Link>
     </div> : null}
-    {applicationState === "pending_onboarding" ? <div className={styles.actions}>
+    {applicationState === "pending_onboarding" ? <div className={`zk-action-row ${styles.actions}`}>
       <Link href="/id/apply" className={styles.applyLink}>View your application</Link>
     </div> : null}
-    {applicationState === "stale" ? <div className={styles.actions}>
+    {applicationState === "stale" ? <div className={`zk-action-row ${styles.actions}`}>
       <p className={styles.notice} data-local-edit={process.env.NODE_ENV === "development" ? "ve-ec70541e8bfb-5" : undefined}>Your evidence changed after you applied, so the application needs checking again.</p>
       <Link href="/id/apply" className={styles.applyLink}>Review your application</Link>
     </div> : null}

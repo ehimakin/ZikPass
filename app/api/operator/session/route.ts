@@ -1,9 +1,11 @@
+import { supportRateLimit, SupportError } from "@/lib/server/support/store";
+import { secretHash } from "@/lib/server/support/auth";
 import { NextRequest, NextResponse } from "next/server";
 import {
   createOperatorSession,
   operatorCookieOptions,
   OPERATOR_SESSION_COOKIE,
-  verifyOperatorLoginCode
+  verifyStoreLoginCode
 } from "@/lib/server/operator-session";
 import { getStoreById } from "@/lib/shared/stores";
 
@@ -12,8 +14,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json() as { storeId?: unknown; code?: unknown };
     const storeId = typeof body.storeId === "string" ? body.storeId.trim() : "";
     const code = typeof body.code === "string" ? body.code.trim() : "";
+    await supportRateLimit(`store-login:${secretHash(`${storeId}:${request.headers.get("x-forwarded-for")?.split(",")[0] ?? "local"}`)}`, 10, 15 * 60_000);
     const store = getStoreById(storeId);
-    if (!store || !verifyOperatorLoginCode(code)) {
+    if (!store || !await verifyStoreLoginCode(storeId, code)) {
       return NextResponse.json(
         { error: "That store or login code was not recognised." },
         { status: 401, headers: { "Cache-Control": "no-store" } }
@@ -30,7 +33,8 @@ export async function POST(request: NextRequest) {
       operatorCookieOptions(request.nextUrl.protocol === "https:")
     );
     return response;
-  } catch {
+  } catch (error) {
+    if (error instanceof SupportError) return NextResponse.json({ error: error.message }, { status: error.status, headers: { "Cache-Control": "no-store" } });
     return NextResponse.json(
       { error: "The clerk login could not be completed. Please try again." },
       { status: 400, headers: { "Cache-Control": "no-store" } }

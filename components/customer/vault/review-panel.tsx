@@ -95,7 +95,7 @@ export function ReviewPanel({ observations, claims, documents, onReview, onSetCl
               <input id={`correct-${observation.id}`} value={draft} maxLength={512} autoFocus onChange={event => setDraft(event.target.value)} onKeyDown={event => { if (event.key === "Escape") setEditing(null); }} />
               <Button type="submit" loading={busy}>Save mine</Button>
             </div>
-          </form> : <div className={styles.proposalActions}>
+          </form> : <div className={`zk-action-row ${styles.proposalActions}`}>
             {usable ? <Button type="button" disabled={busy} onClick={async () => {
               setBusy(true);
               // Using a proposal makes it the value and records the user's acceptance of the reading.

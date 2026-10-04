@@ -15,7 +15,7 @@ export default function VaultGuidePage() {
         <p className={styles.eyebrow} data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-1" : undefined}>HOW ZIK VAULT WORKS</p>
         <h1 data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-2" : undefined}>Your documents.<br /><em>Your say.</em></h1>
         <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-3" : undefined}>Keep your documents together. Choose what you share.</p>
-        <div className={styles.actions}><ButtonLink href="/vault">Explore Vault</ButtonLink><ButtonLink href="/home" variant="ghost">Back to Zik</ButtonLink></div>
+        <div className={`zk-action-row ${styles.actions}`}><ButtonLink href="/vault">Explore Vault</ButtonLink><ButtonLink href="/home" variant="ghost">Back to Zik</ButtonLink></div>
       </header>
       <section className={styles.preview} aria-labelledby="preview-title">
         <h2 id="preview-title" data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-4" : undefined}>Early Access. Yours to use.</h2>
@@ -31,7 +31,7 @@ export default function VaultGuidePage() {
           <li><span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-17" : undefined}>04</span><div><h3 data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-18" : undefined}>Share a fact, with your permission.</h3><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-c9e4451dcebc-19" : undefined}>The aim is to let you approve a specific proof, such as being over 18, without routinely handing over the entire document. Any external verification checks would need a clear explanation of the information involved.</p></div></li>
         </ol>
       </section>
-      <footer className={styles.actions}><ButtonLink href="/vault" className="!rounded-none">Go to Vault</ButtonLink></footer>
+      <footer className={`zk-action-row ${styles.actions}`}><ButtonLink href="/vault" className="!rounded-none">Go to Vault</ButtonLink></footer>
     </article>
   </CustomerShell>;
 }

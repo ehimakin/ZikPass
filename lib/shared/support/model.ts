@@ -10,8 +10,10 @@ export type BugStatus = typeof BUG_STATUSES[number];
 export type RecoveryOutcome = typeof RECOVERY_OUTCOMES[number];
 export const RESPONSE_HOURS: Record<Priority, number> = { urgent: 4, high: 24, normal: 72, low: 120 };
 export type SupportMessage = { id: string; requestId: string; author: 'customer' | 'admin'; authorName: string; visibility: 'public' | 'internal'; body: string; createdAt: string };
+export type PartnerApproval = { status: 'approved'; approvedAt: string; approvedBy: string };
 export type Ticket = {
   id: string; accessHash: string; creationId: string; subject: string; category: Category; priority: Priority; status: TicketStatus;
+  partnerApproval?: PartnerApproval;
   contactEmail?: string; errorReference?: string; diagnostic?: string; assignee: string; resolution: string; recoveryOutcome: RecoveryOutcome;
   createdAt: string; updatedAt: string; dueAt: string; firstResponseAt?: string; closedAt?: string; version: number; bugId?: string; messages: SupportMessage[];
 };

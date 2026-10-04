@@ -92,7 +92,7 @@ export function HelpScreen() {
       <section>
         <SectionHeading>About this build</SectionHeading>
         <Card className="p-4 text-[13px] leading-relaxed text-[var(--zk-text-soft)]">
-          <p>
+          <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-77c96c1e782b-1" : undefined}>
 
             Early Access includes a payment and finance-check preview. No real payment or finance check takes place. Confirmed partner locations will be listed before launch.
           </p>
