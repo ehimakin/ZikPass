@@ -2,6 +2,14 @@
 
 Zik's native home for local documents, identity details and a device-bound pass. The existing website supplies the remaining services through `react-native-webview` (WKWebView on iOS). This extends the existing Expo app and shared pass protocol.
 
+## Opening and unlocking
+
+The app opens with a short Zik splash, then the primary device-authentication screen. Successful entry opens `/dashboard`, a non-sensitive profile overview. The green Zik logo returns there from every main screen; the dashboard is deliberately absent from the bottom tab bar.
+
+The four tabs remain Vault, Zik ID, Card and Explore. Each tap on a sensitive tab requests a fresh device challenge through the shared resource gate, including a repeated tap on the current tab. Cancelled challenges reveal no resource. Leaving a sensitive screen invalidates pending authentication and clears its grant; backgrounding locks the app and Vault. Explore does not request a second challenge after the primary unlock. SecureStore may additionally request authentication when releasing the protected Vault key.
+
+The dashboard contains no decrypted profile details or document counts. Identity and card content load only behind their resource gates.
+
 ## What lives where
 
 | Surface | Implementation |
@@ -23,7 +31,7 @@ npm ci
 EXPO_PUBLIC_ZIK_API_ORIGIN=https://your-deployed-zik-host.example npm run ios
 ```
 
-Use a native development build, not Expo Go, to test biometric key protection and deep links. This SDK's native dependencies require Swift 6.2 or newer; the installed Xcode 16.2 / Swift 6.0 cannot compile them. Select a compatible Xcode before running the native build. If CocoaPods encounters an unsupported locale, run it with `LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8`.
+Use a native development build, not Expo Go, to test biometric key protection and deep links. This SDK's native dependencies require Swift 6.2 or newer; Xcode 16.2 / Swift 6.0 cannot compile them. Select a compatible Xcode before running the native build. If CocoaPods encounters an unsupported locale, run it with `LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8`.
 
 `EXPO_PUBLIC_ZIK_API_ORIGIN` must be the exact HTTPS origin, without a path or credentials. Development builds also allow HTTP on localhost, 127.0.0.1 and the Android emulator's 10.0.2.2. Use HTTPS for physical-device testing. Without an origin, Vault and ID remain available and Explore explains that the website is not configured.
 

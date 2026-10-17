@@ -3,7 +3,7 @@ import { ActivityIndicator, Alert, BackHandler, Linking, Pressable, Text, View }
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Action, Body, Heading, Panel, Screen, colours } from '../../src/components/ui';
+import { Action, Body, Heading, Panel, Screen, HomeLogo, colours } from '../../src/components/ui';
 import { WEB_ORIGIN } from '../../src/config';
 import { webDestination } from '../../src/web-policy';
 const presentation = `document.documentElement.setAttribute('data-zik-native', 'true'); true;`;
@@ -41,6 +41,7 @@ export default function ExploreScreen() {
   }
   return <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colours.canvas }}>
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, minHeight: 48 }}>
+      <HomeLogo />
       <Pressable accessibilityRole="button" accessibilityLabel="Back in website" onPress={() => browser.current?.goBack()} style={{ padding: 12 }}><Text style={{ color: colours.green }}>← Back</Text></Pressable>
       <Text style={{ fontWeight: '700', color: colours.ink }}>Explore Zik</Text>
       <Pressable accessibilityRole="button" accessibilityLabel="Website home" onPress={() => { setFailed(false); setUrl(`${WEB_ORIGIN}/home`); browser.current?.reload(); }} style={{ padding: 12 }}><Text style={{ color: colours.green }}>Home</Text></Pressable>

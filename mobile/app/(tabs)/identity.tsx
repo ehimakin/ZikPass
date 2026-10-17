@@ -1,7 +1,8 @@
+import { ResourceGate } from '../../src/auth/gates';
 import { useState } from 'react';
-import { Action, Badge, Body, ErrorText, Field, Heading, Panel, Screen, VaultGate } from '../../src/components/ui';
+import { Action, Badge, Body, ErrorText, Field, Heading, Panel, Screen } from '../../src/components/ui';
 import { useVault } from '../../src/vault/context';
-export default function IdentityScreen() { return <Screen title="Zik ID" subtitle="Your details. Your say."><VaultGate><Identity /></VaultGate></Screen>; }
+export default function IdentityScreen() { return <ResourceGate resource="identity"><Screen title="Zik ID" subtitle="Your details. Your say."><Identity /></Screen></ResourceGate>; }
 function Identity() {
   const { vault, index, refresh } = useVault();
   const [name, setName] = useState(index?.identity.name ?? '');

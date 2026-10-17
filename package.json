@@ -13,7 +13,11 @@
     "prepare": "node scripts/vendor-ocr-assets.mjs",
     "fixtures": "node scripts/generate-fixtures.mjs",
     "measure:ocr": "node scripts/measure-ocr.mjs",
-    "admin:setup": "node scripts/configure-admin.mjs"
+    "admin:setup": "node scripts/configure-admin.mjs",
+    "security:scan": "node scripts/scan-secrets.mjs",
+    "security:staged": "node scripts/scan-secrets.mjs staged",
+    "security:hooks": "node scripts/install-security-hooks.mjs",
+    "security:test": "node scripts/test-secret-scanning.mjs"
   },
   "dependencies": {
     "@noble/ciphers": "^2.4.0",

@@ -1,10 +1,12 @@
+import { EntryGate } from '../src/auth/gates';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Action, Body, ErrorText, Field, Heading, Panel, Screen } from '../src/components/ui';
 import { claimHandoff } from '../src/native-wallet';
 import { WEB_ORIGIN } from '../src/config';
 import { webDestination } from '../src/web-policy';
-export default function HandoffScreen() {
+export default function HandoffScreen() { return <EntryGate><HandoffContent /></EntryGate>; }
+function HandoffContent() {
   const params = useLocalSearchParams<{ token?: string | string[] }>();
   const token = Array.isArray(params.token) ? params.token[0] : params.token;
   const [link, setLink] = useState('');

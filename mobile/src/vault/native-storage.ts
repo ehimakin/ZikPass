@@ -1,4 +1,6 @@
 import * as Crypto from 'expo-crypto';
+import { isRunningInExpoGo } from 'expo';
+import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { Directory, File, Paths } from 'expo-file-system';
@@ -24,8 +26,13 @@ const storage: VaultStorage = {
   random: Crypto.getRandomBytes
 };
 export async function unlockNativeVault(): Promise<LocalVault> {
+  if (Platform.OS === 'ios' && isRunningInExpoGo()) {
+    throw new Error('Vault and Zik ID need the installed Zik app on iPhone. Expo Go cannot unlock their protected storage. Use a Zik development build or TestFlight to continue.');
+  }
   const auth = await LocalAuthentication.authenticateAsync({ promptMessage: 'Unlock your Zik Vault', biometricsSecurityLevel: 'strong' });
-  if (!auth.success) throw new Error('Unlock cancelled. Your Vault is still locked.');
+  if (!auth.success) throw new Error(['user_cancel', 'system_cancel', 'app_cancel'].includes(auth.error)
+    ? 'Unlock cancelled. Your Vault is still locked.'
+    : `Device authentication could not complete (${auth.error}). Check Face ID or fingerprint and passcode settings, then try again.`);
   let raw = await SecureStore.getItemAsync(KEY, options);
   if (!raw) {
     if (await storage.pointer() || (directory().exists && directory().list().length)) throw new Error('The key for this Vault is unavailable. Existing files have been kept; no replacement key was created.');

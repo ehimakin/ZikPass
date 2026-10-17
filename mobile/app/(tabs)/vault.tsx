@@ -1,17 +1,18 @@
+import { ResourceGate } from '../../src/auth/gates';
 import { useEffect, useState } from 'react';
 import { Alert, AppState, Image, Modal, View } from 'react-native';
 import { File, Directory, Paths } from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Sharing from 'expo-sharing';
-import { Action, Badge, Body, ErrorText, Heading, Panel, Screen, VaultGate } from '../../src/components/ui';
+import { Action, Badge, Body, ErrorText, Heading, Panel, Screen } from '../../src/components/ui';
 import { useVault } from '../../src/vault/context';
 import { clearExportCopies } from '../../src/vault/native-storage';
 import type { LocalDocument } from '../../src/vault/repository';
 export default function VaultScreen() {
-  return <Screen title="Vault" subtitle="Your documents. Kept close."><VaultGate><Documents /></VaultGate></Screen>;
+  return <ResourceGate resource="vault"><Screen title="Vault" subtitle="Your documents. Kept close."><Documents /></Screen></ResourceGate>;
 }
 function Documents() {
-  const { vault, index, refresh, lock } = useVault();
+  const { vault, index, refresh } = useVault();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [image, setImage] = useState<string | null>(null);
@@ -60,8 +61,8 @@ function Documents() {
     <Action busy={busy} onPress={() => void add()}>Add a document</Action>
     <ErrorText>{error}</ErrorText>
     {!index.documents.length ? <Panel><Heading>A place for the important things.</Heading><Body>Add a photo or PDF. Files are encrypted on this device and are not uploaded.</Body></Panel> : index.documents.map(document => <Panel key={document.id}><Badge>Stored locally · Not verified</Badge><Heading>{document.name}</Heading><Body>{Math.max(1, Math.round(document.size / 1024))} KB · {new Date(document.addedAt).toLocaleDateString()}</Body>{document.mime.startsWith('image/') ? <Action secondary disabled={busy} onPress={() => void open(document, false)}>View image</Action> : null}<Action secondary disabled={busy} onPress={() => Alert.alert('Share a copy?', 'The app you choose will receive a decrypted copy of this document.', [{ text: 'Cancel', style: 'cancel' }, { text: 'Continue', onPress: () => void open(document, true) }])}>Share a copy</Action><Action secondary disabled={busy} onPress={() => remove(document)}>Remove</Action></Panel>)}
+    <Body>Keep your originals. Backup and recovery are not available yet.</Body>
     <Body>PDFs can be opened through “Share a copy”. On-device text extraction is not connected in the native app yet.</Body>
-    <Action secondary onPress={lock}>Lock Vault</Action>
     <Modal visible={Boolean(image)} onRequestClose={() => setImage(null)} animationType="fade"><View style={{ flex: 1, backgroundColor: '#17251e', padding: 24, paddingTop: 70 }}>{image ? <Image source={{ uri: image }} resizeMode="contain" style={{ flex: 1 }} accessibilityLabel="Your saved document" alt="Your saved document" /> : null}<Action onPress={() => setImage(null)}>Close</Action></View></Modal>
   </>;
 }
