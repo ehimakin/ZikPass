@@ -4,6 +4,7 @@ import { clientIp, supportBody, supportFailure, supportJson } from '@/lib/server
 import { createTicket } from '@/lib/server/support/service';
 import { supportRateLimit, supportStorageReady } from '@/lib/server/support/store';
 export const runtime = 'nodejs';
+export const maxDuration = 60;
 export function GET() { return supportJson({ available: supportStorageReady() }); }
 export async function POST(request: NextRequest) {
   try {

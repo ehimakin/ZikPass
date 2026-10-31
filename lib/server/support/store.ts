@@ -1,16 +1,22 @@
+import { databaseTransaction } from './database';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { getRuntimeDataDir } from '@/lib/server/runtime-paths';
+import type { Delivery } from './delivery';
+import type { ErrorReportRecord } from '@/lib/shared/types';
 import type { AuditEvent, Bug, Ticket } from '@/lib/shared/support/model';
-export type AdminSession = { tokenHash: string; csrf: string; actor: string; configHash: string; createdAt: number; lastSeenAt: number; expiresAt: number };
-export type SupportStore = { storeAccess?: Record<string, { salt: string; hash: string; version: string }>; version: 1; ingestedErrorIds: string[]; tickets: Ticket[]; bugs: Bug[]; audit: AuditEvent[]; sessions: AdminSession[]; limits: Record<string, { count: number; until: number }> };
+export type AdminSession = { role?: 'admin' | 'support' | 'engineer'; tokenHash: string; csrf: string; actor: string; configHash: string; createdAt: number; lastSeenAt: number; expiresAt: number };
+export type SupportStore = { deliveries?: Delivery[]; errorReports?: ErrorReportRecord[]; storeAccess?: Record<string, { salt: string; hash: string; version: string }>; version: 1; ingestedErrorIds: string[]; tickets: Ticket[]; bugs: Bug[]; audit: AuditEvent[]; sessions: AdminSession[]; limits: Record<string, { count: number; until: number }> };
 let queue: Promise<unknown> = Promise.resolve();
 export function supportStorageReady(): boolean {
+  if (process.env.ZIK_SUPPORT_DATABASE_URL?.trim()) return true;
+  if (process.env.VERCEL) return false;
   return !((process.env.NODE_ENV === 'production' || process.env.VERCEL || process.env.LAMBDA_TASK_ROOT || process.env.AWS_REGION) && (!process.env.ZIK_RUNTIME_DATA_DIR?.trim() || process.env.ZIK_SUPPORT_STORAGE_DURABLE !== 'true'));
 }
 export class SupportError extends Error { constructor(message: string, public status = 400) { super(message); } }
 export function supportTransaction<T>(work: (data: SupportStore) => T | Promise<T>): Promise<T> {
+  if (process.env.ZIK_SUPPORT_DATABASE_URL?.trim()) return databaseTransaction(work);
   const run = queue.then(async () => {
     if (!supportStorageReady()) throw new SupportError('Durable support storage is not configured. Please try again later.', 503);
     const file = path.join(getRuntimeDataDir(), 'support-store.json');

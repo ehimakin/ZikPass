@@ -4,6 +4,8 @@ import { supportRateLimit } from "@/lib/server/support/store";
 import { NextRequest, NextResponse } from "next/server";
 import { reportError } from "@/lib/server/error-reports";
 
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
   try {
     sameOrigin(request);

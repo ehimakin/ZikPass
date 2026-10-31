@@ -29,6 +29,7 @@ const NAV: NavItem[] = [
 
 export function SiteNavigation({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const focusedHandoff = pathname === "/dashboard/store/purchase" || pathname === "/dashboard/customer/activate";
   const shellRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const active = pathname === "/home" ? "home" : pathname === "/find" ? "find"
@@ -42,7 +43,8 @@ export function SiteNavigation({ children }: { children: ReactNode }) {
     const observer = new ResizeObserver(updateHeight);
     observer.observe(nav);
     return () => observer.disconnect();
-  }, []);
+  }, [focusedHandoff]);
+  if (focusedHandoff) return <div className="zk-surface min-h-[100dvh]"><OfflineBanner />{children}</div>;
   return <div ref={shellRef} className="zk-surface min-h-[100dvh]" style={{ paddingBottom: "var(--zk-bottom-nav-height, 64px)" }}>
       <a
         href="#zk-main"

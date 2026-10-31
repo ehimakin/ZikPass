@@ -14,7 +14,7 @@ export type PartnerApproval = { status: 'approved'; approvedAt: string; approved
 export type Ticket = {
   id: string; accessHash: string; creationId: string; subject: string; category: Category; priority: Priority; status: TicketStatus;
   partnerApproval?: PartnerApproval;
-  contactEmail?: string; errorReference?: string; diagnostic?: string; assignee: string; resolution: string; recoveryOutcome: RecoveryOutcome;
+  emailNotifications?: boolean; contactEmail?: string; errorReference?: string; diagnostic?: string; assignee: string; resolution: string; recoveryOutcome: RecoveryOutcome;
   createdAt: string; updatedAt: string; dueAt: string; firstResponseAt?: string; closedAt?: string; version: number; bugId?: string; messages: SupportMessage[];
 };
 export type PublicTicket = Pick<Ticket, 'id' | 'subject' | 'category' | 'status' | 'resolution' | 'createdAt' | 'updatedAt' | 'version' | 'messages'>;
@@ -25,6 +25,6 @@ export type Bug = {
   fixSummary: string; verification: string; changeUrl: string; createdAt: string; updatedAt: string; lastSeenAt: string; version: number;
 };
 export type AuditEvent = { id: string; at: string; actor: string; action: string; target: string; changes: string[] };
-export type Workspace = { tickets: AdminTicket[]; bugs: Bug[]; audit: AuditEvent[]; storageReady: boolean; recoveryAvailable: boolean; generatedAt: string };
+export type Workspace = { notifications?: { enabled: boolean; email: boolean; sms: boolean; pending: number; accepted: number; failed: number; uncertain: number }; deliveries?: { id: string; target: string; channel: string; status: string; attempts: number; createdAt: string; error?: string }[]; tickets: AdminTicket[]; bugs: Bug[]; audit: AuditEvent[]; storageReady: boolean; recoveryAvailable: boolean; generatedAt: string };
 export function label(value: string) { return value.replaceAll('_', ' ').replace(/^./, c => c.toUpperCase()); }
 export function isActive(status: TicketStatus) { return status !== 'resolved' && status !== 'closed'; }

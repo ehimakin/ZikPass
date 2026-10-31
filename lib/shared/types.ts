@@ -158,6 +158,8 @@ export interface PhysicalVerificationState {
 
 export interface PhysicalStoreSessionRecord extends PhysicalStoreContext {
   purchase_sale?: {
+    product?: "physical_card" | "digital_voucher";
+    customer_connected_at?: string;
     token_hash: string;
     amount_minor: number;
     currency: string;

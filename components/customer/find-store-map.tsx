@@ -1,10 +1,11 @@
 "use client";
 import { useState } from 'react';
 import { StoreLocationPicker } from './store-location-picker';
-import { Card, StatusBadge } from './ui';
+import type { Route } from 'next';
+import { ButtonLink, Card, StatusBadge } from './ui';
 import { ZIK_STORES } from '@/lib/shared/stores';
 const services = { physical_id_check: 'In-person ID checks', retail_card: 'Physical Zik Cards', device_extension: 'Device linking' };
-export function FindStoreMap() {
+export function FindStoreMap({ product = "digital" }: { product?: "digital" | "card" }) {
   const [selected, setSelected] = useState(ZIK_STORES[0].id);
   const [query, setQuery] = useState('');
   const store = ZIK_STORES.find(item => item.id === selected)!;
@@ -18,9 +19,12 @@ export function FindStoreMap() {
       {matches.length === 0 && <p role="status" className="text-sm" data-local-edit={process.env.NODE_ENV === "development" ? "ve-8163a0feac89-2" : undefined}>No configured stores match. Try a different name or area, or search for a place on the map.</p>}
     </section>
     <section aria-label="Selected store" className="rounded-xl border border-[var(--zk-line)] bg-[var(--zk-card)] p-5">
-      <h2 className="text-xl font-bold">{store.name}</h2><p className="mt-2 text-sm">{store.addressLine}, {store.city}, {store.postcode}</p>
-      <p className="mt-3 text-sm font-semibold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-8163a0feac89-3" : undefined}>Demo services</p><ul className="mt-2 list-inside list-disc text-sm">{store.services.map(service => <li key={service}>{services[service]}</li>)}</ul>
-      <p className="mt-3 text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-8163a0feac89-4" : undefined}>Distances are straight-line estimates, not journey times.</p>
+      <h2 className="text-xl font-bold">{store.name}</h2>
+      <ButtonLink className="mt-4" size="lg" href={`/get-pass?${new URLSearchParams({ product, store_id: store.id }).toString()}` as Route}>
+        {product === "card" ? "Continue with Zik Card" : "Continue"}
+      </ButtonLink><p className="mt-2 text-sm">{store.addressLine}, {store.city}, {store.postcode}</p>
+      <p className="mt-3 text-sm font-semibold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-8163a0feac89-3" : undefined}>{"Demo services"}</p><ul className="mt-2 list-inside list-disc text-sm">{store.services.map(service => <li key={service}>{services[service]}</li>)}</ul>
+      <p className="mt-3 text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-8163a0feac89-4" : undefined}>{"Distances are straight-line estimates, not journey times."}</p>
     </section>
   </div>;
 }

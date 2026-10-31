@@ -9,8 +9,22 @@ const TTL = 8 * 60 * 60_000;
 const IDLE = 30 * 60_000;
 export const secretHash = (value: string) => createHash('sha256').update(value).digest('hex');
 export function safeEqual(a: string, b: string): boolean { const aa = Buffer.from(a), bb = Buffer.from(b); return aa.length === bb.length && timingSafeEqual(aa, bb); }
-export function adminConfigured() { return /^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$/.test(process.env.ZIK_ADMIN_PASSWORD_HASH ?? '') && Boolean(process.env.ZIK_ADMIN_USERNAME?.trim()); }
-function configHash() { return secretHash(`${process.env.ZIK_ADMIN_USERNAME}:${process.env.ZIK_ADMIN_PASSWORD_HASH}`); }
+type StaffAccount = { username: string; passwordHash: string; role: 'admin' | 'support' | 'engineer' };
+function staffAccounts(): StaffAccount[] {
+  const validHash = (value: unknown) => typeof value === 'string' && /^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$/.test(value);
+  if (process.env.ZIK_STAFF_ACCOUNTS) {
+    try {
+      const accounts = JSON.parse(process.env.ZIK_STAFF_ACCOUNTS);
+      if (!Array.isArray(accounts) || accounts.length < 1 || accounts.length > 50 || accounts.some(a => !a || typeof a.username !== 'string' || !a.username.trim() || a.username.length > 80 || !validHash(a.passwordHash) || !['admin', 'support', 'engineer'].includes(a.role)) || new Set(accounts.map(a => a.username)).size !== accounts.length) return [];
+      return accounts;
+    } catch { return []; }
+  }
+  return validHash(process.env.ZIK_ADMIN_PASSWORD_HASH) && process.env.ZIK_ADMIN_USERNAME?.trim()
+    ? [{ username: process.env.ZIK_ADMIN_USERNAME.trim(), passwordHash: process.env.ZIK_ADMIN_PASSWORD_HASH!, role: 'admin' }] : [];
+}
+export function adminConfigured() { return staffAccounts().length > 0; }
+function configHash() { return secretHash(JSON.stringify(staffAccounts())); }
+
 export async function hashAdminPassword(password: string): Promise<string> {
   if (password.length < 14 || password.length > 256) throw new SupportError('Use an admin password between 14 and 256 characters.');
   const salt = randomBytes(16).toString('hex');
@@ -27,19 +41,22 @@ export async function loginAdmin(username: string, password: string, ip: string)
     await supportRateLimit(`admin-login:${secretHash(ip)}`, 5, 15 * 60_000);
     await supportRateLimit('admin-login:global', 40, 15 * 60_000);
   }
-  const [, salt, expected] = process.env.ZIK_ADMIN_PASSWORD_HASH!.split(':');
+  const accounts = staffAccounts();
+  const account = accounts.find(a => safeEqual(a.username, username));
+  const [, salt, expected] = (account ?? accounts[0]).passwordHash.split(':');
   const actual = (await scrypt(password.slice(0, 257), salt, 64) as Buffer).toString('hex');
-  if (password.length > 256 || !safeEqual(actual, expected) || !safeEqual(username, process.env.ZIK_ADMIN_USERNAME!.trim())) {
+  if (password.length > 256 || !safeEqual(actual, expected) || !account) {
     await supportTransaction(data => { audit(data, 'anonymous', 'admin.login_failed', 'admin'); });
     throw new SupportError('Admin credentials were not recognised.', 401);
   }
   const token = randomBytes(32).toString('base64url');
-  const session = { tokenHash: secretHash(token), csrf: randomBytes(32).toString('base64url'), actor: process.env.ZIK_ADMIN_USERNAME!.trim(), configHash: configHash(), createdAt: Date.now(), lastSeenAt: Date.now(), expiresAt: Date.now() + TTL };
+  const session = { tokenHash: secretHash(token), csrf: randomBytes(32).toString('base64url'), actor: account!.username, role: account!.role, configHash: configHash(), createdAt: Date.now(), lastSeenAt: Date.now(), expiresAt: Date.now() + TTL };
   await supportTransaction(data => {
-    data.sessions = data.sessions.filter(s => s.expiresAt > Date.now() && Date.now() - s.lastSeenAt < IDLE).slice(-9);
+    const active = data.sessions.filter(s => s.expiresAt > Date.now() && Date.now() - s.lastSeenAt < IDLE);
+    data.sessions = [...active.filter(s => s.actor !== session.actor), ...active.filter(s => s.actor === session.actor).slice(-9)].slice(-499);
     data.sessions.push(session); audit(data, session.actor, 'admin.login', 'admin');
   });
-  return { token, actor: session.actor, csrf: session.csrf, expiresAt: session.expiresAt };
+  return { token, actor: session.actor, role: session.role ?? 'admin', csrf: session.csrf, expiresAt: session.expiresAt };
 }
 export async function readAdminSession(token: string | undefined) {
   if (!adminConfigured() || !token || !/^[A-Za-z0-9_-]{43}$/.test(token)) return null;
@@ -49,7 +66,7 @@ export async function readAdminSession(token: string | undefined) {
     const session = data.sessions.find(s => safeEqual(s.tokenHash, secretHash(token)));
     if (!session) return null;
     session.lastSeenAt = now;
-    return { actor: session.actor, csrf: session.csrf, expiresAt: session.expiresAt };
+    return { actor: session.actor, role: session.role ?? 'admin', csrf: session.csrf, expiresAt: session.expiresAt };
   });
 }
 export function sameOrigin(request: NextRequest) {

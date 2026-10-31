@@ -11,7 +11,7 @@ import { ZikLogoMark } from "@/components/zik-logo";
 const TOPICS = [
   { title: "Recover my account", answer: "Lost your phone and Zik Card? If you saved your 24-word recovery phrase and enabled a backup, open the recovery screen on your replacement device. Only enter your words there. Support cannot retrieve them or decrypt your backup.", href: "/account-recovery/restore", action: "Open recovery" },
   { title: "Something isn’t working", answer: "Keep your Vault and browser storage intact. Note what happened, the steps you tried and any error reference, then create a private help ticket so the team can investigate.", href: "/help#contact-support", action: "Create a help ticket" },
-  { title: "How support works", answer: "The Zik team can help through a private ticket. Save your ticket link and check it for replies. Automated chat and email notifications are not available yet.", href: "/help/policy", action: "Read the support policy" }
+  { title: "How support works", answer: "The Zik team can help through a private ticket. Save your ticket link and check it for replies. Optional email alerts are available when enabled; this assistant provides saved help tips.", href: "/help/policy", action: "Read the support policy" }
 ] as const;
 
 function ChatIcon({ className }: { className?: string }) {

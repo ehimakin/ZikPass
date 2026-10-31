@@ -70,3 +70,28 @@ describe("clerk-first purchase sale", () => {
     await expect(claimPurchaseSale(sale.token, (await generateKeyPair()).publicKeyJwk)).rejects.toThrow();
   });
 });
+
+describe("digital voucher QR connection", () => {
+  it("records arrival without claiming or issuing a credential, and exposes progress to the clerk", async () => {
+    const { connectPurchaseSale } = await import("@/lib/server/purchase-sale");
+    const sale = await startPurchaseSale(clerk.storeId, clerk.verifierToken, "digital_voucher");
+    const { getPassPrice } = await import("@/lib/shared/payment-config");
+    expect(sale.amountMinor).toBe(getPassPrice().minor);
+    expect(sale.customerConnected).toBe(false);
+    await expect(connectPurchaseSale(sale.token)).rejects.toThrow("not ready");
+    await updatePurchaseSale({ ...clerk, sessionId: sale.id, action: "confirm_id" });
+    await updatePurchaseSale({ ...clerk, sessionId: sale.id, action: "confirm_payment", method: "cash" });
+    const [first, retry] = await Promise.all([connectPurchaseSale(sale.token), connectPurchaseSale(sale.token)]);
+    expect(first).toEqual(retry);
+    expect(first.connected).toBe(true);
+    const status = await updatePurchaseSale({ ...clerk, sessionId: sale.id, action: "status" });
+    expect(status).toMatchObject({ customerConnected: true, claimed: false, status: "open", product: "digital_voucher" });
+    await expect(claimPurchaseSale(sale.token, (await generateKeyPair()).publicKeyJwk)).rejects.toThrow("connection only");
+    await runPurchaseSaleTransaction(data => { data.physical_sessions.find(s => s.session_id === sale.id)!.expires_at = "2000-01-01T00:00:00Z"; });
+    await expect(connectPurchaseSale(sale.token)).rejects.toThrow("expired");
+    const replacement = await updatePurchaseSale({ ...clerk, sessionId: sale.id, action: "renew" });
+    expect(replacement.customerConnected).toBe(false);
+    await expect(connectPurchaseSale(sale.token)).rejects.toThrow("not recognised");
+    expect((await connectPurchaseSale((replacement as { token: string }).token)).connected).toBe(true);
+  });
+});

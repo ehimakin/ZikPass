@@ -1,3 +1,5 @@
+import { scheduleSupportWork } from './events';
+import { customerNotification, staffNotification, deliveryConfiguration } from './delivery';
 import { randomUUID, createHash } from 'node:crypto';
 import { validEmail } from '@/lib/server/mailer';
 import { getErrorReports } from '@/lib/server/error-reports';
@@ -6,6 +8,19 @@ import { containsSupportSecret, diagnosticPath, safeDiagnostic } from '@/lib/sha
 import { CATEGORIES, TICKET_STATUSES, PRIORITIES, BUG_STATUSES, RECOVERY_OUTCOMES, RESPONSE_HOURS, type Ticket, type PublicTicket, type AdminTicket, type Bug, type Workspace, type Priority } from '@/lib/shared/support/model';
 import { audit, supportTransaction, SupportError, supportStorageReady, type SupportStore } from './store';
 import { safeEqual, secretHash } from './auth';
+
+
+async function eventTransaction<T>(work: (data: SupportStore) => T | Promise<T>): Promise<T> {
+  let ids: string[] = [];
+  const result = await supportTransaction(async data => {
+    const before = new Set((data.deliveries ?? []).map(d => d.id));
+    const result = await work(data);
+    ids = (data.deliveries ?? []).filter(d => !before.has(d.id)).map(d => d.id);
+    return result;
+  });
+  scheduleSupportWork(ids);
+  return result;
+}
 
 type Input = Record<string, unknown>;
 export function inputObject(input: unknown): Input { if (!input || typeof input !== 'object' || Array.isArray(input)) throw new SupportError('Invalid request.'); return input as Input; }
@@ -38,23 +53,23 @@ export async function createTicket(value: unknown) {
   const reference = text(input.errorReference, 'Error reference', 80, false);
   if (reference && !/^err_[A-Za-z0-9_-]+$/.test(reference)) throw new SupportError('Use the error reference shown by Zik, or leave it blank.');
   const diagnostic = text(input.diagnostic, 'Diagnostics', 500, false);
-  return supportTransaction(data => {
+  return eventTransaction(data => {
     const existing = data.tickets.find(t => t.creationId === creationId);
     if (existing) { if (!safeEqual(existing.accessHash, secretHash(token))) throw new SupportError('Invalid duplicate request.', 409); return publicView(existing); }
     if (data.tickets.length >= 10000) throw new SupportError('The help desk is temporarily at capacity. Please try again later.', 503);
     const now = new Date().toISOString();
     const priority = category === 'recovery' || category === 'privacy' ? 'high' : 'normal';
-    const ticket: Ticket = { id: `help_${randomUUID()}`, accessHash: secretHash(token), creationId, subject, category, contactEmail: email || undefined, errorReference: reference || undefined, diagnostic: diagnostic || undefined,
+    const ticket: Ticket = { id: `help_${randomUUID()}`, accessHash: secretHash(token), creationId, subject, category, emailNotifications: input.emailNotifications === true && Boolean(email), contactEmail: email || undefined, errorReference: reference || undefined, diagnostic: diagnostic || undefined,
       status: 'open', priority, assignee: '', resolution: '', recoveryOutcome: 'not_reviewed', createdAt: now, updatedAt: now, dueAt: new Date(Date.now() + RESPONSE_HOURS[priority] * 3600000).toISOString(), version: 1,
       messages: [{ id: randomUUID(), requestId: creationId, author: 'customer', authorName: 'Customer', visibility: 'public', body, createdAt: now }] };
-    data.tickets.push(ticket); audit(data, 'customer', 'ticket.created', ticket.id, [category]);
+    data.tickets.push(ticket); staffNotification(data, `created:${ticket.id}`, ticket.id, priority === 'high'); audit(data, 'customer', 'ticket.created', ticket.id, [category]);
     return publicView(ticket);
   });
 }
 export async function readCustomerTicket(id: string, token: string) { return supportTransaction(data => publicView(authorizedTicket(data, id, token))); }
 export async function replyToTicket(id: string, token: string, value: unknown) {
   const input = inputObject(value), body = text(input.body, 'Reply', 6000), requestId = uuid(input.requestId);
-  return supportTransaction(data => {
+  return eventTransaction(data => {
     const ticket = authorizedTicket(data, id, token);
     const duplicate = ticket.messages.find(m => m.requestId === requestId);
     if (duplicate) { if (duplicate.author !== 'customer' || duplicate.body !== body) throw new SupportError('Reply identifier already used.', 409); return publicView(ticket); }
@@ -64,6 +79,7 @@ export async function replyToTicket(id: string, token: string, value: unknown) {
     ticket.messages.push({ id: randomUUID(), requestId, author: 'customer', authorName: 'Customer', visibility: 'public', body, createdAt: now });
     if (ticket.status === 'resolved' || ticket.status === 'closed' || ticket.status === 'waiting_customer') { ticket.status = 'open'; delete ticket.closedAt; ticket.resolution = ''; }
     ticket.updatedAt = now; ticket.version++;
+    staffNotification(data, `reply:${requestId}`, id, ticket.priority === 'urgent');
     audit(data, 'customer', 'ticket.reply', id);
     return publicView(ticket);
   });
@@ -72,7 +88,7 @@ export async function replyToTicket(id: string, token: string, value: unknown) {
 /** Approve an existing partnership enquiry atomically with its customer reply and audit event. */
 export async function approvePartnerOnboarding(actor: string, value: unknown): Promise<AdminTicket> {
   const input = inputObject(value);
-  return supportTransaction(data => {
+  return eventTransaction(data => {
     const ticket = data.tickets.find(item => item.id === input.id);
     if (!ticket) throw new SupportError('Ticket not found.', 404);
     if (ticket.category !== 'store_partner') throw new SupportError('Only store partnership requests can be approved.', 400);
@@ -92,6 +108,7 @@ export async function approvePartnerOnboarding(actor: string, value: unknown): P
     ticket.messages.push({ id: randomUUID(), requestId: randomUUID(), author: 'admin', authorName: actor,
       visibility: 'public', createdAt: now,
       body: ticket.resolution });
+    customerNotification(data, ticket);
     audit(data, actor, 'partner.onboarding_approved', ticket.id, ['partnerApproval', 'status', 'resolution', 'assignee']);
     return adminView(ticket);
   });
@@ -99,7 +116,7 @@ export async function approvePartnerOnboarding(actor: string, value: unknown): P
 
 export async function updateTicket(actor: string, value: unknown): Promise<AdminTicket> {
   const input = inputObject(value);
-  return supportTransaction(data => {
+  return eventTransaction(data => {
     const ticket = data.tickets.find(t => t.id === input.id);
     if (!ticket) throw new SupportError('Ticket not found.', 404);
     if (input.action === 'message') {
@@ -112,6 +129,7 @@ export async function updateTicket(actor: string, value: unknown): Promise<Admin
       ticket.messages.push({ id: randomUUID(), requestId, author: 'admin', authorName: actor, visibility, body, createdAt: now });
       if (visibility === 'public') { ticket.firstResponseAt ??= now; if (ticket.status === 'open') ticket.status = 'waiting_customer'; }
       ticket.updatedAt = now; ticket.version++;
+      if (visibility === 'public') customerNotification(data, ticket);
       audit(data, actor, visibility === 'public' ? 'ticket.public_reply' : 'ticket.internal_note', ticket.id);
       return adminView(ticket);
     }
@@ -121,10 +139,13 @@ export async function updateTicket(actor: string, value: unknown): Promise<Admin
     if ((nextStatus === 'resolved' || nextStatus === 'closed') && resolution.length < 10) throw new SupportError('Add a customer-visible resolution of at least 10 characters before resolving or closing.');
     const recoveryOutcome = choice(input.recoveryOutcome, RECOVERY_OUTCOMES);
     if (ticket.category !== 'recovery' && recoveryOutcome !== 'not_reviewed') throw new SupportError('Recovery outcomes apply only to recovery tickets.');
+    const notifyCustomer = ticket.status !== nextStatus || ticket.resolution !== resolution;
     ticket.status = nextStatus; ticket.priority = nextPriority; ticket.assignee = assignee; ticket.resolution = resolution; ticket.recoveryOutcome = recoveryOutcome;
     ticket.dueAt = new Date(Date.parse(ticket.createdAt) + RESPONSE_HOURS[nextPriority] * 3600000).toISOString();
     if (nextStatus === 'closed') ticket.closedAt ??= new Date().toISOString(); else delete ticket.closedAt;
     ticket.updatedAt = new Date().toISOString(); ticket.version++;
+    if (notifyCustomer) customerNotification(data, ticket);
+    if (nextPriority === 'urgent') staffNotification(data, `urgent:${ticket.id}`, ticket.id, true);
     audit(data, actor, 'ticket.updated', ticket.id, ['status', 'priority', 'assignee', 'resolution', 'recoveryOutcome']);
     return adminView(ticket);
   });
@@ -165,9 +186,9 @@ export async function updateBug(actor: string, value: unknown) {
   });
 }
 
-export async function syncErrorReports(actor: string) {
+export async function syncErrorReports(actor: string, dispatch = true) {
   const reports = (await getErrorReports()).slice(0, 1000).reverse();
-  return supportTransaction(data => {
+  return (dispatch ? eventTransaction : supportTransaction)(data => {
     data.ingestedErrorIds ??= [];
     let count = 0;
     for (const report of reports) {
@@ -176,9 +197,9 @@ export async function syncErrorReports(actor: string) {
       const route = diagnosticPath(report.route), operation = safeDiagnostic(report.operation, 100);
       const fingerprint = createHash('sha256').update(`${title.replace(/\b\d+\b/g, '#')}|${route}|${operation}`).digest('hex');
       let bug = data.bugs.find(b => b.fingerprint === fingerprint);
-      if (!bug) { if (data.bugs.length >= 10000) break; bug = { ...newBug(title, 'normal'), fingerprint, route, operation }; data.bugs.push(bug); }
+      if (!bug) { if (data.bugs.length >= 10000) break; bug = { ...newBug(title, 'normal'), fingerprint, route, operation }; data.bugs.push(bug); staffNotification(data, `bug:${bug.id}`, bug.id); }
       bug.occurrences++; bug.references = [...bug.references, report.reference].slice(-20); bug.lastSeenAt = report.created_at; bug.updatedAt = new Date().toISOString(); bug.version++;
-      if (bug.status === 'resolved') { bug.status = 'investigating'; audit(data, actor, 'bug.recurred', bug.id); }
+      if (bug.status === 'resolved') { bug.status = 'investigating'; audit(data, actor, 'bug.recurred', bug.id); staffNotification(data, `recurred:${report.reference}`, bug.id, true); }
       data.ingestedErrorIds.push(report.reference); count++;
     }
     data.ingestedErrorIds = data.ingestedErrorIds.slice(-20000);
@@ -187,13 +208,31 @@ export async function syncErrorReports(actor: string) {
   });
 }
 export async function getWorkspace(): Promise<Workspace> {
-  return supportTransaction(data => ({ tickets: data.tickets.map(adminView).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)), bugs: [...data.bugs].sort((a, b) => b.lastSeenAt.localeCompare(a.lastSeenAt)), audit: data.audit.slice(-500).reverse(), storageReady: supportStorageReady(), recoveryAvailable: accountRecoveryAvailable(), generatedAt: new Date().toISOString() }));
+  return supportTransaction(data => {
+    const deliveries = data.deliveries ?? [];
+    return {
+      notifications: {
+        ...deliveryConfiguration(),
+        pending: deliveries.filter(d => ['pending', 'sending'].includes(d.status)).length,
+        accepted: deliveries.filter(d => d.status === 'accepted').length,
+        failed: deliveries.filter(d => d.status === 'failed').length,
+        uncertain: deliveries.filter(d => d.status === 'uncertain').length,
+      },
+      deliveries: deliveries.slice(-100).reverse().map(({ id, target, channel, status, attempts, createdAt, error }) => ({ id, target, channel, status, attempts, createdAt, error })),
+      tickets: data.tickets.map(adminView).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
+      bugs: [...data.bugs].sort((a, b) => b.lastSeenAt.localeCompare(a.lastSeenAt)),
+      audit: data.audit.slice(-500).reverse(),
+      storageReady: supportStorageReady(), recoveryAvailable: accountRecoveryAvailable(),
+      generatedAt: new Date().toISOString(),
+    };
+  });
 }
 export async function applyRetention(actor: string) {
   return supportTransaction(data => {
     const before = data.tickets.length;
     data.tickets = data.tickets.filter(t => !(t.status === 'closed' && t.closedAt && Date.now() - Date.parse(t.closedAt) > 90 * 86400000));
     const ids = new Set(data.tickets.map(t => t.id));
+    data.deliveries = (data.deliveries ?? []).filter(d => (!d.target.startsWith('help_') || ids.has(d.target)) && Date.now() - Date.parse(d.createdAt) < 30 * 86400000);
     for (const bug of data.bugs) bug.ticketIds = bug.ticketIds.filter(id => ids.has(id));
     data.audit = data.audit.filter(event => Date.now() - Date.parse(event.at) < 180 * 86400000);
     audit(data, actor, 'retention.applied', 'support', [`${before - data.tickets.length} closed tickets removed`]);

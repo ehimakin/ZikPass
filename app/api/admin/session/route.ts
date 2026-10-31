@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   try {
     sameOrigin(request); const body = await supportBody(request);
     const session = await loginAdmin(typeof body.username === 'string' ? body.username.slice(0, 80) : '', typeof body.password === 'string' ? body.password : '', clientIp(request));
-    const response = supportJson({ actor: session.actor, csrf: session.csrf, expiresAt: session.expiresAt });
+    const response = supportJson({ actor: session.actor, role: session.role, csrf: session.csrf, expiresAt: session.expiresAt });
     response.cookies.set(ADMIN_COOKIE, session.token, adminCookieOptions(request.nextUrl.protocol === 'https:')); return response;
   } catch (error) { return supportFailure(error); }
 }

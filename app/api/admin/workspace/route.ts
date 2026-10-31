@@ -1,15 +1,19 @@
+import { processDeliveries } from '@/lib/server/support/delivery';
 import { NextRequest } from 'next/server';
 import { requireAdmin } from '@/lib/server/support/auth';
 import { supportBody, supportFailure, supportJson } from '@/lib/server/support/http';
 import { approvePartnerOnboarding, applyRetention, createOrLinkBug, getWorkspace, syncErrorReports, updateBug, updateTicket } from '@/lib/server/support/service';
 import { SupportError } from '@/lib/server/support/store';
 export const runtime = 'nodejs';
+export const maxDuration = 60;
 export async function GET(request: NextRequest) {
   try { await requireAdmin(request); return supportJson(await getWorkspace()); } catch (error) { return supportFailure(error); }
 }
 export async function POST(request: NextRequest) {
   try {
     const session = await requireAdmin(request, true); const body = await supportBody(request);
+    if (['retention', 'send_notifications'].includes(String(body.action)) && session.role !== 'admin') throw new SupportError('Only an administrator can perform this action.', 403);
+    if (body.action === 'send_notifications') return supportJson(await processDeliveries());
     if (body.action === 'approve_partner') return supportJson(await approvePartnerOnboarding(session.actor, body));
     if (body.action === 'update_ticket') return supportJson(await updateTicket(session.actor, { ...body, action: 'update' }));
     if (body.action === 'reply_ticket') return supportJson(await updateTicket(session.actor, { ...body, action: 'message' }));

@@ -225,9 +225,9 @@ export function OnboardingFlow({ price, storeId: storeIdProp, initialEnrollment 
       <Card className="p-5">
         <p className="text-[15px] font-bold text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-faf71124d2d2-1" : undefined}>Choose a store first</p>
         <p className="mt-1.5 text-[14px] text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-faf71124d2d2-2" : undefined}>
-          Pick where you&rsquo;ll get verified in person, then come back here.
+          Choose where you&rsquo;ll get verified in person to continue.
         </p>
-        <ButtonLink href={"/find" as Route} className="mt-4">
+        <ButtonLink href={"/find?product=digital" as Route} className="mt-4">
           Choose a store
         </ButtonLink>
       </Card>
