@@ -1,3 +1,5 @@
+import { SiteNavigation } from "@/components/site-navigation";
+import { LocalVisualEditor } from "@/devtools/visual-editor/local-visual-editor";
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
@@ -12,10 +14,13 @@ const manrope = Manrope({
   variable: "--font-manrope"
 });
 
+// Middleware supplies a fresh CSP nonce for every document request.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Zik Pass",
   description:
-    "Get a reusable age pass in person, then prove you are old enough online without sharing your ID. Prototype.",
+    "Your proof of age, in your pocket. Explore ZikPass, physical Zik Cards and your private document Vault.",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
@@ -35,23 +40,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={manrope.variable}>
       <body>
-        {process.env.NODE_ENV === "development" ? (
-          <script dangerouslySetInnerHTML={{ __html: `
-            if ('serviceWorker' in navigator) {
-              navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                return Promise.all(registrations.filter(function(r) {
-                  return r.active && new URL(r.active.scriptURL).pathname === '/sw.js';
-                }).map(function(r) { return r.unregister(); }));
-              }).then(function() {
-                return caches.keys().then(function(keys) {
-                  return Promise.all(keys.filter(function(key) { return key.startsWith('zikpass-'); }).map(function(key) { return caches.delete(key); }));
-                });
-              }).catch(function() {});
-            }
-          ` }} />
-        ) : <PwaRegistration />}
+        <PwaRegistration />
         <GlobalErrorReporter />
-        {children}
+        <SiteNavigation>{children}</SiteNavigation>
+        {process.env.NODE_ENV === "development" && process.env.ZIK_VISUAL_EDITOR !== "false" && <LocalVisualEditor />}
       </body>
     </html>
   );

@@ -1,0 +1,169 @@
+{
+  "note": "Recorded by npm run measure:ocr from real in-browser OCR of the synthetic fixtures. Regenerate after any engine or pipeline change.",
+  "engine": "tesseract.js 7.0.0 (LSTM, eng 4.0.0_best_int) + pdfjs-dist 6.3.289",
+  "recorded_at": "2026-09-18T21:32:04.265Z",
+  "transcripts": {
+    "bank-statement-scanned.pdf": {
+      "ok": true,
+      "method": "ocr",
+      "pages": 1,
+      "rotation_applied": 0,
+      "recognition_quality": 94,
+      "error": null,
+      "text": "Harbour Mutual Bank\nCurrent account statement\nAlex Morgan Rivers\nFlat 3\n14 Harbour Lane\nBristol\nBS14TR\nStatement date 14 August 2026\nReference 40-11-92 / 87654321\nAccount name Alex Morgan Rivers\nCorrespondence address Flat 3, 14 Harbour Lane, Bristol, BS1 4TR\nClosing balance GBP 1,284.06\nThis is a synthetic specimen created for software testing. Harbour Mutual Bank is not a real bank.\nSYNTHETIC SPECIMEN - GENERATED FOR ZIK VAULT TESTS - NOT A REAL DOCUMENT\n"
+    },
+    "certificate.png": {
+      "ok": true,
+      "method": "ocr",
+      "pages": 1,
+      "rotation_applied": 0,
+      "recognition_quality": 94,
+      "error": null,
+      "text": "BRISTOL INSTITUTE OF TECHNOLOGY\nCertificate of Award\nThis is to certify that\nAlex Morgan Rivers\nhas been awarded the\nLevel 4 Diploma in Data Practice\nAwarded 6 July 2018\nRegistrar - Bristol Institute of Technology\nSYNTHETIC SPECIMEN - GENERATED FOR ZIK VAULT TESTS - NOT A REAL DOCUMENT\n"
+    },
+    "contract.pdf": {
+      "ok": true,
+      "method": "pdf_text_layer",
+      "pages": 1,
+      "rotation_applied": 0,
+      "recognition_quality": null,
+      "error": null,
+      "text": "Services Agreement \nThis agreement is made on 4 February 2025 between:\n1. Northbank Studios Ltd , a company registered in England and Wales, whose registered\no ffi ce is at 200 Quay Street, Manchester, M3 4JB (\"the Company\"); and\n2. Alex Morgan Rivers (\"the Contractor\"). \n1. Term \nThe Contractor shall provide the services from 1 March 2025 until terminated under clause\n6. \n2. Fees \nThe Company shall pay the Contractor a fee of GBP 420 per day, invoiced monthly in\narrears. \n3. Con fi dentiality \nEach party shall keep con fi dential all information disclosed under this agreement. \nSigned for the Company\nDana Whitcombe, Director\nSigned by the Contractor\nAlex Morgan Rivers \nS P E C I M E N \nS Y N T H E T I C S P E C I M E N - G E N E R AT E D F O R Z I K V A U LT T E S T S - N O T A R E A L D O C U M E N T"
+    },
+    "corrupt.pdf": {
+      "ok": false,
+      "method": null,
+      "pages": null,
+      "rotation_applied": 0,
+      "recognition_quality": null,
+      "error": "Invalid PDF structure.",
+      "text": ""
+    },
+    "council-tax-initials.png": {
+      "ok": true,
+      "method": "ocr",
+      "pages": 1,
+      "rotation_applied": 0,
+      "recognition_quality": 92,
+      "error": null,
+      "text": "Bristol City Council\nCouncil tax bill\nAlex Morgan Rivers\nFlat 3\n14 Harbour Lane\nBristol\nBS1 4TR\nIssue date 11 August 2026\nReference CT-9920-3311\nLiable person A. M. RIVERS\nProperty Flat 3, 14 Harbour Lane, Bristol, BS1 4TR\nAnnual charge GBP 1,612.00\nThis is a synthetic specimen created for software testing.\nSYNTHETIC SPECIMEN - GENERATED FOR ZIK VAULT TESTS - NOT A REAL DOCUMENT\n"
+    },
+    "driving-licence-clean.png": {
+      "ok": true,
+      "method": "ocr",
+      "pages": 1,
+      "rotation_applied": 0,
+      "recognition_quality": 86,
+      "error": null,
+      "text": "DRIVING LICENCE SYNTHETIC SPECIMEN\n1. RIVERS\n2. ALEX MORGAN\n3. 12.03.1994 BRISTOL\nPHOTO 4a. 15.06.2021\n\nNOT A REAL PERSON 4b. 15.06.2031\n4c. DVLA\n5. RIVER905124AM9AB\n8. Flat 3, 14 Harbour Lane, Bristol, BS1 4TR\n90.  AM/A/B1/B/f/k/I/n/p/q\n\nSYNTHETIC SPECIMEN - GENERATED FOR ZIK VAULT TESTS - NOT A REAL DOCUMENT\n"
+    },
+    "driving-licence-dob-conflict.png": {
+      "ok": true,
+      "method": "ocr",
+      "pages": 1,
+      "rotation_applied": 0,
+      "recognition_quality": 86,
+      "error": null,
+      "text": "DRIVING LICENCE SYNTHETIC SPECIMEN\n1. RIVERS\n2. ALEX MORGAN\n3. 12.03.1974 BRISTOL\nPHOTO 4a. 15.06.2021\n\nNOT A REAL PERSON 4b. 15.06.2031\n4c. DVLA\n5. RIVER905124AM9AB\n8. Flat 3, 14 Harbour Lane, Bristol, BS1 4TR\n90.  AM/A/B1/B/f/k/I/n/p/q\n\nSYNTHETIC SPECIMEN - GENERATED FOR ZIK VAULT TESTS - NOT A REAL DOCUMENT\n"
+    },
+    "passport-clean.heic": {
+      "ok": false,
+      "method": null,
+      "pages": null,
+      "rotation_applied": 0,
+      "recognition_quality": null,
+      "error": "The source image could not be decoded.",
+      "text": ""
+    },
+    "passport-clean.png": {
+      "ok": true,
+      "method": "ocr",
+      "pages": 1,
+      "rotation_applied": 0,
+      "recognition_quality": 92,
+      "error": null,
+      "text": "PASSPORT / PASSEPORT UNITED KINGDOM OF GREAT BRITAIN\nType / Type Code / Code\nP GBR\nPassport No. / No. du passeport Surname / Nom\n987654321 RIVERS\nPHOTO Given names / Prenoms Nationality / Nationalite\nNOT A REAL ALEX MORGAN BRITISH CITIZEN\nPERSON\nDate of birth / Date de naissance Sex / Sexe\n12 MAR / MAR 94 M\nDate of expiry / Date d expiration Authority / Autorite\n15 APR / AVR 30 HM PASSPORT OFFICE\nP<GBRRIVERS<<ALEX<MORGAN<<<<<<<<<<<<<<<<<<<<\n9876543213GBR9403121M3004157<<<<<<<<<<<<<<08\nSYNTHETIC SPECIMEN - GENERATED FOR ZIK VAULT TESTS - NOT A REAL DOCUMENT\n"
+    },
+    "passport-degraded.jpg": {
+      "ok": true,
+      "method": "ocr",
+      "pages": 1,
+      "rotation_applied": 0,
+      "recognition_quality": 92,
+      "error": null,
+      "text": "PASSPORT / PASSEPORT UNITED KINGDOM OF GREAT BRITAIN\nType / Type Code / Code\nP GBR\nPassport No. / No. du passeport Surname / Nom\n987654321 RIVERS\nPHOTO Given names / Prenoms Nationality / Nationalite\nNOT A REAL ALEX MORGAN BRITISH CITIZEN\nPERSON\nDate of birth / Date de naissance Sex / Sexe\n12 MAR / MAR 94 M\nDate of expiry / Date d expiration Authority / Autorite\n15 APR / AVR 30 HM PASSPORT OFFICE\nP<GBRRIVERS<<ALEX<MORGAN<<<<<<<<<<<<<<<<<<<<\n9876543213GBR9403121M3004157 <<<<<<<<<<<<<<08\nSYNTHETIC SPECIMEN - GENERATED FOR ZIK VAULT TESTS - NOT A REAL DOCUMENT\n"
+    },
+    "passport-expired.png": {
+      "ok": true,
+      "method": "ocr",
+      "pages": 1,
+      "rotation_applied": 0,
+      "recognition_quality": 92,
+      "error": null,
+      "text": "PASSPORT / PASSEPORT UNITED KINGDOM OF GREAT BRITAIN\nType / Type Code / Code\nP GBR\nPassport No. / No. du passeport Surname / Nom\n987654321 RIVERS\nPHOTO Given names / Prenoms Nationality / Nationalite\nNOT A REAL ALEX MORGAN BRITISH CITIZEN\nPERSON\nDate of birth / Date de naissance Sex / Sexe\n12 MAR / MAR 94 M\nDate of expiry / Date d expiration Authority / Autorite\n15 APR / AVR 20 HM PASSPORT OFFICE\nP<GBRRIVERS<<ALEX<MORGAN<<<<<<<<<<<<<<<<<<<<\n9876543213GBR9403121M2004150<<<<<<<<<<<<<<00\nSYNTHETIC SPECIMEN - GENERATED FOR ZIK VAULT TESTS - NOT A REAL DOCUMENT\n"
+    },
+    "passport-rescan.jpg": {
+      "ok": true,
+      "method": "ocr",
+      "pages": 1,
+      "rotation_applied": 0,
+      "recognition_quality": 80,
+      "error": null,
+      "text": "PASSEPORT UNITED KINGDOM OF\n—— — Type / Type Code / Code\n| P GBR\nPassport No. / No. du passeport Surname / Nom\n987654321 RIVERS\nI0OTO Given names / Prenoms Nationality / Nationalite\nA REAL | ALEX MORGAN BRITISH CITIZEN\nISON\nDate of birth / Date de naissance Sex / Sexe\n| 12 MAR / MAR 94 M\nDate of expiry / Date d expiration Authority / Autorite\n| 15 APR/ AVR 30 HM PASSPORT OFFICE\n— |\n/ERS<<ALEX<MORGAN<<<<<<<<<<<<<<<<<ccc\n13GBR9403121M3004157<<<<<<<<<<<<<<08\n"
+    },
+    "passport-rotated.jpg": {
+      "ok": true,
+      "method": "ocr",
+      "pages": 1,
+      "rotation_applied": 270,
+      "recognition_quality": 92,
+      "error": null,
+      "text": "PASSPORT / PASSEPORT UNITED KINGDOM OF GREAT BRITAIN\nType / Type Code / Code\nP GBR\nPassport No. / No. du passeport Surname / Nom\n987654321 RIVERS\nPHOTO Given names / Prenoms Nationality / Nationalite\nNOT A REAL ALEX MORGAN BRITISH CITIZEN\nPERSON\nDate of birth / Date de naissance Sex / Sexe\n12 MAR / MAR 94 M\nDate of expiry / Date d expiration Authority / Autorite\n15 APR / AVR 30 HM PASSPORT OFFICE\nP<GBRRIVERS<<ALEX<MORGAN<<<<<<<<<<<<<<<<<<<<\n9876543213GBR9403121M3004157<<<<<<<<<<<<<<08\nSYNTHETIC SPECIMEN - GENERATED FOR ZIK VAULT TESTS - NOT A REAL DOCUMENT\n"
+    },
+    "pixel-bomb.png": {
+      "ok": false,
+      "method": null,
+      "pages": null,
+      "rotation_applied": 0,
+      "recognition_quality": null,
+      "error": "rejected: 144 megapixels exceeds the 50 megapixel limit",
+      "text": ""
+    },
+    "unreadable.png": {
+      "ok": true,
+      "method": "ocr",
+      "pages": 1,
+      "rotation_applied": 0,
+      "recognition_quality": 0,
+      "error": null,
+      "text": ""
+    },
+    "utility-bill-ambiguous-date.pdf": {
+      "ok": true,
+      "method": "pdf_text_layer",
+      "pages": 1,
+      "rotation_applied": 0,
+      "recognition_quality": null,
+      "error": null,
+      "text": "Severn Light & Power \nEnergy statement \nAlex Morgan Rivers\nFlat 3\n14 Harbour Lane\nBristol\nBS1 4TR \nIssue date 03/04/26 \nReference SLP-4471-8102 \nAccount holder Alex Morgan Rivers \nSupply address Flat 3, 14 Harbour Lane, Bristol, BS1 4TR \nAmount due GBP 74.20 \nThis is a synthetic specimen created for software testing. Severn Light & Power is not a real\ncompany. \nS P E C I M E N \nS Y N T H E T I C S P E C I M E N - G E N E R AT E D F O R Z I K V A U LT T E S T S - N O T A R E A L D O C U M E N T"
+    },
+    "utility-bill-recent.pdf": {
+      "ok": true,
+      "method": "pdf_text_layer",
+      "pages": 1,
+      "rotation_applied": 0,
+      "recognition_quality": null,
+      "error": null,
+      "text": "Severn Light & Power \nEnergy statement \nAlex Morgan Rivers\nFlat 3\n14 Harbour Lane\nBristol\nBS1 4TR \nIssue date 30 August 2026 \nReference SLP-4471-9920 \nAccount holder Alex Morgan Rivers \nSupply address Flat 3, 14 Harbour Lane, Bristol, BS1 4TR \nAmount due GBP 74.20 \nThis is a synthetic specimen created for software testing. Severn Light & Power is not a real\ncompany. \nS P E C I M E N \nS Y N T H E T I C S P E C I M E N - G E N E R AT E D F O R Z I K V A U LT T E S T S - N O T A R E A L D O C U M E N T"
+    },
+    "utility-bill-stale.pdf": {
+      "ok": true,
+      "method": "pdf_text_layer",
+      "pages": 1,
+      "rotation_applied": 0,
+      "recognition_quality": null,
+      "error": null,
+      "text": "Severn Light & Power \nEnergy statement \nAlex Morgan Rivers\nFlat 3\n14 Harbour Lane\nBristol\nBS1 4TR \nIssue date 2 May 2025 \nReference SLP-4471-7714 \nAccount holder Alex Morgan Rivers \nSupply address Flat 3, 14 Harbour Lane, Bristol, BS1 4TR \nAmount due GBP 74.20 \nThis is a synthetic specimen created for software testing. Severn Light & Power is not a real\ncompany. \nS P E C I M E N \nS Y N T H E T I C S P E C I M E N - G E N E R AT E D F O R Z I K V A U LT T E S T S - N O T A R E A L D O C U M E N T"
+    }
+  }
+}

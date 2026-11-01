@@ -118,11 +118,11 @@ export function IssuerDashboard() {
         subtitle="The private signing key stays server-side; only the public key is shared with verifiers."
       >
         {issuerPublicKey ? (
-          <pre className="rounded-2xl border border-white/10 bg-black/30 p-4 text-xs text-mist/80">
+          <pre className="rounded-none border border-white/10 bg-black/30 p-4 text-xs text-mist/80">
             {JSON.stringify(issuerPublicKey, null, 2)}
           </pre>
         ) : (
-          <p className="text-sm text-mist/50">Loading public key material.</p>
+          <p className="text-sm text-mist/50" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d4fd78fd29bd-1" : undefined}>Loading public key material.</p>
         )}
       </SurfaceCard>
 
@@ -133,7 +133,7 @@ export function IssuerDashboard() {
       >
         {error ? <p className="mb-4 text-sm text-[#f8c8b4]">{error}</p> : null}
         {sessions.length === 0 ? (
-          <p className="text-sm text-mist/50">No sessions yet. Start one from the wallet flow.</p>
+          <p className="text-sm text-mist/50" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d4fd78fd29bd-2" : undefined}>No sessions yet. Start one from the wallet flow.</p>
         ) : (
           <div className="grid gap-4">
             {sessions.map((session, index) => {
@@ -152,7 +152,7 @@ export function IssuerDashboard() {
               return (
                 <article
                   key={session.id ?? `session-${index}`}
-                  className="rounded-[24px] border border-white/8 bg-white/[0.03] p-5"
+                  className="rounded-none border border-white/8 bg-white/[0.03] p-5"
                 >
                   <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
@@ -191,40 +191,40 @@ export function IssuerDashboard() {
                   </div>
 
                   <div className="mt-4 grid gap-4 lg:grid-cols-3">
-                    <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
-                      <p className="font-medium text-mist">Provider outcomes</p>
+                    <div className="rounded-none border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
+                      <p className="font-medium text-mist" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d4fd78fd29bd-3" : undefined}>Provider outcomes</p>
                       <p className="mt-2">Financial check: {financialStatus}</p>
                       <p className="mt-2">CoP: {copStatus}</p>
                       <p className="mt-2">Bank verification: {transactionStatus}</p>
                       <p className="mt-2">Risk decision: {riskStatus}</p>
                       <p className="mt-2">Stage: {session.orchestration?.stage ?? "Unavailable"}</p>
                     </div>
-                    <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
-                      <p className="font-medium text-mist">Bank verification</p>
-                      <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-mist/40">
+                    <div className="rounded-none border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
+                      <p className="font-medium text-mist" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d4fd78fd29bd-4" : undefined}>Bank verification</p>
+                      <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-mist/40" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d4fd78fd29bd-5" : undefined}>
                         Bank
                       </p>
                       <p className="mt-1">
                         {session.bank_verification?.bank_name ?? "Bank unavailable"}
                       </p>
-                      <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-mist/40">
+                      <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-mist/40" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d4fd78fd29bd-6" : undefined}>
                         Amount
                       </p>
                       <p className="mt-1">{formatCurrencyGbp(session.bank_verification?.amount_gbp)}</p>
-                      <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-mist/40">
+                      <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-mist/40" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d4fd78fd29bd-7" : undefined}>
                         Reference
                       </p>
                       <p className="mt-1">
                         {session.bank_verification?.reference ?? "Reference unavailable"}
                       </p>
-                      <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-mist/40">
+                      <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-mist/40" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d4fd78fd29bd-8" : undefined}>
                         Code
                       </p>
                       <p className="mt-1">{session.bank_verification?.code ?? "Code unavailable"}</p>
                       <p className="mt-2">Attempts: {session.bank_verification?.attempts ?? 0}</p>
                     </div>
-                    <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
-                      <p className="font-medium text-mist">Lifecycle</p>
+                    <div className="rounded-none border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
+                      <p className="font-medium text-mist" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d4fd78fd29bd-9" : undefined}>Lifecycle</p>
                       <p className="mt-2">
                         Holder key registered: {formatAdminDateTime(session.holder_key_registered_at)}
                       </p>
@@ -245,8 +245,8 @@ export function IssuerDashboard() {
                       </p>
                       <p className="mt-2 font-mono text-xs text-mist/40">{formatFingerprint(session.application_fingerprint)}</p>
                     </div>
-                    <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
-                      <p className="font-medium text-mist">Cooling-off</p>
+                    <div className="rounded-none border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
+                      <p className="font-medium text-mist" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d4fd78fd29bd-10" : undefined}>Cooling-off</p>
                       <p className="mt-2">
                         Configured delay:{" "}
                         {typeof session.cooling_off?.duration_seconds === "number"
@@ -264,8 +264,8 @@ export function IssuerDashboard() {
                         Issuance status: {session.orchestration?.issuance_status ?? "Unavailable"}
                       </p>
                     </div>
-                    <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
-                      <p className="font-medium text-mist">Decision detail</p>
+                    <div className="rounded-none border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
+                      <p className="font-medium text-mist" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d4fd78fd29bd-11" : undefined}>Decision detail</p>
                       <p className="mt-2">Risk state: {riskStatus}</p>
                       <p className="mt-2">
                         Manual review: {session.risk_decision?.requires_manual_review ? "Yes" : "No"}
@@ -280,8 +280,8 @@ export function IssuerDashboard() {
                         User message: {session.last_user_message ?? "Unavailable"}
                       </p>
                     </div>
-                    <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
-                      <p className="font-medium text-mist">Raw provider detail</p>
+                    <div className="rounded-none border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
+                      <p className="font-medium text-mist" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d4fd78fd29bd-12" : undefined}>Raw provider detail</p>
                       <pre className="mt-2 text-xs">
                         {stringifyForAdmin(
                           {
@@ -301,14 +301,14 @@ export function IssuerDashboard() {
                       className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm text-mist/80 disabled:opacity-50"
                       disabled={isPending || session.status !== "approved_with_cooling_off" || !session.id}
                       onClick={() => session.id && mutate("/api/enrollment/advance-cooling-off", session.id)}
-                    >
+                     data-local-edit={process.env.NODE_ENV === "development" ? "ve-d4fd78fd29bd-13" : undefined}>
                       Advance cooling-off
                     </button>
                     <button
                       className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm text-mist/80 disabled:opacity-50"
                       disabled={isPending || session.status !== "retry_provider_failure" || !session.id}
                       onClick={() => session.id && mutate("/api/enrollment/retry", session.id)}
-                    >
+                     data-local-edit={process.env.NODE_ENV === "development" ? "ve-d4fd78fd29bd-14" : undefined}>
                       Retry providers
                     </button>
                     <button
@@ -321,20 +321,20 @@ export function IssuerDashboard() {
                         !session.id
                       }
                       onClick={() => session.id && mutate("/api/enrollment/issue", session.id)}
-                    >
+                     data-local-edit={process.env.NODE_ENV === "development" ? "ve-d4fd78fd29bd-15" : undefined}>
                       Sign credential manually
                     </button>
                   </div>
 
                   <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                    <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
-                      <p className="font-medium text-mist">Notification log</p>
+                    <div className="rounded-none border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
+                      <p className="font-medium text-mist" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d4fd78fd29bd-16" : undefined}>Notification log</p>
                       {notifications.length > 0 ? (
                         <div className="mt-2 space-y-2">
                           {notifications.map((notification, notificationIndex) => (
                             <div
                               key={notification.id ?? `${sessionId}-notification-${notificationIndex}`}
-                              className="rounded-2xl border border-white/8 bg-white/[0.04] p-3"
+                              className="rounded-none border border-white/8 bg-white/[0.04] p-3"
                             >
                               <p>{notification.message ?? "Notification content unavailable."}</p>
                               <p className="mt-1 font-mono text-xs uppercase tracking-[0.2em] text-mist/40">
@@ -344,18 +344,18 @@ export function IssuerDashboard() {
                           ))}
                         </div>
                       ) : (
-                        <p className="mt-2">No notifications recorded.</p>
+                        <p className="mt-2" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d4fd78fd29bd-17" : undefined}>No notifications recorded.</p>
                       )}
                     </div>
 
-                    <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
-                      <p className="font-medium text-mist">Issued credential</p>
+                    <div className="rounded-none border border-white/8 bg-white/[0.03] p-4 text-sm text-mist/70">
+                      <p className="font-medium text-mist" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d4fd78fd29bd-18" : undefined}>Issued credential</p>
                       {session.issued_credential ? (
                         <pre className="mt-2 text-xs">
                           {stringifyForAdmin(session.issued_credential, "Credential unavailable.")}
                         </pre>
                       ) : (
-                        <p className="mt-2">No credential issued yet.</p>
+                        <p className="mt-2" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d4fd78fd29bd-19" : undefined}>No credential issued yet.</p>
                       )}
                     </div>
                   </div>
@@ -373,11 +373,11 @@ export function IssuerDashboard() {
       >
         {errorReportsFailure ? <p className="mb-4 text-sm text-[#f8c8b4]">{errorReportsFailure}</p> : null}
         {errorReports.length === 0 ? (
-          <p className="text-sm text-mist/50">No error reports filed yet.</p>
+          <p className="text-sm text-mist/50" data-local-edit={process.env.NODE_ENV === "development" ? "ve-d4fd78fd29bd-20" : undefined}>No error reports filed yet.</p>
         ) : (
           <div className="grid gap-3">
             {errorReports.map((report) => (
-              <article key={report.reference} className="rounded-[20px] border border-white/8 bg-white/[0.03] p-4">
+              <article key={report.reference} className="rounded-none border border-white/8 bg-white/[0.03] p-4">
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                   <div>
                     <p className="font-mono text-sm font-medium text-mist">{report.reference}</p>

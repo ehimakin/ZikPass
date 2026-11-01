@@ -1,3 +1,5 @@
+import { isHolderRevoked } from "@/lib/server/storage";
+import type { AgeConsentV1 } from "@/lib/shared/age-consent";
 import { createHash, randomBytes } from "node:crypto";
 import { getAffiliateClient, isAllowedAffiliateRedirectUri } from "@/lib/server/affiliate-clients";
 import { getIssuerPublicKey } from "@/lib/server/issuer-keys";
@@ -81,7 +83,7 @@ export async function createAffiliateAuthorizationRequest(input: {
   }
 
   const now = new Date().toISOString();
-  const requestId = randomId("areq");
+  const requestId = `areq_${crypto.randomUUID()}`;
   const nonce = randomAlphaNumericCode(20);
   const challenge = buildAffiliateChallenge({ clientId, requestId, nonce });
   const challengeExpiresAt = new Date(
@@ -107,6 +109,7 @@ export async function createAffiliateAuthorizationRequest(input: {
 export async function getAffiliateAuthorizationStatus(requestId: string): Promise<
   | {
       status: AffiliateAuthorizationRequest["status"];
+      consent: AgeConsentV1;
       client_id: string;
       redirect_uri: string;
       // Only meaningful (and only returned) while still pending — this is
@@ -124,6 +127,7 @@ export async function getAffiliateAuthorizationStatus(requestId: string): Promis
 
   return {
     status: request.status,
+    consent: { version: 1, request_id: request.request_id, audience: request.client_id, display_name: getAffiliateClient(request.client_id)?.display_name ?? "Unknown recipient", return_uri: request.redirect_uri, state: request.state, nonce: request.nonce, issued_at: request.created_at, expires_at: request.challenge_expires_at, threshold: 18, purpose: "Confirm an active over-18 pass.", fields: ["age_over_18"] },
     client_id: request.client_id,
     redirect_uri: request.redirect_uri,
     challenge: request.status === "pending" ? request.challenge : undefined
@@ -190,7 +194,8 @@ export async function completeAffiliateChallenge(input: {
 
     const verification = await verifyPresentationBundle(input.presentationBundle, issuerPublicKey, new Date());
 
-    if (verification.decision !== "allow") {
+    const revoked = await isHolderRevoked(input.presentationBundle.credential.payload.credential_id, input.presentationBundle.credential.payload.subject_public_key.x);
+    if (verification.decision !== "allow" || revoked) {
       const reason: AffiliateDenialReason = !verification.checks.holder_signature_valid
         ? "invalid_signature"
         : !verification.checks.not_expired

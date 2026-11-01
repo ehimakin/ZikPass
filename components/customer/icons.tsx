@@ -151,3 +151,13 @@ export function WalletAddIcon(props: IconProps) {
     </Base>
   );
 }
+
+export function VaultIcon(props: IconProps) {
+  return (
+    <Base {...props}>
+      <rect x="3.5" y="3.5" width="17" height="17" rx="1.5" />
+      <circle cx="12" cy="12" r="3.5" />
+      <path d="M12 8.5v7M8.5 12h7M6 7v2M6 15v2" />
+    </Base>
+  );
+}

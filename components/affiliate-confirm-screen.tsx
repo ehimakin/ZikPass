@@ -1,5 +1,6 @@
 "use client";
 
+import { parseAgeConsent, type AgeConsentV1 } from "@/lib/shared/age-consent";
 import { useEffect, useState } from "react";
 import type { Route } from "next";
 import { Zignature } from "@/components/zignature";
@@ -12,13 +13,14 @@ import { ShieldIcon } from "@/components/customer/icons";
 import { ZikLogoMark } from "@/components/zik-logo";
 import { environmentBadgeLabel } from "@/lib/shared/demo-environment";
 
-const CLIENT_NAME = "JerkMeat";
+
 
 interface ApiError {
   error: string;
 }
 
 interface PendingAuthorization {
+  consent: AgeConsentV1;
   status: string;
   redirect_uri: string;
   challenge?: string;
@@ -35,6 +37,7 @@ type ConfirmFlowState =
   | "not_found";
 
 export function AffiliateConfirmScreen({ requestId }: { requestId: string }) {
+  const [clientName, setClientName] = useState("Requesting site");
   const [wallet, setWallet] = useState<WalletState>({});
   const [pending, setPending] = useState<PendingAuthorization | null>(null);
   const [flowState, setFlowState] = useState<ConfirmFlowState>("loading");
@@ -60,6 +63,9 @@ export function AffiliateConfirmScreen({ requestId }: { requestId: string }) {
           return;
         }
 
+        authorization.consent = parseAgeConsent(authorization.consent);
+        if (authorization.consent.request_id !== requestId || Date.parse(authorization.consent.expires_at) <= Date.now()) throw new Error("expired");
+        setClientName(authorization.consent.display_name);
         setPending(authorization);
 
         const nextWallet = await loadWalletState();
@@ -87,7 +93,7 @@ export function AffiliateConfirmScreen({ requestId }: { requestId: string }) {
         }
 
         setFlowState("ready");
-        setMessage(`Zik will confirm only that you are over 18. ${CLIENT_NAME} learns nothing else.`);
+        setMessage(`Zik checks your signed age pass. ${authorization.consent.display_name} receives an over-18 result and verification timestamps. Your Vault is not accessed.`);
       } catch {
         setFlowState("not_found");
         setMessage("Verification is unavailable in this browser session right now.");
@@ -124,8 +130,8 @@ export function AffiliateConfirmScreen({ requestId }: { requestId: string }) {
     setFlowState("resolved");
     setMessage(
       outcome.outcome === "approved"
-        ? `Verified. Returning to ${CLIENT_NAME}.`
-        : `Zik could not confirm an active over-18 pass. Returning to ${CLIENT_NAME}.`
+        ? `Verified. Returning to ${clientName}.`
+        : `Zik could not confirm an active over-18 pass. Returning to ${clientName}.`
     );
 
     const params = new URLSearchParams({ state: outcome.state });
@@ -144,7 +150,7 @@ export function AffiliateConfirmScreen({ requestId }: { requestId: string }) {
     }
 
     setFlowState("approving");
-    setMessage(`Checking your pass on this device and preparing a minimal result for ${CLIENT_NAME}.`);
+    setMessage(`Checking your pass on this device and preparing a minimal result for ${clientName}.`);
 
     try {
       const bundle = await createPresentationBundle(pending.challenge);
@@ -174,7 +180,7 @@ export function AffiliateConfirmScreen({ requestId }: { requestId: string }) {
         <div className="mb-4 flex items-center justify-between">
           <span className="flex items-center gap-2">
             <ZikLogoMark className="h-7 w-7 shrink-0" />
-            <span className="text-[15px] font-extrabold tracking-tight text-[var(--zk-text)]">Zik Pass</span>
+            <span className="text-[15px] font-extrabold tracking-tight text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fadb2050857d-1" : undefined}>Zik Pass</span>
           </span>
           <span className="rounded-full bg-[var(--zk-sunken)] px-2.5 py-1 text-[11px] font-semibold text-[var(--zk-text-soft)]">
             {environmentBadgeLabel()}
@@ -183,12 +189,13 @@ export function AffiliateConfirmScreen({ requestId }: { requestId: string }) {
 
         <Card className="overflow-hidden">
           <div className="border-b border-[var(--zk-line)] p-5">
-            <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--zk-text-faint)]">
+            <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fadb2050857d-2" : undefined}>
               Age check requested by
             </p>
-            <p className="mt-1 text-[18px] font-extrabold text-[var(--zk-text)]">{CLIENT_NAME}</p>
+            <p className="text-xs" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fadb2050857d-3" : undefined}>Consent v1 · Required: age over 18 · Zik verified</p>
+            <p className="mt-1 text-[18px] font-extrabold text-[var(--zk-text)]">{clientName}</p>
             <div className="mt-4 space-y-2">
-              <ShareRow label="Shared" value="Over 18: yes / no" tone="share" />
+              <ShareRow label="Shared" value="Over 18 result and verification metadata" tone="share" />
               <ShareRow label="Not shared" value="Name, date of birth, photo, ID number" tone="hold" />
             </div>
           </div>
@@ -207,8 +214,8 @@ export function AffiliateConfirmScreen({ requestId }: { requestId: string }) {
             </div>
 
             {wallet.credential ? (
-              <div className="mt-4 rounded-[var(--zk-r-md)] bg-[var(--zk-sunken)] px-3 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--zk-text-faint)]">
+              <div className="mt-4 rounded-none bg-[var(--zk-sunken)] px-3 py-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-fadb2050857d-4" : undefined}>
                   Your pass &middot; visual only
                 </p>
                 <Zignature
@@ -237,11 +244,13 @@ export function AffiliateConfirmScreen({ requestId }: { requestId: string }) {
 
               {flowState === "missing" || flowState === "expired" || flowState === "unavailable" ? (
                 <>
-                  <ButtonLink href={"/pass" as Route} size="lg">
-                    Open my pass
-                  </ButtonLink>
+                  <div className={flowState === "missing" ? "zk-lifted-pass-button" : undefined}>
+                    <ButtonLink href={(flowState === "missing" ? "/find" : "/pass") as Route} size="lg">
+                      {flowState === "missing" ? "Get Zik Pass" : "Open my pass"}
+                    </ButtonLink>
+                  </div>
                   <Button size="lg" variant="ghost" disabled={busy} onClick={returnMissingState}>
-                    Back to {CLIENT_NAME}
+                    Back to {clientName}
                   </Button>
                 </>
               ) : null}
@@ -254,7 +263,7 @@ export function AffiliateConfirmScreen({ requestId }: { requestId: string }) {
         </Card>
 
         <p className="mt-4 px-1 text-center text-[12px] leading-relaxed text-[var(--zk-text-faint)]">
-          Zik checks your pass on this device and sends {CLIENT_NAME} a one-time signed
+          Zik checks your pass on this device and sends {clientName} a one-time signed
           result. Denials look the same whether or not you have a pass.
         </p>
       </div>
@@ -306,7 +315,7 @@ function headingForState(state: ConfirmFlowState): string {
     case "approving":
       return "Verifying locally";
     case "resolved":
-      return `Returning to ${CLIENT_NAME}`;
+      return "Returning to the requesting site";
     case "not_found":
       return "Verification unavailable";
   }

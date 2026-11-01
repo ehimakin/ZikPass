@@ -1,0 +1,109 @@
+"use client";
+import { StoreLocationPicker } from "@/components/operator/store-location-picker";
+
+import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import type { Route } from "next";
+import { ZikLogoMark } from "@/components/zik-logo";
+import { Alert, Button, ButtonLink } from "@/components/customer/ui";
+import { environmentBadgeLabel } from "@/lib/shared/demo-environment";
+import { ZIK_STORES } from "@/lib/shared/stores";
+
+export function StoreLogin({ nextPath = "/dashboard/store" }: { nextPath?: string }) {
+  const router = useRouter();
+  const [storeId, setStoreId] = useState(ZIK_STORES[0].id);
+  const [code, setCode] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const selectedStore = ZIK_STORES.find((store) => store.id === storeId) ?? ZIK_STORES[0];
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/operator/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ storeId, code })
+      });
+      const data = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(data.error ?? "Login failed.");
+      router.replace(nextPath as Route);
+      router.refresh();
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Login failed. Please try again.");
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="zk-surface min-h-[100dvh] bg-[var(--zk-canvas)] px-4 py-8 sm:py-14">
+      <main className="mx-auto w-full max-w-[520px]">
+        <header className="mb-8 flex items-center justify-between gap-4">
+          <span className="flex items-center gap-3">
+            <ZikLogoMark className="h-10 w-10" />
+            <span data-local-edit={process.env.NODE_ENV === "development" ? "ve-782b43252e3b-1" : undefined}>
+              <span className="block text-[18px] font-extrabold tracking-tight">Zik Pass</span>
+              <span className="block text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--zk-text-soft)]">Store portal</span>
+            </span>
+          </span>
+          <span className="rounded-full bg-[var(--zk-sunken)] px-3 py-1.5 text-[11px] font-semibold text-[var(--zk-text-soft)]">
+            {environmentBadgeLabel()}
+          </span>
+        </header>
+
+        <section className="overflow-hidden rounded-none border border-[var(--zk-line)] bg-[var(--zk-card)] shadow-[var(--zk-shadow-card)]">
+          <div className="bg-[var(--zk-ink-surface)] px-6 py-7 text-[var(--zk-text-on-ink)] sm:px-8">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#d7f171]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-782b43252e3b-2" : undefined}>Clerk access</p>
+            <h1 className="mt-3 text-[30px] font-extrabold leading-tight tracking-[-0.035em]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-782b43252e3b-3" : undefined}>Store sign-in</h1>
+            <p className="mt-3 max-w-[390px] text-[14px] leading-relaxed text-[#b9c0cb]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-782b43252e3b-4" : undefined}>Choose your store and enter your existing staff code to sign in.</p>
+          </div>
+
+          <form onSubmit={submit} className="space-y-6 p-6 sm:p-8">
+            {error ? <Alert tone="critical" title="Couldn’t sign in">{error}</Alert> : null}
+
+            <StoreLocationPicker storeId={storeId} onSelect={setStoreId} />
+            <label className="block text-sm font-semibold">Store
+              <select className="mt-2 w-full rounded-lg border border-[var(--zk-line-strong)] bg-[var(--zk-card)] p-3" value={storeId} onChange={event => setStoreId(event.target.value)}>
+                {ZIK_STORES.map(store => <option key={store.id} value={store.id}>{store.name}</option>)}
+              </select>
+            </label>
+
+            <label className="block">
+              <span className="text-[13px] font-bold text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-782b43252e3b-5" : undefined}>Staff login code</span>
+              <input
+                type="password"
+                autoComplete="current-password"
+                autoFocus
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                value={code}
+                onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="••••"
+                aria-describedby="clerk-code-help"
+                className="mt-3 block min-h-[62px] w-full rounded-[14px] border border-[var(--zk-line-strong)] bg-[var(--zk-sunken)] px-5 text-center font-mono text-[28px] font-bold tracking-[0.38em] outline-none transition focus:border-[var(--zk-focus)] focus:ring-2 focus:ring-[var(--zk-focus)]/20"
+              />
+              <span id="clerk-code-help" className="mt-2 block text-[11px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-782b43252e3b-7" : undefined}>
+                Use the staff code provided for your store.
+              </span>
+            </label>
+
+            <div className="rounded-none bg-[var(--zk-sunken)] p-4">
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-782b43252e3b-6" : undefined}>Signing in to</p>
+              <p className="mt-1 text-[14px] font-bold">{selectedStore.name}</p>
+              <p className="mt-1 text-[12px] text-[var(--zk-text-soft)]">{selectedStore.addressLine}, {selectedStore.postcode}</p>
+            </div>
+
+            <Button type="submit" size="lg" loading={busy} disabled={code.length < 4}>
+              Sign in
+            </Button>
+            <ButtonLink href="/partner_stores#store-setup" variant="ghost">Need to set up store access?</ButtonLink>
+          </form>
+        </section>
+      </main>
+    </div>
+  );
+}

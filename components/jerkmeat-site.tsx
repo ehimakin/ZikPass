@@ -18,7 +18,7 @@ const dishes: Dish[] = [
 const categories = ["All meat", "Chicken", "Pork", "Beef", "Lamb", "Saved"];
 
 export function JerkMeatBrand() {
-  return <span className={styles.brand}><span className={styles.brandMark} aria-hidden="true">♨</span><span>jerk<span className={styles.brandAccent}>meat</span></span></span>;
+  return <span className={styles.brand} data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-1" : undefined}><span className={styles.brandMark} aria-hidden="true">♨</span><span>jerk<span className={styles.brandAccent}>meat</span></span></span>;
 }
 
 export function JerkMeatSite({ gate, unlocked = false }: { gate?: ReactNode; unlocked?: boolean }) {
@@ -44,40 +44,40 @@ export function JerkMeatSite({ gate, unlocked = false }: { gate?: ReactNode; unl
   return <div className={styles.site}>
     <header className={styles.header}>
       <a href="/affiliate-demo" aria-label="JerkMeat home"><JerkMeatBrand /></a>
-      <label className={styles.search}><span aria-hidden="true">⌕</span><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Find your perfect piece of meat…" aria-label="Search dishes" /></label>
+      <label className={styles.search}><span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-2" : undefined}>⌕</span><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Find your perfect piece of meat…" aria-label="Search dishes" /></label>
       <a className={styles.login} href={unlocked ? "/affiliate-demo" : "#jerkmeat-age-gate"}>{unlocked ? "✓ Zik verified" : "Log in"}</a>
-      <button className={styles.pinkButton} onClick={() => openDish(dishes[Math.floor(Math.random() * dishes.length)])}>Meat your match</button>
+      <button className={styles.pinkButton} onClick={() => openDish(dishes[Math.floor(Math.random() * dishes.length)])} data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-3" : undefined}>Meat your match</button>
     </header>
     <div className={styles.layout}>
       <aside className={styles.sidebar}>
-        <p className={styles.eyebrow}>Find your flavour</p>
+        <p className={styles.eyebrow} data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-4" : undefined}>Find your flavour</p>
         <nav aria-label="Meat categories">{categories.map((item, i) => <button key={item} aria-pressed={category === item} className={category === item ? styles.activeCategory : ""} onClick={() => setCategory(item)}><span aria-hidden="true">{["♨", "✦", "◇", "◈", "✧", "♡"][i]}</span>{item}<small>{item === "Saved" ? saved.length : item === "All meat" ? 9 : dishes.filter(d => d.kind === item).length}</small></button>)}</nav>
-        <div className={styles.sidebarNote}><span aria-hidden="true">🌶</span><strong>Only the food<br />is spicy.</strong><p>Good meat. Bad puns.<br />Zero adult content.</p></div>
-        <a className={styles.backToZik} href="/home">← Back to Zik Pass</a>
+        <div className={styles.sidebarNote}><span aria-hidden="true" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-5" : undefined}>🌶</span><strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-6" : undefined}>Only the food<br />is spicy.</strong><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-7" : undefined}>Good meat. Bad puns.<br />Zero adult content.</p></div>
+        <a className={styles.backToZik} href="/home" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-8" : undefined}>← Back to Zik Pass</a>
       </aside>
       <main className={styles.main}>
-        <div className={styles.notice}><span>FOOD-ONLY PARODY</span><span>Zik Pass affiliate demonstration</span></div>
+        <div className={styles.notice}><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-9" : undefined}>FOOD-ONLY PARODY</span><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-10" : undefined}>Zik Pass affiliate demonstration</span></div>
         <section className={styles.hero}>
-          <div><p className={styles.eyebrow}>100% jerk. 0% awkward.</p><h1>Hot meat.<br /><em>No small talk.</em></h1><p>Find your perfect match. Well-seasoned,<br className={styles.desktopBreak} /> a little smoky, and very easy on the eyes.</p><a href="#meat-gallery" className={styles.heroLink}>See what’s sizzling <span>↘</span></a></div>
-          <div className={styles.heroPhoto} role="img" aria-label="Chargrilled jerk chicken with lime"><div className={styles.heroPhotoLabel}><span>CHEF’S PICK</span><strong>The original hot leg</strong><small>KingstonKitchen · Chicken · Hot</small></div></div>
-          <span className={styles.heroStamp}>WELL<br />SEASONED</span>
+          <div><p className={styles.eyebrow} data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-11" : undefined}>100% jerk. 0% awkward.</p><h1 data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-12" : undefined}>Hot meat.<br /><em>No small talk.</em></h1><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-13" : undefined}>Find your perfect match. Well-seasoned,<br className={styles.desktopBreak} /> a little smoky, and very easy on the eyes.</p><a href="#meat-gallery" className={styles.heroLink} data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-14" : undefined}>See what’s sizzling <span>↘</span></a></div>
+          <div className={styles.heroPhoto} role="img" aria-label="Chargrilled jerk chicken with lime"><div className={styles.heroPhotoLabel}><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-15" : undefined}>CHEF’S PICK</span><strong data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-16" : undefined}>The original hot leg</strong><small data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-17" : undefined}>KingstonKitchen · Chicken · Hot</small></div></div>
+          <span className={styles.heroStamp} data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-18" : undefined}>WELL<br />SEASONED</span>
         </section>
         {gate && <section id="jerkmeat-age-gate" tabIndex={-1} className={styles.gate}>{gate}</section>}
-        {unlocked && <div className={styles.unlocked}><span>✓ Age verified with Zik</span><p>Welcome to the kitchen. Pick a photo for the delicious details.</p></div>}
+        {unlocked && <div className={styles.unlocked}><span data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-19" : undefined}>✓ Age verified with Zik</span><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-20" : undefined}>Welcome to the kitchen. Pick a photo for the delicious details.</p></div>}
         <section id="meat-gallery" className={styles.gallerySection}>
-          <div className={styles.sectionHeading}><div><p className={styles.eyebrow}>Recommended for your appetite</p><h2>{category === "Saved" ? "Your saved meat" : "Fresh off the grill"}<span>{visible.length}</span></h2></div><span className={styles.photoLabel}>PHOTOS, NOT CAMS</span></div>
+          <div className={styles.sectionHeading}><div><p className={styles.eyebrow} data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-21" : undefined}>Recommended for your appetite</p><h2>{category === "Saved" ? "Your saved meat" : "Fresh off the grill"}<span>{visible.length}</span></h2></div><span className={styles.photoLabel} data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-22" : undefined}>PHOTOS, NOT CAMS</span></div>
           <div className={styles.tabs}>{categories.map(item => <button key={item} aria-pressed={category === item} className={category === item ? styles.activeTab : ""} onClick={() => setCategory(item)}>{item}</button>)}</div>
           <div className={styles.grid}>{visible.map(dish => <article key={dish.name} className={styles.card}>
             <button className={styles.photoButton} onClick={() => openDish(dish)} aria-label={`View ${dish.name}`}><FoodPhoto index={dishes.indexOf(dish)} label={dish.name} /><span className={styles.heat}>♨ {dish.heat}</span><span className={styles.duration}>{dish.time}</span><span className={styles.photoHover}>{unlocked ? "Get a closer look ↗" : "Verify with Zik to enter ↗"}</span></button>
             <div className={styles.cardHeading}><button onClick={() => openDish(dish)}>{dish.name}</button><button className={saved.includes(dish.name) ? styles.saved : styles.save} aria-label={`${saved.includes(dish.name) ? "Unsave" : "Save"} ${dish.name}`} aria-pressed={saved.includes(dish.name)} onClick={() => toggleSaved(dish.name)}>{saved.includes(dish.name) ? "♥" : "♡"}</button></div><p className={styles.creator}><span />{dish.handle}<span className={styles.location}>{dish.place}</span></p>
           </article>)}</div>
-          {!visible.length && <p className={styles.empty}>Nothing on the grill here yet. Try another category or search.</p>}
+          {!visible.length && <p className={styles.empty} data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-23" : undefined}>Nothing on the grill here yet. Try another category or search.</p>}
         </section>
-        <footer className={styles.footer}><JerkMeatBrand /><p>All sizzle. No scandal.</p><small>Independent food parody. Not affiliated with JerkMate. AI-generated food photography.<br />The age check demonstrates Zik Pass; these food photos do not require age verification.</small></footer>
+        <footer className={styles.footer}><JerkMeatBrand /><p data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-24" : undefined}>All sizzle. No scandal.</p><small data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-25" : undefined}>Independent food parody. Not affiliated with JerkMate. AI-generated food photography.<br />The age check demonstrates Zik Pass; these food photos do not require age verification.</small></footer>
       </main>
     </div>
     <dialog ref={dialog} aria-labelledby="jerkmeat-dish-title" className={styles.dialog} onClose={() => setSelected(null)} onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
-      {selected && <><button className={styles.close} aria-label="Close dish" onClick={() => dialog.current?.close()}>×</button><FoodPhoto index={dishes.indexOf(selected)} label={selected.name} /><div className={styles.dialogCopy}><p className={styles.eyebrow}>{selected.kind} · {selected.heat} · {selected.time}</p><h2 id="jerkmeat-dish-title">{selected.name}</h2><p>{selected.note}</p><small>Serving inspiration from the JerkMeat photo kitchen.</small></div></>}
+      {selected && <><button className={styles.close} aria-label="Close dish" onClick={() => dialog.current?.close()} data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-26" : undefined}>×</button><FoodPhoto index={dishes.indexOf(selected)} label={selected.name} /><div className={styles.dialogCopy}><p className={styles.eyebrow}>{selected.kind} · {selected.heat} · {selected.time}</p><h2 id="jerkmeat-dish-title">{selected.name}</h2><p>{selected.note}</p><small data-local-edit={process.env.NODE_ENV === "development" ? "ve-ef79f7dd355c-27" : undefined}>Serving inspiration from the JerkMeat photo kitchen.</small></div></>}
     </dialog>
   </div>;
 }

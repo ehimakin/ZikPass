@@ -1,14 +1,10 @@
-import { ClerkVerify } from "@/components/operator/clerk-verify";
-
-export default async function VerifyPage({
-  searchParams
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const params = await searchParams;
-  return <ClerkVerify initialCode={getParam(params.code)} />;
-}
-
-function getParam(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
+import type { Route } from "next";
+import { redirect } from "next/navigation";
+export default async function LegacyPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(await searchParams)) {
+    if (Array.isArray(value)) value.forEach(item => query.append(key, item));
+    else if (value !== undefined) query.set(key, value);
+  }
+  redirect(`/dashboard/store/verify${query.size ? `?${query}` : ""}` as Route);
 }

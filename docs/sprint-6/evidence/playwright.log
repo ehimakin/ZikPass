@@ -1,0 +1,27 @@
+
+> zik-pass@0.1.0 e2e
+> playwright test
+
+[WebServer] (node:97600) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 14 tests using 1 worker
+
+(node:97601) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › e2e/edge-cases.spec.ts:8:5 › location denied: manual search still completes (611ms)
+  ✓   2 [chromium] › e2e/edge-cases.spec.ts:18:5 › no search match shows guidance, list still works (426ms)
+  ✓   3 [chromium] › e2e/edge-cases.spec.ts:25:5 › unknown route shows the branded 404 (262ms)
+  ✓   4 [chromium] › e2e/edge-cases.spec.ts:33:5 › affiliate: honest 'no pass' path when the device has none (382ms)
+  ✓   5 [chromium] › e2e/edge-cases.spec.ts:41:5 › affiliate: approve with an active pass opens the gated site (8.2s)
+  ✓   6 [chromium] › e2e/journeys.spec.ts:17:5 › self-directed: discover a store, get verified, pay, receive a pass (7.1s)
+  ✓   7 [chromium] › e2e/journeys.spec.ts:37:5 › clerk-first purchase sale: till payment, customer activates, one payment (377ms)
+  ✓   8 [chromium] › e2e/journeys.spec.ts:72:5 › payment declined, then retried successfully - no premature issuance (6.5s)
+  ✓   9 [chromium] › e2e/journeys.spec.ts:87:5 › delete pass from this device returns to the empty state (6.8s)
+  ✓  10 [chromium] › e2e/journeys.spec.ts:105:5 › cross-store clerk cannot look up another store's session (282ms)
+  ✓  11 [chromium] › e2e/vault-disclosure.spec.ts:7:5 › Vault reload, wrong secret, edit, encrypted storage and deletion (1.2s)
+  ✓  12 [chromium] › e2e/vault-disclosure.spec.ts:16:5 › retail cancel, locked approval, exact optional omission, and Zik payload privacy (7.9s)
+  ✓  13 [chromium] › e2e/vault-disclosure.spec.ts:28:5 › age-only never opens Vault storage and never transmits profile (8.4s)
+  ✓  14 [chromium] › e2e/vault-disclosure.spec.ts:35:5 › optional email is included only when selected; responsive consent and keyboard cancellation (8.0s)
+
+  14 passed (58.0s)

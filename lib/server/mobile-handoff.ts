@@ -1,3 +1,4 @@
+import { isRecoveredEnrollment, isHolderRevoked } from "@/lib/server/storage";
 import { createHash, randomBytes } from "node:crypto";
 import { getEnrollmentOrThrow } from "@/lib/server/enrollment-service";
 import { rebindIssuedCredential } from "@/lib/server/credential-issuer";
@@ -18,6 +19,7 @@ export async function createNativeAppHandoff(
   token: string;
   expiresAt: string;
 }> {
+  if (await isRecoveredEnrollment(enrollmentId)) throw new Error("Use your recovery phrase to move this recovered pass to another device.");
   const enrollment = await getEnrollmentOrThrow(enrollmentId);
   if (!enrollment.issued_credential) {
     throw new Error("The Zik Pass must be issued before it can be opened in the native app.");
@@ -47,6 +49,8 @@ export async function claimNativeAppHandoff(input: {
   if (!handoff) {
     throw new Error("This app handoff has expired or is not recognised.");
   }
+
+  if (handoff.superseded_at || await isRecoveredEnrollment(handoff.enrollment_id) || (handoff.issued_credential && await isHolderRevoked(handoff.issued_credential.payload.credential_id, handoff.issued_credential.payload.subject_public_key.x))) throw new Error("This handoff was revoked by account recovery.");
 
   if (handoff.claimed_at) {
     if (
@@ -140,4 +144,12 @@ function validateHolderPublicKey(value: JsonWebKey) {
 
 function sameHolderPublicKey(left: JsonWebKey, right: JsonWebKey): boolean {
   return left.kty === right.kty && left.crv === right.crv && left.x === right.x;
+}
+
+/** Product context comes from the authorised enrollment, never a scanned serial. */
+export async function nativeHandoffProduct(token: string): Promise<"physical_card" | "digital"> {
+  const handoff = await getMobileAppHandoff(hashToken(token));
+  if (!handoff?.claimed_at) throw new Error("Claim this handoff first.");
+  const enrollment = await getEnrollmentOrThrow(handoff.enrollment_id);
+  return enrollment.physical_verification?.session.entry_mode === "retail_card" ? "physical_card" : "digital";
 }

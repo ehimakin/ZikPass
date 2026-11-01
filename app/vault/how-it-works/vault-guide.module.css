@@ -1,0 +1,16 @@
+.page { background: #fff; min-height: calc(100svh - 56px); padding: clamp(40px, 7vw, 100px) max(24px, calc((100% - 1040px) / 2)) calc(var(--zk-bottom-nav-height, 64px) + 48px); }
+.intro { max-width: 740px; }
+.eyebrow { font-size: 12px; font-weight: 800; letter-spacing: .18em; margin-bottom: 24px; }
+.intro h1 { font-size: clamp(46px, 7vw, 86px); font-weight: 800; letter-spacing: -.06em; line-height: 1; }
+.intro h1 em { font-family: Georgia, serif; font-weight: 400; }
+.intro > p:last-of-type { margin-top: 28px; max-width: 600px; font-size: 17px; line-height: 1.75; color: var(--zk-text-soft); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.preview { margin-block: 48px; padding: 24px; border-left: 5px solid #cbb95b; background: #faf8ed; }
+.preview h2 { font-size: 20px; font-weight: 800; }
+.preview p { margin-top: 12px; font-size: 14px; line-height: 1.7; }
+.sectionTitle { font-size: 28px; font-weight: 800; letter-spacing: -.03em; }
+.steps { list-style: none; padding: 0; margin-top: 24px; }
+.steps li { display: flex; gap: clamp(18px, 4vw, 48px); padding-block: 28px; border-top: 1px solid #e4dfc8; }
+.steps li > span { color: #716528; font-size: 14px; font-weight: 800; padding-top: 5px; }
+.steps h3 { font-size: 22px; font-weight: 700; letter-spacing: -.025em; }
+.steps p { max-width: 720px; margin-top: 12px; font-size: 15px; line-height: 1.75; color: var(--zk-text-soft); }

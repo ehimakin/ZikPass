@@ -29,6 +29,7 @@ Cryptographic helpers and domain contracts shared by browser and server code liv
 | `/pass` | `PassScreen` | Wallet states + delete, `PwaInstallButton`, PWA-launch handoff claim. `/wallet` redirects here (PWA/handoff params preserved). |
 | `/card` | `PurchaseActivation` | Activate a physical card bought at a till (printed-card QR target). |
 | `/help` | `HelpScreen` | Accepted ID, FAQ, "Reset demo data" (demo only). |
+| `/ecosystem` | `ProductFamily` | Read-only planned-product explanation; uses the shared display catalogue. |
 | `/about` | about page | Longer explanation for customers/stores/sites. |
 | `/offline` | `StatusPage` | Served by the service worker. `not-found.tsx` + `error.tsx` share `StatusPage`. |
 
@@ -215,3 +216,65 @@ When adding a capability:
 3. Make repeated requests safe where a user can retry after a network loss.
 4. Add a focused test for the state transition and one adverse/retry path.
 5. Keep the route handler thin and update `README.md`, this document, and `docs/TESTING.md` if the user-visible flow changes.
+
+## Vault v2: documents, local analysis and the Zik ID application
+
+`lib/shared/vault/` holds the v2 model and crypto: `model.ts` (documents,
+observations, claims, consents, applications, all strictly parsed), `crypto.ts` (the
+wrapped-data-key hierarchy and per-record AAD binding) and `claims.ts` (reconciling
+accepted evidence against the value the user stands behind).
+
+`lib/client/vault/` holds the device side: `store.ts` (the encrypted `zik-vault`
+IndexedDB database and its atomic `commit()`), `session.ts` (`VaultV2`, the unlock
+lifecycle, the v1 migration and every read/write path), `analysis.worker.ts` (PDF.js
+plus Tesseract WASM, entirely on-device), `analysis-client.ts` (one worker, one job,
+generation-guarded) and `import-sources.ts` (file, camera and folder adapters).
+
+`lib/shared/analysis/` is pure and testable in Node: `text.ts` (date, name and
+address normalisation and comparison), `mrz.ts` (ICAO 9303 parsing and check digits)
+and `extract.ts` (classification and field proposals).
+
+`lib/shared/policy/zik-id-readiness.ts` is the versioned readiness function;
+`lib/shared/onboarding/adapter.ts` is the boundary a future authorised checker
+implements, and which currently refuses every outcome.
+
+Read [ADR 007](decisions/007-vault-v2-local-analysis.md) before changing storage or
+the CSP. v1 (`lib/shared/vault.ts`, `lib/client/vault-adapter.ts`) is retained for
+migration, for the legacy `/vault-legacy` screen and for disclosure. Nothing is added
+to WalletState or native pass handoff.
+`lib/shared/disclosure.ts` handles field selection and hybrid encryption.
+`lib/server/disclosure-service.ts` registers Harbour & Pine, delegates age verification
+to the existing affiliate service, and serializes ciphertext redemption. Only
+`lib/demo-rp/merchant.ts` unwraps/decrypts; it is server-only and banned from Zik server
+and client imports by lint. Explicit demo merchant routes call it.
+
+`middleware.ts` supplies a per-request CSP nonce and security headers; the root layout
+is dynamic to attach that nonce. Sensitive routes are no-store. New endpoints are
+strictly parsed and v1 is opt-in. See the [data inventory](sprint-6/SECURITY_AND_DATA.md)
+for the co-hosted/single-process limits and precise recipient boundaries.
+
+## Future product boundary
+
+[PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md) defines Zik as the umbrella and Pass as its
+first standalone product. ZikVault must be local-first: underlying proof-backed credentials
+and documents belong on the device, not in a central Zik identity-document database.
+Zik ID must derive from Vault claims as a predefined presentation rather than create a
+duplicate identity store. Pass must never require Vault or a subscription.
+
+Operational server data may still include public keys, revocation/status data, issuer
+metadata, fraud signals and audit events. “Local-first” must never become “Zik stores no
+data”. A separate security/data architecture decision is required before implementation
+of the agreed Vault begins. Do not add speculative Vault types, APIs or schemas for this
+positioning milestone.
+
+`lib/shared/product-catalogue.ts` is display-only; `ProductFamily` reuses it on `/home` and
+`/ecosystem`. The Pass display amount comes from server `getPassPrice()`; planned prices
+have no payment, entitlement, credential or persistence integration. `/ecosystem` has no
+forms or mutation handlers. Existing customer header, bottom tabs and hero behavior remain.
+
+Preserved experiments already exist: `/vault`, `/retail-demo`, `/id`, `/verify/id`,
+`lib/client/vault-adapter.ts`, `lib/shared/vault.ts`, `lib/shared/zik-id.ts`,
+`lib/client/zik-id-peer.ts`, `/api/zik-id/sessions` and the disclosure services above.
+They are not the agreed proof-backed Vault/ID products. No assertion that this repository
+contains no Vault/ID logic is accurate. Customer menu and active-pass promotions now point
+to the read-only ecosystem explanation; direct experimental routes and their logic remain.

@@ -1,6 +1,11 @@
+import { appleWalletDemoConfigured } from "@/lib/server/apple-wallet";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { CustomerShell } from "@/components/customer/customer-shell";
+import { WalletScreen } from "@/components/customer/wallet-screen";
 import { WalletSurface } from "@/components/wallet-surface";
+
+export const dynamic = "force-dynamic";
 
 export default async function WalletPage({
   searchParams
@@ -24,8 +29,7 @@ export default async function WalletPage({
     );
   }
 
-  // The returning-customer wallet now lives on /pass. Carry a PWA launch /
-  // device-handoff token across so the installed app can claim its credential.
+  // Preserve installed-app and device handoffs on the pass claim screen.
   const handoffToken = getParam(params.handoff_token);
   const fromPwa = getParam(params.source) === "pwa";
   if (handoffToken || fromPwa) {
@@ -33,7 +37,7 @@ export default async function WalletPage({
     if (handoffToken) q.set("handoff_token", handoffToken);
     redirect(`/pass?${q.toString()}`);
   }
-  redirect("/pass");
+  return <CustomerShell active="wallet"><WalletScreen appleWalletAvailable={appleWalletDemoConfigured()} /></CustomerShell>;
 }
 
 function getParam(value: string | string[] | undefined): string | undefined {

@@ -45,6 +45,6 @@ export function environmentBadgeLabel(): string {
     case "live":
       return "Live";
     default:
-      return "Demo - no real charges";
+      return "Demo";
   }
 }

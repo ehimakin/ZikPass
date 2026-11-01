@@ -1251,15 +1251,15 @@ export function WalletSurface({
         />
       ) : (
         <>
-      <section className="relative overflow-hidden rounded-[40px] border border-white/80 bg-white/72 px-6 py-8 shadow-panel backdrop-blur-sm sm:px-10 sm:py-10">
+      <section className="relative overflow-hidden rounded-none border border-white/80 bg-white/72 px-6 py-8 shadow-panel backdrop-blur-sm sm:px-10 sm:py-10">
         <div
           className={`relative grid gap-8 md:items-start ${
             onboardingMode ? "md:grid-cols-1" : "md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]"
           }`}
         >
           <div className="relative md:order-1">
-            <div className="absolute inset-0 translate-x-5 translate-y-5 rounded-[34px] bg-lime/35" />
-            <div className="relative overflow-hidden rounded-[34px] border border-ink/8 bg-white p-6 shadow-[0_30px_80px_rgba(14,23,38,0.18)]">
+            <div className="absolute inset-0 translate-x-5 translate-y-5 rounded-none bg-lime/35" />
+            <div className="relative overflow-hidden rounded-none border border-ink/8 bg-white p-6 shadow-[0_30px_80px_rgba(14,23,38,0.18)]">
               <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top_right,_rgba(215,241,113,0.3),_transparent_45%)]" />
               <div className="relative space-y-6">
                 <div className="mb-8 flex items-center justify-between gap-4">
@@ -1269,7 +1269,7 @@ export function WalletSurface({
                         ? "Customer Onboarding"
                         : isPhysicalLane
                           ? "Verify offline, use online. No digital footpwinx"
-                          : "Zero Knowledge age verification"}
+                          : "Signed age verification"}
                     </p>
                     {!showHeroPassPreview && !onboardingMode ? (
                       <p className="mt-2 font-mono text-xs tracking-[0.24em] text-ink/45">
@@ -1279,14 +1279,14 @@ export function WalletSurface({
                       </p>
                     ) : null}
                   </div>
-                  <div className="animate-float-slow rounded-[24px] border border-ink/8 bg-[#f6faea] p-3">
+                  <div className="animate-float-slow rounded-none border border-ink/8 bg-[#f6faea] p-3">
                     <ZikLogoMark className="h-10 w-10 text-ink" />
                   </div>
                 </div>
 
                 {credential ? (
-                  <div className="rounded-[28px] border border-ink/8 bg-[#f7faee] p-5">
-                    <p className="font-heading text-2xl font-semibold tracking-tight text-ink">Your pass</p>
+                  <div className="rounded-none border border-ink/8 bg-[#f7faee] p-5">
+                    <p className="font-heading text-2xl font-semibold tracking-tight text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-1" : undefined}>Your pass</p>
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">
                       <MetaTile
                         label="Status"
@@ -1305,7 +1305,7 @@ export function WalletSurface({
                     </div>
                     {homepageMode ? (
                       <Link
-                        className="mt-4 inline-flex w-fit rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist transition hover:bg-[#24364d]"
+                        className="zk-button mt-4 inline-flex w-fit rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist transition hover:bg-[#24364d]"
                         href="/wallet"
                       >
                         View pass
@@ -1342,7 +1342,7 @@ export function WalletSurface({
                       <button
                         className="rounded-full bg-ink px-6 py-3 text-sm font-semibold text-mist"
                         onClick={openFlow}
-                      >
+                       data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-2" : undefined}>
                         View application
                       </button>
                     </div>
@@ -1351,17 +1351,17 @@ export function WalletSurface({
                   <>
                     {isPhysicalLane ? (
                       onboardingMode && !physicalEntryExplicit ? (
-                        <div className="rounded-[26px] bg-[#f7faee] p-5 text-sm text-ink/76">
-                          <p className="font-medium text-ink">Select a store</p>
+                        <div className="rounded-none bg-[#f7faee] p-5 text-sm text-ink/76">
+                          <p className="font-medium text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-3" : undefined}>Select a store</p>
                           <AffiliateStoreSelector
                             selectedStoreId={selectedAffiliateStoreId}
                             onSelect={setSelectedAffiliateStoreId}
                           />
                         </div>
                       ) : (
-                        <div className="rounded-[26px] bg-[#f7faee] p-5 text-sm text-ink/76">
-                          <p className="font-medium text-ink">This store session is ready</p>
-                          <p className="mt-2 leading-6">
+                        <div className="rounded-none bg-[#f7faee] p-5 text-sm text-ink/76">
+                          <p className="font-medium text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-4" : undefined}>This store session is ready</p>
+                          <p className="mt-2 leading-6" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-5" : undefined}>
                             Create a local holder key, then show your temporary customer QR to a staff
                             member with your physical ID. Zik receives the age-check result, not your
                             identity details.
@@ -1423,7 +1423,7 @@ export function WalletSurface({
                     >
                       {isPhysicalLane && !onboardingMode ? (
                         <Link
-                          className="rounded-full bg-ink px-6 py-3 text-sm font-semibold text-mist transition"
+                          className="zk-button rounded-full bg-ink px-6 py-3 text-sm font-semibold text-mist transition"
                           href={onboardingHref}
                         >
                           Get Zik Pass
@@ -1451,7 +1451,7 @@ export function WalletSurface({
                         </button>
                       )}
                       {onboardingMode ? (
-                        <p className="mb-[50px] max-w-sm text-xs leading-5 text-ink/55">
+                        <p className="mb-[50px] max-w-sm text-xs leading-5 text-ink/55" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-6" : undefined}>
                           A physical check of your ID will be made by the affiliate verifier
                         </p>
                       ) : null}
@@ -1459,14 +1459,14 @@ export function WalletSurface({
                         <button
                           className="rounded-full border border-ink/10 bg-[#f7faee] px-6 py-3 text-sm font-medium text-ink hover:bg-[#edf3df]"
                           onClick={() => setIsLearnMoreOpen(true)}
-                        >
+                         data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-7" : undefined}>
                           Learn more
                         </button>
                       ) : null}
                     </div>
 
                     {!onboardingMode && !homepageMode ? (
-                      <div className="grid gap-4 rounded-[26px] bg-[#f7faee] p-5 sm:grid-cols-3">
+                      <div className="grid gap-4 rounded-none bg-[#f7faee] p-5 sm:grid-cols-3">
                         {isPhysicalLane ? (
                           <>
                             <HeroMetric label="Assurance" value="In-person verified" dark />
@@ -1489,7 +1489,7 @@ export function WalletSurface({
           </div>
 
           {!onboardingMode ? (
-            <div className="space-y-6 rounded-[32px] py-6 pl-[25px] md:order-2 md:flex md:self-stretch md:flex-col md:space-y-0 md:py-8">
+            <div className="space-y-6 rounded-none py-6 pl-[25px] md:order-2 md:flex md:self-stretch md:flex-col md:space-y-0 md:py-8">
             <div className="flex flex-wrap gap-2">
               <HeroViewTab
                 active={heroViewMode === "how_to_get"}
@@ -1542,7 +1542,7 @@ export function WalletSurface({
                         className="rounded-full bg-ink px-4 py-[10px] text-[12px] font-semibold text-mist transition hover:bg-[#24364d]"
                         onClick={() => setIsLearnMoreOpen(true)}
                         type="button"
-                      >
+                       data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-8" : undefined}>
                         Learn more
                       </button>
                     ) : (
@@ -1559,7 +1559,7 @@ export function WalletSurface({
                 </>
               ) : heroViewMode === "parental_controls" ? (
                 <div className="-mt-[10px] min-h-[248px] space-y-4 sm:min-h-[272px]">
-                  <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-ink/44">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-ink/44" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-9" : undefined}>
                     Coming soon
                   </p>
                   <h2 className="max-w-3xl font-heading text-5xl font-semibold leading-[0.92] tracking-tight text-ink sm:text-6xl">
@@ -1569,7 +1569,7 @@ export function WalletSurface({
                     {parentalControlsSlide.body}
                   </p>
                   <Link
-                    className="inline-flex w-fit rounded-full bg-ink px-4 py-[10px] text-[12px] font-semibold text-mist transition hover:bg-[#24364d]"
+                    className="zk-button inline-flex w-fit rounded-full bg-ink px-4 py-[10px] text-[12px] font-semibold text-mist transition hover:bg-[#24364d]"
                     href="/ZikParental"
                   >
                     Learn more
@@ -1577,7 +1577,7 @@ export function WalletSurface({
                 </div>
               ) : (
                 <>
-                  <div className="min-h-[248px] overflow-hidden rounded-[28px] border border-ink/10 bg-white/74 shadow-[0_18px_40px_rgba(14,23,38,0.06)] sm:min-h-[272px]">
+                  <div className="min-h-[248px] overflow-hidden rounded-none border border-ink/10 bg-white/74 shadow-[0_18px_40px_rgba(14,23,38,0.06)] sm:min-h-[272px]">
                     <div
                       className="flex h-full w-full transition-transform duration-500 ease-out"
                       style={{
@@ -1635,7 +1635,7 @@ export function WalletSurface({
           >
           <ul className="grid gap-4">
             <li className="flex items-start gap-3">
-              <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#eef6df] text-sm font-semibold text-ink">
+              <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#eef6df] text-sm font-semibold text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-10" : undefined}>
                 ✓
               </span>
               <div>
@@ -1650,11 +1650,11 @@ export function WalletSurface({
               </div>
             </li>
             <li className="flex items-start gap-3">
-              <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#eef6df] text-sm font-semibold text-ink">
+              <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#eef6df] text-sm font-semibold text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-11" : undefined}>
                 ✓
               </span>
               <div>
-                <p className="text-sm font-medium text-ink">Private by design</p>
+                <p className="text-sm font-medium text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-12" : undefined}>Private by design</p>
                 <p className="mt-1 text-sm leading-6 text-ink/68">
                   {isPhysicalLane
                     ? "Zik receives the staff-confirmed 18+ result, not your name, date of birth, address, ID number, or ID image."
@@ -1663,7 +1663,7 @@ export function WalletSurface({
               </div>
             </li>
             <li className="flex items-start gap-3">
-              <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#eef6df] text-sm font-semibold text-ink">
+              <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#eef6df] text-sm font-semibold text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-13" : undefined}>
                 ✓
               </span>
               <div>
@@ -1701,7 +1701,7 @@ export function WalletSurface({
                 isDarkChrome ? "bg-white/10 text-mist" : "bg-ink text-mist"
               )}
               onClick={resetFlow}
-            >
+             data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-14" : undefined}>
               Reset local wallet
             </button>
             {enrollment && !credential ? (
@@ -1712,7 +1712,7 @@ export function WalletSurface({
                 )}
                 disabled={isPending}
                 onClick={advanceCoolingOff}
-              >
+               data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-15" : undefined}>
                 Complete cooling-off
               </button>
             ) : null}
@@ -1736,7 +1736,7 @@ export function WalletSurface({
         <section
           aria-live="polite"
           className={clsx(
-            "pointer-events-auto mx-auto w-[85%] max-w-[1088px] rounded-[22px] p-1.5 opacity-30 transition-[opacity,background-color] duration-200 sm:p-2",
+            "pointer-events-auto mx-auto w-[85%] max-w-[1088px] rounded-none p-1.5 opacity-30 transition-[opacity,background-color] duration-200 sm:p-2",
             isDarkChrome
               ? "border border-white/10 bg-[#0a0f18]/90 backdrop-blur-md hover:opacity-100"
               : "bg-white/80 shadow-[0_-12px_36px_rgba(14,23,38,0.08)] hover:bg-[linear-gradient(180deg,_rgba(255,255,255,0.94),_rgba(244,247,238,0.94))] hover:opacity-100"
@@ -1749,7 +1749,7 @@ export function WalletSurface({
                   "font-mono text-[11px] uppercase tracking-[0.24em]",
                   isDarkChrome ? "text-mist/45" : "text-ink/45"
                 )}
-              >
+               data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-16" : undefined}>
                 Your status
               </p>
               <StatusPill
@@ -1826,14 +1826,14 @@ export function WalletSurface({
         >
           <div className="flex h-full w-full flex-col items-stretch justify-center p-2 sm:p-6">
             <div
-              className="relative mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col overflow-hidden rounded-[30px] border border-white/65 bg-[linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(244,247,238,0.97))] p-2 shadow-[0_36px_120px_rgba(14,23,38,0.28)] sm:rounded-[40px] sm:p-6"
+              className="relative mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col overflow-hidden rounded-none border border-white/65 bg-[linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(244,247,238,0.97))] p-2 shadow-[0_36px_120px_rgba(14,23,38,0.28)] sm:rounded-none sm:p-6"
               onClick={(event) => event.stopPropagation()}
             >
               <button
                 aria-label="Close Zik Pass form"
                 className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full border border-ink/10 bg-white text-lg text-ink hover:bg-[#f4f7ee] sm:right-4 sm:top-4 sm:h-11 sm:w-11 sm:text-xl"
                 onClick={closeFlow}
-              >
+               data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-17" : undefined}>
                 ×
               </button>
 
@@ -2056,9 +2056,9 @@ export function WalletSurface({
                     }
                     onNext={() => setStep("device-security")}
                   >
-                    <div className="rounded-[28px] bg-[linear-gradient(135deg,_rgba(215,241,113,0.18),_rgba(105,225,200,0.12))] p-5 text-sm text-ink/78">
-                      <p className="font-medium text-ink">Why we ask for this</p>
-                      <p className="mt-2 leading-6">
+                    <div className="rounded-none bg-[linear-gradient(135deg,_rgba(215,241,113,0.18),_rgba(105,225,200,0.12))] p-5 text-sm text-ink/78">
+                      <p className="font-medium text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-18" : undefined}>Why we ask for this</p>
+                      <p className="mt-2 leading-6" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-19" : undefined}>
                         We send a temporary refundable GBP 0.01 verification reference so you can
                         confirm you control a real adult-linked bank account.
                       </p>
@@ -2104,8 +2104,8 @@ export function WalletSurface({
                     }
                     onNext={startEnrollmentSubmission}
                   >
-                    <div className="rounded-[28px] bg-ink/5 p-5 text-sm text-ink/78">
-                      <p className="font-medium text-ink">What happens next</p>
+                    <div className="rounded-none bg-ink/5 p-5 text-sm text-ink/78">
+                      <p className="font-medium text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-20" : undefined}>What happens next</p>
                       <div className="mt-3 grid gap-3 sm:grid-cols-3">
                         <InlineDetail title="Local key" body="Created on this device and kept private." />
                         <InlineDetail
@@ -2158,7 +2158,7 @@ export function WalletSurface({
                     onNext={startDeviceAuthentication}
                   >
                     <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-                      <div className="rounded-[28px] bg-ink p-5 text-mist">
+                      <div className="rounded-none bg-ink p-5 text-mist">
                         <div className="flex flex-wrap items-center gap-3">
                           <StatusPill tone="good">
                             {enrollment.physical_verification.session.store_name}
@@ -2169,22 +2169,22 @@ export function WalletSurface({
                               : "Waiting for staff"}
                           </StatusPill>
                         </div>
-                        <p className="mt-5 font-heading text-2xl font-semibold tracking-tight">
+                        <p className="mt-5 font-heading text-2xl font-semibold tracking-tight" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-21" : undefined}>
                           Choose the strongest device authentication available.
                         </p>
-                        <p className="mt-2 text-sm leading-6 text-mist/76">
+                        <p className="mt-2 text-sm leading-6 text-mist/76" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-22" : undefined}>
                           WebAuthn will use your platform authenticator when available. The demo
                           device check keeps the architecture explicit when a full authenticator
                           prompt is not available in this browser.
                         </p>
                         {deviceAuthSummary ? (
-                          <p className="mt-4 rounded-[20px] bg-white/10 px-4 py-3 text-sm text-mist/82">
+                          <p className="mt-4 rounded-none bg-white/10 px-4 py-3 text-sm text-mist/82">
                             {deviceAuthSummary}
                           </p>
                         ) : null}
                       </div>
-                      <div className="rounded-[28px] bg-white p-5">
-                        <p className="font-medium text-ink">Authentication method</p>
+                      <div className="rounded-none bg-white p-5">
+                        <p className="font-medium text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-23" : undefined}>Authentication method</p>
                         <div className="mt-4 grid gap-3">
                           <AnswerButton
                             active={deviceAuthMethod === "webauthn"}
@@ -2274,7 +2274,7 @@ export function WalletSurface({
                           issuedZignatureSeed ?? pendingZignatureSeed ?? enrollment.id
                         }
                       />
-                      <div className="rounded-[28px] bg-white p-5">
+                      <div className="rounded-none bg-white p-5">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div>
                             <p className="font-heading text-2xl font-semibold tracking-tight text-ink">
@@ -2284,7 +2284,7 @@ export function WalletSurface({
                                   ? "Waiting for issuer signature"
                                   : "Waiting for issuer signature"}
                             </p>
-                            <p className="mt-1 text-sm text-ink/68">
+                            <p className="mt-1 text-sm text-ink/68" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-24" : undefined}>
                               You can come back at any time. No account is required, and your
                               identity details are not included in the pass that will be stored on
                               this device.
@@ -2345,7 +2345,7 @@ export function WalletSurface({
                           value={formatIssuanceChannel(credential.payload.issuance_channel)}
                         />
                       </div>
-                      <div className="rounded-[28px] bg-white p-5 text-sm text-ink/76">
+                      <div className="rounded-none bg-white p-5 text-sm text-ink/76">
                         <div className="grid gap-3 sm:grid-cols-3">
                           <InlineDetail
                             title="What sites see"
@@ -2401,7 +2401,7 @@ export function WalletSurface({
                       setError(null);
                     }}
                   >
-                    <div className="rounded-[28px] bg-blush/35 p-5 text-sm text-ink/80">
+                    <div className="rounded-none bg-blush/35 p-5 text-sm text-ink/80">
                       <ul className="space-y-2">
                         {(enrollment.risk_decision.reasons.length > 0
                           ? enrollment.risk_decision.reasons
@@ -2437,7 +2437,7 @@ export function WalletSurface({
           <div className="flex min-h-screen items-center justify-center p-4 sm:p-6">
             <div
               className={clsx(
-                "w-full max-w-4xl rounded-[36px] p-6 sm:p-8",
+                "w-full max-w-4xl rounded-none p-6 sm:p-8",
                 isDarkChrome
                   ? "border border-white/10 bg-[#0a0f18]"
                   : "border border-white/70 bg-[linear-gradient(135deg,_rgba(255,255,255,0.98),_rgba(245,249,231,0.98))] shadow-[0_36px_120px_rgba(14,23,38,0.24)]"
@@ -2450,7 +2450,7 @@ export function WalletSurface({
                     "font-heading text-3xl font-semibold tracking-tight sm:text-4xl",
                     isDarkChrome ? "text-mist" : "text-ink"
                   )}
-                >
+                 data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-25" : undefined}>
                   How Zik Pass works
                 </h3>
                 <button
@@ -2462,7 +2462,7 @@ export function WalletSurface({
                       : "border border-ink/10 bg-white text-ink hover:bg-[#f4f7ee]"
                   )}
                   onClick={() => setIsLearnMoreOpen(false)}
-                >
+                 data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-26" : undefined}>
                   ×
                 </button>
               </div>
@@ -2506,7 +2506,7 @@ export function WalletSurface({
                 />
               </div>
 
-              <div className={clsx("mt-6 rounded-[28px] p-6", isDarkChrome ? "bg-white/[0.04]" : "bg-[#0f1721] text-mist")}>
+              <div className={clsx("mt-6 rounded-none p-6", isDarkChrome ? "bg-white/[0.04]" : "bg-[#0f1721] text-mist")}>
                 <div className="grid gap-4 md:grid-cols-3">
                   {isPhysicalLane ? (
                     <>
@@ -2565,7 +2565,7 @@ function HomepageHero({
     <section className="relative py-6 sm:py-10">
       <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-16">
         <div className="space-y-7">
-          <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-lime/80">
+          <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-lime/80" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-27" : undefined}>
             Private &middot; Over 18
           </p>
           <h1 className="max-w-xl font-heading text-[2.75rem] font-semibold leading-[0.94] tracking-tight text-mist sm:text-6xl lg:text-[4.5rem]">
@@ -2582,7 +2582,7 @@ function HomepageHero({
           </p>
 
           {error ? (
-            <p className="max-w-md rounded-2xl border border-[#f8c8b4]/25 bg-[#f8c8b4]/[0.06] px-4 py-3 text-sm text-[#f8c8b4]" role="alert">
+            <p className="max-w-md rounded-none border border-[#f8c8b4]/25 bg-[#f8c8b4]/[0.06] px-4 py-3 text-sm text-[#f8c8b4]" role="alert">
               {error}
             </p>
           ) : null}
@@ -2590,14 +2590,14 @@ function HomepageHero({
           <div className="flex flex-wrap items-center gap-3 pt-1">
             {credential ? (
               <Link
-                className="rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-lime/90"
+                className="zk-button rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-lime/90"
                 href="/wallet"
               >
                 View pass
               </Link>
             ) : isPhysicalLane && !isPendingIssuance ? (
               <Link
-                className="rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-lime/90"
+                className="zk-button rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-lime/90"
                 href={onboardingHref}
               >
                 Get Zik Pass
@@ -2616,7 +2616,7 @@ function HomepageHero({
               className="rounded-full border border-white/15 px-6 py-3.5 text-sm font-medium text-mist/70 transition hover:border-white/30 hover:text-mist"
               onClick={onLearnMore}
               type="button"
-            >
+             data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-28" : undefined}>
               How it works
             </button>
           </div>
@@ -2694,8 +2694,8 @@ function OnboardingHero({
         <div className="animate-float-slow mx-auto mb-[88px] flex h-[100px] w-[100px] items-center justify-center">
           <ZikLogoMark className="h-full w-full" tone="light" />
         </div>
-        <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-lime/80">Prove over 18 &middot; Privately</p>
-        <h1 className="mt-4 font-heading text-5xl font-semibold leading-[0.94] tracking-tight text-mist sm:text-6xl">
+        <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-lime/80" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-29" : undefined}>Prove over 18 &middot; Privately</p>
+        <h1 className="mt-4 font-heading text-5xl font-semibold leading-[0.94] tracking-tight text-mist sm:text-6xl" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-30" : undefined}>
           Verify in person.
         </h1>
       </div>
@@ -2703,7 +2703,7 @@ function OnboardingHero({
       <div className="mx-auto mt-10 max-w-xl">
         {credential ? (
           <div className="space-y-6 text-center">
-            <p className="text-base text-mist/50">Your pass is ready.</p>
+            <p className="text-base text-mist/50" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-31" : undefined}>Your pass is ready.</p>
             <div className="mx-auto max-w-sm">
               <PassPreviewCard
                 active={walletStatus.credential_active}
@@ -2712,7 +2712,7 @@ function OnboardingHero({
               />
             </div>
             <Link
-              className="inline-flex rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-lime/90"
+              className="zk-button inline-flex rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-lime/90"
               href="/wallet"
             >
               View pass
@@ -2720,9 +2720,9 @@ function OnboardingHero({
           </div>
         ) : isPendingIssuance ? (
           <div className="space-y-6 text-center">
-            <p className="text-base text-mist/50">Zik is finishing your pass.</p>
+            <p className="text-base text-mist/50" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-32" : undefined}>Zik is finishing your pass.</p>
             <div className="relative mx-auto max-w-sm">
-              <span className="absolute -top-3 left-6 z-10 rounded-full bg-[#0a0f18] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-mist/45 ring-1 ring-white/10">
+              <span className="absolute -top-3 left-6 z-10 rounded-full bg-[#0a0f18] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-mist/45 ring-1 ring-white/10" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-33" : undefined}>
                 Signing in progress
               </span>
               <PassPreviewCard active={false} zignatureSeedInput={cardSeed} />
@@ -2731,22 +2731,22 @@ function OnboardingHero({
               className="rounded-full bg-lime px-7 py-3.5 text-sm font-semibold text-ink transition hover:bg-lime/90"
               onClick={onViewApplication}
               type="button"
-            >
+             data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-34" : undefined}>
               View application
             </button>
           </div>
         ) : isPhysicalLane ? (
           <div className="space-y-6">
             {physicalEntryExplicit ? (
-              <p className="text-center text-base text-mist/50">Your store session is ready.</p>
+              <p className="text-center text-base text-mist/50" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-35" : undefined}>Your store session is ready.</p>
             ) : (
               <>
-                <p className="text-center text-base text-mist/50">Choose a nearby store to start.</p>
+                <p className="text-center text-base text-mist/50" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-36" : undefined}>Choose a nearby store to start.</p>
                 <AffiliateStoreSelector selectedStoreId={selectedAffiliateStoreId} onSelect={onSelectStore} />
               </>
             )}
             {error ? (
-              <p className="rounded-2xl border border-[#f8c8b4]/25 bg-[#f8c8b4]/[0.06] px-4 py-3 text-sm text-[#f8c8b4]" role="alert">
+              <p className="rounded-none border border-[#f8c8b4]/25 bg-[#f8c8b4]/[0.06] px-4 py-3 text-sm text-[#f8c8b4]" role="alert">
                 {error}
               </p>
             ) : null}
@@ -2756,7 +2756,7 @@ function OnboardingHero({
                 disabled={isPending || !canBegin}
                 onClick={onBegin}
                 type="button"
-              >
+               data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-37" : undefined}>
                 Begin
               </button>
             </div>
@@ -2784,7 +2784,7 @@ function OnboardingHero({
               onChange={(value) => onAnswerChange({ dateOfBirth: value })}
             />
             {error ? (
-              <p className="rounded-2xl border border-[#f8c8b4]/25 bg-[#f8c8b4]/[0.06] px-4 py-3 text-sm text-[#f8c8b4]" role="alert">
+              <p className="rounded-none border border-[#f8c8b4]/25 bg-[#f8c8b4]/[0.06] px-4 py-3 text-sm text-[#f8c8b4]" role="alert">
                 {error}
               </p>
             ) : null}
@@ -2794,7 +2794,7 @@ function OnboardingHero({
                 disabled={isPending || !canBegin}
                 onClick={onBegin}
                 type="button"
-              >
+               data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-38" : undefined}>
                 Begin
               </button>
             </div>
@@ -2815,13 +2815,13 @@ function AffiliateStoreSelector({
   return (
     <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
       <div
-        className="relative min-h-[220px] overflow-hidden rounded-[24px] bg-[#0e1a14]"
+        className="relative min-h-[220px] overflow-hidden rounded-none bg-[#0e1a14]"
         style={{
           backgroundImage:
             "linear-gradient(28deg, transparent 46%, rgba(255,255,255,0.2) 47%, rgba(255,255,255,0.2) 50%, transparent 51%), linear-gradient(112deg, transparent 44%, rgba(255,255,255,0.16) 45%, rgba(255,255,255,0.16) 48%, transparent 49%), radial-gradient(circle at 30% 30%, rgba(215,241,113,0.14), transparent 55%)"
         }}
       >
-        <p className="absolute left-4 top-4 rounded-full border border-white/10 bg-black/40 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-mist/55">
+        <p className="absolute left-4 top-4 rounded-full border border-white/10 bg-black/40 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-mist/55" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-39" : undefined}>
           Affiliate locations
         </p>
         {affiliateStores.map((store) => {
@@ -2913,11 +2913,11 @@ function WalletStatusFooter({
     >
       <section
         aria-live="polite"
-        className="pointer-events-auto mx-auto w-[85%] max-w-[1088px] rounded-[22px] bg-white/80 p-1.5 opacity-25 shadow-[0_-12px_36px_rgba(14,23,38,0.08)] transition-[opacity,background-image,background-color] duration-200 hover:bg-[linear-gradient(180deg,_rgba(255,255,255,0.94),_rgba(244,247,238,0.94))] hover:opacity-100 sm:p-2"
+        className="pointer-events-auto mx-auto w-[85%] max-w-[1088px] rounded-none bg-white/80 p-1.5 opacity-25 shadow-[0_-12px_36px_rgba(14,23,38,0.08)] transition-[opacity,background-image,background-color] duration-200 hover:bg-[linear-gradient(180deg,_rgba(255,255,255,0.94),_rgba(244,247,238,0.94))] hover:opacity-100 sm:p-2"
       >
         <div className="flex flex-wrap items-center gap-2 px-1 py-0.5">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-ink/45">Your status</p>
+            <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-ink/45" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-40" : undefined}>Your status</p>
             <StatusPill tone={statusLabel === "Active" ? "good" : statusLabel === "Expired" ? "warn" : "neutral"}>
               {statusLabel}
             </StatusPill>
@@ -3029,7 +3029,7 @@ function PhysicalOnboardingExperience({
             className="rounded-full bg-ink px-7 py-4 text-base font-semibold text-mist"
             onClick={onReset}
             type="button"
-          >
+           data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-41" : undefined}>
             Start again
           </button>
         </div>
@@ -3053,7 +3053,7 @@ function PhysicalOnboardingExperience({
             className="rounded-full bg-ink px-7 py-4 text-base font-semibold text-mist"
             onClick={onReset}
             type="button"
-          >
+           data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-42" : undefined}>
             Start again
           </button>
         </div>
@@ -3070,9 +3070,9 @@ function PhysicalOnboardingExperience({
         body="Your in-person verified pass has been delivered to this device."
       >
         <div className="zik-stage-pop grid w-full max-w-xl gap-7">
-          <div className="rounded-[30px] border border-ink/8 bg-[#f7faee] p-5 text-ink ring-1 ring-ink/4">
-            <p className="font-mono text-xs uppercase text-ink/48">Over 18</p>
-            <p className="mt-2 font-heading text-5xl font-semibold">In-person verified</p>
+          <div className="rounded-none border border-ink/8 bg-[#f7faee] p-5 text-ink ring-1 ring-ink/4">
+            <p className="font-mono text-xs uppercase text-ink/48" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-43" : undefined}>Over 18</p>
+            <p className="mt-2 font-heading text-5xl font-semibold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-44" : undefined}>In-person verified</p>
             <Zignature
               animate
               className="mt-6 h-24 w-full"
@@ -3090,7 +3090,7 @@ function PhysicalOnboardingExperience({
               label="Install Zik Pass"
             />
             <Link
-              className="rounded-full border border-ink/15 px-7 py-4 text-center text-base font-semibold text-ink"
+              className="zk-button rounded-full border border-ink/15 px-7 py-4 text-center text-base font-semibold text-ink"
               href="/wallet"
             >
               Open wallet
@@ -3130,9 +3130,9 @@ function PhysicalOnboardingExperience({
           </div>
           <div className="grid w-full gap-3">
             <a
-              className="rounded-full border border-ink/15 px-7 py-4 text-center text-base font-semibold text-ink"
+              className="zk-button rounded-full border border-ink/15 px-7 py-4 text-center text-base font-semibold text-ink"
               href={appHref}
-            >
+             data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-45" : undefined}>
               Open Zik
             </a>
             <button
@@ -3199,18 +3199,18 @@ function PhysicalOnboardingExperience({
           <a
             aria-label="Open retailer verification screen for this temporary customer QR"
             className="block w-full"
-            href={challengeUrl ?? "/verify"}
+            href={challengeUrl ?? "/dashboard/store/verify"}
           >
             <PhysicalChallengeQr value={challengeValue} />
           </a>
           <p className="font-heading text-6xl font-semibold tracking-[0.18em] text-ink sm:text-7xl">
             {sessionCode}
           </p>
-          <p className="max-w-sm text-center text-sm font-semibold text-ink/64">
+          <p className="max-w-sm text-center text-sm font-semibold text-ink/64" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-46" : undefined}>
             Waiting for the clerk to confirm 18+
           </p>
           {alreadyPaid ? (
-            <p className="w-full rounded-[20px] border border-ink/8 bg-white/76 px-5 py-4 text-sm font-semibold text-ink" role="status">
+            <p className="w-full rounded-none border border-ink/8 bg-white/76 px-5 py-4 text-sm font-semibold text-ink" role="status" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-47" : undefined}>
               Paid at the till
             </p>
           ) : enrollment?.id ? (
@@ -3254,9 +3254,9 @@ function PhysicalStageFrame({
 }) {
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(215,241,113,0.28),_transparent_42%),_#f4f7ee] px-4 py-5 text-ink sm:px-6 sm:py-7">
-      <div className="relative mx-auto flex min-h-[calc(100vh-2.5rem)] max-w-6xl flex-col overflow-hidden rounded-[40px] border border-white/80 bg-white/76 px-5 py-7 shadow-panel backdrop-blur-sm sm:min-h-[calc(100vh-3.5rem)] sm:px-8">
+      <div className="relative mx-auto flex min-h-[calc(100vh-2.5rem)] max-w-6xl flex-col overflow-hidden rounded-none border border-white/80 bg-white/76 px-5 py-7 shadow-panel backdrop-blur-sm sm:min-h-[calc(100vh-3.5rem)] sm:px-8">
         <div className={`absolute inset-x-0 top-0 h-1.5 ${accent}`} />
-        <p className="hidden text-center text-sm font-semibold text-ink/45 lg:block">Continue on your phone</p>
+        <p className="hidden text-center text-sm font-semibold text-ink/45 lg:block" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-48" : undefined}>Continue on your phone</p>
         <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center gap-10 text-center">
           <div className="zik-stage-copy">
             <h1 className="font-heading text-6xl font-semibold leading-[0.9] text-ink sm:text-8xl">{title}</h1>
@@ -3306,17 +3306,17 @@ function PhysicalChallengeQr({ value }: { value: string }) {
   return (
     <div
       aria-label="Temporary customer verification QR"
-      className="grid w-full max-w-[430px] place-items-center rounded-[34px] bg-white p-5 shadow-[0_28px_90px_rgba(0,0,0,0.22)]"
+      className="grid w-full max-w-[430px] place-items-center rounded-none bg-white p-5 shadow-[0_28px_90px_rgba(0,0,0,0.22)]"
     >
       {qrDataUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           alt="Temporary customer verification QR"
-          className="h-auto w-full rounded-[18px]"
+          className="h-auto w-full rounded-none"
           src={qrDataUrl}
         />
       ) : (
-        <div className="h-[320px] w-full animate-pulse rounded-[18px] bg-ink/10" />
+        <div className="h-[320px] w-full animate-pulse rounded-none bg-ink/10" />
       )}
     </div>
   );
@@ -3373,7 +3373,7 @@ function JourneyTracker({
   const activeIndex = steps.findIndex((step) => step.states.includes(state));
 
   return (
-    <div className="rounded-[22px] border border-[#c6e29e]/55 bg-[linear-gradient(180deg,_rgba(255,255,255,0.92),_rgba(237,247,219,0.96))] px-2.5 py-2.5 sm:rounded-[28px] sm:px-4 sm:py-4">
+    <div className="rounded-none border border-[#c6e29e]/55 bg-[linear-gradient(180deg,_rgba(255,255,255,0.92),_rgba(237,247,219,0.96))] px-2.5 py-2.5 sm:rounded-none sm:px-4 sm:py-4">
       <div className="-mx-0.5 flex gap-2 overflow-x-auto px-0.5 pb-0.5 sm:hidden">
         {steps.map((step, index) => {
           const complete = activeIndex > index || state === "pass_issued";
@@ -3382,7 +3382,7 @@ function JourneyTracker({
           return (
             <div
               key={step.label}
-              className={`min-w-[118px] shrink-0 rounded-[16px] px-2.5 py-2 ${
+              className={`min-w-[118px] shrink-0 rounded-none px-2.5 py-2 ${
                 complete
                   ? "bg-[linear-gradient(135deg,_#7cb56b,_#a2ce6a)] text-ink shadow-[0_10px_24px_rgba(124,181,107,0.22)]"
                   : active
@@ -3417,7 +3417,7 @@ function JourneyTracker({
           return (
             <div
               key={step.label}
-              className={`rounded-[22px] px-4 py-3 ${
+              className={`rounded-none px-4 py-3 ${
                 complete
                   ? "bg-[linear-gradient(135deg,_#7cb56b,_#a2ce6a)] text-ink shadow-[0_14px_32px_rgba(124,181,107,0.24)]"
                   : active
@@ -3457,7 +3457,7 @@ function QuestionCard({
   onNext: () => void;
 }) {
   return (
-    <div className="grid min-h-[60vh] overflow-hidden rounded-[28px] border border-ink/8 bg-transparent sm:min-h-[68vh] sm:rounded-[34px]">
+    <div className="grid min-h-[60vh] overflow-hidden rounded-none border border-ink/8 bg-transparent sm:min-h-[68vh] sm:rounded-none">
       <div className="flex flex-col justify-between p-4 sm:p-8">
         <div className="space-y-4 sm:space-y-5">
           <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/45 sm:text-xs sm:tracking-[0.24em]">
@@ -3482,7 +3482,7 @@ function QuestionCard({
             <button
               className="rounded-full border border-ink/10 bg-white px-5 py-3 text-sm font-medium text-ink"
               onClick={onBack}
-            >
+             data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-49" : undefined}>
               Back
             </button>
           ) : null}
@@ -3528,7 +3528,7 @@ function FullscreenCard({
 
   return (
     <div
-      className={`grid min-h-[68vh] min-w-0 w-full max-w-full overflow-hidden rounded-[34px] border border-ink/8 bg-transparent ${
+      className={`grid min-h-[68vh] min-w-0 w-full max-w-full overflow-hidden rounded-none border border-ink/8 bg-transparent ${
         showPassPreview ? "lg:grid-cols-[1.12fr_0.88fr]" : ""
       }`}
     >
@@ -3546,7 +3546,7 @@ function FullscreenCard({
 
         {!renderActionAside && actionHref ? (
           <Link
-            className={`mt-8 inline-flex rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist ${
+            className={`zk-button mt-8 inline-flex rounded-full bg-ink px-5 py-3 text-sm font-semibold text-mist ${
               actionClassName ?? "w-fit"
             }`}
             href={actionHref}
@@ -3570,7 +3570,7 @@ function FullscreenCard({
           <aside className="relative flex min-w-0 w-full items-center justify-center border-t border-ink/10 p-4 sm:p-8 lg:border-l lg:border-t-0">
             {actionHref ? (
               <Link
-                className={`inline-flex h-[150px] w-full max-w-[400px] items-center justify-center rounded-full px-5 py-4 text-center font-semibold sm:px-8 ${
+                className={`zk-button inline-flex h-[150px] w-full max-w-[400px] items-center justify-center rounded-full px-5 py-4 text-center font-semibold sm:px-8 ${
                   actionClassName ?? "w-full max-w-xs justify-center"
                 }`}
                 href={actionHref}
@@ -3604,7 +3604,7 @@ function IdentityCheckIntro({
   lane?: "remote" | "physical";
 }) {
   return (
-    <div className={`mb-6 rounded-[28px] bg-ink/5 px-5 py-3.5 text-ink/78 ${compact ? "mt-4" : ""}`}>
+    <div className={`mb-6 rounded-none bg-ink/5 px-5 py-3.5 text-ink/78 ${compact ? "mt-4" : ""}`}>
       <p className="font-heading text-xl font-semibold tracking-tight text-ink">
         {lane === "physical" ? "Prepare your in-store verification" : "Help us find your financial record"}
       </p>
@@ -3616,13 +3616,13 @@ function IdentityCheckIntro({
       <div className="mt-3 space-y-1.5 text-sm text-ink/68">
         {lane === "physical" ? (
           <>
-            <p>Staff will verify your ID in person before the pass is issued.</p>
-            <p>This device must complete device authentication before the pass can be delivered.</p>
+            <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-50" : undefined}>Staff will verify your ID in person before the pass is issued.</p>
+            <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-51" : undefined}>This device must complete device authentication before the pass can be delivered.</p>
           </>
         ) : (
           <>
-            <p>This is a soft check and won&apos;t affect your credit score.</p>
-            <p>We don&apos;t see your transactions or store your personal data after this step.</p>
+            <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-52" : undefined}>This is a soft check and won&apos;t affect your credit score.</p>
+            <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-53" : undefined}>We don&apos;t see your transactions or store your personal data after this step.</p>
           </>
         )}
       </div>
@@ -3645,7 +3645,7 @@ function PhysicalVerificationPanel({
 
   return (
     <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-      <div className="rounded-[28px] bg-ink p-5 text-mist">
+      <div className="rounded-none bg-ink p-5 text-mist">
         <div className="flex flex-wrap items-center gap-3">
           <StatusPill tone="good">{verification.session.store_name}</StatusPill>
           <StatusPill tone="neutral">
@@ -3658,7 +3658,7 @@ function PhysicalVerificationPanel({
         <p className="mt-5 text-center font-heading text-5xl font-semibold tracking-[0.18em]">
           {verification.user_code.value}
         </p>
-        <p className="mt-3 text-sm leading-6 text-mist/76">
+        <p className="mt-3 text-sm leading-6 text-mist/76" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-54" : undefined}>
           This short-lived QR/code identifies only this verification session. It does not contain
           your name, date of birth, address, ID number, or ID image.
         </p>
@@ -3672,7 +3672,7 @@ function PhysicalVerificationPanel({
         </div>
       </div>
 
-                      <div className="rounded-[28px] bg-white p-5 text-sm text-ink/76">
+                      <div className="rounded-none bg-white p-5 text-sm text-ink/76">
         <div className="space-y-3">
           <InstructionRow number="1" body="Show this code to the staff member assisting you." />
           <InstructionRow number="2" body="When prompted, show your ID." />
@@ -3681,7 +3681,7 @@ function PhysicalVerificationPanel({
             body="Complete device authentication in person for stronger proof."
           />
         </div>
-        <div className="mt-5 rounded-[20px] bg-ink/5 px-4 py-3 text-sm text-ink/72">
+        <div className="mt-5 rounded-none bg-ink/5 px-4 py-3 text-sm text-ink/72">
           {physicalSession?.status === "awaiting_device_auth" ||
           verification.clerk_verification.status === "verified"
             ? "ID check confirmed. Device authentication is next."
@@ -3728,12 +3728,12 @@ function CustomerSessionQr({ value }: { value: string }) {
   return (
     <div
       aria-label="Temporary customer verification QR"
-      className="mx-auto mt-6 grid w-full max-w-[260px] grid-cols-[repeat(13,minmax(0,1fr))] gap-1 rounded-[24px] bg-white p-4"
+      className="mx-auto mt-6 grid w-full max-w-[260px] grid-cols-[repeat(13,minmax(0,1fr))] gap-1 rounded-none bg-white p-4"
     >
       {cells.map((filled, index) => (
         <span
           key={index}
-          className={`aspect-square rounded-[3px] ${filled ? "bg-ink" : "bg-[#edf6d7]"}`}
+          className={`aspect-square rounded-none ${filled ? "bg-ink" : "bg-[#edf6d7]"}`}
         />
       ))}
     </div>
@@ -3753,7 +3753,7 @@ function BankVerificationPanel({ enrollment }: { enrollment: EnrollmentRecord })
 
   return (
     <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-      <div className="rounded-[28px] bg-ink p-5 text-mist">
+      <div className="rounded-none bg-ink p-5 text-mist">
         <div className="flex flex-wrap items-center gap-3">
           <StatusPill tone="good">{enrollment.bank_verification.bank_name}</StatusPill>
           <StatusPill
@@ -3773,7 +3773,7 @@ function BankVerificationPanel({ enrollment }: { enrollment: EnrollmentRecord })
           <BankMetaTile label="Reference" value={enrollment.bank_verification.reference} />
           <BankMetaTile label="Refund" value="Automatic" />
         </div>
-        <p className="mt-5 text-sm leading-6 text-mist/78">
+        <p className="mt-5 text-sm leading-6 text-mist/78" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-55" : undefined}>
           This temporary refundable authorisation helps confirm you control a real adult-linked
           account. Zik does not see your balance or transaction history.
         </p>
@@ -3782,8 +3782,8 @@ function BankVerificationPanel({ enrollment }: { enrollment: EnrollmentRecord })
         </p>
       </div>
 
-      <div className="rounded-[28px] bg-white p-5 text-sm text-ink/76">
-        <p className="font-medium text-ink">What to do</p>
+      <div className="rounded-none bg-white p-5 text-sm text-ink/76">
+        <p className="font-medium text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-56" : undefined}>What to do</p>
         <div className="mt-3 space-y-3">
           <InstructionRow
             number="1"
@@ -3799,7 +3799,7 @@ function BankVerificationPanel({ enrollment }: { enrollment: EnrollmentRecord })
           />
         </div>
         {enrollment.last_user_message ? (
-          <p className="mt-5 rounded-[20px] bg-ink/5 px-4 py-3 text-sm text-ink/72">
+          <p className="mt-5 rounded-none bg-ink/5 px-4 py-3 text-sm text-ink/72">
             {enrollment.last_user_message}
           </p>
         ) : null}
@@ -3818,17 +3818,17 @@ export function PassPreviewCard({
   zignatureSeedInput: string;
 }) {
   return (
-    <div className="relative min-w-0 w-full max-w-full overflow-hidden rounded-[32px] bg-[linear-gradient(135deg,_#243818_0%,_#557f33_48%,_#a2ce6a_100%)] p-4 text-mist sm:p-6">
+    <div className="relative min-w-0 w-full max-w-full overflow-hidden rounded-none bg-[linear-gradient(135deg,_#243818_0%,_#557f33_48%,_#a2ce6a_100%)] p-4 text-mist sm:p-6">
       <div className="absolute -right-10 top-0 h-40 w-40 rounded-full bg-[#e9f8c9]/20 blur-3xl" />
       <div className="relative min-w-0">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.24em] text-[#edf9d1]">Zik Pass</p>
-            <p className="mt-2 font-heading text-3xl font-semibold tracking-tight">Over 18</p>
+            <p className="font-mono text-xs uppercase tracking-[0.24em] text-[#edf9d1]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-57" : undefined}>Zik Pass</p>
+            <p className="mt-2 font-heading text-3xl font-semibold tracking-tight" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-58" : undefined}>Over 18</p>
           </div>
           <StatusPill tone={active ? "good" : "neutral"}>{active ? "Active" : "Activating"}</StatusPill>
         </div>
-        <div className="mt-7 min-w-0 rounded-[26px] border border-white/12 bg-white/8 px-3 py-6 sm:px-4">
+        <div className="mt-7 min-w-0 rounded-none border border-white/12 bg-white/8 px-3 py-6 sm:px-4">
           <Zignature
             animate={active}
             className="h-20 w-full"
@@ -3864,11 +3864,11 @@ function CredentialVisualPreview({
   muted?: boolean;
 }) {
   return (
-    <div className="rounded-[28px] border border-ink/10 bg-white/88 p-5 shadow-[0_18px_40px_rgba(14,23,38,0.08)]">
-      <div className="rounded-[24px] bg-[#f7faee] p-5">
-        <div className="rounded-[22px] border border-ink/8 bg-white/75 px-4 py-4">
+    <div className="rounded-none border border-ink/10 bg-white/88 p-5 shadow-[0_18px_40px_rgba(14,23,38,0.08)]">
+      <div className="rounded-none bg-[#f7faee] p-5">
+        <div className="rounded-none border border-ink/8 bg-white/75 px-4 py-4">
           <div className="flex items-center justify-between gap-3">
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink/46">
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink/46" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-59" : undefined}>
               Your Zignature
             </p>
             <p className="text-xs text-ink/52">
@@ -3895,7 +3895,7 @@ function CredentialVisualPreview({
 function WalletFlowAside({ emphasis = false }: { emphasis?: boolean }) {
   return (
     <aside className="relative hidden overflow-hidden border-l border-ink/10 bg-transparent lg:flex lg:flex-col lg:justify-between lg:p-8">
-      <section className="relative my-auto rounded-[32px] border border-ink/10 bg-white/88 p-6 text-ink shadow-[0_22px_60px_rgba(14,23,38,0.14)] backdrop-blur-sm">
+      <section className="relative my-auto rounded-none border border-ink/10 bg-white/88 p-6 text-ink shadow-[0_22px_60px_rgba(14,23,38,0.14)] backdrop-blur-sm">
         <div className="inline-flex items-center rounded-full border border-ink/10 bg-[#eef6df] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.2em] text-ink/68">
           {emphasis ? "Signed preview" : "Credential preview"}
         </div>
@@ -3990,7 +3990,7 @@ function HowItWorksGraphic({
 }) {
   if (art === "physical-session") {
     return (
-      <div className="rounded-[26px] bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
+      <div className="rounded-none bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
         <div className="grid gap-3">
           <WorkflowStage label="1" title="Generic card" body="One printed QR can start many fresh sessions." />
           <WorkflowStage label="2" title="New session" body="Zik creates a short-lived opaque session." />
@@ -4002,7 +4002,7 @@ function HowItWorksGraphic({
 
   if (art === "staff-check") {
     return (
-      <div className="rounded-[26px] bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
+      <div className="rounded-none bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
         <div className="grid gap-3 sm:grid-cols-3">
           <InlineDetail title="Staff sees" body="The customer and their physical ID." />
           <InlineDetail title="Zik receives" body="An authorised 18+ attestation." />
@@ -4014,11 +4014,11 @@ function HowItWorksGraphic({
 
   if (art === "physical-pass") {
     return (
-      <div className="rounded-[26px] bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
+      <div className="rounded-none bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
         <div className="space-y-4">
-          <div className="rounded-[22px] border border-ink/8 bg-white p-4">
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/42">Wallet shows</p>
-            <p className="mt-2 font-heading text-2xl font-semibold tracking-tight text-ink">
+          <div className="rounded-none border border-ink/8 bg-white p-4">
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/42" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-60" : undefined}>Wallet shows</p>
+            <p className="mt-2 font-heading text-2xl font-semibold tracking-tight text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-61" : undefined}>
               18+ · In-person verified
             </p>
           </div>
@@ -4033,7 +4033,7 @@ function HowItWorksGraphic({
 
   if (art === "signals") {
     return (
-      <div className="rounded-[26px] bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
+      <div className="rounded-none bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
         <div className="grid gap-3 sm:grid-cols-3">
           <InlineDetail title="Soft check" body="Looks for adult financial signals only." />
           <InlineDetail title="Bank step" body="Refundable authorisation confirms control." />
@@ -4045,7 +4045,7 @@ function HowItWorksGraphic({
 
   if (art === "signing") {
     return (
-      <div className="rounded-[26px] bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
+      <div className="rounded-none bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
         <div className="grid gap-3">
           <WorkflowStage label="1" title="Local key" body="Created on this device only." />
           <WorkflowStage label="2" title="Human review" body="Cooling off completes before signing." />
@@ -4056,11 +4056,11 @@ function HowItWorksGraphic({
   }
 
   return (
-    <div className="rounded-[26px] bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
+    <div className="rounded-none bg-[linear-gradient(180deg,_#ffffff_0%,_#f3f8e6_100%)] p-5">
       <div className="space-y-4">
-        <div className="rounded-[22px] border border-ink/8 bg-white p-4">
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/42">Site sees</p>
-          <p className="mt-2 font-heading text-2xl font-semibold tracking-tight text-ink">Over 18</p>
+        <div className="rounded-none border border-ink/8 bg-white p-4">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/42" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-62" : undefined}>Site sees</p>
+          <p className="mt-2 font-heading text-2xl font-semibold tracking-tight text-ink" data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-63" : undefined}>Over 18</p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <InlineDetail title="Shared" body="Only the signed over-18 result." />
@@ -4116,7 +4116,7 @@ function BankOptionCard({
       onClick={onClick}
     >
       <p className="font-heading text-xl font-semibold tracking-tight">{label}</p>
-      <p className={`mt-2 text-sm ${active ? "text-mist/76" : "text-ink/58"}`}>
+      <p className={`mt-2 text-sm ${active ? "text-mist/76" : "text-ink/58"}`} data-local-edit={process.env.NODE_ENV === "development" ? "ve-ab60c91a7134-64" : undefined}>
         Use this account for the refundable verification.
       </p>
     </button>
@@ -4181,7 +4181,7 @@ function FieldTextarea({
 
 function InlineDetail({ title, body }: { title: string; body: string }) {
   return (
-    <div className="min-w-0 rounded-[20px] bg-white/75 px-4 py-4">
+    <div className="min-w-0 rounded-none bg-white/75 px-4 py-4">
       <p className="text-sm font-medium text-ink">{title}</p>
       <p className="mt-2 break-words text-sm leading-6 text-ink/64">{body}</p>
     </div>
@@ -4198,7 +4198,7 @@ function WorkflowStage({
   body: string;
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-[22px] bg-white px-4 py-4">
+    <div className="flex items-start gap-3 rounded-none bg-white px-4 py-4">
       <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#DDF0EC] text-xs font-semibold text-ink">
         {label}
       </span>
@@ -4220,7 +4220,7 @@ function InfoBlock({
   dark?: boolean;
 }) {
   return (
-    <div className={clsx("rounded-[26px] p-5", dark ? "border border-white/8 bg-white/[0.03]" : "border border-ink/8 bg-white/78")}>
+    <div className={clsx("rounded-none p-5", dark ? "border border-white/8 bg-white/[0.03]" : "border border-ink/8 bg-white/78")}>
       <p className={clsx("font-heading text-2xl font-semibold tracking-tight", dark ? "text-mist" : "text-ink")}>{title}</p>
       <p className={clsx("mt-3 text-sm leading-7", dark ? "text-mist/55" : "text-ink/68")}>{body}</p>
     </div>
@@ -4229,7 +4229,7 @@ function InfoBlock({
 
 function InstructionRow({ number, body }: { number: string; body: string }) {
   return (
-    <div className="flex items-start gap-3 rounded-[20px] bg-ink/5 px-4 py-3">
+    <div className="flex items-start gap-3 rounded-none bg-ink/5 px-4 py-3">
       <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ink text-xs font-semibold text-mist">
         {number}
       </span>
@@ -4248,7 +4248,7 @@ function MetaTile({
   dark?: boolean;
 }) {
   return (
-    <div className={clsx("min-w-0 rounded-[18px] px-2.5 py-1.5", dark ? "bg-white/5" : "bg-white")}>
+    <div className={clsx("min-w-0 rounded-none px-2.5 py-1.5", dark ? "bg-white/5" : "bg-white")}>
       <p className={clsx("font-mono text-[9px] uppercase tracking-[0.16em]", dark ? "text-mist/40" : "text-ink/45")}>
         {label}
       </p>
@@ -4259,7 +4259,7 @@ function MetaTile({
 
 function BankMetaTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0 rounded-[22px] bg-white/8 px-4 py-4">
+    <div className="min-w-0 rounded-none bg-white/8 px-4 py-4">
       <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/55">{label}</p>
       <p className="mt-2 break-words text-sm font-medium text-mist">{value}</p>
     </div>

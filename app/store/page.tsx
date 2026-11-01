@@ -1,8 +1,7 @@
+import type { Route } from "next";
 import { redirect } from "next/navigation";
-
-// The store-session dashboard was the pre-/find way to bootstrap a physical
-// session and duplicated /verify's code lookup. Both are now covered by the
-// customer store finder and the clerk purchase-sale flow.
-export default function StorePage() {
-  redirect("/verify");
+export default async function Page({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(await searchParams)) if (typeof value === "string") query.set(key, value);
+  redirect(`/dashboard/store/login${query.size ? `?${query}` : ""}` as Route);
 }
