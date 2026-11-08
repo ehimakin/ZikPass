@@ -1,4 +1,5 @@
 import { createHash, createPublicKey, randomBytes } from "node:crypto";
+import { getPassPrice } from "@/lib/shared/payment-config";
 import { runtimeConfig } from "@/lib/shared/config";
 import { getStoreById } from "@/lib/shared/stores";
 import { randomId } from "@/lib/shared/utils";
@@ -11,6 +12,8 @@ import { buildPhysicalApplicationFingerprint } from "@/lib/server/application-gu
 
 const hash = (token: string) => createHash("sha256").update(token).digest("hex");
 const summary = (session: PhysicalStoreSessionRecord) => ({
+  product: session.purchase_sale!.product ?? "physical_card",
+  customerConnected: Boolean(session.purchase_sale!.customer_connected_at),
   id: session.session_id, storeName: session.store_name, storeId: session.store_id,
   expiresAt: session.expires_at, amountMinor: session.purchase_sale!.amount_minor,
   currency: session.purchase_sale!.currency, paid: Boolean(session.purchase_sale!.paid_at),
@@ -18,7 +21,7 @@ const summary = (session: PhysicalStoreSessionRecord) => ({
   claimed: Boolean(session.enrollment_id)
 });
 
-export async function startPurchaseSale(storeId: string, verifierToken?: string) {
+export async function startPurchaseSale(storeId: string, verifierToken?: string, product: "physical_card" | "digital_voucher" = "physical_card") {
   const verifier = authenticateRetailVerifier(verifierToken, storeId);
   const store = getStoreById(storeId);
   if (!store || store.id !== verifier.retailer_id) throw new Error("Choose a valid store.");
@@ -26,10 +29,10 @@ export async function startPurchaseSale(storeId: string, verifierToken?: string)
   const now = new Date().toISOString();
   const session: PhysicalStoreSessionRecord = {
     session_id: randomId("store"), store_id: store.id, store_name: store.name,
-    location_id: verifier.location_id, entry_mode: "retail_card", created_at: now, updated_at: now,
+    location_id: verifier.location_id, entry_mode: product === "physical_card" ? "retail_card" : "self_directed", created_at: now, updated_at: now,
     expires_at: new Date(Date.now() + runtimeConfig.physicalSessionTtlSeconds * 1000).toISOString(),
     status: "open", clerk_verification: { status: "pending" }, device_auth: { status: "pending" },
-    purchase_sale: { token_hash: hash(token), amount_minor: runtimeConfig.passIssuancePriceMinor, currency: runtimeConfig.deviceExtensionCurrency }
+    purchase_sale: { product, token_hash: hash(token), amount_minor: product === "digital_voucher" ? getPassPrice().minor : 299, currency: runtimeConfig.deviceExtensionCurrency }
   };
   return runPurchaseSaleTransaction((data) => {
     data.physical_sessions.push(session);
@@ -53,6 +56,7 @@ export async function updatePurchaseSale(input: {
       if (!session.purchase_sale.paid_at || session.clerk_verification.status !== "verified") throw new Error("Only a verified, paid sale can receive a replacement QR.");
       const token = randomBytes(32).toString("base64url");
       session.purchase_sale.token_hash = hash(token);
+      delete session.purchase_sale.customer_connected_at;
       session.expires_at = new Date(Date.now() + runtimeConfig.physicalSessionTtlSeconds * 1000).toISOString();
       session.status = "open";
       session.updated_at = new Date().toISOString();
@@ -93,6 +97,7 @@ export async function claimPurchaseSale(token: string, holderPublicKey: JsonWebK
     const session = data.physical_sessions.find((s) => s.purchase_sale?.token_hash === hash(token));
     if (!session?.purchase_sale) throw new Error("Activation link not found. Ask the clerk for your QR.");
     const sale = session.purchase_sale;
+    if (sale.product === "digital_voucher") throw new Error("Digital voucher activation is not available yet. This session tests the in-store connection only.");
     const fingerprint = buildPhysicalApplicationFingerprint({ sessionId: session.session_id, holderPublicKey });
     if (session.enrollment_id) {
       const existing = data.enrollments.find((e) => e.id === session.enrollment_id);
@@ -127,5 +132,19 @@ export async function claimPurchaseSale(token: string, holderPublicKey: JsonWebK
     data.enrollments.push(record);
     data.payments.push(payment);
     return record;
+  });
+}
+
+/** Presence only: possession of the QR is not identity or device authentication. */
+export async function connectPurchaseSale(token: string) {
+  if (typeof token !== "string" || token.length < 32 || token.length > 128) throw new Error("Scan the QR on your clerk’s screen.");
+  return runPurchaseSaleTransaction((data) => {
+    const session = data.physical_sessions.find((s) => s.purchase_sale?.token_hash === hash(token));
+    if (!session?.purchase_sale || session.purchase_sale.product !== "digital_voucher") throw new Error("This QR is not recognised. Ask your clerk for a new one.");
+    if (session.enrollment_id) throw new Error("This activation has already been used.");
+    if (Date.parse(session.expires_at) <= Date.now()) throw new Error("This QR has expired. Ask your clerk to replace it.");
+    if (session.status !== "open" || !session.purchase_sale.paid_at || session.clerk_verification.status !== "verified") throw new Error("This session is not ready. Please speak to your clerk.");
+    session.purchase_sale.customer_connected_at ??= new Date().toISOString();
+    return { storeName: session.store_name, expiresAt: session.expires_at, connected: true };
   });
 }

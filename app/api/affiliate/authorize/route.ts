@@ -1,3 +1,4 @@
+import { recordAffiliateEvidence } from "@/lib/server/affiliate-onboarding";
 import { NextRequest, NextResponse } from "next/server";
 import { createAffiliateAuthorizationRequest } from "@/lib/server/affiliate-verifier";
 import { toErrorResponse } from "@/lib/server/api-errors";
@@ -20,6 +21,7 @@ export async function POST(request: NextRequest) {
       state: body.state ?? ""
     });
 
+    recordAffiliateEvidence(body.client_id ?? "", "connectedAt");
     return NextResponse.json({
       request_id: authorizationRequest.request_id,
       nonce: authorizationRequest.nonce,

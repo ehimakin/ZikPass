@@ -1,0 +1,134 @@
+You are working on ZikPass, an existing prototype evolving into a real product. Design and implement Zik Vault and lost-phone recovery, our sixth product, with working development integrations and honest security boundaries.
+Start by inspecting the existing project.
+- Main application: /Users/ehim/dev/ZikPass
+- Affiliate examples: /Users/ehim/dev/pomography and /Users/ehim/dev/jerkmeat
+- Product overview: /ecosystem
+- Existing Vault functionality may already exist. Extend it rather than building a competing implementation.
+- Read repository instructions and inspect Git status. Preserve unrelated changes.
+- Existing affiliate onboarding includes paired client/agent sessions. Review it for reusable patterns, but do not assume it provides end-to-end encrypted messaging.
+Product intent
+Create a gentle introduction to Zik ID through immediate practical value:
+Lost-phone recovery card → backup access methods → private Vault → optional verified Zik ID.
+Users must be able to benefit from recovery and Vault features without completing identity verification.
+1. Lost-phone recovery card
+Let users create a personalised lock-screen image containing:
+Ehim’s iPhone
+Found this phone? Scan to contact me privately.
+[QR code and short recovery URL]
+
+Requirements:
+- Do not depend on an interactive button working on a locked iPhone.
+- The finder scans the code using their own phone.
+- The recovery page requires no finder account or app installation.
+- Use an opaque, revocable identifier. Expose no account credentials or private information.
+- Make public return details optional; hide home addresses by default.
+- Support the same recovery route on a printable card or phone-case sticker.
+- Explain that a screen-based code cannot help when the phone has no power.
+- Configure and verify an alternative notification destination before claiming recovery setup is complete.
+The finder selects “I found this phone,” opening a recovery conversation and notifying the owner through their configured alternative channel.
+2. Recovery communication
+The owner can respond from a trusted device or access a restricted dashboard on a borrowed phone.
+Borrowed-device sessions must:
+- Permit recovery messaging and return coordination.
+- Exclude Vault contents, Vault keys, identity documents and full account administration.
+- Prohibit trusted-device enrolment and seed-phrase entry.
+- Expire quickly and support explicit termination.
+- Minimise retained conversation history and local persistence.
+- Include blocking, reporting and protections against notification spam.
+The target is end-to-end encrypted messaging. TLS alone does not satisfy this requirement. Use an established, maintained protocol or library; do not invent cryptography. Document endpoint limitations: a compromised borrowed phone may see messages displayed on it.
+3. Zik Vault
+Build a private area for imported files and photos.
+Requirements:
+- Local storage by default, with authenticated encryption of content.
+- Protect filenames, thumbnails and other sensitive metadata where practical.
+- Support an appropriate unlock mechanism and automatic locking.
+- Never treat a password screen as a substitute for encryption.
+- Explain that importing a file does not protect or delete its original elsewhere.
+- Avoid plaintext content in logs, analytics, temporary files and error reports.
+- Make any AI organisation/search optional and local by default.
+- Encryption must use established cryptographic software, not “AI encryption.”
+Inspect whether the existing application is web/PWA, native or hybrid. State the actual guarantees and limitations of its storage and key-management environment. Do not claim native secure-hardware protection in a browser implementation.
+4. Optional paid encrypted backup
+Offer optional cloud backup as a paid product capability.
+The intended architecture is:
+- Files are encrypted before upload.
+- Zik stores ciphertext without the keys needed to decrypt it.
+- Authorised devices and recovery methods can restore access.
+- Backups have integrity checks, versioning and clear completion/failure states.
+- Identify metadata still visible to Zik and minimise its collection.
+- Account password resets must not silently grant Vault decryption access.
+Use development credentials through server configuration. Never put secrets in browser bundles, source control or chat. If storage or billing credentials are missing, implement and test the integration boundary and clearly report what remains unconnected. Do not simulate successful uploads or payments in the real flow.
+5. Three access and recovery methods
+Trusted device
+Everyday access using its own protected device keys.
+Physical Zik card + PIN
+Full recovery and authorisation of another trusted device, such as a laptop.
+- Full recovery needs a cryptographic card with protected key storage and appropriate PIN attempt limits.
+- A printed QR or ordinary NFC identifier is not a secure recovery credential.
+- Do not assume a standard security key can export or derive arbitrary Vault recovery keys; verify the selected hardware’s capabilities.
+- If suitable hardware is unavailable, define the adapter and clearly distinguish any development simulator from real card support.
+Recovery seed phrase
+Independent fallback when both phone and physical card are lost.
+- Generate locally using a cryptographically secure random source.
+- Use a reviewed mnemonic/key-recovery construction.
+- Require confirmation that the user recorded it.
+- Encourage offline storage separate from the physical card.
+- Never transmit or log the phrase.
+- Never request it in the borrowed-device dashboard.
+- Design an explicit process for replacing a compromised recovery method, explaining that rotation cannot revoke access to already copied data or old backups.
+The seed phrase recovers access to encryption keys. It cannot reconstruct files that have no surviving backup or device copy.
+If all authorised devices, the card and seed phrase are lost, Zik must not claim it can decrypt the Vault.
+6. Privacy language
+Treat this as a target claim requiring implementation evidence:
+Your Vault stays on your device by default. Optional backup encrypts your files before they leave your device. Zik stores encrypted copies without the keys needed to read them. Only your authorised devices and recovery methods can unlock your Vault.
+
+Avoid promises such as “we can never leak data” or “we never duplicate data.”
+Document:
+- No sale, advertising use or model training on Vault contents.
+- Necessary account, billing and operational metadata.
+- Retention and deletion periods for active storage, replicas, backups and providers.
+- How deletion requests remain effective after backup restoration.
+- Any legal retention exceptions.
+- The distinction between deleting cloud data and copies retained on users’ devices.
+Implementation approach
+First produce a concise architecture and threat model covering:
+- Data locations and trust boundaries.
+- Key creation, storage, wrapping, recovery and device enrolment.
+- What Zik’s servers can and cannot access.
+- Lost/stolen phone, stolen card, exposed seed phrase and compromised borrowed-device scenarios.
+- Browser/native/hardware constraints.
+Then implement a coherent development slice in the existing product. Prioritise the recovery-card journey, restricted communication access and integration with the existing Vault. Keep unfinished hardware, encryption, backup and billing capabilities visibly distinct from completed features.
+Ask only for genuinely missing decisions or credentials, and continue independent work while waiting.
+
+Progress reporting and completion estimates
+Provide a concise progress update at least every 60 seconds during active work, and whenever a milestone completes or a blocker changes the estimate.
+Each update must include:
+- Completed: concrete deliverables and verification results since the previous update.
+- Measured progress: completed acceptance criteria versus the current total, plus tests passed, failed and pending where relevant. Distinguish implemented work from verified work.
+- Remaining: specific unfinished tasks, blockers and dependencies.
+- Estimated time remaining: a realistic range based on remaining work, observed execution times and current uncertainty. State the assumptions behind it.
+Do not invent percentages, countdowns or cosmetic progress numbers. Do not equate file counts, lines written or tests passed with overall completion. Acceptance criteria may differ substantially in effort; explain that when reporting counts.
+Maintain an acceptance checklist from the initial repository assessment. If discoveries change the scope, update the checklist and explain the change rather than hiding it within a shifting percentage.
+When there is insufficient evidence for an estimate, say “Not enough evidence yet”, identify the uncertainty, and state what investigation will make an estimate possible. Separate estimated engineering time from waiting for credentials, hardware or external services.
+Example:
+Completed: Recovery-card generation and finder access controls are implemented and verified.
+Progress: 4 of 11 acceptance criteria verified; 2 implemented but awaiting validation; 5 not implemented. The remaining criteria include the larger encryption and recovery work. Targeted tests: 18 passed, 2 failed.
+Remaining: Session expiry fix, encrypted messaging, backup integration and mobile verification.
+Estimate: 60–100 minutes of engineering work, assuming the selected messaging library supports the existing runtime. Live backup validation also depends on storage credentials; that wait is excluded.
+
+Validation and handoff
+Test meaningful security and lifecycle properties:
+- Finder access cannot reveal private account or Vault data.
+- Borrowed sessions cannot enrol devices or recover Vault keys.
+- Expired and revoked credentials fail.
+- Encrypted files reject tampering and incorrect keys.
+- A surviving encrypted backup can be restored through the implemented recovery method.
+- Sensitive material stays out of logs and API responses.
+- Failed notifications, uploads and payments are represented honestly.
+Verify the user journeys in desktop and mobile browsers. Report:
+1. What was implemented.
+2. What was tested and the results.
+3. Remaining dependencies and limitations.
+4. How to run and review the work.
+Do not claim production readiness, end-to-end encryption or hardware-backed recovery without evidence.
+

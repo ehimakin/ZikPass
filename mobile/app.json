@@ -12,7 +12,7 @@
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "Use Face ID to protect your ZikPass."
+          "faceIDPermission": "Use Face ID to unlock your Zik Vault, ID and card."
         }
       ]
     ],

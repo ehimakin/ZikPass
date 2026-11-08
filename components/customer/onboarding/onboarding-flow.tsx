@@ -223,11 +223,11 @@ export function OnboardingFlow({ price, storeId: storeIdProp, initialEnrollment 
   if (!store) {
     return (
       <Card className="p-5">
-        <p className="text-[15px] font-bold text-[var(--zk-text)]">Choose a store first</p>
-        <p className="mt-1.5 text-[14px] text-[var(--zk-text-soft)]">
-          Pick where you&rsquo;ll get verified in person, then come back here.
+        <p className="text-[15px] font-bold text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-faf71124d2d2-1" : undefined}>Choose a store first</p>
+        <p className="mt-1.5 text-[14px] text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-faf71124d2d2-2" : undefined}>
+          Choose where you&rsquo;ll get verified in person to continue.
         </p>
-        <ButtonLink href={"/find" as Route} className="mt-4">
+        <ButtonLink href={"/find?product=digital" as Route} className="mt-4">
           Choose a store
         </ButtonLink>
       </Card>
@@ -239,9 +239,9 @@ export function OnboardingFlow({ price, storeId: storeIdProp, initialEnrollment 
       <div className="space-y-4">
         <SuccessMark />
         <div className="text-center">
-          <h1 className="text-[22px] font-extrabold text-[var(--zk-text)]">Your pass is ready</h1>
-          <p className="mx-auto mt-1.5 max-w-[34ch] text-[14px] text-[var(--zk-text-soft)]">
-            It&rsquo;s saved on this device. Open it any time from the My pass tab.
+          <h1 className="text-[22px] font-extrabold text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-faf71124d2d2-3" : undefined}>Your pass is ready</h1>
+          <p className="mx-auto mt-1.5 max-w-[34ch] text-[14px] text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-faf71124d2d2-4" : undefined}>
+            It&rsquo;s saved on this device. Open it any time from the Wallet tab.
           </p>
         </div>
         <ButtonLink href={"/pass" as Route} size="lg">
@@ -385,7 +385,7 @@ function Intro({
   return (
     <div className="space-y-4">
       <header>
-        <h1 className="text-[22px] font-extrabold tracking-tight text-[var(--zk-text)]">
+        <h1 className="text-[22px] font-extrabold tracking-tight text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-faf71124d2d2-5" : undefined}>
           Get your Zik Pass
         </h1>
         <p className="mt-1 text-[14px] text-[var(--zk-text-soft)]">
@@ -394,7 +394,7 @@ function Intro({
       </header>
 
       <Card className="p-4">
-        <p className="text-[13px] font-bold uppercase tracking-[0.06em] text-[var(--zk-text-faint)]">
+        <p className="text-[13px] font-bold uppercase tracking-[0.06em] text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-faf71124d2d2-6" : undefined}>
           Bring with you
         </p>
         <ul className="mt-2 space-y-2 text-[14px] text-[var(--zk-text)]">
@@ -408,18 +408,18 @@ function Intro({
       </Card>
 
       <Card className="p-4">
-        <p className="text-[13px] font-bold uppercase tracking-[0.06em] text-[var(--zk-text-faint)]">
+        <p className="text-[13px] font-bold uppercase tracking-[0.06em] text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-faf71124d2d2-7" : undefined}>
           What happens
         </p>
         <ol className="mt-2 space-y-2.5 text-[14px] text-[var(--zk-text)]">
-          <li><span className="font-semibold">1.</span> We show you a 6-character code.</li>
-          <li><span className="font-semibold">2.</span> A clerk checks your ID and enters the code.</li>
+          <li data-local-edit={process.env.NODE_ENV === "development" ? "ve-faf71124d2d2-8" : undefined}><span className="font-semibold">1.</span> We show you a 6-character code.</li>
+          <li data-local-edit={process.env.NODE_ENV === "development" ? "ve-faf71124d2d2-9" : undefined}><span className="font-semibold">2.</span> A clerk checks your ID and enters the code.</li>
           <li>
-            <span className="font-semibold">3.</span>{" "}
+            <span className="font-semibold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-faf71124d2d2-10" : undefined}>3.</span>{" "}
             {`You pay ${price === "Free" ? "nothing" : price} and your pass is issued to this phone.`}
           </li>
         </ol>
-        <p className="mt-3 text-[12px] text-[var(--zk-text-faint)]">
+        <p className="mt-3 text-[12px] text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-faf71124d2d2-11" : undefined}>
           Your ID is checked visually and handed back. It is not scanned, photographed or stored.
         </p>
       </Card>
@@ -447,8 +447,8 @@ function CodeCard({ code, sessionId }: { code: string; sessionId: string }) {
   }, [code, sessionId]);
 
   return (
-    <div className="overflow-hidden rounded-[var(--zk-r-xl)] bg-[var(--zk-ink-surface)] p-5 text-center text-[var(--zk-text-on-ink)]">
-      <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--zk-accent)]">
+    <div className="overflow-hidden rounded-none bg-[var(--zk-ink-surface)] p-5 text-center text-[var(--zk-text-on-ink)]">
+      <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--zk-accent)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-faf71124d2d2-12" : undefined}>
         Show this to the clerk
       </p>
       <p className="mt-3 font-mono text-[40px] font-bold leading-none tracking-[0.14em]">{code}</p>
@@ -457,10 +457,10 @@ function CodeCard({ code, sessionId }: { code: string; sessionId: string }) {
         <img
           src={qr}
           alt={`QR code for verification code ${code}`}
-          className="mx-auto mt-4 h-40 w-40 rounded-[var(--zk-r-md)] bg-white p-2"
+          className="mx-auto mt-4 h-40 w-40 rounded-none bg-white p-2"
         />
       ) : (
-        <div className="mx-auto mt-4 h-40 w-40 rounded-[var(--zk-r-md)] bg-white/10" />
+        <div className="mx-auto mt-4 h-40 w-40 rounded-none bg-white/10" />
       )}
       <p className="mt-4 flex items-center justify-center gap-1.5 text-[12px] text-white/55">
         <ClockIcon className="h-3.5 w-3.5" />
@@ -485,9 +485,10 @@ function Checklist({
   deviceChecked: boolean;
   phase: Phase;
 }) {
-  const steps: Array<{ label: string; done: boolean; active: boolean }> = [
+  const steps: Array<{ label: string; detail?: string; done: boolean; active: boolean }> = [
     {
-      label: clerkLookedUp ? "Clerk found your code" : "Waiting for the clerk",
+      label: clerkLookedUp ? "Clerk found your code." : "Waiting for the clerk",
+      detail: clerkLookedUp && !clerkVerified ? "Now show them your ID." : undefined,
       done: clerkLookedUp,
       active: !clerkLookedUp
     },
@@ -531,7 +532,10 @@ function Checklist({
                 : "text-[var(--zk-text-faint)]")
             }
           >
-            {step.label}
+            <span className="block">{step.label}</span>
+            {step.detail ? (
+              <span className="mt-0.5 block text-[var(--zk-positive)]">{step.detail}</span>
+            ) : null}
           </span>
           {step.active ? (
             <span className="ml-auto h-2 w-2 animate-pulse rounded-full bg-[var(--zk-text)]" />

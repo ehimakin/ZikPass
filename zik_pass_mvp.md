@@ -5,6 +5,11 @@
 > background context only. For the current implementation, use `README.md`,
 > `docs/ARCHITECTURE.md`, and `docs/TESTING.md`.
 
+> Current product direction: Zik is the umbrella; Zik Pass is its standalone £1.99
+> one-off age product. ZikVault and Zik ID are planned products. See
+> [PRODUCT_DIRECTION.md](docs/PRODUCT_DIRECTION.md), which supersedes this historical
+> positioning. The current prototype does not implement zero-knowledge proofs.
+
 ## 🧠 Core Product Idea
 Zik Pass is a zero-knowledge-inspired system that allows users to prove they are over 18 using cryptographic credentials derived from real-world financial signals—without revealing their identity.
 

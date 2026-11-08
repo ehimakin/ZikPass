@@ -115,3 +115,90 @@ The UI should preserve the latest known state, show a clear recovery action, and
 ## Physical-device testing (still required)
 
 Chromium automation and the in-app preview browser do **not** register service workers and cannot present a real Apple Pay sheet. On a physical iPhone/Safari, still verify: install to home screen, PWA launch + handoff claim, offline shell, reduced-motion, safe-area insets, and — if/when Stripe is configured — a real Apple Pay test transaction.
+
+## Sprint 6 gates
+
+Vault/disclosure service tests use real Web Crypto plus independent Node RSA/AES
+interop; the suite covers authenticated context, required/optional fields, provenance,
+unknown schemas, failed writes, locking/deletion, replay and concurrency. HTTP tests
+check generic errors, origin/content type and request size.
+
+`e2e/vault-disclosure.spec.ts` uses actual physical issuance, inspects IndexedDB,
+checks every captured API request for profile canaries, and intercepts the age-only
+IndexedDB adapter to fail if it opens the Vault database. It also checks optional
+email both omitted and selected, cancellation/focus and four responsive widths.
+This interception is test-only; no production data-exfiltration hook is installed.
+
+For an isolated browser run (do not reset a user's existing dev server):
+
+```sh
+ZIK_E2E_BASE_URL=http://localhost:3106 ZIK_NEXT_DIST_DIR=.next-sprint6-e2e ZIK_DISCLOSURE_V1=true ZIK_ENV=demo ZIK_RUNTIME_DATA_DIR=/tmp/zik-s6-browser npm run e2e
+```
+
+Build separately with `ZIK_NEXT_DIST_DIR=.next-sprint6-build npm run build`.
+Next may rewrite its generated TypeScript include paths when switching output directories.
+Real iPhone/PWA verification remains a manual gate; see [demo checklist](sprint-6/DEMO.md).
+
+## Vault documents and on-device analysis
+
+Four suites cover the document pipeline, none of them mocked:
+
+- `tests/analysis-text.test.ts` — date, name and address normalisation and
+  comparison, including every case where the code must refuse to guess.
+- `tests/extraction-fixtures.test.ts` — field-level accuracy against
+  `tests/fixtures/ocr-transcripts.json`, which is the text **real in-browser OCR**
+  produced from the committed fixtures. It runs offline and fast.
+- `tests/zik-id-readiness.test.ts` — the readiness policy, including duplicate
+  evidence, expired primary evidence, stale address evidence and conflicts.
+- `tests/vault-v2.test.ts` — key hierarchy, record binding, migration, lock
+  lifecycle and cascade deletion, against `fake-indexeddb`.
+
+Regenerate the inputs when the engine or pipeline changes:
+
+```sh
+npm run fixtures      # rebuild the 18 synthetic documents (Playwright, macOS for HEIC)
+npm run measure:ocr   # re-record transcripts and print the measured table
+```
+
+`npm run measure:ocr` blocks every non-origin request and reports how many were
+attempted; it must stay at zero. Do not hand-edit `ocr-transcripts.json` — if a test
+fails after an engine change, re-record and judge the new numbers.
+
+`e2e/vault-documents.spec.ts` drives the real application: OS file picker, consent,
+real OCR, review, lock and reload, conflict handling, unsupported files, and deleting
+evidence withdrawing readiness. It also asserts that no request body carries a
+document value and that nothing left the origin. Real OCR takes seconds per document,
+so it sets a longer per-test timeout.
+
+Three tests in `e2e/vault-preview.spec.ts` exercise the development-only demo Vault
+and require a development server; they fail against a production build, on this
+branch and on `main` alike.
+
+
+For production browser verification, first build with the isolated output directory, then use the same directory with `ZIK_E2E_PRODUCTION=true` in the browser command (full exact invocation in the handoff).
+
+## Product-positioning manual checks
+
+At 320, 390, 768 and 1440px, review `/home`, `/ecosystem`, `/about`, the full-screen menu
+and `/pass` with an active credential (the existing `?demo=active` preview may be used
+only for visual review). Check the empty and expired Pass states too.
+
+- First viewport still explains Pass and 18+ with its existing hero behavior and primary
+  acquisition action. No Vault/ID promotion appears in the hero.
+- Family appears below the Pass explanation/how-it-works. Pass says Available now;
+  ZikVault says Coming next and planned/not available; Zik ID says Planned/not available.
+- Prices agree on home/ecosystem; Pass reflects server configuration, including free demo
+  configuration. Planned £0.35/month, £0.99/month cloud backup, and £2.99 one-off cannot
+  be charged.
+- Only Pass has an acquisition CTA. No planned-product element initiates setup, upload,
+  payment or issuance. Follow ecosystem links from home, menu, About and active Pass.
+- Car-hire example has plain Shared/Not shared labels and no checkboxes or form controls.
+- Active-pass promotion is below pass, status, usage, install and removal controls; it is
+  absent in empty/pending/activating/expired states. Bottom navigation retains four tabs.
+- Check no horizontal overflow, readable wrapping, header/footer clearance, centred
+  product column, keyboard focus, menu Escape/focus return and reduced motion.
+- Rerun self-directed purchase, payment decline/retry, clerk-first physical-card activation,
+  wallet deletion and affiliate approval/denial journeys above. Their logic is unchanged.
+
+Preserved `/vault` and `/id` experiments are outside the new product links. Their existence
+must not be confused with availability of the planned proof-backed products.

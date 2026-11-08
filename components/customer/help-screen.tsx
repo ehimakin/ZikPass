@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { Button, Card, SectionHeading } from "@/components/customer/ui";
-import { environmentBadgeLabel, isDemoEnvironment } from "@/lib/shared/demo-environment";
+
+import { TicketCreate } from "@/components/customer/support/ticket-create";
+import { Card, SectionHeading } from "@/components/customer/ui";
+
+
+
 
 const ACCEPTED_ID = [
   "UK or EU passport",
@@ -13,12 +16,16 @@ const ACCEPTED_ID = [
 
 const FAQ = [
   {
-    q: "Why do I have to go to a store?",
-    a: "The one-time identity check happens in person so no photo of your ID is ever uploaded. After that, everything is on your device."
+    q: "I lost both my phone and Zik Card.",
+    a: "Open /account-recovery/restore on your replacement device. If you saved a 24-word recovery phrase and enabled a backup, you can restore from it. Never put those words in a help ticket. Without a phrase or usable backup, support can explain fresh verification but cannot decrypt the lost Vault."
+  },
+  {
+    q: "Can I get ZikPass online?",
+    a: "Digital Zik Pass starts with an in-person check: 99p one-off, free during Early Access. Physical Zik Cards cost £2.99 and are kept for life. The separate £3.99 remote finance-check route is coming later."
   },
   {
     q: "What does a website learn about me?",
-    a: "Only that you are over 18, plus a one-time signed token for that specific check. No name, date of birth or document number is shared."
+    a: "Age-only sites receive an over-18 result and verification metadata. Retail demos also receive only the self-entered profile fields you approve. No date of birth or document number is shared."
   },
   {
     q: "How long does my pass last?",
@@ -30,49 +37,23 @@ const FAQ = [
   },
   {
     q: "The clerk could not find my code.",
-    a: "Codes expire after a few minutes. Start the in-store step again from My pass and show the clerk the fresh code."
+    a: "Codes expire after a few minutes. Start the in-store step again from Zik Pass in your Wallet and show the clerk the fresh code."
   }
 ];
-
-function DemoResetRow() {
-  const [state, setState] = useState<"idle" | "working" | "done">("idle");
-  if (!isDemoEnvironment) return null;
-  return (
-    <div className="mt-3 border-t border-[var(--zk-line)] pt-3">
-      <p className="text-[13px] text-[var(--zk-text-soft)]">
-        Reset the demo to a clean slate before a walkthrough. Clears all in-progress
-        enrolments, store sessions and test payments on the server. Delete this
-        device&rsquo;s pass separately from the My pass tab.
-      </p>
-      <Button
-        variant="secondary"
-        className="mt-2.5"
-        loading={state === "working"}
-        onClick={async () => {
-          setState("working");
-          try {
-            await fetch("/api/demo/reset", { method: "POST" });
-            setState("done");
-          } catch {
-            setState("idle");
-          }
-        }}
-      >
-        {state === "done" ? "Demo reset" : "Reset demo data"}
-      </Button>
-    </div>
-  );
-}
 
 export function HelpScreen() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[22px] font-extrabold tracking-tight text-[var(--zk-text)]">Help</h1>
-        <p className="mt-1 text-[14px] text-[var(--zk-text-soft)]">
+        <h1 className="text-[22px] font-extrabold tracking-tight text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-77c96c1e782b-2" : undefined}>Help</h1>
+        <p className="mt-1 text-[14px] text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-77c96c1e782b-3" : undefined}>
           How Zik Pass works and what to do when something goes wrong.
         </p>
       </div>
+
+      <section id="contact-support" className="scroll-mt-20" aria-label="Contact support">
+        <TicketCreate />
+      </section>
 
       <section>
         <SectionHeading>Accepted ID</SectionHeading>
@@ -85,9 +66,8 @@ export function HelpScreen() {
               </li>
             ))}
           </ul>
-          <p className="mt-3 text-[12px] leading-relaxed text-[var(--zk-text-faint)]">
-            Prototype guidance only. A production service would publish a definitive
-            accepted-ID policy per region.
+          <p className="mt-3 text-[12px] leading-relaxed text-[var(--zk-text-faint)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-77c96c1e782b-4" : undefined}>
+            Check the participating store’s accepted-ID policy before visiting.
           </p>
         </Card>
       </section>
@@ -112,13 +92,11 @@ export function HelpScreen() {
       <section>
         <SectionHeading>About this build</SectionHeading>
         <Card className="p-4 text-[13px] leading-relaxed text-[var(--zk-text-soft)]">
-          <p>
-            <span className="font-semibold text-[var(--zk-text)]">{environmentBadgeLabel()}.</span>{" "}
-            This is a working prototype. Payments are test-only, stores are fictional
-            demo locations, and the identity check is a demonstration flow. It is not a
-            certified age-verification service.
+          <p data-local-edit={process.env.NODE_ENV === "development" ? "ve-77c96c1e782b-1" : undefined}>
+
+            Early Access includes a payment and finance-check preview. No real payment or finance check takes place. Confirmed partner locations will be listed before launch.
           </p>
-          <DemoResetRow />
+
         </Card>
       </section>
     </div>

@@ -24,7 +24,7 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: "npm run dev",
+    command: `npm run ${process.env.ZIK_E2E_PRODUCTION === "true" ? "start" : "dev"} -- --port ${new URL(BASE_URL).port || "3000"}`,
     url: BASE_URL,
     reuseExistingServer: true,
     timeout: 120_000

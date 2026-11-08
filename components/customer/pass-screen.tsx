@@ -1,5 +1,7 @@
 "use client";
 
+import { AccountRecoveryPrompt } from "@/components/customer/account-recovery/recovery-prompt";
+
 import { useEffect, useState } from "react";
 import type { Route } from "next";
 import { useSearchParams } from "next/navigation";
@@ -12,7 +14,8 @@ import {
 import { isDemoEnvironment } from "@/lib/shared/demo-environment";
 import { getWalletStatusSnapshot } from "@/lib/shared/wallet-state";
 import type { EnrollmentRecord, WalletState } from "@/lib/shared/types";
-import { SilverPassCard } from "@/components/customer/silver-pass-card";
+import { AppleWalletButton } from "./apple-wallet-button";
+import { VerificationSeal } from "@/components/customer/verification-seal";
 import { PwaInstallButton } from "@/components/pwa-install-button";
 import { Alert, Button, ButtonLink, Card, SectionHeading, Skeleton, StatusBadge } from "@/components/customer/ui";
 import { ShieldIcon, ClockIcon } from "@/components/customer/icons";
@@ -41,7 +44,7 @@ function demoWallet(mode: string): WalletState {
   } as unknown as WalletState;
 }
 
-export function PassScreen() {
+export function PassScreen({ appleWalletAvailable = false }: { appleWalletAvailable?: boolean }) {
   const params = useSearchParams();
   const demoMode = isDemoEnvironment ? params.get("demo") : null;
   const [wallet, setWallet] = useState<WalletState | null>(null);
@@ -115,7 +118,7 @@ export function PassScreen() {
     return (
       <div className="space-y-4">
         <Skeleton className="h-6 w-32" />
-        <Skeleton className="h-52 w-full rounded-[var(--zk-r-xl)]" />
+        <Skeleton className="h-52 w-full rounded-none" />
         <Skeleton className="h-24 w-full" />
       </div>
     );
@@ -138,14 +141,15 @@ export function PassScreen() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h1 className="text-[22px] font-extrabold tracking-tight text-[var(--zk-text)]">My pass</h1>
+        <h1 className="text-[22px] font-extrabold tracking-tight text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-1" : undefined}>My pass</h1>
         <StatusBadge tone={expired ? "critical" : active ? "positive" : "caution"} dot>
           {expired ? "Expired" : active ? "Active" : "Activating"}
         </StatusBadge>
       </div>
 
-      {/* Share the homepage card's metallic finish and credit-card proportions. */}
-      <SilverPassCard credential={credential} />
+      <VerificationSeal credential={credential} detailed />
+      <AccountRecoveryPrompt />
+      <AppleWalletButton available={appleWalletAvailable} product="Zik Pass" />
 
       {!active && !expired ? (
         <Alert tone="info" title="Almost ready">
@@ -168,7 +172,7 @@ export function PassScreen() {
         </Alert>
       ) : null}
 
-      <section>
+      <section className="pt-12">
         <SectionHeading>Use your pass</SectionHeading>
         <Card className="divide-y divide-[var(--zk-line)]">
           <Row
@@ -187,7 +191,7 @@ export function PassScreen() {
       <section>
         <SectionHeading>Add to another device</SectionHeading>
         <Card className="p-4">
-          <p className="text-[13px] leading-relaxed text-[var(--zk-text-soft)]">
+          <p className="text-[13px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-2" : undefined}>
             Install Zik Pass on this phone&rsquo;s home screen, then use the one-time
             transfer link to move this pass to it.
           </p>
@@ -205,6 +209,15 @@ export function PassScreen() {
           setWallet({});
         }}
       />
+      {active ? (
+        <Card as="section" className="p-5">
+          <StatusBadge>Try it</StatusBadge>
+          <h2 className="mt-3 text-lg font-bold" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-3" : undefined}>Build your Zik Vault</h2>
+          <p className="mt-2 text-sm leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-4" : undefined}>Planned verified credentials, designed to live on your device and be selectively shared. Sufficient verified information could eventually be assembled into Zik ID.</p>
+          <p className="mt-2 text-xs text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-5" : undefined}>Vault · Early Access. Zik ID · Coming Soon.</p>
+          <ButtonLink href="/vault" variant="ghost" className="mt-3 !rounded-none">Go to Vault</ButtonLink>
+        </Card>
+      ) : null}
     </div>
   );
 }
@@ -217,7 +230,7 @@ function DeletePassRow({ onDeleted }: { onDeleted: () => Promise<void> }) {
       <summary className="cursor-pointer font-semibold text-[var(--zk-text)]">
         Remove this pass from this device
       </summary>
-      <p className="mt-2">
+      <p className="mt-2" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-6" : undefined}>
         Deleting removes the pass and its device key here. You can move it back from
         another device you added, or get a new pass at a store.
       </p>
@@ -227,7 +240,7 @@ function DeletePassRow({ onDeleted }: { onDeleted: () => Promise<void> }) {
         </Button>
       ) : (
         <div className="mt-3 space-y-2">
-          <p className="font-semibold text-[var(--zk-critical)]">
+          <p className="font-semibold text-[var(--zk-critical)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-7" : undefined}>
             Delete the pass from this device? This can&rsquo;t be undone here.
           </p>
           <div className="flex gap-2">
@@ -267,7 +280,7 @@ function Row({ icon, title, body }: { icon: React.ReactNode; title: string; body
 function EmptyPass({ pending }: { pending: boolean }) {
   return (
     <div className="space-y-5">
-      <h1 className="text-[22px] font-extrabold tracking-tight text-[var(--zk-text)]">My pass</h1>
+      <h1 className="text-[22px] font-extrabold tracking-tight text-[var(--zk-text)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-8" : undefined}>My pass</h1>
 
       <Card className="flex flex-col items-center px-6 py-10 text-center">
         <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[var(--zk-sunken)]">
@@ -285,14 +298,14 @@ function EmptyPass({ pending }: { pending: boolean }) {
           {pending ? "Resume" : "Find a store"}
         </ButtonLink>
         {!pending ? (
-          <ButtonLink href={"/card" as Route} variant="ghost" size="lg" className="mt-2">
+          <ButtonLink href={"/find?product=card" as Route} variant="ghost" size="lg" className="mt-2">
             I bought a Zik Pass card
           </ButtonLink>
         ) : null}
       </Card>
 
       {!pending ? (
-        <p className="px-1 text-[13px] leading-relaxed text-[var(--zk-text-soft)]">
+        <p className="px-1 text-[13px] leading-relaxed text-[var(--zk-text-soft)]" data-local-edit={process.env.NODE_ENV === "development" ? "ve-e172254d7628-9" : undefined}>
           Already have Zik Pass on another device? Open its{" "}
           <span className="font-semibold text-[var(--zk-text)]">My pass</span> screen and use
           the transfer link to move it here.

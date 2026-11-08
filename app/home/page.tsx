@@ -6,7 +6,7 @@ import { runtimeConfig } from "@/lib/shared/config";
 
 export default function CustomerHomePage() {
   return (
-    <CustomerShell active="home" hero={<HomeHero />}>
+    <CustomerShell active="home" hero={<HomeHero />} immersive>
       <HomepageSplash suppressSeconds={runtimeConfig.homepageSplashSuppressSeconds} />
       <HomeScreen price={getPassPrice().display} />
     </CustomerShell>

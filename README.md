@@ -4,6 +4,24 @@ ZikPass ("Zik Pass" in the UI) is a privacy-first age-assurance prototype. It de
 
 Active branch: `v2-ui-overhaul` (aligned with `origin/v2-ui-overhaul`). `main` and `dev` are older parallel branches and are intentionally not merged for routine local setup.
 
+## Product direction
+
+This repository implements **Zik Pass**, the first product in the wider **Zik** platform:
+£1.99 one-off, with no Vault or subscription requirement. **ZikVault** (planned £0.35/month,
+with an optional encrypted cloud backup planned at £0.99/month) and **Zik ID** (planned
+£2.99 one-off) are future products. See the
+[product source of truth](docs/PRODUCT_DIRECTION.md).
+
+**ZikVault now works on the device**: documents the user picks are stored encrypted in
+the browser and read there with on-device OCR, producing suggestions the user reviews.
+Nothing is uploaded, and nothing it reads is a check that a document is genuine.
+**Zik ID** can be applied for but not issued — Zik has not defined the identity checks
+or the issuer, so an application stops at `pending_onboarding`. See
+[ADR 007](docs/decisions/007-vault-v2-local-analysis.md),
+[the analysis capability and results](docs/VAULT_LOCAL_ANALYSIS.md) and
+[the onboarding decisions still needed](docs/ZIK_ID_ONBOARDING_DEPENDENCIES.md).
+Planned prices are illustrative and cannot be charged here.
+
 ## Surfaces
 
 The product now has two distinct surfaces plus a small set of legacy/dev screens.
@@ -18,6 +36,7 @@ The product now has two distinct surfaces plus a small set of legacy/dev screens
 | `/pass` | The wallet. Empty / pending / activating / active / expired, plus delete, PWA install, and PWA-launch handoff claim. `/wallet` redirects here. |
 | `/card` | Activate a physical Zik Pass card bought at a till (the printed-card QR target). |
 | `/help` | Accepted ID, common failure recoveries, "about this build", and (demo only) a **Reset demo data** button. |
+| `/ecosystem` | Read-only Zik product ladder, planned local-first credentials and illustrative selective sharing. |
 | `/about` | Longer explanation for customers, stores and participating sites. |
 | `/offline` | Branded offline page served by the service worker. Branded `404` and error pages also exist. |
 
@@ -159,3 +178,22 @@ All supported environment variables are documented in [`.env.example`](.env.exam
 - Check mobile and desktop states for user-facing changes, especially recovery, modal overflow, and fixed navigation.
 
 For the system map and extension points, start with [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), then [`docs/TESTING.md`](docs/TESTING.md).
+
+## Zik Vault documents and selective disclosure
+
+`/vault` is a working device Vault: import from the file picker, camera or a chosen
+folder, consent separately to storing and to reading, real local OCR, review of what
+was found, and a Zik ID application that stops at pending onboarding. Run
+`npm run fixtures` for synthetic test documents and `npm run measure:ocr` to reproduce
+the measured extraction results.
+
+`/retail-demo` selective disclosure is separate and still gated: enable explicitly
+with `ZIK_DISCLOSURE_V1=true`; the default is off. Name/address/email are self-entered,
+separate from the signed age pass. Zik disclosure endpoints receive only encrypted
+profile fields; the co-hosted demo merchant is the decryption boundary.
+
+See [demo/setup/reset](docs/sprint-6/DEMO.md), [data and threat model](docs/sprint-6/SECURITY_AND_DATA.md),
+[claims](docs/sprint-6/CLAIMS.md), and [handoff/evidence](docs/sprint-6/HANDOFF.md).
+Investor-ready vertical slice; not certified or approved for public reliance.
+
+The preserved `/id` and `/verify/id` experiment also contains session and peer-presentation logic. These direct demo routes are outside the new product navigation and are not the planned verified Zik ID product.

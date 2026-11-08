@@ -1,0 +1,41 @@
+title = "Zik secret scanning"
+[extend]
+useDefault = true
+
+# Narrow exceptions for reviewed false positives. All other rules remain active.
+[[rules]]
+id = "generic-api-key"
+[[rules.allowlists]]
+description = "LocalStorage identifier, not an API key"
+condition = "AND"
+paths = ['''(^|/)lib/client/finance-check\.ts$''']
+regexTarget = "line"
+regexes = ['''KEY = "zik-finance-application-v1"''']
+
+[[rules.allowlists]]
+description = "Type annotations, not credential values"
+condition = "AND"
+paths = ['''(^|/)lib/(client/recovery/api|shared/recovery/types|server/recovery-service)\.ts$''']
+regexTarget = "line"
+regexes = ['''^\s*recovery(_key_envelope|KeyEnvelope): VaultKeyEnvelopeV2;$''']
+
+[[rules.allowlists]]
+description = "CocoaPods checksum for the authentication dependency"
+condition = "AND"
+paths = ['''(^|/)mobile/ios/Podfile\.lock$''']
+regexTarget = "line"
+regexes = ['''^\s+ExpoLocalAuthentication: [a-f0-9]{40}$''']
+
+[[rules.allowlists]]
+description = "Exact test-only recovery fixture"
+condition = "AND"
+paths = ['''(^|/)tests/recovery\.test\.ts$''']
+regexTarget = "line"
+regexes = ['''ownerSecret = "owner-secret-of-sufficient-length-123456"''']
+
+# Gitleaks' default rules do not reliably detect JSON Web Key private scalars.
+[[rules]]
+id = "zik-private-jwk"
+description = "Private JSON Web Key scalar"
+regex = '''["']d["']\s*:\s*["']([A-Za-z0-9_-]{32,})["']'''
+secretGroup = 1

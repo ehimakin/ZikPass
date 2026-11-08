@@ -8,7 +8,135 @@ Branch: `v2-ui-overhaul` · Baseline commit: `675a050`
 
 ---
 
-## Current phase
+## Vault documents and Zik ID application — 2026-09-18
+
+Branch: `sprint-6-vault-selective-disclosure` · Baseline commit: `b86d3b1`
+Brief: `docs/sprints/vault-to-zik-id-opus-brief.md`
+
+The Vault now does the thing it described. Documents the user picks are stored
+encrypted on the device, read on the device with real OCR, turned into reviewable
+proposals, and reconciled against claims the user controls. When enough reviewed
+evidence exists, a Zik ID application can be prepared and saved — and can go no
+further, because no identity checks or issuer exist yet.
+
+Read first: [ADR 007](decisions/007-vault-v2-local-analysis.md) for storage and
+security, [VAULT_LOCAL_ANALYSIS.md](VAULT_LOCAL_ANALYSIS.md) for measured results,
+capability matrix and limitations, and
+[ZIK_ID_ONBOARDING_DEPENDENCIES.md](ZIK_ID_ONBOARDING_DEPENDENCIES.md) for what the
+owner still has to decide.
+
+### What changed
+
+- **Real local analysis.** PDF.js text layers, Tesseract WASM OCR for everything
+  else, in a Web Worker, from same-origin assets vendored at install time. No CDN,
+  no cloud fallback. Deterministic parsers for MRZ, UK driving licences, address
+  evidence, certificates and contracts.
+- **Vault v2 storage.** Wrapped data key, per-record nonces and AAD binding, binary
+  document storage, transactional writes, generation-guarded lifecycle, and a v1
+  migration that never destroys the old record.
+- **Review and reconciliation.** Every proposal carries its raw text, method,
+  legibility and ambiguities, and shows matches / different / missing / needs review
+  against the user's own value. Nothing overwrites a self-entered value silently.
+- **Readiness policy.** A pure versioned function (`zik-id-readiness/1`) returning
+  `not_ready | needs_review | ready_to_apply` with machine-readable reasons. Duplicate
+  evidence cannot raise readiness; deleting evidence withdraws it.
+- **Application.** `/id/apply` prepares and saves a `pending_onboarding` application
+  against an explicit onboarding adapter boundary that refuses every outcome. The
+  Wallet shows that an application exists without opening the Vault.
+
+### Validation — 2026-09-18
+
+- `npm test`: 221 tests across 34 files (was 152/28). New: `analysis-text`,
+  `extraction-fixtures`, `zik-id-readiness`, `vault-v2`.
+- `npm run measure:ocr`: 18 fixtures, real browser OCR, **0 off-origin requests**.
+  Full table in VAULT_LOCAL_ANALYSIS.md.
+- Playwright against an isolated production server (`ZIK_DISCLOSURE_V1=true`):
+  27 passed, 3 failed. The 3 failures are the dev-only demo Vault tests in
+  `vault-preview.spec.ts`, which need a development server for the `memaguy`
+  development key; **they fail identically on unmodified HEAD** in a production build,
+  verified in a separate worktree.
+- `npm run lint`: 0 errors, 7 warnings (all pre-existing, in the legacy Zik ID
+  components). `npx tsc --noEmit`: passed. Production build: passed.
+
+### Deliberate changes to existing behaviour
+
+- **CSP now allows `'wasm-unsafe-eval'`** in `middleware.ts`. Without it the OCR
+  engine cannot compile its WebAssembly. It permits WebAssembly only; JavaScript
+  `eval` stays blocked outside development. `frame-src blob:` was added for sandboxed
+  document preview.
+- **Editing a Vault detail no longer asks for the passphrase.** v2 unwraps one data
+  key at unlock rather than re-deriving per write. The passphrase is still never
+  stored, and inactivity, tab-hide and manual locking are unchanged. The assertion in
+  `vault-preview.spec.ts` was updated with that reason rather than worked around.
+- **The simulated document search is gone from the real Vault.** `vault-search.tsx`
+  survives only behind the development-only demo Vault on `/vault-preview`.
+
+### Known incomplete
+
+- No encrypted Vault export or import. The Vault cannot be backed up or moved.
+- No real-device testing. Headless Chromium is not an iPhone, and CPU throttling does
+  not reach the OCR worker thread, so mobile timings are unmeasured.
+- English language model and UK layouts only.
+
+---
+
+## Product-positioning milestone — 2026-09-15
+
+Added the agreed Zik → Zik Pass / ZikVault / Zik ID product direction, shared display
+catalogue, homepage family section, read-only `/ecosystem`, menu link, About explanation
+and active-pass promotion beneath working controls. Pass remains standalone and the only
+available product in this presentation; planned prices are display-only.
+
+This is a product-positioning/documentation milestone, not a Vault implementation sprint.
+Existing experimental Vault/disclosure and Zik ID code is preserved at the owner's request;
+it does not implement the agreed verified-credential products. No credential, API, payment,
+issuance, wallet or physical-card logic changes are part of this milestone. See
+[PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md) for the boundary and terminology.
+
+### Validation and file-level record — 2026-09-15
+
+- `npm test`: 152 tests passed across 28 files. Corrected an existing flaky operator
+  tampering test to change significant signature bits rather than base64 padding bits.
+- Customer/clerk/affiliate Playwright suite: 10/10 passed against an isolated production
+  server and runtime directory. Updated stale no-pass CTA and pass-seal selectors; no
+  production journey changes were needed.
+- `npm run lint`: no errors; seven existing warnings in experimental Vault/ID components.
+- `npx tsc --noEmit`: passed. Production build: passed (existing font fetch required network).
+- Visual review: home, ecosystem, About, menu and active Pass at 320/390/768/1440px.
+  No horizontal overflow or browser errors. Planned cards have no acquisition controls;
+  example has no inputs. Promo appears only on active Pass, below existing controls,
+  with its explanation link reachable above the fixed navigation. Reduced-motion browser
+  review and menu Escape/focus return checked. Physical-device PWA testing remains separate.
+- Build output and screenshots are temporary review artifacts, not source changes.
+
+Exact changed files for this milestone:
+
+- `lib/shared/product-catalogue.ts` (new)
+- `components/customer/product-family.tsx` (new)
+- `app/ecosystem/page.tsx` (new)
+- `components/customer/home-screen.tsx`
+- `components/customer/customer-menu.tsx`
+- `components/customer/pass-screen.tsx`
+- `app/about/page.tsx`
+- `docs/PRODUCT_DIRECTION.md` (new)
+- `README.md`
+- `docs/ARCHITECTURE.md`
+- `docs/SPRINT_STATUS.md`
+- `docs/DEMO_SCRIPT.md`
+- `docs/TESTING.md`
+- `zik_pass_mvp.md`
+- `tests/operator-session.test.ts`
+- `e2e/edge-cases.spec.ts`
+- `e2e/journeys.spec.ts`
+
+Product-language ambiguity: the original brief assumed no Vault/ID logic exists, but
+this checkout already includes experiments. The owner requested preservation and expansion;
+existing code is preserved and accurately distinguished from the planned products.
+The desired additional prototype behavior is awaiting clarification; this milestone adds
+only product presentation. Commercial availability is also distinct from Pass's working,
+demo-payment prototype. Existing expiry, renewal and server price overrides are unchanged.
+
+## Historical overhaul phase
 
 **Post-step-7 cleanup (2026-09-09).** Steps 1-7 done. Then, per the user:
 - **`/store` retired** - `app/store/page.tsx` now `redirect("/verify")`;

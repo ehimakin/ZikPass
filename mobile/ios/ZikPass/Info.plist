@@ -46,7 +46,7 @@
 		<true/>
 	</dict>
 	<key>NSFaceIDUsageDescription</key>
-	<string>Use Face ID to protect your ZikPass.</string>
+	<string>Use Face ID to unlock your Zik Vault, ID and card.</string>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>

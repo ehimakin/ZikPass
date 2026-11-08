@@ -23,7 +23,7 @@ export function AffiliateLogoRails() {
   useEffect(() => {
     let cancelled = false;
     void getPool().then((pool) => { if (!cancelled) setLogos(pool); });
-    const nav = root.current?.parentElement?.querySelector('nav[aria-label="Primary"]');
+    const nav = document.querySelector('nav[aria-label="Primary"]');
     const update = () => setCapacity(desktopAffiliateCapacity(window.innerHeight, nav?.getBoundingClientRect().height ?? 64));
     const observer = new ResizeObserver(update);
     if (nav) observer.observe(nav);
