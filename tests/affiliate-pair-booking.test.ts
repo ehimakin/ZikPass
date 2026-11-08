@@ -61,7 +61,7 @@ describe("assisted booking and calendar delivery", () => {
     expect(message.to).toEqual(["agent@example.com", "client@example.com"]);
     expect(message.text).toContain(result.pair.key); expect(message.text).not.toContain(token); expect(message.text).not.toContain(agentKey);
     const unfolded = message.icalEvent.content.replace(/\r\n /g, "");
-    expect(unfolded).toContain(`https://dev.example.com/affiliates/session?id=${row.id}`);
+    expect(unfolded).toContain(`https://dev.example.com/dashboard/affiliate/session?id=${row.id}`);
     expect(unfolded).toContain("STATUS:TENTATIVE"); expect(unfolded).not.toContain(result.pair.key);
     const client = joinPair(row.id, result.pair.key, "client", token); const agent = joinPair(row.id, result.pair.key, "agent", agentKey);
     await expect(updateBooking(row.id, client.session, "confirmed")).rejects.toThrow("Only the paired agent");

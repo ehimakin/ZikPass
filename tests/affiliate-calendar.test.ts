@@ -13,7 +13,7 @@ async function setup() { const value = createRegistration("Calendar & Café", "h
 it("generates Google event drafts and Apple-compatible ICS copies without exposing credentials", async () => {
   const value = await setup(); const result = calendarOptions(value.registration.id, value.token, "setup", "http://localhost:3000");
   const google = new URL(result.googleUrl); expect(google.origin).toBe("https://calendar.google.com"); expect(google.searchParams.get("action")).toBe("TEMPLATE"); expect(google.searchParams.get("text")).toBe("Requested: Zik onboarding: Calendar & Café"); expect(google.searchParams.get("dates")).toMatch(/^\d{8}T\d{6}Z\/\d{8}T\d{6}Z$/);
-  expect(google.searchParams.get("details")).toContain(`/affiliates/session?id=${value.registration.id}`); expect(result.localOnly).toBe(true);
+  expect(google.searchParams.get("details")).toContain(`/dashboard/affiliate/session?id=${value.registration.id}`); expect(result.localOnly).toBe(true);
   expect(result.ics).toContain("METHOD:PUBLISH"); expect(result.ics).toContain("STATUS:TENTATIVE"); expect(result.ics).not.toContain("ATTENDEE"); expect(result.ics).not.toContain("ORGANIZER");
   expect(JSON.stringify(result)).not.toContain(value.token); expect(JSON.stringify(result)).not.toContain(value.pair.key); expect(JSON.stringify(result)).not.toContain("client@example.com");
 });
